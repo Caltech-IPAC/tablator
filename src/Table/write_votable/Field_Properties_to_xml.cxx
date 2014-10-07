@@ -1,0 +1,122 @@
+#include <boost/property_tree/ptree.hpp>
+#include "../../Table.hxx"
+
+namespace
+{
+void Min_Max_to_xml (boost::property_tree::ptree &tree,
+                     const std::string &min_max, const TAP::Min_Max &m)
+{
+  if (!min_max.empty ())
+    {
+      boost::property_tree::ptree &min_max_tree = tree.add (min_max, "");
+      min_max_tree.add ("<xmlattr>.value", m.value);
+      min_max_tree.add ("<xmlattr>.inclusive", m.inclusive ? "yes" : "no");
+    }
+}
+
+void Option_to_xml (boost::property_tree::ptree &tree,
+                    const TAP::Option &option)
+{
+  if (!option.empty ())
+    {
+      boost::property_tree::ptree &option_tree = tree.add ("OPTION", "");
+      option_tree.add ("<xmlattr>.name", option.name);
+      option_tree.add ("<xmlattr>.value", option.value);
+      for (auto &o : option.options)
+        Option_to_xml (option_tree, o);
+    }
+}
+
+std::string Type_to_string (const TAP::Table::Type &type)
+{
+  std::string result;
+  switch (type)
+    {
+    case TAP::Table::Type::BOOLEAN:
+      result = "boolean";
+      break;
+    case TAP::Table::Type::SHORT:
+      result = "short";
+      break;
+    case TAP::Table::Type::INT:
+      result = "int";
+      break;
+    case TAP::Table::Type::LONG:
+      result = "long";
+      break;
+    case TAP::Table::Type::FLOAT:
+      result = "float";
+      break;
+    case TAP::Table::Type::DOUBLE:
+      result = "double";
+      break;
+    case TAP::Table::Type::STRING:
+      result = "char\" arraysize=\"*";
+      break;
+    default:
+      throw TAP::Error (500,
+                        "Unexpected data type in Field_Properties_to_xml: "
+                        + std::to_string (static_cast<int>(type)));
+    }
+  return result;
+}
+}
+
+namespace TAP
+{
+void Field_Properties_to_xml (boost::property_tree::ptree &tree,
+                              const std::string &name,
+                              const TAP::Table::Type &type,
+                              const Field_Properties &field_property)
+{
+  boost::property_tree::ptree &field = tree.add ("FIELD", "");
+  field.add ("<xmlattr>.name", name);
+  field.add ("<xmlattr>.datatype", Type_to_string (type));
+
+  for (auto &a : field_property.attributes)
+    {
+      /// Empty attributes cause field.add to crash :(, so make sure
+      /// that does not happen.
+
+      // FIXME: This error is thrown a bit too late to be useful.
+
+      if (a.first.empty ())
+        throw Error (500, "Empty attribute in field " + name
+                          + " which has type " + Type_to_string (type));
+      field.add ("<xmlattr>." + a.first, a.second);
+    }
+
+  for (auto &d : field_property.descriptions)
+    {
+      boost::property_tree::ptree &description
+          = field.add ("DESCRIPTION", d.value);
+      for (auto &a : field_property.attributes)
+        description.add ("<xmlattr>." + a.first, a.second);
+    }
+
+  auto &v (field_property.values);
+  if (!v.empty ())
+    {
+      boost::property_tree::ptree &values = field.add ("VALUES", "");
+      if (!v.ID.empty ())
+        values.add ("<xmlattr>.ID", v.ID);
+      if (!v.null.empty ())
+        values.add ("<xmlattr>.null", v.null);
+      if (!v.ref.empty ())
+        values.add ("<xmlattr>.ref", v.ref);
+
+      Min_Max_to_xml (values, "MIN", v.min);
+      Min_Max_to_xml (values, "MAX", v.max);
+
+      for (auto &o : v.options)
+        Option_to_xml (values, o);
+    }
+
+  for (auto &l : field_property.links)
+    {
+      boost::property_tree::ptree &link = field.add ("LINK", "");
+      for (auto &a : l)
+        link.add ("<xmlattr>." + a.first, a.second);
+    }
+}
+}
