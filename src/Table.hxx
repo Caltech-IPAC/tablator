@@ -52,8 +52,9 @@ public:
   std::vector<size_t> offsets;
   size_t row_size;
 
-  /// Need to keep a copy the string types around, since compound_type
-  /// only has a reference to the type, not a copy of the type.
+  /// Need to keep a copy of the string types around, since
+  /// compound_type only has a reference to the type, not a copy of
+  /// the type.
   std::vector<H5::StrType> string_types;
 
   typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties>
@@ -111,6 +112,7 @@ public:
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (const boost::filesystem::path &filename) const;
+  void read_fits (const std::string &input_file);
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   void write_votable (std::ostream &os) const;

@@ -27,6 +27,14 @@ public:
   {
   }
 
+  Field_Properties (const std::string &description,
+      const std::initializer_list<std::pair<const std::string, std::string> > &
+          Attributes)
+      : attributes (Attributes)
+  {
+    descriptions.push_back (description);
+  }
+
   Field_Properties (const std::vector<Description> &Descriptions,
                     const std::map<std::string, std::string> &Attributes)
       : descriptions (Descriptions), attributes (Attributes)

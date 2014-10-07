@@ -12,6 +12,7 @@ def build(bld):
 
     sources=['src/Table/Table.cxx',
              'src/Table/flatten_properties.cxx',
+             'src/Table/read_fits.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
              'src/Table/write_fits.cxx',
