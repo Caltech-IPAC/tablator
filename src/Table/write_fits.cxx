@@ -77,9 +77,9 @@ void TAP::Table::write_fits (const boost::filesystem::path &filename) const
               + "A");
           break;
         default:
-          throw TAP::Error (500,
-                            "Unknown data type when writing fits data: "
-                            + std::to_string (static_cast<int>(types[i])));
+          throw std::runtime_error
+            ("Unknown data type when writing fits data: "
+             + std::to_string (static_cast<int>(types[i])));
           break;
         }
     }
@@ -175,9 +175,9 @@ void TAP::Table::write_fits (const boost::filesystem::path &filename) const
           }
           break;
         default:
-          throw TAP::Error (500,
-                            "Unknown data type when writing fits data: "
-                            + std::to_string (static_cast<int>(types[i])));
+          throw std::runtime_error
+            ("Unknown data type when writing fits data: "
+             + std::to_string (static_cast<int>(types[i])));
         }
     }
   fits_close_file(fits_file, &status);

@@ -14,7 +14,6 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include "Error.hxx"
 #include "Property.hxx"
 #include "Field_Properties.hxx"
 #include "Format.hxx"

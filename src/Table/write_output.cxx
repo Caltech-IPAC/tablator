@@ -42,7 +42,7 @@ void TAP::Table::write_output (const boost::filesystem::path &path,
           break;
         case Format::enum_format::UNKNOWN:
         default:
-          throw TAP::Error (500, "Unknown output type");
+          throw std::runtime_error ("Unknown output type");
           break;
         }
     }

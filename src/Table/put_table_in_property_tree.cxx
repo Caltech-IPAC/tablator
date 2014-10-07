@@ -47,9 +47,9 @@ TAP::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
                         compound_type.getMemberDataType (j).getSize ());
               break;
             default:
-              throw TAP::Error (500,
-                                "Unknown data type when writing data: "
-                                + std::to_string (static_cast<int>(types[j])));
+              throw std::runtime_error
+                ("Unknown data type when writing data: "
+                 + std::to_string (static_cast<int>(types[j])));
             }
           tr.add ("TD", td.str ());
         }

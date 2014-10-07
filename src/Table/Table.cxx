@@ -51,8 +51,8 @@ TAP::Table::Table (
       else if (type == H5::PredType::NATIVE_CHAR)
         types.push_back (Type::STRING);
       else
-        throw TAP::Error (500, "Unknown HDF5 type in compound_type with id: "
-                               + std::to_string (type.getId ()));
+        throw std::runtime_error ("Unknown HDF5 type in compound_type with id: "
+                                  + std::to_string (type.getId ()));
     }
   offsets.push_back (offset);
 

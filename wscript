@@ -7,13 +7,7 @@ def configure(conf):
     conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx CCfits')
 
 def build(bld):
-
     default_flags=['-Wall', '-Wextra', '-Ofast']
-    default_flags.append('-DWEB_CONF_DIR=\"' + bld.env.WEB_CONF_DIR + '\"')
-    default_flags.append('-DDATA_DIR=\"' + bld.env.DATA_DIR + '\"')
-    default_flags.append('-DIPAC_BASE_BINDIR=\"' + bld.env.IPAC_BASE_BINDIR
-                         + '/\"')
-
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'CCfits']
 
     sources=['src/Table/Table.cxx',

@@ -54,9 +54,9 @@ std::string Type_to_string (const TAP::Table::Type &type)
       result = "char\" arraysize=\"*";
       break;
     default:
-      throw TAP::Error (500,
-                        "Unexpected data type in Field_Properties_to_xml: "
-                        + std::to_string (static_cast<int>(type)));
+      throw std::runtime_error
+        ("Unexpected data type in Field_Properties_to_xml: "
+         + std::to_string (static_cast<int>(type)));
     }
   return result;
 }
@@ -81,8 +81,8 @@ void Field_Properties_to_xml (boost::property_tree::ptree &tree,
       // FIXME: This error is thrown a bit too late to be useful.
 
       if (a.first.empty ())
-        throw Error (500, "Empty attribute in field " + name
-                          + " which has type " + Type_to_string (type));
+        throw std::runtime_error ("Empty attribute in field " + name
+                                  + " which has type " + Type_to_string (type));
       field.add ("<xmlattr>." + a.first, a.second);
     }
 
