@@ -3,7 +3,7 @@
 #include "Min_Max.hxx"
 #include "Option.hxx"
 
-namespace TAP
+namespace Tablator
 {
 class Values
 {

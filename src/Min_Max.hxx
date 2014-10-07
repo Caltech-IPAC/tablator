@@ -1,6 +1,6 @@
 #pragma once
 
-namespace TAP
+namespace Tablator
 {
 class Min_Max
 {

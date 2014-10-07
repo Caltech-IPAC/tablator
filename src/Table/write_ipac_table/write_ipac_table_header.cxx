@@ -2,7 +2,7 @@
 
 #include "../../Table.hxx"
 
-void TAP::Table::write_ipac_table_header (std::ostream &os,
+void Tablator::Table::write_ipac_table_header (std::ostream &os,
                                           const int &num_members) const
 {
   os << "\\fixlen = T\n";

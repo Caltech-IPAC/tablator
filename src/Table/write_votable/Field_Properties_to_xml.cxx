@@ -4,7 +4,7 @@
 namespace
 {
 void Min_Max_to_xml (boost::property_tree::ptree &tree,
-                     const std::string &min_max, const TAP::Min_Max &m)
+                     const std::string &min_max, const Tablator::Min_Max &m)
 {
   if (!min_max.empty ())
     {
@@ -15,7 +15,7 @@ void Min_Max_to_xml (boost::property_tree::ptree &tree,
 }
 
 void Option_to_xml (boost::property_tree::ptree &tree,
-                    const TAP::Option &option)
+                    const Tablator::Option &option)
 {
   if (!option.empty ())
     {
@@ -27,30 +27,30 @@ void Option_to_xml (boost::property_tree::ptree &tree,
     }
 }
 
-std::string Type_to_string (const TAP::Table::Type &type)
+std::string Type_to_string (const Tablator::Table::Type &type)
 {
   std::string result;
   switch (type)
     {
-    case TAP::Table::Type::BOOLEAN:
+    case Tablator::Table::Type::BOOLEAN:
       result = "boolean";
       break;
-    case TAP::Table::Type::SHORT:
+    case Tablator::Table::Type::SHORT:
       result = "short";
       break;
-    case TAP::Table::Type::INT:
+    case Tablator::Table::Type::INT:
       result = "int";
       break;
-    case TAP::Table::Type::LONG:
+    case Tablator::Table::Type::LONG:
       result = "long";
       break;
-    case TAP::Table::Type::FLOAT:
+    case Tablator::Table::Type::FLOAT:
       result = "float";
       break;
-    case TAP::Table::Type::DOUBLE:
+    case Tablator::Table::Type::DOUBLE:
       result = "double";
       break;
-    case TAP::Table::Type::STRING:
+    case Tablator::Table::Type::STRING:
       result = "char\" arraysize=\"*";
       break;
     default:
@@ -62,11 +62,11 @@ std::string Type_to_string (const TAP::Table::Type &type)
 }
 }
 
-namespace TAP
+namespace Tablator
 {
 void Field_Properties_to_xml (boost::property_tree::ptree &tree,
                               const std::string &name,
-                              const TAP::Table::Type &type,
+                              const Tablator::Table::Type &type,
                               const Field_Properties &field_property)
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");

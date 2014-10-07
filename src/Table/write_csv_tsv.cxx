@@ -2,7 +2,7 @@
 
 #include "../Table.hxx"
 
-void TAP::Table::write_csv_tsv (std::ostream &os, const char &separator) const
+void Tablator::Table::write_csv_tsv (std::ostream &os, const char &separator) const
 {
   const int num_members = compound_type.getNmembers ();
   if (num_members == 0)

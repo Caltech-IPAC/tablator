@@ -3,7 +3,7 @@
 
 #include "../../Table.hxx"
 
-void TAP::Table::write_ipac_table (std::ostream &os) const
+void Tablator::Table::write_ipac_table (std::ostream &os) const
 {
   const int num_members = compound_type.getNmembers ();
   write_ipac_table_header (os, num_members);

@@ -18,7 +18,7 @@
 #include "Field_Properties.hxx"
 #include "Format.hxx"
 
-namespace TAP
+namespace Tablator
 {
 class Table
 {
@@ -50,7 +50,7 @@ public:
   /// offsets has an extra element at the end so that we can get the
   /// size of any element.  This is needed for strings.
   std::vector<size_t> offsets;
-  const size_t row_size;
+  size_t row_size;
 
   /// Need to keep a copy the string types around, since compound_type
   /// only has a reference to the type, not a copy of the type.

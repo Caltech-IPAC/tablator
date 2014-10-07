@@ -5,7 +5,7 @@
 #include "Description.hxx"
 #include "Values.hxx"
 
-namespace TAP
+namespace Tablator
 {
 class Field_Properties
 {

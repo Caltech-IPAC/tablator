@@ -1,5 +1,4 @@
-#ifndef TAP_FORMAT_HXX
-#define TAP_FORMAT_HXX
+#pragma once
 
 #include <string>
 #include <map>
@@ -126,5 +125,3 @@ inline std::ostream &operator<<(std::ostream &os, const Format &f)
   os << f.string ();
   return os;
 }
-
-#endif

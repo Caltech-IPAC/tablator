@@ -36,7 +36,7 @@ void write_column(fitsfile *fits_file, const int &fits_type,
                                     row_size);
 }
 
-void TAP::Table::write_fits (const boost::filesystem::path &filename) const
+void Tablator::Table::write_fits (const boost::filesystem::path &filename) const
 {
   int status=0;
   fitsfile *fits_file;
@@ -53,25 +53,25 @@ void TAP::Table::write_fits (const boost::filesystem::path &filename) const
       fits_names.push_back (compound_type.getMemberName (i));
       switch (types[i])
         {
-        case TAP::Table::Type::BOOLEAN:
+        case Type::BOOLEAN:
           fits_types.push_back ("L");
           break;
-        case TAP::Table::Type::SHORT:
+        case Type::SHORT:
           fits_types.push_back ("I");
           break;
-        case TAP::Table::Type::INT:
+        case Type::INT:
           fits_types.push_back ("J");
           break;
-        case TAP::Table::Type::LONG:
+        case Type::LONG:
           fits_types.push_back ("K");
           break;
-        case TAP::Table::Type::FLOAT:
+        case Type::FLOAT:
           fits_types.push_back ("E");
           break;
-        case TAP::Table::Type::DOUBLE:
+        case Type::DOUBLE:
           fits_types.push_back ("D");
           break;
-        case TAP::Table::Type::STRING:
+        case Type::STRING:
           fits_types.push_back (
               std::to_string (compound_type.getMemberDataType (i).getSize ())
               + "A");
@@ -140,25 +140,25 @@ void TAP::Table::write_fits (const boost::filesystem::path &filename) const
       const char *index=data.data () + offsets[i];
       switch (types[i])
         {
-        case TAP::Table::Type::BOOLEAN:
+        case Type::BOOLEAN:
           write_column<bool,char>(fits_file,TLOGICAL,i,index,size(),row_size);
           break;
-        case TAP::Table::Type::SHORT:
+        case Type::SHORT:
           write_column<int16_t>(fits_file,TSHORT,i,index,size(),row_size);
           break;
-        case TAP::Table::Type::INT:
+        case Type::INT:
           write_column<int32_t>(fits_file,TINT,i,index,size(),row_size);
           break;
-        case TAP::Table::Type::LONG:
+        case Type::LONG:
           write_column<int64_t>(fits_file,TLONG,i,index,size(),row_size);
           break;
-        case TAP::Table::Type::FLOAT:
+        case Type::FLOAT:
           write_column<float>(fits_file,TFLOAT,i,index,size(),row_size);
           break;
-        case TAP::Table::Type::DOUBLE:
+        case Type::DOUBLE:
           write_column<double>(fits_file,TDOUBLE,i,index,size(),row_size);
           break;
-        case TAP::Table::Type::STRING:
+        case Type::STRING:
           {
             std::vector<std::string> temp_strings(size());
             std::vector<char *> temp_chars(size());
