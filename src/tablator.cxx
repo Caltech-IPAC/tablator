@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 
   try
     {
+      H5::Exception::dontPrint ();
       Tablator::Table table(argv[1]);
       boost::filesystem::path output_path(argv[2]);
       Tablator::Format output_format(output_path);
