@@ -70,17 +70,9 @@ void Tablator::Table::read_fits(const std::string &input_file)
     {
       CCfits::Column &c=table->column(column);
       
-      std::cout << "offset: " << offset << " "
-                << c.name() << " "
-                << "\n";
-      std::cout.flush();
-
       switch (c.type())
         {
         case CCfits::Tlogical:
-          std::cout << "Tlogical\n";
-          std::cout.flush();
-
           compound_type.insertMember(c.name(),offset,H5::PredType::NATIVE_UCHAR);
           types.push_back(Type::BOOLEAN);
           {
@@ -95,8 +87,6 @@ void Tablator::Table::read_fits(const std::string &input_file)
           }
           break;
         case CCfits::Tstring:
-          std::cout << "Tstring\n";
-          std::cout.flush();
           string_types.emplace_back(H5::PredType::NATIVE_CHAR,c.width());
           compound_type.insertMember(c.name(),offset,*string_types.rbegin());
           types.push_back(Type::STRING);
@@ -114,38 +104,28 @@ void Tablator::Table::read_fits(const std::string &input_file)
           break;
         case CCfits::Tushort:
         case CCfits::Tshort:
-          std::cout << "Tshort\n";
-          std::cout.flush();
           compound_type.insertMember(c.name(),offset,H5::PredType::NATIVE_INT16);
           types.push_back(Type::SHORT);
           read_column<int16_t>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tuint:
         case CCfits::Tint:
-          std::cout << "Tint\n";
-          std::cout.flush();
           compound_type.insertMember(c.name(),offset,H5::PredType::NATIVE_INT32);
           types.push_back(Type::INT);
           read_column<int32_t>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tulong:
         case CCfits::Tlong:
-          std::cout << "Tlong\n";
-          std::cout.flush();
           compound_type.insertMember(c.name(),offset,H5::PredType::NATIVE_INT64);
           types.push_back(Type::LONG);
           read_column<int64_t>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tfloat:
-          std::cout << "Tfloat\n";
-          std::cout.flush();
           compound_type.insertMember(c.name(),offset,H5::PredType::NATIVE_FLOAT);
           types.push_back(Type::FLOAT);
           read_column<float>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tdouble:
-          std::cout << "Tdouble\n";
-          std::cout.flush();
           compound_type.insertMember(c.name(),offset,
                                      H5::PredType::NATIVE_DOUBLE);
           types.push_back(Type::DOUBLE);
