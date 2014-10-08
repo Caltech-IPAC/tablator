@@ -7,12 +7,16 @@ namespace
   template <typename T>
   void read_column(char *position, std::pair<const std::string,
                                              CCfits::Column *> &c,
-                   const size_t &rows)
+                   const size_t &rows, const size_t &row_size)
   {
     std::vector<T> v;
     c.second->read(v,1,rows);
+    char *current=position;
     for(auto &element: v)
-      *reinterpret_cast<T*>(position)=element;
+      {
+        *reinterpret_cast<T*>(current)=element;
+        current+=row_size;
+      }
   }
 }
 
@@ -70,7 +74,6 @@ void Tablator::Table::read_fits(const std::string &input_file)
                 << "\n";
       std::cout.flush();
 
-      char *current_row=data.data();
       switch (c.second->type())
         {
         case CCfits::Tlogical:
@@ -82,8 +85,12 @@ void Tablator::Table::read_fits(const std::string &input_file)
           {
             std::vector<int> v;
             c.second->read(v,1,table->rows());
+            size_t total_offset=offset;
             for(auto &element: v)
-              current_row[offset]=element;
+              {
+                data[total_offset]=element;
+                total_offset+=row_size;
+              }
           }
           break;
         case CCfits::Tstring:
@@ -95,9 +102,13 @@ void Tablator::Table::read_fits(const std::string &input_file)
           {
             std::vector<std::string> v;
             c.second->read(v,1,table->rows());
+            size_t total_offset=offset;
             for(auto &element: v)
-              for(int i=0; i<c.second->width(); ++i)
-                current_row[offset+i]=element[i];
+              {
+                for(int i=0; i<c.second->width(); ++i)
+                  data[total_offset+i]=element[i];
+                total_offset+=row_size;
+              }
           }
           break;
         case CCfits::Tushort:
@@ -106,7 +117,7 @@ void Tablator::Table::read_fits(const std::string &input_file)
           std::cout.flush();
           compound_type.insertMember(c.first,offset,H5::PredType::NATIVE_INT16);
           types.push_back(Type::SHORT);
-          read_column<int16_t>(current_row+offset,c,table->rows());
+          read_column<int16_t>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tuint:
         case CCfits::Tint:
@@ -114,7 +125,7 @@ void Tablator::Table::read_fits(const std::string &input_file)
           std::cout.flush();
           compound_type.insertMember(c.first,offset,H5::PredType::NATIVE_INT32);
           types.push_back(Type::INT);
-          read_column<int32_t>(current_row+offset,c,table->rows());
+          read_column<int32_t>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tulong:
         case CCfits::Tlong:
@@ -122,14 +133,14 @@ void Tablator::Table::read_fits(const std::string &input_file)
           std::cout.flush();
           compound_type.insertMember(c.first,offset,H5::PredType::NATIVE_INT64);
           types.push_back(Type::LONG);
-          read_column<int64_t>(current_row+offset,c,table->rows());
+          read_column<int64_t>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tfloat:
           std::cout << "Tfloat\n";
           std::cout.flush();
           compound_type.insertMember(c.first,offset,H5::PredType::NATIVE_FLOAT);
           types.push_back(Type::FLOAT);
-          read_column<float>(current_row+offset,c,table->rows());
+          read_column<float>(data.data()+offset,c,table->rows(),row_size);
           break;
         case CCfits::Tdouble:
           std::cout << "Tdouble\n";
@@ -137,7 +148,7 @@ void Tablator::Table::read_fits(const std::string &input_file)
           compound_type.insertMember(c.first,offset,
                                      H5::PredType::NATIVE_DOUBLE);
           types.push_back(Type::DOUBLE);
-          read_column<double>(current_row+offset,c,table->rows());
+          read_column<double>(data.data()+offset,c,table->rows(),row_size);
           break;
         default:
           throw std::runtime_error("Unsupported data type in the fits file for "
@@ -151,8 +162,6 @@ void Tablator::Table::read_fits(const std::string &input_file)
       offsets.push_back(offset);
       offset += compound_type.getMemberDataType(compound_type.getNmembers()-1)
         .getSize();
-        
-      current_row+=row_size;
     }
   offsets.push_back(offset);
 }
