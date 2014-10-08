@@ -5,7 +5,10 @@
 #include <utility>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
+namespace Tablator
+{
 class Format
 {
 
@@ -22,51 +25,64 @@ public:
     HDF5,
     UNKNOWN
   };
-  static std::map<enum_format, std::pair<std::string, std::string> > formats;
-  enum_format index;
+
+  // FIXME: This should really be a static, but then I ran into
+  // problems with order of static initialization, where something
+  // static would get destroyed before this variable, causing crashes
+  // on exit.
+  const std::map<Format::enum_format,
+                  std::pair<std::string, std::vector<std::string> > >
+  formats{ { Format::enum_format::VOTABLE, { "votable", { "xml" } } },
+                 { Format::enum_format::CSV, { "csv", { "csv" } } },
+                 { Format::enum_format::TSV, { "tsv", { "tsv" } } },
+                 { Format::enum_format::FITS, { "fits", { "fits" } } },
+                 { Format::enum_format::IPAC_TABLE, { "ipac_table",
+                                                      { "tbl" } } },
+                 { Format::enum_format::TEXT, { "text", { "txt" } } },
+                 { Format::enum_format::HTML, { "html", { "html" } } },
+                 { Format::enum_format::HDF5, { "hdf5", { "h5" , "hdf" ,
+                                                          "hdf5" } } },
+                 { Format::enum_format::UNKNOWN, { "", { } } } };
+
+  std::map<Format::enum_format,
+           std::pair<std::string, std::vector<std::string> > >::const_iterator
+  index;
 
   std::string extension () const
   {
-    if (formats[index].second.empty ())
+    if (index->second.second.empty ())
       return "";
-    return "." + formats[index].second;
+    return "." + index->second.second.at(0);
   }
 
-  Format () : index (enum_format::UNKNOWN) {}
+  Format () : index (formats.end()) {}
+  Format (const boost::filesystem::path &path)
+  {
+    set_from_extension(path);
+  }
+
   Format (const std::string &format)
   {
-    index = enum_format::UNKNOWN;
-    for (auto &f : formats)
+    for (index=formats.begin(); index!=formats.end(); ++index)
       {
-        if (boost::iequals (f.second.first, format))
-          {
-            index = f.first;
-            break;
-          }
+        if (boost::iequals (index->second.first, format))
+          break;
       }
 
-    if (index == enum_format::UNKNOWN)
+    if (index == formats.end())
       throw std::runtime_error ("Unknown format: " + format);
   }
 
-  void set_from_extension (const std::string &extension)
-  {
-    index = enum_format::IPAC_TABLE;
-    for (auto &f : formats)
-      {
-        if (boost::iequals (f.second.second, extension))
-          {
-            index = f.first;
-            break;
-          }
-      }
-  }
+  void set_from_extension (const boost::filesystem::path &path);
 
   std::string content_type () const
   {
-    std::string result;
+    if(index==formats.end())
+      throw std::runtime_error ("INTERNAL ERROR: Unknown format when "
+                                "generating content type");
 
-    switch (index)
+    std::string result;
+    switch (index->first)
       {
       case enum_format::CSV:
         result = "Content-type: text/csv\r\n\r\n";
@@ -97,30 +113,29 @@ public:
         result = "Content-type: application/x-hdf\r\n\r\n";
         break;
 
-      case enum_format::UNKNOWN:
       default:
-        {
-          throw std::runtime_error ("INTERNAL ERROR: Unknown format when "
-                                    "generating content type: "
-                                    + std::to_string(static_cast<int>(index)));
-        }
+        throw std::runtime_error ("INTERNAL ERROR: Unknown format when "
+                                  "generating content type: "
+                                  + std::to_string(static_cast<int>
+                                                   (index->first)));
       }
     return result;
   }
 
-  bool is_ipac_table () const { return index == enum_format::IPAC_TABLE; }
-  bool is_votable () const { return index == enum_format::VOTABLE; }
-  bool is_csv () const { return index == enum_format::CSV; }
-  bool is_tsv () const { return index == enum_format::TSV; }
-  bool is_text () const { return index == enum_format::TEXT; }
-  bool is_fits () const { return index == enum_format::FITS; }
-  bool is_html () const { return index == enum_format::HTML; }
-  bool is_hdf5 () const { return index == enum_format::HDF5; }
+  bool is_ipac_table () const { return index->first == enum_format::IPAC_TABLE; }
+  bool is_votable () const { return index->first == enum_format::VOTABLE; }
+  bool is_csv () const { return index->first == enum_format::CSV; }
+  bool is_tsv () const { return index->first == enum_format::TSV; }
+  bool is_text () const { return index->first == enum_format::TEXT; }
+  bool is_fits () const { return index->first == enum_format::FITS; }
+  bool is_html () const { return index->first == enum_format::HTML; }
+  bool is_hdf5 () const { return index->first == enum_format::HDF5; }
 
-  std::string string () const { return formats[index].first; }
+  std::string string () const { return index->second.first; }
 };
+}
 
-inline std::ostream &operator<<(std::ostream &os, const Format &f)
+inline std::ostream &operator<<(std::ostream &os, const Tablator::Format &f)
 {
   os << f.string ();
   return os;

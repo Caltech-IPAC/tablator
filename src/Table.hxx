@@ -60,11 +60,24 @@ public:
   typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties>
   Column_Properties;
   typedef std::pair<std::string, Column_Properties> Column;
+
   Table (const std::vector<Column> &columns,
          const std::map<std::string, std::string> &property_map);
   Table (const std::vector<Column> &columns)
       : Table (columns, std::map<std::string, std::string>())
   {
+  }
+  Table (const boost::filesystem::path &input_path)
+  {
+    Format format(input_path);
+    if(format.is_hdf5())
+      {
+        // read_hdf5(input_path);
+      }
+    else if(format.is_fits())
+      {
+        read_fits(input_path.string());
+      }
   }
 
   size_t size () const { return data.size () / row_size; }
@@ -96,6 +109,10 @@ public:
   const int output_precision = 13;
   void write_output (const boost::filesystem::path &path,
                      const Format &format) const;
+  void write_output (const boost::filesystem::path &path)
+  {
+    write_output(path,Format(path));
+  }
   void write_HDF5 (std::ostream &os) const;
   void write_HDF5 (const boost::filesystem::path &p) const;
   void write_HDF5_to_file (H5::H5File &outfile) const;

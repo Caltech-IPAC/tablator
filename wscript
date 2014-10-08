@@ -1,16 +1,19 @@
 import os
 
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx CCfits')
+    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx CCfits boost')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx CCfits')
+    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx CCfits boost')
+    conf.check_boost(lib='filesystem system')
 
 def build(bld):
-    default_flags=['-Wall', '-Wextra', '-Ofast']
-    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'CCfits']
+    # default_flags=['-Wall', '-Wextra', '-Ofast']
+    default_flags=['-Wall', '-Wextra', '-g']
+    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'CCfits', 'BOOST']
 
-    sources=['src/Table/Table.cxx',
+    sources=['src/Format/set_from_extension.cxx',
+             'src/Table/Table.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/read_fits.cxx',
              'src/Table/write_output.cxx',
@@ -28,7 +31,30 @@ def build(bld):
 
     bld.shlib(source=sources,
               target='tablator',
+              name='libtablator',
               cxxflags=default_flags,
               use=use_packages
               )
+
+    bld.program(source=sources + ['src/tablator.cxx'],
+                target='tablator',
+                cxxflags=default_flags,
+                rpath=[bld.env.LIBDIR],
+                use=use_packages + ['libtablator']
+                )
+
+
+    # bld.stlib(source=sources,
+    #           target='tablator',
+    #           name='libtablator',
+    #           cxxflags=default_flags,
+    #           use=use_packages
+    #           )
+
+    # bld.program(source=sources + ['src/tablator.cxx'],
+    #             target='tablator',
+    #             cxxflags=default_flags,
+    #             # rpath=[bld.env.LIBDIR],
+    #             use=use_packages + ['libtablator']
+    #             )
 

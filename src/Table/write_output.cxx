@@ -4,11 +4,11 @@ void Tablator::Table::write_output (const boost::filesystem::path &path,
                                const Format &format) const
 {
   const bool use_stdout (path.string () == "-");
-  if (format.index == Format::enum_format::FITS)
+  if (format.index->first == Format::enum_format::FITS)
     {
       write_fits (path);
     }
-  else if (format.index == Format::enum_format::HDF5)
+  else if (format.index->first == Format::enum_format::HDF5)
     {
       if (use_stdout)
         write_HDF5 (std::cout);
@@ -22,7 +22,7 @@ void Tablator::Table::write_output (const boost::filesystem::path &path,
         file_output.open (path);
       std::ostream &out (use_stdout ? std::cout : file_output);
 
-      switch (format.index)
+      switch (format.index->first)
         {
         case Format::enum_format::VOTABLE:
           write_votable (out);
