@@ -29,8 +29,8 @@ void Tablator::Table::read_hdf5(const boost::filesystem::path &path)
         types.push_back(Type::DOUBLE);
       else 
         {
-          // Do have to create a string_type since compound_type lives
-          // on???
+          // Do we have to create a string_type since compound_type
+          // lives on???
           string_types.push_back(compound_type.getMemberStrType(i));
           types.push_back(Type::STRING);
         }
