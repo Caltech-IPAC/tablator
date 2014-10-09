@@ -20,9 +20,10 @@ namespace
 }
 
 
-void Tablator::Table::read_fits(const std::string &input_file)
+// FIXME: This does not copy any keywords
+void Tablator::Table::read_fits(const boost::filesystem::path &path)
 {
-  CCfits::FITS fits (input_file, CCfits::Read, false);
+  CCfits::FITS fits (path.string(), CCfits::Read, false);
   CCfits::ExtHDU &table_extension = fits.extension (1);
   CCfits::BinTable *table (dynamic_cast<CCfits::BinTable *>(&table_extension));
 

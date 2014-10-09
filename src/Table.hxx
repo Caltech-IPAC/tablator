@@ -72,11 +72,11 @@ public:
     Format format(input_path);
     if(format.is_hdf5())
       {
-        // read_hdf5(input_path);
+        read_hdf5(input_path);
       }
     else if(format.is_fits())
       {
-        read_fits(input_path.string());
+        read_fits(input_path);
       }
   }
 
@@ -129,7 +129,8 @@ public:
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (const boost::filesystem::path &filename) const;
-  void read_fits (const std::string &input_file);
+  void read_fits (const boost::filesystem::path &path);
+  void read_hdf5 (const boost::filesystem::path &path);
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   void write_votable (std::ostream &os) const;
