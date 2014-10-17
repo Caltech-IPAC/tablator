@@ -24,8 +24,50 @@ namespace
 void Tablator::Table::read_fits(const boost::filesystem::path &path)
 {
   CCfits::FITS fits (path.string(), CCfits::Read, false);
-  CCfits::ExtHDU &table_extension = fits.extension (1);
+  if(fits.extension().empty())
+    throw std::runtime_error("Could not find any extensions in this file: "
+                             + path.string());
+  CCfits::ExtHDU &table_extension = *(fits.extension().begin()->second);
   CCfits::BinTable *table (dynamic_cast<CCfits::BinTable *>(&table_extension));
+
+  std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
+
+  std::map<std::string,std::string> fits_keyword_mapping=
+    {{"TELESCOP","instr.obsty"},
+     {"INSTRUME","instr"},
+     {"FREQ","em.freq"},
+     {"DETNAM","instr.det"},
+     {"OBJECT","src"},
+     {"OBJ_TYPE","src.class"},
+     {"OBJRA","pos.eq.ra"},
+     {"OBJDEC","pos.eq.dec"},
+     {"OBJGLON","pos.galactic.lon"},
+     {"OBJGLAT","pos.galactic.lat"},
+     {"PROCVER","meta.version"},
+     /// From HEASARC recommendation
+     /// http://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/ofwg_recomm.html
+     {"CREATOR","meta.software"},
+     {"DATE","time.creation"},
+     {"ADQL","meta.adql"}
+    };
+
+  table_extension.readAllKeys();
+  for(auto &k: table_extension.keyWord ())
+    {
+      if(std::find(fits_ignored_keywords.begin(),fits_ignored_keywords.end(),
+                   k.first)!=fits_ignored_keywords.end())
+        continue;
+      std::string name(k.first), value;
+      /// Annoyingly, CCfits does not have a way to just return the
+      /// value.  You have to give it something to put it in.
+      Property p(k.second->value(value));
+      auto i=fits_keyword_mapping.find(name);
+      if(i!=fits_keyword_mapping.end())
+        name=i->second;
+      if(!k.second->comment().empty())
+        p.attributes.insert(std::make_pair("comment",k.second->comment()));
+      properties.insert(std::make_pair(name,p));
+    }
 
   row_size=0;
   for(auto &c: table->column ())
