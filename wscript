@@ -32,7 +32,14 @@ def build(bld):
 
     bld.shlib(source=sources,
               target='tablator',
-              name='libtablator',
+              name='libtablator_sh',
+              cxxflags=default_flags,
+              use=use_packages
+              )
+
+    bld.stlib(source=sources,
+              target='tablator',
+              name='libtablator_st',
               cxxflags=default_flags,
               use=use_packages
               )
@@ -41,21 +48,10 @@ def build(bld):
                 target='tablator',
                 cxxflags=default_flags,
                 rpath=[bld.env.LIBDIR],
-                use=use_packages + ['libtablator']
+                use=use_packages + ['libtablator_st']
                 )
 
-
-    # bld.stlib(source=sources,
-    #           target='tablator',
-    #           name='libtablator',
-    #           cxxflags=default_flags,
-    #           use=use_packages
-    #           )
-
-    # bld.program(source=sources + ['src/tablator.cxx'],
-    #             target='tablator',
-    #             cxxflags=default_flags,
-    #             # rpath=[bld.env.LIBDIR],
-    #             use=use_packages + ['libtablator']
-    #             )
-
+    # install headers
+    bld.install_files(bld.env.INCLUDEDIR + '/tablator',
+                      bld.path.ant_glob('src/*.hxx'),
+                      cwd=bld.path.find_dir('src'), relative_trick=True)
