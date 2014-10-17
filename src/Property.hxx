@@ -2,6 +2,8 @@
 
 /// A simple class to hold properties.  It gets a little complicated
 /// because XML can have attributes.
+namespace Tablator
+{
 class Property
 {
 public:
@@ -20,3 +22,4 @@ public:
     return result;
   }
 };
+}
