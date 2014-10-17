@@ -44,7 +44,7 @@ def build(bld):
               use=use_packages
               )
 
-    bld.program(source=sources + ['src/tablator.cxx'],
+    bld.program(source=['src/tablator.cxx'],
                 target='tablator',
                 cxxflags=default_flags,
                 rpath=[bld.env.LIBDIR],
