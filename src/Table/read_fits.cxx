@@ -70,7 +70,10 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
       Property p(k.second->value(value));
       auto i=fits_keyword_mapping.find(name);
       if(i!=fits_keyword_mapping.end())
-        name=i->second;
+        {
+          name=i->second;
+          p.attributes.insert(std::make_pair("ucd",name));
+        }
       if(!k.second->comment().empty())
         p.attributes.insert(std::make_pair("comment",k.second->comment()));
       properties.insert(std::make_pair(name,p));
