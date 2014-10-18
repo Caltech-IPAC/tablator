@@ -14,6 +14,7 @@ def build(bld):
 
     sources=['src/Format/set_from_extension.cxx',
              'src/Table/Table.cxx',
+             'src/Table/fits_keyword_mapping.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/read_fits.cxx',
              'src/Table/read_hdf5.cxx',

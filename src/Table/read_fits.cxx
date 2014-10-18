@@ -1,6 +1,7 @@
 #include <CCfits/CCfits>
 
 #include "../Table.hxx"
+#include "fits_keyword_mapping.hxx"
 
 namespace
 {
@@ -32,30 +33,7 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
 
   std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
 
-  std::map<std::string,std::string> fits_keyword_mapping=
-    {{"TELESCOP","instr.obsty"},
-     {"INSTRUME","instr"},
-     {"FREQ","em.freq"},
-     {"DETNAM","instr.det"},
-     {"OBJECT","src"},
-     {"OBJ_TYPE","src.class"},
-     {"OBJRA","pos.eq.ra"},
-     {"OBJDEC","pos.eq.dec"},
-     //  FIXME: These UCD's (radius, width, height) are completely
-     //  made up.  We should probably convert it to a shape and use
-     //  phys.angArea, but that would be annoying to convert both ways
-     {"RADIUS","pos.radius"},
-     {"WIDTH","pos.width"},
-     {"HEIGHT","pos.height"},
-     {"OBJGLON","pos.galactic.lon"},
-     {"OBJGLAT","pos.galactic.lat"},
-     {"PROCVER","meta.version"},
-     /// From HEASARC recommendation
-     /// http://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/ofwg_recomm.html
-     {"CREATOR","meta.software"},
-     {"DATE","time.creation"},
-     {"ADQL","meta.adql"}
-    };
+  auto keyword_mapping=fits_keyword_mapping(false);
 
   table_extension.readAllKeys();
   for(auto &k: table_extension.keyWord ())
@@ -68,8 +46,8 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
       /// Annoyingly, CCfits does not have a way to just return the
       /// value.  You have to give it something to put it in.
       Property p(k.second->value(value));
-      auto i=fits_keyword_mapping.find(name);
-      if(i!=fits_keyword_mapping.end())
+      auto i=keyword_mapping.find(name);
+      if(i!=keyword_mapping.end())
         {
           name=i->second;
           p.attributes.insert(std::make_pair("ucd",name));
