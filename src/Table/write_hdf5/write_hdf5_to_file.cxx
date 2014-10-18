@@ -2,7 +2,7 @@
 
 #include "../../Table.hxx"
 
-void Tablator::Table::write_HDF5_to_file (H5::H5File &outfile) const
+void Tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
 {
   std::array<hsize_t, 1> dims = { { size () } };
   H5::DataSpace dataspace (dims.size (), dims.data ());

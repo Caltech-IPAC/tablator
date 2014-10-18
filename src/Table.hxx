@@ -113,9 +113,9 @@ public:
   {
     write_output(path,Format(path));
   }
-  void write_HDF5 (std::ostream &os) const;
-  void write_HDF5 (const boost::filesystem::path &p) const;
-  void write_HDF5_to_file (H5::H5File &outfile) const;
+  void write_hdf5 (std::ostream &os) const;
+  void write_hdf5 (const boost::filesystem::path &p) const;
+  void write_hdf5_to_file (H5::H5File &outfile) const;
 
   void write_ipac_table (std::ostream &os) const;
   void write_ipac_table (const boost::filesystem::path &p) const

@@ -1,6 +1,6 @@
 #include "../../Table.hxx"
 
-void Tablator::Table::write_HDF5 (std::ostream &os) const
+void Tablator::Table::write_hdf5 (std::ostream &os) const
 {
   /// This makes two copies of the file in memory.  It seems like
   /// there should be a way to only use one.
@@ -10,7 +10,7 @@ void Tablator::Table::write_HDF5 (std::ostream &os) const
   fapl.setCore ((size_t)1, backing_store);
   H5::H5File memory_file ("nosuch.h5", H5F_ACC_TRUNC,
                           H5::FileCreatPropList::DEFAULT, fapl);
-  write_HDF5_to_file (memory_file);
+  write_hdf5_to_file (memory_file);
   memory_file.flush (H5F_SCOPE_GLOBAL);
 
   hid_t fileid = memory_file.getId ();
@@ -20,8 +20,8 @@ void Tablator::Table::write_HDF5 (std::ostream &os) const
   os.write (buffer.data (), size);
 }
 
-void Tablator::Table::write_HDF5 (const boost::filesystem::path &p) const
+void Tablator::Table::write_hdf5 (const boost::filesystem::path &p) const
 {
   H5::H5File outfile{ p.string (), H5F_ACC_TRUNC };
-  write_HDF5_to_file (outfile);
+  write_hdf5_to_file (outfile);
 }

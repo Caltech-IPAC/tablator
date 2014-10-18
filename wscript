@@ -28,8 +28,8 @@ def build(bld):
              'src/Table/write_ipac_table/write_ipac_table.cxx',
              'src/Table/write_ipac_table/write_ipac_table_header.cxx',
              'src/Table/write_ipac_table/write_element_type.cxx',
-             'src/Table/write_HDF5/write_HDF5.cxx',
-             'src/Table/write_HDF5/write_HDF5_to_file.cxx']
+             'src/Table/write_hdf5/write_hdf5.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_file.cxx']
 
     bld.shlib(source=sources,
               target='tablator',

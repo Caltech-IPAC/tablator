@@ -11,9 +11,9 @@ void Tablator::Table::write_output (const boost::filesystem::path &path,
   else if (format.index->first == Format::enum_format::HDF5)
     {
       if (use_stdout)
-        write_HDF5 (std::cout);
+        write_hdf5 (std::cout);
       else
-        write_HDF5 (path);
+        write_hdf5 (path);
     }
   else
     {
