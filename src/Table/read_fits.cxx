@@ -41,6 +41,12 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
      {"OBJ_TYPE","src.class"},
      {"OBJRA","pos.eq.ra"},
      {"OBJDEC","pos.eq.dec"},
+     //  FIXME: These UCD's (radius, width, height) are completely
+     //  made up.  We should probably convert it to a shape and use
+     //  phys.angArea, but that would be annoying to convert both ways
+     {"RADIUS","pos.radius"},
+     {"WIDTH","pos.width"},
+     {"HEIGHT","pos.height"},
      {"OBJGLON","pos.galactic.lon"},
      {"OBJGLAT","pos.galactic.lat"},
      {"PROCVER","meta.version"},
@@ -54,10 +60,11 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
   table_extension.readAllKeys();
   for(auto &k: table_extension.keyWord ())
     {
-      if(std::find(fits_ignored_keywords.begin(),fits_ignored_keywords.end(),
-                   k.first)!=fits_ignored_keywords.end())
-        continue;
       std::string name(k.first), value;
+      if(std::find(fits_ignored_keywords.begin(),fits_ignored_keywords.end(),
+                   name)!=fits_ignored_keywords.end())
+        continue;
+
       /// Annoyingly, CCfits does not have a way to just return the
       /// value.  You have to give it something to put it in.
       Property p(k.second->value(value));
