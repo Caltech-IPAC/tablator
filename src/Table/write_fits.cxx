@@ -2,6 +2,7 @@
 #include <CCfits/CCfits>
 
 #include "../Table.hxx"
+#include "fits_keyword_mapping.hxx"
 
 /// We need different data_type and vector_type because vector<bool>
 /// has a packed representation.
@@ -121,15 +122,21 @@ void Tablator::Table::write_fits (const boost::filesystem::path &filename) const
     throw CCfits::FitsError(status);
   for (auto &p : properties)
     {
+      auto keyword_mapping=fits_keyword_mapping(true);
+      std::string name=p.first;
+      auto i=keyword_mapping.find(name);
+      if(i!=keyword_mapping.end())
+        name=i->second;
+
       std::string comment, value(p.second.value);
       for(auto &a: p.second.attributes)
         {
           if(a.first=="comment")
             comment=a.second;
-          else
+          else if(a.first!="ucd")
             value+=", " + a.first + ": " + a.second;
         }
-      fits_write_key_longstr(fits_file,p.first.c_str(),value.c_str(),
+      fits_write_key_longstr(fits_file,name.c_str(),value.c_str(),
                              comment.c_str(),&status);
       if(status!=0)
         throw CCfits::FitsError(status);
