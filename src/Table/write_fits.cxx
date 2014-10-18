@@ -2,7 +2,7 @@
 #include <CCfits/CCfits>
 
 #include "../Table.hxx"
-#include "fits_keyword_mapping.hxx"
+#include "../fits_keyword_mapping.hxx"
 
 /// We need different data_type and vector_type because vector<bool>
 /// has a packed representation.

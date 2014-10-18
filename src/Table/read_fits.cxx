@@ -1,7 +1,7 @@
 #include <CCfits/CCfits>
 
 #include "../Table.hxx"
-#include "fits_keyword_mapping.hxx"
+#include "../fits_keyword_mapping.hxx"
 
 namespace
 {

@@ -7,6 +7,8 @@
 #include <map>
 #include <string>
 
+namespace Tablator
+{
 std::map<std::string,std::string> fits_keyword_mapping(const bool &reverse)
 {
   std::map<std::string,std::string> mapping=
@@ -39,4 +41,5 @@ std::map<std::string,std::string> fits_keyword_mapping(const bool &reverse)
   for(auto &m: mapping)
     reverse_mapping.insert(std::make_pair(m.second,m.first));
   return reverse_mapping;
+}
 }

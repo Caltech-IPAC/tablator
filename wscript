@@ -12,9 +12,9 @@ def build(bld):
     default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'CCfits', 'BOOST']
 
-    sources=['src/Format/set_from_extension.cxx',
+    sources=['src/fits_keyword_mapping.cxx',
+             'src/Format/set_from_extension.cxx',
              'src/Table/Table.cxx',
-             'src/Table/fits_keyword_mapping.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/read_fits.cxx',
              'src/Table/read_hdf5.cxx',
