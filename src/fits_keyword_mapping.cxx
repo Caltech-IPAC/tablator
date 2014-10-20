@@ -20,6 +20,7 @@ std::map<std::string,std::string> fits_keyword_mapping(const bool &reverse)
      {"OBJ_TYPE","src.class"},
      {"OBJRA","pos.eq.ra"},
      {"OBJDEC","pos.eq.dec"},
+     {"BUNIT","meta.unit"},
      //  FIXME: These UCD's (radius, width, height) are completely
      //  made up.  We should probably convert it to a shape and use
      //  phys.angArea, but that would be annoying to convert both ways
