@@ -8,8 +8,8 @@ def configure(conf):
     conf.check_boost(lib='filesystem system')
 
 def build(bld):
-    # default_flags=['-Wall', '-Wextra', '-Ofast']
-    default_flags=['-Wall', '-Wextra', '-g']
+    default_flags=['-Wall', '-Wextra', '-Ofast']
+    # default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'CCfits', 'BOOST']
 
     sources=['src/fits_keyword_mapping.cxx',
