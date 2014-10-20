@@ -1,16 +1,16 @@
 import os
 
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx CCfits boost')
+    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx CCfits boost')
+    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost')
     conf.check_boost(lib='filesystem system')
 
 def build(bld):
     default_flags=['-Wall', '-Wextra', '-Ofast']
     # default_flags=['-Wall', '-Wextra', '-g']
-    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'CCfits', 'BOOST']
+    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST']
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
