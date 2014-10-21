@@ -35,6 +35,7 @@ def build(bld):
               target='tablator',
               name='libtablator_sh',
               cxxflags=default_flags,
+              install_path=os.path.join(bld.env.PREFIX, 'lib'),
               use=use_packages
               )
 
@@ -42,6 +43,7 @@ def build(bld):
               target='tablator',
               name='libtablator_st',
               cxxflags=default_flags,
+              install_path=os.path.join(bld.env.PREFIX, 'lib'),
               use=use_packages
               )
 
