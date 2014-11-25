@@ -73,6 +73,8 @@ public:
       throw std::runtime_error ("Unknown format: " + format);
   }
 
+  Format (const char *format): Format(std::string(format)) {}
+
   void set_from_extension (const boost::filesystem::path &path);
 
   std::string content_type () const
