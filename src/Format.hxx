@@ -29,7 +29,8 @@ public:
   // FIXME: This should really be a static, but then I ran into
   // problems with order of static initialization, where something
   // static would get destroyed before this variable, causing crashes
-  // on exit.
+  // on exit.  On the other hand, having this const breaks the default
+  // operator=().
   const std::map<Format::enum_format,
                   std::pair<std::string, std::vector<std::string> > >
   formats{ { Format::enum_format::VOTABLE, { "votable", { "xml" } } },
@@ -61,7 +62,7 @@ public:
     set_from_extension(path);
   }
 
-  Format (const std::string &format)
+  void init (const std::string &format)
   {
     for (index=formats.begin(); index!=formats.end(); ++index)
       {
@@ -71,6 +72,11 @@ public:
 
     if (index == formats.end())
       throw std::runtime_error ("Unknown format: " + format);
+  }
+
+  Format (const std::string &format)
+  {
+    init(format);
   }
 
   Format (const char *format): Format(std::string(format)) {}
