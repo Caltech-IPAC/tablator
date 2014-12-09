@@ -33,7 +33,8 @@ public:
   // operator=().
   const std::map<Format::enum_format,
                   std::pair<std::string, std::vector<std::string> > >
-  formats{ { Format::enum_format::VOTABLE, { "votable", { "xml" } } },
+  formats{ { Format::enum_format::VOTABLE, { "votable", { "xml", "vot",
+                                                          "vo" } } },
                  { Format::enum_format::CSV, { "csv", { "csv" } } },
                  { Format::enum_format::TSV, { "tsv", { "tsv" } } },
                  { Format::enum_format::FITS, { "fits", { "fits" } } },
