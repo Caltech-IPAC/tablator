@@ -8,6 +8,8 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
   os << "\\fixlen = T\n";
 
   os << std::left;
+
+  /// FIXME:: why related to fits?
   const int fits_keyword_length (8);
 
   for (auto &p : flatten_properties ())
@@ -17,17 +19,26 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
          << p.second << "'\n";
     }
 
-  for (int i = 0; i < num_members; ++i)
+  if (comment.size() == 0 && fields_properties.size() > 0)
     {
-      os << "\\ " << compound_type.getMemberName (i);
-      auto unit = fields_properties.at (i).attributes.find ("unit");
-      if (unit != fields_properties.at (i).attributes.end ())
+      /// FIXME: Suggest to review this and remove this part
+      for (int i = 0; i < num_members; ++i)
         {
-          os << " (" << unit->second << ")";
+          os << "\\ " << compound_type.getMemberName (i);
+          auto unit = fields_properties.at (i).attributes.find ("unit");
+          if (unit != fields_properties.at (i).attributes.end ())
+            {
+              os << " (" << unit->second << ")";
+            }
+          os << "\n";
+          for (auto &description : fields_properties.at (i).descriptions)
+             os << "\\ ___ " << description.value << "\n";
+          // FIXME: Write out description attributes
         }
-      os << "\n";
-      for (auto &description : fields_properties.at (i).descriptions)
-        os << "\\ ___ " << description.value << "\n";
-      // FIXME: Write out description attributes
+    }
+  else
+    {
+      for (auto &c : comment)
+        os << "\\ " << c << "\n";
     }
 }

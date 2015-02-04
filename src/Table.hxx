@@ -25,9 +25,10 @@ class Table
 public:
   std::map<std::string, Property> properties;
   std::vector<char> data;
+  std::vector<std::string> comment, nulls;
   std::vector<Field_Properties> fields_properties;
   H5::CompType compound_type;
-
+  std::vector<int> ipac_column_widths;
   /// Type names are mostly lifted directly from the IVOA TAP spec.
   /// IVOA has fixed length char[] arrays.  We just use a string.
   enum class Type : char
@@ -57,16 +58,17 @@ public:
   /// the type.
   std::vector<H5::StrType> string_types;
 
-  typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties>
-  Column_Properties;
+  typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties> Column_Properties;
   typedef std::pair<std::string, Column_Properties> Column;
 
   Table (const std::vector<Column> &columns,
          const std::map<std::string, std::string> &property_map);
+
   Table (const std::vector<Column> &columns)
       : Table (columns, std::map<std::string, std::string>())
   {
   }
+
   Table (const boost::filesystem::path &input_path)
   {
     Format format(input_path);
@@ -77,6 +79,10 @@ public:
     else if(format.is_fits())
       {
         read_fits(input_path);
+      }
+    else if(format.is_ipac_table())
+      {
+        read_ipac_table(input_path);
       }
   }
 
@@ -107,8 +113,9 @@ public:
   flatten_properties () const;
 
   const int output_precision = 13;
+  void read_ipac_table (const boost::filesystem::path &path);
   void write_output (const boost::filesystem::path &path,
-                     const Format &format) const;
+                     const Format &format);
   void write_output (const boost::filesystem::path &path)
   {
     write_output(path,Format(path));
@@ -118,7 +125,7 @@ public:
   void write_hdf5_to_file (H5::H5File &outfile) const;
 
   void write_ipac_table (std::ostream &os) const;
-  void write_ipac_table (const boost::filesystem::path &p) const
+  void write_ipac_table (const boost::filesystem::path &p) 
   {
     boost::filesystem::ofstream outfile (p);
     write_ipac_table (outfile);
@@ -134,5 +141,6 @@ public:
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   void write_votable (std::ostream &os) const;
+  void assign_column_width ();
 };
 }

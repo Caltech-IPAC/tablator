@@ -1,7 +1,7 @@
 #include "../Table.hxx"
 
 void Tablator::Table::write_output (const boost::filesystem::path &path,
-                               const Format &format) const
+                               const Format &format) 
 {
   const bool use_stdout (path.string () == "-");
   if (format.index->first == Format::enum_format::FITS)
@@ -35,6 +35,8 @@ void Tablator::Table::write_output (const boost::filesystem::path &path,
           break;
         case Format::enum_format::IPAC_TABLE:
         case Format::enum_format::TEXT:
+          if (ipac_column_widths.size() == 0)
+              assign_column_width();
           write_ipac_table (out);
           break;
         case Format::enum_format::HTML:
