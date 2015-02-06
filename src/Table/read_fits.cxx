@@ -90,8 +90,10 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
           throw std::runtime_error("Unsupported data type in the fits file for "
                                    "column " + c.first);
         }
+        nulls.push_back("nan");
     }
   compound_type=H5::CompType(row_size);
+
 
   // FIXME: This is going to break if we have more than 2^32 rows
   data.resize(table->rows()*row_size);
@@ -170,7 +172,7 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
       // function is protected???
       fields_properties.push_back(Field_Properties
                                   (std::string(""),
-                                   {{ "unit", c.unit() }}));
+                                   {{ "unit", c.unit()}, { "null", nulls[column-1] }}));
       offsets.push_back(offset);
       offset += compound_type.getMemberDataType(compound_type.getNmembers()-1)
         .getSize();

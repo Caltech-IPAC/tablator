@@ -82,7 +82,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
             case Type::BOOLEAN:
                   /// FIXME: assign a reasonable null value late
                   /// Booleans are converted to integers
-                  if (static_cast<int>(data[offset]) == std::numeric_limits<bool>::has_quiet_NaN)
+                  if (static_cast<int>(data[offset]) == -9)
                   {
                       current += snprintf (
                       buffer.data () + current, buffer.size () - current,
