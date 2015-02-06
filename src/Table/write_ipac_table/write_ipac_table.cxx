@@ -1,5 +1,7 @@
 #include <iomanip>
 #include <inttypes.h>
+#include <limits>
+#include <cmath>
 
 #include "../../Table.hxx"
 
@@ -80,7 +82,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
             case Type::BOOLEAN:
                   /// FIXME: assign a reasonable null value late
                   /// Booleans are converted to integers
-                  if (static_cast<int>(data[offset]) == -9)
+                  if (static_cast<int>(data[offset]) == std::numeric_limits<bool>::has_quiet_NaN)
                   {
                       current += snprintf (
                       buffer.data () + current, buffer.size () - current,
@@ -96,7 +98,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
               break;
 
             case Type::SHORT:
-                  if (*reinterpret_cast<const int16_t *>(data.data () + offset) == -9999)
+                  if (*reinterpret_cast<const int16_t *>(data.data () + offset) == std::numeric_limits<int16_t>::has_quiet_NaN)
                   {
                       current += snprintf (
                       buffer.data () + current, buffer.size () - current,
@@ -112,7 +114,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
               break;
 
             case Type::INT:
-                  if (*reinterpret_cast<const int32_t *>(data.data () + offset) == -9999)
+                  if (*reinterpret_cast<const int32_t *>(data.data () + offset) == std::numeric_limits<int32_t>::has_quiet_NaN)
                   {
                       current += snprintf (
                       buffer.data () + current, buffer.size () - current,
@@ -128,7 +130,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
               break;
 
             case Type::LONG:
-                  if (*reinterpret_cast<const int64_t *>(data.data () + offset) == -9999)
+                  if (*reinterpret_cast<const int64_t *>(data.data () + offset) == std::numeric_limits<int64_t>::has_quiet_NaN)
                   {
                       current += snprintf (
                       buffer.data () + current, buffer.size () - current,
@@ -148,7 +150,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
 
             case Type::FLOAT:
               // FIXME: Use Table::output_precision
-                  if (*reinterpret_cast<const float *>(data.data () + offset) == -9999.999)
+                  if (*reinterpret_cast<const float *>(data.data () + offset) == std::numeric_limits<float>::has_quiet_NaN)
                   {
                       current += snprintf (
                       buffer.data () + current, buffer.size () - current,
@@ -164,7 +166,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
               break;
 
             case Type::DOUBLE:
-                  if (*reinterpret_cast<const double *>(data.data () + offset) == -9999.999)
+                  if (*reinterpret_cast<const double *>(data.data () + offset) == std::numeric_limits<double>::has_quiet_NaN)
                   {
                       current += snprintf (
                       buffer.data () + current, buffer.size () - current,
