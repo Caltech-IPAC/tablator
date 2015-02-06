@@ -128,7 +128,6 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
             }
             ifs.clear();
         }
-
       types = assign_data_type(dtypes);
       row_size = 0;
       for (size_t i=0; i< ncols; ++i) 
@@ -164,6 +163,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
 
       compound_type=H5::CompType(row_size);
       data.resize(ipac_row_number*row_size);
+      auto string_type_pointer=string_types.begin();
       for (size_t i=0; i< ncols; ++i) 
         {
           switch(types[i])
@@ -174,7 +174,8 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
               break;
 
               case Type::STRING:
-                   compound_type.insertMember(names[i],offsets[i],*string_types.rbegin());
+                   compound_type.insertMember(names[i],offsets[i],*string_type_pointer);
+                   ++string_type_pointer;
               break;
 
               case Type::INT:
@@ -192,17 +193,15 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
             }
         }
 
-     for (size_t i=0; i != units.size(); ++i )
-       {
-          if (nulls.size() == 0)
-              fields_properties.push_back(Field_Properties (std::string(""), 
-                 {{ "unit", boost::algorithm::trim_copy(units[i]) }})); 
-          else 
-              fields_properties.push_back(Field_Properties (std::string(""), 
-                 {{ "unit", boost::algorithm::trim_copy(units[i]) }, 
-                 { "null", boost::algorithm::trim_copy(nulls[i]) }}));
-       }
-
+      for (int i=0; i< names.size(); ++i)
+        {
+          if (nulls.size() < i+1) nulls.push_back("");
+          if (units.size() < i+1) units.push_back("");
+          fields_properties.push_back(Field_Properties (std::string(""), 
+              {{ "unit", boost::algorithm::trim_copy(units[i]) }, 
+              { "null", boost::algorithm::trim_copy(nulls[i]) }}));
+        }
+      
       char    line[10240],  *block_ptr, *rd, *end_ptr;
       double  ipac_double;
       int64_t ipac_int64;
