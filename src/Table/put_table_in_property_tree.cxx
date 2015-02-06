@@ -17,7 +17,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
           switch (types[j])
             {
             case Type::BOOLEAN:
-                 if (static_cast<int>(data[i + offsets[j]]) == -9)
+                 if (static_cast<int>(data[i + offsets[j]]) == std::numeric_limits<bool>::has_quiet_NaN)
                      td << nulls[j];
                  else
                      td << static_cast<int>(data[i + offsets[j]]);
@@ -25,7 +25,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::SHORT:
                  if (*reinterpret_cast<const int16_t *>
-                     (data.data () + i + offsets[j]) == -9999)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<int16_t>::has_quiet_NaN)
                      td << nulls[j];
                  else
                    {
@@ -36,7 +36,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::INT:
                  if (*reinterpret_cast<const int32_t *>
-                     (data.data () + i + offsets[j]) == -9999)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<int32_t>::has_quiet_NaN)
                      td << nulls[j];
                  else
                    {
@@ -47,7 +47,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::LONG:
                  if (*reinterpret_cast<const int64_t *>
-                     (data.data () + i + offsets[j]) == -9999)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<int64_t>::has_quiet_NaN)
                      td << nulls[j];
                  else
                    {
@@ -58,7 +58,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::FLOAT:
                  if (*reinterpret_cast<const float *>
-                     (data.data () + i + offsets[j]) == -9999.999)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<float>::has_quiet_NaN)
                      td << nulls[j];
                  else
                    {
@@ -70,7 +70,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::DOUBLE:
                  if (*reinterpret_cast<const double *>
-                     (data.data () + i + offsets[j]) == -9999.999)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<double>::has_quiet_NaN)
                     td << nulls[j];
                  else
                {
