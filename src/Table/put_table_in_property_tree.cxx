@@ -17,35 +17,75 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
           switch (types[j])
             {
             case Type::BOOLEAN:
-              td << static_cast<int>(data[i + offsets[j]]);
-              break;
+                 if (static_cast<int>(data[i + offsets[j]]) == -9)
+                     td << nulls[j];
+                 else
+                     td << static_cast<int>(data[i + offsets[j]]);
+            break;
+
             case Type::SHORT:
-              td << *reinterpret_cast<const int16_t *>(data.data () + i
-                                                       + offsets[j]);
-              break;
+                 if (*reinterpret_cast<const int16_t *>
+                     (data.data () + i + offsets[j]) == -9999)
+                     td << nulls[j];
+                 else
+                   {
+                     td << *reinterpret_cast<const int16_t *>
+                           (data.data () + i + offsets[j]);
+                   }
+            break;
+
             case Type::INT:
-              td << *reinterpret_cast<const int32_t *>(data.data () + i
-                                                       + offsets[j]);
-              break;
+                 if (*reinterpret_cast<const int32_t *>
+                     (data.data () + i + offsets[j]) == -9999)
+                     td << nulls[j];
+                 else
+                   {
+                     td << *reinterpret_cast<const int32_t *>
+                           (data.data () + i + offsets[j]);
+                   }
+            break;
+
             case Type::LONG:
-              td << *reinterpret_cast<const int64_t *>(data.data () + i
-                                                       + offsets[j]);
-              break;
+                 if (*reinterpret_cast<const int64_t *>
+                     (data.data () + i + offsets[j]) == -9999)
+                     td << nulls[j];
+                 else
+                   {
+                     td << *reinterpret_cast<const int64_t *>
+                          (data.data () + i + offsets[j]);
+                   }
+            break;
+
             case Type::FLOAT:
-              td << std::setprecision (output_precision)
-                 << *reinterpret_cast<const float *>(data.data () + i
-                                                     + offsets[j]);
-              break;
+                 if (*reinterpret_cast<const float *>
+                     (data.data () + i + offsets[j]) == -9999.999)
+                     td << nulls[j];
+                 else
+                   {
+                     td << std::setprecision (output_precision)
+                        << *reinterpret_cast<const float *>
+                           (data.data () + i + offsets[j]);
+                   }
+            break;
+
             case Type::DOUBLE:
-              td << std::setprecision (output_precision)
-                 << *reinterpret_cast<const double *>(data.data () + i
+                 if (*reinterpret_cast<const double *>
+                     (data.data () + i + offsets[j]) == -9999.999)
+                    td << nulls[j];
+                 else
+               {
+                    td << std::setprecision (output_precision)
+                       << *reinterpret_cast<const double *>(data.data () + i
                                                       + offsets[j]);
+               }
               break;
+
             case Type::STRING:
               td << std::string (
                         data.data () + i + offsets[j],
                         compound_type.getMemberDataType (j).getSize ());
-              break;
+            break;
+
             default:
               throw std::runtime_error
                 ("Unknown data type when writing data: "
