@@ -109,7 +109,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
       if (fixlen_key)
         {
           if (!fixlen_table) 
-              throw std::runtime_error( "Not a fixlen table althogh 'fixlen = T' is defined.");
+              throw std::runtime_error( "Not a fixlen table although 'fixlen = T' is defined.");
           if ((file_size - ipac_data_offset) % (ipac_row_size) > 0)
               throw std::runtime_error( "Bad formatted fixlen IPAC table.");
           ipac_row_number = (file_size - ipac_data_offset+1) / ipac_row_size;
@@ -193,7 +193,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
             }
         }
 
-      for (int i=0; i< names.size(); ++i)
+      for (size_t i=0; i< names.size(); ++i)
         {
           if (nulls.size() < i+1) nulls.push_back("");
           if (units.size() < i+1) units.push_back("");
