@@ -1,4 +1,6 @@
 #include <iomanip>
+#include <limits>
+#include <cmath>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -17,7 +19,8 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
           switch (types[j])
             {
             case Type::BOOLEAN:
-                 if (static_cast<int>(data[i + offsets[j]]) == std::numeric_limits<bool>::has_quiet_NaN)
+                 /// FIXME: need to update Null value checking late
+                 if (static_cast<int>(data[i + offsets[j]]) == -9)
                      td << nulls[j];
                  else
                      td << static_cast<int>(data[i + offsets[j]]);
