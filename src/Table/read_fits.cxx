@@ -102,7 +102,7 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
   for(size_t column=1; column<=table->column().size(); ++column)
     {
       CCfits::Column &c=table->column(column);
-      
+     
       switch (c.type())
         {
         case CCfits::Tlogical:
@@ -126,11 +126,14 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
           {
             std::vector<std::string> v;
             c.read(v,1,table->rows());
+
             size_t total_offset=offset;
             for(auto &element: v)
               {
-                for(int i=0; i<c.width(); ++i)
+                for(int i=0; i<element.size(); ++i)
                   data[total_offset+i]=element[i];
+                for(int i=element.size(); i<c.width(); ++i)
+                  data[total_offset+i]=' ';
                 total_offset+=row_size;
               }
           }
