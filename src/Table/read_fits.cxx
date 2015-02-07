@@ -34,7 +34,6 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
   std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
 
   auto keyword_mapping=fits_keyword_mapping(false);
-
   table_extension.readAllKeys();
   for(auto &k: table_extension.keyWord ())
     {
@@ -58,15 +57,17 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
     }
 
   row_size=0;
-  for(auto &c: table->column ())
+  for(size_t column=1; column<=table->column().size(); ++column)
     {
-      switch(c.second->type())
+      CCfits::Column &c=table->column(column);
+      switch(c.type())
         {
         case CCfits::Tlogical:
           row_size+=H5::PredType::NATIVE_UCHAR.getSize();
           break;
         case CCfits::Tstring:
-          row_size+=H5::PredType::NATIVE_CHAR.getSize()*c.second->width();
+          row_size+=H5::PredType::NATIVE_CHAR.getSize()*c.width();
+          nulls.push_back("null");
           break;
         case CCfits::Tushort:
         case CCfits::Tshort:
@@ -88,9 +89,9 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
           break;
         default:
           throw std::runtime_error("Unsupported data type in the fits file for "
-                                   "column " + c.first);
+                                   "column " + c.name());
         }
-        nulls.push_back("nan");
+        if (c.type() != CCfits::Tstring) nulls.push_back("nan");
     }
   compound_type=H5::CompType(row_size);
 
