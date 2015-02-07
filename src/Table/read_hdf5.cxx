@@ -1,3 +1,5 @@
+#include <limits> 
+
 #include "../Table.hxx"
 
 void Tablator::Table::read_hdf5(const boost::filesystem::path &path)
@@ -10,6 +12,9 @@ void Tablator::Table::read_hdf5(const boost::filesystem::path &path)
   offsets.clear();
   types.clear();
   size_t offset{0};
+  for(size_t i=0; i<compound_type.getNmembers(); ++i)
+     nulls.push_back("nan");
+
   for(int i=0; i<compound_type.getNmembers(); ++i)
     {
       H5::DataType d=compound_type.getMemberDataType(i);
@@ -33,6 +38,7 @@ void Tablator::Table::read_hdf5(const boost::filesystem::path &path)
           // lives on???
           string_types.push_back(compound_type.getMemberStrType(i));
           types.push_back(Type::STRING);
+          nulls[i] = "null";
         }
       offsets.push_back(offset);
       offset += d.getSize();
