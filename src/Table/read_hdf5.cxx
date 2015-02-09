@@ -42,7 +42,10 @@ void Tablator::Table::read_hdf5(const boost::filesystem::path &path)
         }
       offsets.push_back(offset);
       offset += d.getSize();
-    }
+      fields_properties.push_back(Field_Properties
+          (std::string(""),
+          {{ "unit", " "}, { "null", nulls[i] }}));
+      }
   offsets.push_back(offset);
   row_size=offset;
   data.resize (row_size*dataset.getSpace ().getSimpleExtentNpoints());
