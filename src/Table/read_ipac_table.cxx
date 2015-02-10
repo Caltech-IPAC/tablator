@@ -250,7 +250,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                          {
                            trim(line);
                            if (strcmp(line, (nulls[col]).c_str()) == 0)
-                              ipac_int32= std::numeric_limits<int32_t>::quiet_NaN();
+                              ipac_int32= std::numeric_limits<int32_t>::max();
                            else
                               throw std::runtime_error("Invalid long value.");
                          }
@@ -263,7 +263,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                          {
                            trim(line);
                            if (strcmp(line, (nulls[col]).c_str()) == 0)
-                              ipac_int64= std::numeric_limits<int64_t>::quiet_NaN();
+                              ipac_int64= std::numeric_limits<int64_t>::max();
                            else
                               throw std::runtime_error("Invalid long value.");
                          }

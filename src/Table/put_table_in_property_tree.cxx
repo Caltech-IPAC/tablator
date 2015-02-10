@@ -28,7 +28,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::SHORT:
                  if (*reinterpret_cast<const int16_t *>
-                     (data.data () + i + offsets[j]) == std::numeric_limits<int16_t>::has_quiet_NaN)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<int16_t>::max())
                      td << nulls[j];
                  else
                    {
@@ -39,7 +39,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::INT:
                  if (*reinterpret_cast<const int32_t *>
-                     (data.data () + i + offsets[j]) == std::numeric_limits<int32_t>::has_quiet_NaN)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<int32_t>::max())
                      td << nulls[j];
                  else
                    {
@@ -50,7 +50,7 @@ Tablator::Table::put_table_in_property_tree (boost::property_tree::ptree &table)
 
             case Type::LONG:
                  if (*reinterpret_cast<const int64_t *>
-                     (data.data () + i + offsets[j]) == std::numeric_limits<int64_t>::has_quiet_NaN)
+                     (data.data () + i + offsets[j]) == std::numeric_limits<int64_t>::max())
                      td << nulls[j];
                  else
                    {
