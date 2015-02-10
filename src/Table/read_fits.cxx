@@ -131,7 +131,7 @@ void Tablator::Table::read_fits(const boost::filesystem::path &path)
             size_t total_offset=offset;
             for(auto &element: v)
               {
-                for(int i=0; i<element.size(); ++i)
+                for(size_t i=0; i<element.size(); ++i)
                   data[total_offset+i]=element[i];
                 for(int i=element.size(); i<c.width(); ++i)
                   data[total_offset+i]=' ';

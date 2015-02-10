@@ -12,7 +12,7 @@ void Tablator::Table::read_hdf5(const boost::filesystem::path &path)
   offsets.clear();
   types.clear();
   size_t offset{0};
-  for(size_t i=0; i<compound_type.getNmembers(); ++i)
+  for(int i=0; i<compound_type.getNmembers(); ++i)
      nulls.push_back("nan");
 
   for(int i=0; i<compound_type.getNmembers(); ++i)
