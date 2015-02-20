@@ -84,6 +84,11 @@ public:
       {
         read_ipac_table(input_path);
       }
+    else
+      {
+        throw std::runtime_error ("Unsupported input format: "
+                                  + input_path.string ());
+      }
   }
 
   size_t size () const { return data.size () / row_size; }
