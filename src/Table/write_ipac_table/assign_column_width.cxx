@@ -12,10 +12,8 @@ void Tablator::Table::assign_column_width ()
       switch (types[i])
         {
         case Type::STRING:
-          width
-              = (name.size () > compound_type.getMemberDataType (i).getSize ())
-                    ? name.size ()
-                    : compound_type.getMemberDataType (i).getSize ();
+          width = std::max (name.size (),
+                            compound_type.getMemberDataType (i).getSize ());
           break;
         default:
           width = 20;

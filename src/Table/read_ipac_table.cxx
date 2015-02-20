@@ -60,15 +60,14 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
           if (str.find ("\t") != std::string::npos)
             throw std::runtime_error ("Header '" + str + "' contains tabs.");
 
-          header
-              = (header < 4)
-                    ? header + 1
-                    : throw std::runtime_error ("More than 4 headerlines "
-                                                "started with '|' are found.");
+          header = (header < 4) ? header + 1
+                                : throw std::runtime_error (
+                                      "More than 4 headerlines "
+                                      "started with '|' are found.");
 
           fixlen_table
               = fixlen_table
-                & ((header == 1) ? 1
+                && ((header == 1) ? 1
                                  : ((ipac_row_size == str.size ()) ? 1 : 0));
           if (header == 1)
             {
@@ -121,8 +120,8 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
     throw std::runtime_error ("Missing column datatype.");
 
   ncols = names.size ();
-  fixlen_table = fixlen_table & (ncols == dtypes.size ())
-                 & (ncols == units.size ()) & (ncols == nulls.size ());
+  fixlen_table = fixlen_table && (ncols == dtypes.size ())
+                 && (ncols == units.size ()) && (ncols == nulls.size ());
 
   ipac_column_widths = get_ipac_column_widths (ipac_column_offset);
   if (fixlen_key)
