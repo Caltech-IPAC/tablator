@@ -113,6 +113,11 @@ public:
     data.insert (data.end (), row, row + row_size);
   }
 
+  void pop_row ()
+  {
+    data.resize (data.size () - row_size);
+  }
+
   std::vector<std::pair<std::string, std::string> >
   flatten_properties () const;
 

@@ -51,7 +51,7 @@ std::string Type_to_string (const Tablator::Table::Type &type)
       result = "double";
       break;
     case Tablator::Table::Type::STRING:
-      result = "char\" arraysize=\"*";
+      result = "char";
       break;
     default:
       throw std::runtime_error (
@@ -71,7 +71,10 @@ void Field_Properties_to_xml (boost::property_tree::ptree &tree,
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");
   field.add ("<xmlattr>.name", name);
-  field.add ("<xmlattr>.datatype", Type_to_string (type));
+  std::string datatype=Type_to_string (type);
+  field.add ("<xmlattr>.datatype", datatype);
+  if (datatype=="char")
+    field.add ("<xmlattr>.arraysize", "*");
 
   for (auto &a : field_property.attributes)
     {

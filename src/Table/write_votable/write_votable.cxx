@@ -20,17 +20,22 @@ void Tablator::Table::write_votable (std::ostream &os) const
   tree.add ("VOTABLE.<xmlattr>.xmlns:stc",
             "http://www.ivoa.net/xml/STC/v1.30");
 
+  bool overflow;
   for (auto &p : flatten_properties ())
     {
       if (p.first.substr (0, 8) == "VOTABLE.")
         {
           tree.add (p.first, p.second);
         }
-      else
+      else if (p.first!="QUERY_STATUS" || p.second!="OVERFLOW")
         {
           auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
           info.add ("<xmlattr>.name", p.first);
           info.add ("<xmlattr>.value", p.second);
+        }
+      else
+        {
+          overflow=true;
         }
     }
 
@@ -41,6 +46,14 @@ void Tablator::Table::write_votable (std::ostream &os) const
 
   boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", "");
   put_table_in_property_tree (tabledata);
+
+  if (overflow)
+    {
+      auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
+      info.add ("<xmlattr>.name", "QUERY_STATUS");
+      info.add ("<xmlattr>.value", "OVERFLOW");
+    }
+  
   boost::property_tree::write_xml (
       os, tree, boost::property_tree::xml_writer_settings<char>(' ', 2));
 }
