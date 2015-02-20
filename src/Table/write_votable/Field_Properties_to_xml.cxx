@@ -54,9 +54,9 @@ std::string Type_to_string (const Tablator::Table::Type &type)
       result = "char\" arraysize=\"*";
       break;
     default:
-      throw std::runtime_error
-        ("Unexpected data type in Field_Properties_to_xml: "
-         + std::to_string (static_cast<int>(type)));
+      throw std::runtime_error (
+          "Unexpected data type in Field_Properties_to_xml: "
+          + std::to_string (static_cast<int>(type)));
     }
   return result;
 }
@@ -82,7 +82,8 @@ void Field_Properties_to_xml (boost::property_tree::ptree &tree,
 
       if (a.first.empty ())
         throw std::runtime_error ("Empty attribute in field " + name
-                                  + " which has type " + Type_to_string (type));
+                                  + " which has type "
+                                  + Type_to_string (type));
       field.add ("<xmlattr>." + a.first, a.second);
     }
 

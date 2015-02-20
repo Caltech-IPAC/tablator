@@ -20,24 +20,24 @@ void Tablator::Table::write_votable (std::ostream &os) const
   tree.add ("VOTABLE.<xmlattr>.xmlns:stc",
             "http://www.ivoa.net/xml/STC/v1.30");
 
-  for (auto &p: flatten_properties ())
+  for (auto &p : flatten_properties ())
     {
-      if (p.first.substr(0,8)=="VOTABLE.")
+      if (p.first.substr (0, 8) == "VOTABLE.")
         {
           tree.add (p.first, p.second);
         }
       else
         {
-          auto &info=tree.add ("VOTABLE.RESOURCE.INFO","");
-          info.add ("<xmlattr>.name",p.first);
-          info.add ("<xmlattr>.value",p.second);
+          auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
+          info.add ("<xmlattr>.name", p.first);
+          info.add ("<xmlattr>.value", p.second);
         }
     }
 
   boost::property_tree::ptree &table = tree.add ("VOTABLE.RESOURCE.TABLE", "");
   for (size_t i = 0; i < fields_properties.size (); ++i)
-    Field_Properties_to_xml (table, compound_type.getMemberName (i), types.at(i),
-                             fields_properties[i]);
+    Field_Properties_to_xml (table, compound_type.getMemberName (i),
+                             types.at (i), fields_properties[i]);
 
   boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", "");
   put_table_in_property_tree (tabledata);

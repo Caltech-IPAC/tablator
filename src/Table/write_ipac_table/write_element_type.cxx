@@ -7,20 +7,20 @@ void Tablator::Table::write_element_type (std::ostream &os, const int &i) const
     case Type::BOOLEAN:
     case Type::SHORT:
     case Type::INT:
-         os << "integer";
-    break;
+      os << "integer";
+      break;
 
     case Type::LONG:
-         os << "long";
-         break;
+      os << "long";
+      break;
 
     case Type::FLOAT:
     case Type::DOUBLE:
-         os << "double";
-         break;
+      os << "double";
+      break;
 
     case Type::STRING:
-         os << "char";
-         break;
+      os << "char";
+      break;
     }
 }

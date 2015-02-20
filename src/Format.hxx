@@ -14,8 +14,7 @@ class Format
 
 public:
   enum class enum_format
-  {
-    VOTABLE,
+  { VOTABLE,
     CSV,
     TSV,
     FITS,
@@ -23,8 +22,7 @@ public:
     TEXT,
     HTML,
     HDF5,
-    UNKNOWN
-  };
+    UNKNOWN };
 
   // FIXME: This should really be a static, but then I ran into
   // problems with order of static initialization, where something
@@ -32,19 +30,17 @@ public:
   // on exit.  On the other hand, having this const breaks the default
   // operator=().
   const std::map<Format::enum_format,
-                  std::pair<std::string, std::vector<std::string> > >
-  formats{ { Format::enum_format::VOTABLE, { "votable", { "xml", "vot",
-                                                          "vo" } } },
-                 { Format::enum_format::CSV, { "csv", { "csv" } } },
-                 { Format::enum_format::TSV, { "tsv", { "tsv" } } },
-                 { Format::enum_format::FITS, { "fits", { "fits" } } },
-                 { Format::enum_format::IPAC_TABLE, { "ipac_table",
-                                                      { "tbl" } } },
-                 { Format::enum_format::TEXT, { "text", { "txt" } } },
-                 { Format::enum_format::HTML, { "html", { "html" } } },
-                 { Format::enum_format::HDF5, { "hdf5", { "h5" , "hdf" ,
-                                                          "hdf5" } } },
-                 { Format::enum_format::UNKNOWN, { "", { } } } };
+                 std::pair<std::string, std::vector<std::string> > > formats{
+    { Format::enum_format::VOTABLE, { "votable", { "xml", "vot", "vo" } } },
+    { Format::enum_format::CSV, { "csv", { "csv" } } },
+    { Format::enum_format::TSV, { "tsv", { "tsv" } } },
+    { Format::enum_format::FITS, { "fits", { "fits" } } },
+    { Format::enum_format::IPAC_TABLE, { "ipac_table", { "tbl" } } },
+    { Format::enum_format::TEXT, { "text", { "txt" } } },
+    { Format::enum_format::HTML, { "html", { "html" } } },
+    { Format::enum_format::HDF5, { "hdf5", { "h5", "hdf", "hdf5" } } },
+    { Format::enum_format::UNKNOWN, { "", {} } }
+  };
 
   std::map<Format::enum_format,
            std::pair<std::string, std::vector<std::string> > >::const_iterator
@@ -54,39 +50,33 @@ public:
   {
     if (index->second.second.empty ())
       return "";
-    return "." + index->second.second.at(0);
+    return "." + index->second.second.at (0);
   }
 
-  Format () : index (formats.end()) {}
-  Format (const boost::filesystem::path &path)
-  {
-    set_from_extension(path);
-  }
+  Format () : index (formats.end ()) {}
+  Format (const boost::filesystem::path &path) { set_from_extension (path); }
 
   void init (const std::string &format)
   {
-    for (index=formats.begin(); index!=formats.end(); ++index)
+    for (index = formats.begin (); index != formats.end (); ++index)
       {
         if (boost::iequals (index->second.first, format))
           break;
       }
 
-    if (index == formats.end())
+    if (index == formats.end ())
       throw std::runtime_error ("Unknown format: " + format);
   }
 
-  Format (const std::string &format)
-  {
-    init(format);
-  }
+  Format (const std::string &format) { init (format); }
 
-  Format (const char *format): Format(std::string(format)) {}
+  Format (const char *format) : Format (std::string (format)) {}
 
   void set_from_extension (const boost::filesystem::path &path);
 
   std::string content_type () const
   {
-    if(index==formats.end())
+    if (index == formats.end ())
       throw std::runtime_error ("INTERNAL ERROR: Unknown format when "
                                 "generating content type");
 
@@ -123,15 +113,18 @@ public:
         break;
 
       default:
-        throw std::runtime_error ("INTERNAL ERROR: Unknown format when "
-                                  "generating content type: "
-                                  + std::to_string(static_cast<int>
-                                                   (index->first)));
+        throw std::runtime_error (
+            "INTERNAL ERROR: Unknown format when "
+            "generating content type: "
+            + std::to_string (static_cast<int>(index->first)));
       }
     return result;
   }
 
-  bool is_ipac_table () const { return index->first == enum_format::IPAC_TABLE; }
+  bool is_ipac_table () const
+  {
+    return index->first == enum_format::IPAC_TABLE;
+  }
   bool is_votable () const { return index->first == enum_format::VOTABLE; }
   bool is_csv () const { return index->first == enum_format::CSV; }
   bool is_tsv () const { return index->first == enum_format::TSV; }

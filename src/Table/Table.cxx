@@ -12,8 +12,8 @@ Tablator::Table::Table (
                              std::pair<std::pair<H5::PredType, size_t>,
                                        Field_Properties> > &c)
           {
-            return sum + c.second.first.first.getSize ()
-                         * c.second.first.second;
+            return sum
+                   + c.second.first.first.getSize () * c.second.first.second;
           })),
       row_size (compound_type.getSize ())
 {
@@ -51,8 +51,9 @@ Tablator::Table::Table (
       else if (type == H5::PredType::NATIVE_CHAR)
         types.push_back (Type::STRING);
       else
-        throw std::runtime_error ("Unknown HDF5 type in compound_type with id: "
-                                  + std::to_string (type.getId ()));
+        throw std::runtime_error (
+            "Unknown HDF5 type in compound_type with id: "
+            + std::to_string (type.getId ()));
     }
   offsets.push_back (offset);
 

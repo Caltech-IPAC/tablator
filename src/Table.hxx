@@ -32,15 +32,13 @@ public:
   /// Type names are mostly lifted directly from the IVOA TAP spec.
   /// IVOA has fixed length char[] arrays.  We just use a string.
   enum class Type : char
-  {
-    BOOLEAN,
+  { BOOLEAN,
     SHORT,
     INT,
     LONG,
     FLOAT,
     DOUBLE,
-    STRING
-  };
+    STRING };
 
   /// These members are redundant with information in compound_type.
   /// We precompute them so that we do not have to do dynamic lookups
@@ -58,7 +56,8 @@ public:
   /// the type.
   std::vector<H5::StrType> string_types;
 
-  typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties> Column_Properties;
+  typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties>
+  Column_Properties;
   typedef std::pair<std::string, Column_Properties> Column;
 
   Table (const std::vector<Column> &columns,
@@ -71,18 +70,18 @@ public:
 
   Table (const boost::filesystem::path &input_path)
   {
-    Format format(input_path);
-    if(format.is_hdf5())
+    Format format (input_path);
+    if (format.is_hdf5 ())
       {
-        read_hdf5(input_path);
+        read_hdf5 (input_path);
       }
-    else if(format.is_fits())
+    else if (format.is_fits ())
       {
-        read_fits(input_path);
+        read_fits (input_path);
       }
-    else if(format.is_ipac_table())
+    else if (format.is_ipac_table ())
       {
-        read_ipac_table(input_path);
+        read_ipac_table (input_path);
       }
     else
       {
@@ -123,14 +122,14 @@ public:
                      const Format &format);
   void write_output (const boost::filesystem::path &path)
   {
-    write_output(path,Format(path));
+    write_output (path, Format (path));
   }
   void write_hdf5 (std::ostream &os) const;
   void write_hdf5 (const boost::filesystem::path &p) const;
   void write_hdf5_to_file (H5::H5File &outfile) const;
 
   void write_ipac_table (std::ostream &os) const;
-  void write_ipac_table (const boost::filesystem::path &p) 
+  void write_ipac_table (const boost::filesystem::path &p)
   {
     boost::filesystem::ofstream outfile (p);
     write_ipac_table (outfile);

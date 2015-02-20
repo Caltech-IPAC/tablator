@@ -5,5 +5,5 @@
 
 namespace Tablator
 {
-std::map<std::string,std::string> fits_keyword_mapping(const bool &reverse);
+std::map<std::string, std::string> fits_keyword_mapping (const bool &reverse);
 }

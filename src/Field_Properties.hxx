@@ -27,7 +27,8 @@ public:
   {
   }
 
-  Field_Properties (const std::string &description,
+  Field_Properties (
+      const std::string &description,
       const std::initializer_list<std::pair<const std::string, std::string> > &
           Attributes)
       : attributes (Attributes)

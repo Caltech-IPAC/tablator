@@ -3,7 +3,7 @@
 #include "../../Table.hxx"
 
 void Tablator::Table::write_ipac_table_header (std::ostream &os,
-                                          const int &num_members) const
+                                               const int &num_members) const
 {
   os << "\\fixlen = T\n";
 
@@ -19,7 +19,7 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
          << p.second << "'\n";
     }
 
-  if (comment.size() == 0 && fields_properties.size() > 0)
+  if (comment.size () == 0 && fields_properties.size () > 0)
     {
       /// FIXME: Suggest to review this and remove this part
       for (int i = 0; i < num_members; ++i)
@@ -32,7 +32,7 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
             }
           os << "\n";
           for (auto &description : fields_properties.at (i).descriptions)
-             os << "\\ ___ " << description.value << "\n";
+            os << "\\ ___ " << description.value << "\n";
           // FIXME: Write out description attributes
         }
     }
