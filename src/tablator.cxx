@@ -1,10 +1,9 @@
+/// A simple converter program to test out the tablator library.
+
 #include <CCfits/CCfits>
 
 #include "Table.hxx"
 
-/// FIXME: This program uses file extension to determine the 
-///        intput file format. May need to be more flexible late.
-///
 int main(int argc, char *argv[])
 {
   if(argc!=3)
