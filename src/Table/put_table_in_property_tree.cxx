@@ -19,72 +19,50 @@ void Tablator::Table::put_table_in_property_tree (
             {
             case Type::BOOLEAN:
               /// FIXME: need to update Null value checking late
-              if (static_cast<int>(data[i + offsets[j]]) == -9)
-                td << nulls[j];
-              else
+              if (static_cast<int>(data[i + offsets[j]]) != -9)
                 td << static_cast<int>(data[i + offsets[j]]);
               break;
 
             case Type::SHORT:
               if (*reinterpret_cast<const int16_t *>(data.data () + i
                                                      + offsets[j])
-                  == std::numeric_limits<int16_t>::max ())
-                td << nulls[j];
-              else
-                {
-                  td << *reinterpret_cast<const int16_t *>(data.data () + i
-                                                           + offsets[j]);
-                }
+                  != std::numeric_limits<int16_t>::max ())
+                td << *reinterpret_cast<const int16_t *>(data.data () + i
+                                                         + offsets[j]);
               break;
 
             case Type::INT:
               if (*reinterpret_cast<const int32_t *>(data.data () + i
                                                      + offsets[j])
-                  == std::numeric_limits<int32_t>::max ())
-                td << nulls[j];
-              else
-                {
-                  td << *reinterpret_cast<const int32_t *>(data.data () + i
-                                                           + offsets[j]);
-                }
+                  != std::numeric_limits<int32_t>::max ())
+                td << *reinterpret_cast<const int32_t *>(data.data () + i
+                                                         + offsets[j]);
               break;
 
             case Type::LONG:
               if (*reinterpret_cast<const int64_t *>(data.data () + i
                                                      + offsets[j])
-                  == std::numeric_limits<int64_t>::max ())
-                td << nulls[j];
-              else
-                {
-                  td << *reinterpret_cast<const int64_t *>(data.data () + i
-                                                           + offsets[j]);
-                }
+                  != std::numeric_limits<int64_t>::max ())
+                td << *reinterpret_cast<const int64_t *>(data.data () + i
+                                                         + offsets[j]);
               break;
 
             case Type::FLOAT:
               if (*reinterpret_cast<const float *>(data.data () + i
                                                    + offsets[j])
-                  == std::numeric_limits<float>::has_quiet_NaN)
-                td << nulls[j];
-              else
-                {
-                  td << std::setprecision (output_precision)
-                     << *reinterpret_cast<const float *>(data.data () + i
-                                                         + offsets[j]);
-                }
+                  != std::numeric_limits<float>::has_quiet_NaN)
+                td << std::setprecision (output_precision)
+                   << *reinterpret_cast<const float *>(data.data () + i
+                                                       + offsets[j]);
               break;
 
             case Type::DOUBLE:
               if (*reinterpret_cast<const double *>(data.data () + i
                                                     + offsets[j])
-                  == std::numeric_limits<double>::has_quiet_NaN)
-                td << nulls[j];
-              else
-                {
-                  td << std::setprecision (output_precision)
-                     << *reinterpret_cast<const double *>(data.data () + i
-                                                          + offsets[j]);
-                }
+                  != std::numeric_limits<double>::has_quiet_NaN)
+                td << std::setprecision (output_precision)
+                   << *reinterpret_cast<const double *>(data.data () + i
+                                                        + offsets[j]);
               break;
 
             case Type::STRING:
