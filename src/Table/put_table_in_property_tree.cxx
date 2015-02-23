@@ -48,18 +48,16 @@ void Tablator::Table::put_table_in_property_tree (
               break;
 
             case Type::FLOAT:
-              if (*reinterpret_cast<const float *>(data.data () + i
-                                                   + offsets[j])
-                  != std::numeric_limits<float>::has_quiet_NaN)
+              if (!std::isnan(*reinterpret_cast<const float *>(data.data () + i
+                                                              + offsets[j])))
                 td << std::setprecision (output_precision)
                    << *reinterpret_cast<const float *>(data.data () + i
                                                        + offsets[j]);
               break;
 
             case Type::DOUBLE:
-              if (*reinterpret_cast<const double *>(data.data () + i
-                                                    + offsets[j])
-                  != std::numeric_limits<double>::has_quiet_NaN)
+              if (!std::isnan(*reinterpret_cast<const double *>(data.data () + i
+                                                               + offsets[j])))
                 td << std::setprecision (output_precision)
                    << *reinterpret_cast<const double *>(data.data () + i
                                                         + offsets[j]);
