@@ -176,8 +176,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
               break;
 
             case Type::DOUBLE:
-              if (*reinterpret_cast<const double *>(data.data () + offset)
-                  == std::numeric_limits<double>::has_quiet_NaN)
+              if (std::isnan(*reinterpret_cast<const double *>(data.data () + offset)))
                 {
                   current += snprintf (
                       buffer.data () + current, buffer.size () - current,
