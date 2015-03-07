@@ -8,8 +8,8 @@ def configure(conf):
     conf.check_boost(lib='filesystem system regex')
 
 def build(bld):
-    default_flags=['-Wall', '-Wextra', '-Ofast']
-    # default_flags=['-Wall', '-Wextra', '-g']
+    # default_flags=['-Wall', '-Wextra', '-Ofast']
+    default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST']
 
     sources=['src/fits_keyword_mapping.cxx',
@@ -18,7 +18,10 @@ def build(bld):
              'src/Table/flatten_properties.cxx',
              'src/Table/read_fits.cxx',
              'src/Table/read_hdf5.cxx',
-             'src/Table/read_ipac_table.cxx',
+             'src/Table/read_ipac_table/read_ipac_table.cxx',
+             'src/Table/read_ipac_table/read_ipac_header.cxx',
+             'src/Table/read_ipac_table/create_types_from_ipac_headers.cxx',
+             'src/Table/set_null.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
              'src/Table/write_fits.cxx',
@@ -29,7 +32,7 @@ def build(bld):
              'src/Table/write_ipac_table/write_ipac_table.cxx',
              'src/Table/write_ipac_table/write_ipac_table_header.cxx',
              'src/Table/write_ipac_table/write_element_type.cxx',
-             'src/Table/write_ipac_table/assign_column_width.cxx',
+             'src/Table/write_ipac_table/get_column_width.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file.cxx']
 

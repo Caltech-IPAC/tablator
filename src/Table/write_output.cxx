@@ -35,8 +35,6 @@ void Tablator::Table::write_output (const boost::filesystem::path &path,
           break;
         case Format::enum_format::IPAC_TABLE:
         case Format::enum_format::TEXT:
-          if (ipac_column_widths.size () == 0)
-            assign_column_width ();
           write_ipac_table (out);
           break;
         case Format::enum_format::HTML:

@@ -7,13 +7,15 @@
 
 void Tablator::Table::write_ipac_table (std::ostream &os) const
 {
-  const int num_members = compound_type.getNmembers ();
+  std::vector<size_t> ipac_column_widths=get_column_width ();
+
+  const size_t num_members = types.size ()-1;
   write_ipac_table_header (os, num_members);
-  int i = 0, total_record_width = 0;
+  int total_record_width = 0;
 
   os << "|";
   os << std::right;
-  for (int i = 0; i < num_members; ++i)
+  for (size_t i = 0; i < num_members; ++i)
     {
       total_record_width += (ipac_column_widths[i] + 1);
       os << std::setw (ipac_column_widths[i])
@@ -21,7 +23,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
     }
   os << "\n|";
 
-  for (int i = 0; i < num_members; ++i)
+  for (size_t i = 0; i < num_members; ++i)
     {
       os << std::setw (ipac_column_widths[i]);
       write_element_type (os, i);
@@ -33,7 +35,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
   else
     os << "\n";
 
-  i = 0;
+  size_t i = 0;
   for (auto &f : fields_properties)
     {
       os << std::setw (ipac_column_widths[i]);
@@ -72,143 +74,92 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
     os << "\n";
 
   std::vector<char> buffer (total_record_width + 4);
-  for (size_t j = 0; j < data.size (); j += compound_type.getSize ())
+  for (size_t row_offset = 0; row_offset < data.size (); row_offset += row_size)
     {
       int current = 0;
       current += snprintf (buffer.data () + current, buffer.size () - current,
                            " ");
-      for (int i = 0; i < num_members; ++i)
+      /// Skip the null bitfield flag
+      for (size_t column = 1; column < num_members; ++column)
         {
-          size_t offset = offsets[i] + j;
-          switch (types[i])
+          size_t offset = offsets[column] + row_offset;
+          if (is_null (row_offset,column))
             {
-            case Type::BOOLEAN:
-              /// FIXME: assign a reasonable null value late
-              /// Booleans are converted to integers
-              if (static_cast<int>(data[offset]) == -9)
+              current += snprintf (
+                                   buffer.data () + current, buffer.size () - current,
+                                   "%*s ", ipac_column_widths[column], "null");
+            }
+          else
+            {
+              switch (types[column])
                 {
-                  current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      "%*s ", ipac_column_widths[i], nulls[i].c_str ());
-                }
-              else
-                {
+                case Type::BOOLEAN:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*d ",
-                                       ipac_column_widths[i],
+                                       ipac_column_widths[column],
                                        static_cast<int>(data[offset]));
-                }
-              break;
+                  break;
 
-            case Type::SHORT:
-              if (*reinterpret_cast<const int16_t *>(data.data () + offset)
-                  == std::numeric_limits<int16_t>::max ())
-                {
-                  current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      "%*s ", ipac_column_widths[i], nulls[i].c_str ());
-                }
-              else
-                {
+                case Type::SHORT:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*d ",
-                                       ipac_column_widths[i],
+                                       ipac_column_widths[column],
                                        *reinterpret_cast<const int16_t *>(
-                                           data.data () + offset));
-                }
-              break;
+                                                                          data.data () + offset));
+                  break;
 
-            case Type::INT:
-              if (*reinterpret_cast<const int32_t *>(data.data () + offset)
-                  == std::numeric_limits<int32_t>::max ())
-                {
-                  current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      "%*s ", ipac_column_widths[i], nulls[i].c_str ());
-                }
-              else
-                {
+                case Type::INT:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*d ",
-                                       ipac_column_widths[i],
+                                       ipac_column_widths[column],
                                        *reinterpret_cast<const int32_t *>(
-                                           data.data () + offset));
-                }
-              break;
+                                                                          data.data () + offset));
+                  break;
 
-            case Type::LONG:
-              if (*reinterpret_cast<const int64_t *>(data.data () + offset)
-                  == std::numeric_limits<int64_t>::max ())
-                {
+                case Type::LONG:
                   current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      "%*s ", ipac_column_widths[i], nulls[i].c_str ());
-                }
-              else
-                {
-                  current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      // FIXME: This is not a portable way to print a 64
-                      // bit int, but the standard way using PRId64 does
-                      // not work.
-                      "%*ld ", ipac_column_widths[i],
-                      *reinterpret_cast<const int64_t *>(data.data ()
-                                                         + offset));
-                }
-              break;
+                                       buffer.data () + current, buffer.size () - current,
+                                       // FIXME: This is not a portable way to print a 64
+                                       // bit int, but the standard way using PRId64 does
+                                       // not work.
+                                       "%*ld ", ipac_column_widths[column],
+                                       *reinterpret_cast<const int64_t *>(data.data ()
+                                                                          + offset));
+                  break;
 
-            case Type::FLOAT:
-              // FIXME: Use Table::output_precision
-              if (*reinterpret_cast<const float *>(data.data () + offset)
-                  == std::numeric_limits<float>::max ())
-                {
+                case Type::FLOAT:
+                  // FIXME: Use Table::output_precision
                   current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      "%*s ", ipac_column_widths[i], nulls[i].c_str ());
-                }
-              else
-                {
-                  current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      "%*.13g ", ipac_column_widths[i],
-                      *reinterpret_cast<const float *>(data.data () + offset));
-                }
-              break;
+                                       buffer.data () + current, buffer.size () - current,
+                                       "%*.13g ", ipac_column_widths[column],
+                                       *reinterpret_cast<const float *>(data.data () + offset));
+                  break;
 
-            case Type::DOUBLE:
-              if (*reinterpret_cast<const double *>(data.data () + offset)
-                  == std::numeric_limits<double>::has_quiet_NaN)
-                {
-                  current += snprintf (
-                      buffer.data () + current, buffer.size () - current,
-                      "%*s ", ipac_column_widths[i], nulls[i].c_str ());
-                }
-              else
-                {
+                case Type::DOUBLE:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*.13g ",
-                                       ipac_column_widths[i],
+                                       ipac_column_widths[column],
                                        *reinterpret_cast<const double *>(
-                                           data.data () + offset));
-                }
-              break;
+                                                                         data.data () + offset));
+                  break;
 
-            case Type::STRING:
-              const size_t string_size = offsets[i + 1] - offsets[i];
-              for (size_t k = 0; k < ipac_column_widths[i] - string_size; ++k)
-                {
+                case Type::STRING:
+                  const size_t string_size = offsets[column + 1] - offsets[column];
+                  for (size_t k = 0; k < ipac_column_widths[column] - string_size; ++k)
+                    {
+                      buffer[current] = ' ';
+                      ++current;
+                    }
+                  for (size_t k = offset; k < offset + string_size; ++k)
+                    {
+
+                      buffer[current] = data[k];
+                      ++current;
+                    }
                   buffer[current] = ' ';
                   ++current;
+                  break;
                 }
-              for (size_t k = offset; k < offset + string_size; ++k)
-                {
-
-                  buffer[current] = data[k];
-                  ++current;
-                }
-              buffer[current] = ' ';
-              ++current;
-              break;
             }
         }
       current += snprintf (buffer.data () + current, buffer.size () - current,

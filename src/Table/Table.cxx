@@ -5,25 +5,32 @@ Tablator::Table::Table (
                                 std::pair<std::pair<H5::PredType, size_t>,
                                           Field_Properties> > > &columns,
     const std::map<std::string, std::string> &property_map)
-    : compound_type (std::accumulate (
-          columns.begin (), columns.end (), static_cast<size_t>(0),
-          [](const size_t &sum,
-             const std::pair<std::string,
-                             std::pair<std::pair<H5::PredType, size_t>,
-                                       Field_Properties> > &c)
-          {
-            return sum
-                   + c.second.first.first.getSize () * c.second.first.second;
-          })),
+    : compound_type ([&](){
+        size_t sum=(columns.size ()+7)/8;
+        for (auto &c: columns)
+          sum+=c.second.first.first.getSize () * c.second.first.second;
+        return sum;
+      }()),
       row_size (compound_type.getSize ())
 {
-  size_t offset{ 0 };
+  size_t offset(0);
+  const size_t null_flags_size=(columns.size ()+7)/8;
+
+  string_types.emplace_back (0,
+                             null_flags_size);
+  compound_type.insertMember ("null_bitfield_flags", offset,
+                              *string_types.rbegin ());
+  offsets.push_back (offset);
+  offset+=null_flags_size;
+  fields_properties.push_back (Field_Properties("Packed bit array indicating whether an entry is null", {}));
+  types.push_back (Type::STRING);
+
   for (auto &c : columns)
     {
       auto type = c.second.first.first;
       if (type == H5::PredType::NATIVE_CHAR)
         {
-          string_types.emplace_back (H5::PredType::NATIVE_CHAR,
+          string_types.emplace_back (0,
                                      c.second.first.second);
           compound_type.insertMember (c.first, offset,
                                       *string_types.rbegin ());

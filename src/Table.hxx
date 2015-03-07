@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 #include <tuple>
+#include <array>
 
 #include <iostream>
 #include <fstream>
@@ -25,10 +26,10 @@ class Table
 public:
   std::map<std::string, Property> properties;
   std::vector<char> data;
-  std::vector<std::string> comment, nulls;
+  std::vector<std::string> comment;
   std::vector<Field_Properties> fields_properties;
+  // size_t null_flags_size;
   H5::CompType compound_type;
-  std::vector<int> ipac_column_widths;
   /// Type names are mostly lifted directly from the IVOA TAP spec.
   /// IVOA has fixed length char[] arrays.  We just use a string.
   enum class Type : char
@@ -92,21 +93,43 @@ public:
 
   size_t size () const { return data.size () / row_size; }
 
+  bool is_null (size_t row_offset, size_t column) const
+  {
+    return data[row_offset+(column-1)/8] & (1 >> column%8);
+  }
+
+  void clear_nulls (char row[]) const
+  {
+    std::fill (row,row+row_size,0);
+  }
+
+  void set_null (size_t column, char row[]);
+
   template <typename T>
   void copy_to_row (const T &element, const size_t &offset, char row[])
   {
-    assert (offset < row_size);
+    assert (offset + sizeof(T) <= row_size);
+    // FIXME: I think this is undefined, because element+1 is not
+    // guaranteed to be valid
     std::copy (reinterpret_cast<const char *>(&element),
                reinterpret_cast<const char *>(&element + 1), row + offset);
   }
 
-  template <typename T>
-  void copy_to_row (const T &begin, const T &end, const size_t &offset,
-                    char row[])
+  void copy_to_row (const std::string &element, const size_t &offset_begin,
+                    const size_t &offset_end, char row[])
   {
-    assert (offset < row_size);
-    std::copy (begin, end, row + offset);
+    std::string element_copy(element);
+    element_copy.resize (offset_end-offset_begin,' ');
+    std::copy (element_copy.begin (), element_copy.end (), row + offset_begin);
   }
+
+  // template <typename T>
+  // void copy_to_row (const T &begin, const T &end, const size_t &offset,
+  //                   char row[])
+  // {
+  //   assert (offset < row_size);
+  //   std::copy (begin, end, row + offset);
+  // }
 
   void insert_row (const char row[])
   {
@@ -139,6 +162,7 @@ public:
     boost::filesystem::ofstream outfile (p);
     write_ipac_table (outfile);
   }
+  std::vector<size_t> get_column_width () const;
   void write_ipac_table_header (std::ostream &os,
                                 const int &num_members) const;
   void write_element_type (std::ostream &os, const int &i) const;
@@ -150,6 +174,15 @@ public:
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   void write_votable (std::ostream &os) const;
-  void assign_column_width ();
+
+  size_t read_ipac_header
+  (boost::filesystem::ifstream &ipac_file,
+   std::array<std::vector<std::string>,4> &columns,
+   std::vector<size_t> &ipac_table_offsets);
+
+  void create_types_from_ipac_headers
+  (std::array<std::vector<std::string>,4> &columns,
+   std::vector<size_t> &ipac_column_offsets,
+   std::vector<size_t> &ipac_column_widths);
 };
 }

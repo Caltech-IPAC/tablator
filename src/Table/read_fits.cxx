@@ -57,6 +57,7 @@ void Tablator::Table::read_fits (const boost::filesystem::path &path)
     }
 
   row_size = 0;
+  // add_nulls();
   for (size_t column = 1; column <= table->column ().size (); ++column)
     {
       CCfits::Column &c = table->column (column);
@@ -67,7 +68,6 @@ void Tablator::Table::read_fits (const boost::filesystem::path &path)
           break;
         case CCfits::Tstring:
           row_size += H5::PredType::NATIVE_CHAR.getSize () * c.width ();
-          nulls.push_back ("null");
           break;
         case CCfits::Tushort:
         case CCfits::Tshort:
@@ -92,8 +92,6 @@ void Tablator::Table::read_fits (const boost::filesystem::path &path)
               "Unsupported data type in the fits file for "
               "column " + c.name ());
         }
-      if (c.type () != CCfits::Tstring)
-        nulls.push_back ("nan");
     }
   compound_type = H5::CompType (row_size);
 
@@ -123,7 +121,7 @@ void Tablator::Table::read_fits (const boost::filesystem::path &path)
           }
           break;
         case CCfits::Tstring:
-          string_types.emplace_back (H5::PredType::NATIVE_CHAR, c.width ());
+          string_types.emplace_back (0, c.width ());
           compound_type.insertMember (c.name (), offset,
                                       *string_types.rbegin ());
           types.push_back (Type::STRING);
@@ -189,7 +187,7 @@ void Tablator::Table::read_fits (const boost::filesystem::path &path)
       // function is protected???
       fields_properties.push_back (Field_Properties (
           std::string (""),
-          { { "unit", c.unit () }, { "null", nulls[column - 1] } }));
+          { { "unit", c.unit () } }));
       offsets.push_back (offset);
       offset += compound_type.getMemberDataType (compound_type.getNmembers ()
                                                  - 1).getSize ();

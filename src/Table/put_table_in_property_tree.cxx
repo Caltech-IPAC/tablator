@@ -9,95 +9,58 @@
 void Tablator::Table::put_table_in_property_tree (
     boost::property_tree::ptree &table) const
 {
-  for (size_t i = 0; i < data.size (); i += row_size)
+  for (size_t row_offset = 0; row_offset < data.size (); row_offset += row_size)
     {
       boost::property_tree::ptree &tr = table.add ("TR", "");
-      for (size_t j = 0; j < types.size (); ++j)
+      /// Skip the null bitfield flag
+      for (size_t column = 1; column < types.size (); ++column)
         {
           std::stringstream td;
-          switch (types[j])
-            {
-            case Type::BOOLEAN:
-              /// FIXME: need to update Null value checking late
-              if (static_cast<int>(data[i + offsets[j]]) == -9)
-                td << nulls[j];
-              else
-                td << static_cast<int>(data[i + offsets[j]]);
-              break;
+          if (!is_null(row_offset,column))
+            switch (types[column])
+              {
+              case Type::BOOLEAN:
+                td << static_cast<int>(data[row_offset + offsets[column]]);
+                break;
 
-            case Type::SHORT:
-              if (*reinterpret_cast<const int16_t *>(data.data () + i
-                                                     + offsets[j])
-                  == std::numeric_limits<int16_t>::max ())
-                td << nulls[j];
-              else
-                {
-                  td << *reinterpret_cast<const int16_t *>(data.data () + i
-                                                           + offsets[j]);
-                }
-              break;
+              case Type::SHORT:
+                td << *reinterpret_cast<const int16_t *>(data.data () + row_offset
+                                                         + offsets[column]);
+                break;
 
-            case Type::INT:
-              if (*reinterpret_cast<const int32_t *>(data.data () + i
-                                                     + offsets[j])
-                  == std::numeric_limits<int32_t>::max ())
-                td << nulls[j];
-              else
-                {
-                  td << *reinterpret_cast<const int32_t *>(data.data () + i
-                                                           + offsets[j]);
-                }
-              break;
+              case Type::INT:
+                td << *reinterpret_cast<const int32_t *>(data.data () + row_offset
+                                                         + offsets[column]);
+                break;
 
-            case Type::LONG:
-              if (*reinterpret_cast<const int64_t *>(data.data () + i
-                                                     + offsets[j])
-                  == std::numeric_limits<int64_t>::max ())
-                td << nulls[j];
-              else
-                {
-                  td << *reinterpret_cast<const int64_t *>(data.data () + i
-                                                           + offsets[j]);
-                }
-              break;
+              case Type::LONG:
+                td << *reinterpret_cast<const int64_t *>(data.data () + row_offset
+                                                         + offsets[column]);
+                break;
 
-            case Type::FLOAT:
-              if (*reinterpret_cast<const float *>(data.data () + i
-                                                   + offsets[j])
-                  == std::numeric_limits<float>::has_quiet_NaN)
-                td << nulls[j];
-              else
-                {
-                  td << std::setprecision (output_precision)
-                     << *reinterpret_cast<const float *>(data.data () + i
-                                                         + offsets[j]);
-                }
-              break;
+              case Type::FLOAT:
+                td << std::setprecision (output_precision)
+                   << *reinterpret_cast<const float *>(data.data () + row_offset
+                                                       + offsets[column]);
+                break;
 
-            case Type::DOUBLE:
-              if (*reinterpret_cast<const double *>(data.data () + i
-                                                    + offsets[j])
-                  == std::numeric_limits<double>::has_quiet_NaN)
-                td << nulls[j];
-              else
-                {
-                  td << std::setprecision (output_precision)
-                     << *reinterpret_cast<const double *>(data.data () + i
-                                                          + offsets[j]);
-                }
-              break;
+              case Type::DOUBLE:
+                td << std::setprecision (output_precision)
+                   << *reinterpret_cast<const double *>(data.data () + row_offset
+                                                        + offsets[column]);
+                break;
 
-            case Type::STRING:
-              td << std::string (
-                  data.data () + i + offsets[j],
-                  compound_type.getMemberDataType (j).getSize ());
-              break;
+              case Type::STRING:
+                td << std::string (
+                                   data.data () + row_offset + offsets[column],
+                                   compound_type.getMemberDataType (column).getSize ());
+                break;
 
-            default:
-              throw std::runtime_error (
-                  "Unknown data type when writing data: "
-                  + std::to_string (static_cast<int>(types[j])));
-            }
+              default:
+                throw std::runtime_error (
+                                          "Unknown data type when writing data: "
+                                          + std::to_string (static_cast<int>(types[column])));
+              }
           tr.add ("TD", td.str ());
         }
     }

@@ -12,8 +12,6 @@ void Tablator::Table::read_hdf5 (const boost::filesystem::path &path)
   offsets.clear ();
   types.clear ();
   size_t offset{ 0 };
-  for (int i = 0; i < compound_type.getNmembers (); ++i)
-    nulls.push_back ("nan");
 
   for (int i = 0; i < compound_type.getNmembers (); ++i)
     {
@@ -38,12 +36,11 @@ void Tablator::Table::read_hdf5 (const boost::filesystem::path &path)
           // lives on???
           string_types.push_back (compound_type.getMemberStrType (i));
           types.push_back (Type::STRING);
-          nulls[i] = "null";
         }
       offsets.push_back (offset);
       offset += d.getSize ();
       fields_properties.push_back (Field_Properties (
-          std::string (""), { { "unit", " " }, { "null", nulls[i] } }));
+          std::string (""), { { "unit", " " } }));
     }
   offsets.push_back (offset);
   row_size = offset;

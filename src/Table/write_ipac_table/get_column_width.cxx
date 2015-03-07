@@ -1,7 +1,8 @@
 #include "../../Table.hxx"
 
-void Tablator::Table::assign_column_width ()
+std::vector<size_t> Tablator::Table::get_column_width () const
 {
+  std::vector<size_t> widths;
   std::string name;
   int width;
 
@@ -18,6 +19,7 @@ void Tablator::Table::assign_column_width ()
         default:
           width = 20;
         }
-      ipac_column_widths.push_back (width);
+      widths.push_back (width);
     }
+  return widths;
 }
