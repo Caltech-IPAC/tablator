@@ -1,0 +1,122 @@
+\                                                                               
+\fixlen = T
+\RowsRetrieved =                19
+\ORIGIN  = 'IPAC Infrared Science Archive (IRSA), Caltech/JPL'
+\DATETIME= '2013-10-23 12:23:09'
+\DataTag = 'ADS/IRSA.Gator#2013/1023/122309_15417'
+\DATABASE= '2MASS All-Sky Point Source Catalog (PSC) (fp_psc)'
+\EQUINOX = 'J2000'
+\SKYAREA = 'within 10 arcsec of  ra=10.68479 dec=+41.26906 Eq J2000 '
+\StatusFile = '/workspace/TMP_RJwd7q_18059/Gator/irsa/15417/log.15417.html'
+\SQL     = 'WHERE (no constraints) 
+\SQL     = 'SELECT (39 column names follow in next row.)'
+\ 
+\ ra (deg) 
+\ ___ right ascension (J2000 decimal deg)
+\ dec (deg) 
+\ ___ declination (J2000 decimal deg)
+\ clon 
+\ ___ Right ascention in Sexagesimal format.
+\ clat 
+\ ___ Declination in Sexagesimal format.
+\ err_maj (arcsec) 
+\ ___ Semi-major axis length of the one sigma position uncertainty ellipse
+\ err_min (arcsec) 
+\ ___ Semi-minor axis length of the one sigma position uncertainty ellipse
+\ err_ang (deg) 
+\ ___ angle of error ellipse major axis (E of N)
+\ designation 
+\ ___ source designation formed from sexigesimal coordinates
+\ j_m (mag) 
+\ ___ J band selected "default" magnitude
+\ j_cmsig (mag) 
+\ ___ corrected J band photometric uncertainty
+\ j_msigcom (mag) 
+\ ___ combined (total) J band photometric uncertainty
+\ j_snr 
+\ ___ J band "scan" signal-to-noise ratio
+\ h_m (mag) 
+\ ___ H band selected "default" magnitude
+\ h_cmsig (mag) 
+\ ___ corrected H band photometric uncertainty
+\ h_msigcom (mag) 
+\ ___ combined (total) H band photometric uncertainty
+\ h_snr 
+\ ___ H band "scan" signal-to-noise ratio
+\ k_m (mag) 
+\ ___ K band selected "default" magnitude
+\ k_cmsig (mag) 
+\ ___ corrected K band photometric uncertainty
+\ k_msigcom (mag) 
+\ ___ combined (total) K band photometric uncertainty
+\ k_snr 
+\ ___ K band "scan" signal-to-noise ratio
+\ ph_qual 
+\ ___ flag indicating photometric quality of source
+\ rd_flg 
+\ ___ source of JHK "default" mags (AKA "read flag")
+\ bl_flg 
+\ ___ indicates # JHK components fit simultaneously to source
+\ cc_flg 
+\ ___ indicates JHK artifact contamination and/or confusion
+\ ndet 
+\ ___ number of >3-sig. ap. mag measurements, # possible (jjhhkk)
+\ gal_contam 
+\ ___ flag indicating if src is contaminated by extended source
+\ mp_flg 
+\ ___ src is positionally associated with an asteroid, comet, etc
+\ hemis 
+\ ___ hemisphere (N/S) of facility from which src was observed
+\ xdate 
+\ ___ observation reference date
+\ scan 
+\ ___ scan number (unique within date)
+\ glon (deg) 
+\ ___ galactic longitude (decimal deg)
+\ glat (deg) 
+\ ___ galactic latitude (decimal deg)
+\ a 
+\ ___ optical source catalog identifier of closest match within 5"
+\ dist_opt (arcsec) 
+\ ___ distance in arcsec relative to associated optical source
+\ phi_opt (deg) 
+\ ___ position angle relative to optical source (E of N)
+\ b_m_opt (mag) 
+\ ___ catalog blue mag of associated optical source
+\ vr_m_opt (mag) 
+\ ___ catalog visual or red mag of associated optical source
+\ nopt_mchs 
+\ ___ number of optical sources matched to this 2MASS source
+\ ext_key 
+\ ___ key to extended source data DB record
+\ angle (deg) 
+\ ___ Position Angle in degree.
+\ dist (arcsec) 
+\ ___ Distance between the target position and each source in arcsec.
+\ 
+\ j_h ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg
+\ h_k ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg
+\ j_k ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg
+|         ra|       dec|          clon|          clat|err_maj|err_min|err_ang|      designation|   j_m|j_cmsig|j_msigcom|     j_snr|   h_m|h_cmsig|h_msigcom|     h_snr|   k_m|k_cmsig|k_msigcom|     k_snr|ph_qual|rd_flg|bl_flg|cc_flg|  ndet|gal_contam|mp_flg|hemis|     xdate|scan|   glon|   glat|   a|dist_opt|phi_opt|b_m_opt|vr_m_opt|nopt_mchs|ext_key|        dist|       angle|      j_h|      h_k|      j_k|
+|     double|    double|          char|          char| double| double|    int|             char|double| double|   double|    double|double| double|   double|    double|double| double|   double|    double|   char|  char|  char|  char|  char|       int|   int| char|      char| int| double| double|char|  double|    int| double|  double|      int|    int|      double|      double|   double|   double|   double|
+|        deg|       deg|              |              | arcsec| arcsec|    deg|                 |   mag|    mag|      mag|          |   mag|    mag|      mag|          |   mag|    mag|      mag|          |       |      |      |      |      |          |      |     |          |    |    deg|    deg|    |  arcsec|    deg|    mag|     mag|         |       |      arcsec|         deg|         |         |         |
+|       null|      null|          null|          null|   null|   null|   null|             null|  null|   null|     null|      null|  null|   null|     null|      null|  null|   null|     null|      null|   null|  null|  null|  null|  null|      null|  null| null|      null|null|   null|   null|null|    null|   null|   null|    null|     null|   null|        null|        null|        -|        -|        -|
+   10.682383  41.267925   00h42m43.77s   41d16m04.53s    0.10    0.09      69  00424377+4116045 12.446   0.060     0.061      342.0 11.753   0.062     0.063      297.0  9.075    null      null       null     AAU    220    110    cc0 666600          2      0     n 1997-10-24    8 121.172 -21.574    0     null    null    null     null         0    null     7.688598   237.898243    0.6930         -         - 
+   10.682713  41.267056   00h42m43.85s   41d16m01.40s    0.13    0.12      69  00424385+4116014 10.176    null      null       null 11.876   0.049     0.050      265.2  9.252    null      null       null     UEU    020    010    0c0 006600          2      0     n 1997-10-24    8 121.173 -21.575    0     null    null    null     null         0    null     9.145114   217.919695         -         -         - 
+   10.682777  41.270111   00h42m43.87s   41d16m12.40s    0.10    0.09     111  00424386+4116123  9.977    null      null       null 11.683   0.056     0.056      316.8 11.839   0.062     0.062      166.3     UAA    022    011    0cc 006666          2      0     n 1997-10-24    8 121.173 -21.572    0     null    null    null     null         0    null     6.631987   304.786305         -   -0.1560         - 
+   10.683263  41.267456   00h42m43.98s   41d16m02.84s    0.13    0.12      79  00424398+4116028 12.136   0.038     0.040      455.0  9.226    null      null       null  8.994    null      null       null     AUU    200    100    c00 660000          2      0     n 1997-10-24    8 121.173 -21.574    0     null    null    null     null         0    null     7.100419   215.586031         -         -         - 
+   10.683465  41.269676   00h42m44.03s   41d16m10.83s    0.13    0.11     119  00424403+4116108 11.507   0.055     0.056      812.1  8.744    null      null       null  8.489    null      null       null     EUU    200    100    c00 660000          2      0     n 1997-10-24    8 121.173 -21.572    0     null    null    null     null         0    null     4.215626   301.738916         -         -         - 
+   10.683469  41.268585   00h42m44.03s   41d16m06.91s    0.13    0.12      69  00424403+4116069  9.321    null      null       null  8.614    null      null       null 10.601   0.023     0.025      520.0     UUE    002    001    00c 000066          2      0     n 1997-10-24    8 121.173 -21.573    0     null    null    null     null         0    null     3.962395   244.434011         -         -         - 
+   10.683944  41.266682   00h42m44.15s   41d16m00.06s    0.13    0.12      93  00424414+4116000 12.565   0.054     0.055      306.5  9.510    null      null       null  9.274    null      null       null     AUU    206    200    c00 660000          2      0     n 1997-10-24    8 121.174 -21.575    0     null    null    null     null         0    null     8.861581   194.971035         -         -         - 
+   10.684029  41.270901   00h42m44.17s   41d16m15.24s    0.13    0.12     111  00424416+4116152 10.063    null      null       null  9.359    null      null       null 11.409   0.054     0.055      247.1     UUA    002    001    00c 000066          2      0     n 1997-10-24    8 121.174 -21.571    0     null    null    null     null         0    null     6.940102   342.740902         -         -         - 
+   10.684180  41.266941   00h42m44.20s   41d16m00.99s    0.13    0.12     101  00424420+4116009 10.065    null      null       null  9.374    null      null       null 11.504   0.051     0.052      226.4     UUA    002    002    00c 000066          2      0     n 1997-10-24    8 121.174 -21.575    0     null    null    null     null         0    null     7.804929   192.209291         -         -         - 
+   10.684737  41.269035   00h42m44.34s   41d16m08.53s    0.08    0.07      87  00424433+4116085  9.453   0.051     0.052     5385.6  8.668   0.050     0.051     5089.9  8.475   0.050     0.051     3684.8     EEE    222    111    000 556655          2      0     n 1997-10-24    8 121.174 -21.573    0     null    null    null     null         0    null     0.169298   237.888672    0.7850    0.1930    0.9780 
+   10.685270  41.267124   00h42m44.46s   41d16m01.65s    0.13    0.12      90  00424446+4116016 12.070   0.033     0.035      483.5  9.301    null      null       null  9.057    null      null       null     EUU    206    200    c00 660000          2      0     n 1997-10-24    8 121.175 -21.575    0     null    null    null     null         0    null     7.089588   169.443579         -         -         - 
+   10.685657  41.269550   00h42m44.56s   41d16m10.38s    0.13    0.12      90  00424455+4116103 10.773   0.067     0.069     1596.7  8.532    null      null       null  8.254    null      null       null     EUU    200    200    c00 550000          2      0     n 1997-10-24    8 121.175 -21.572    0     null    null    null     null         0    null     2.935161    53.058944         -         -         - 
+   10.685837  41.270599   00h42m44.60s   41d16m14.16s    0.13    0.12      87  00424460+4116141  9.880    null      null       null 12.051   0.067     0.068      225.7  8.934    null      null       null     UAU    020    020    0c0 005500          2      0     n 1997-10-24    8 121.175 -21.571    0     null    null    null     null         0    null     6.222682    27.081691         -         -         - 
+   10.686015  41.269630   00h42m44.64s   41d16m10.67s    0.13    0.12      90  00424464+4116106  9.399    null      null       null  9.985   0.070     0.070     1513.2  8.429    null      null       null     UEU    020    020    0c0 006600          2      0     n 1997-10-24    8 121.175 -21.572    0     null    null    null     null         0    null     3.898395    58.239051         -         -         - 
+   10.686026  41.269226   00h42m44.65s   41d16m09.21s    0.13    0.12      90  00424464+4116092  9.299    null      null       null  8.606    null      null       null 10.119   0.055     0.056      810.6     UUE    002    001    00c 000055          2      0     n 1997-10-24    8 121.175 -21.573    0     null    null    null     null         0    null     3.397378    79.868535         -         -         - 
+   10.686846  41.270714   00h42m44.84s   41d16m14.57s    0.13    0.11      61  00424484+4116145 12.872   0.060     0.061      231.0  9.433    null      null       null  9.178    null      null       null     AUU    200    200    c00 550000          2      0     n 1997-10-24    8 121.176 -21.571    0     null    null    null     null         0    null     8.148817    43.053601         -         -         - 
+   10.686963  41.266827   00h42m44.87s   41d16m00.58s    0.10    0.09      93  00424487+4116005 10.450    null      null       null 12.094   0.032     0.033      216.9 11.728   0.038     0.039      184.2     UEE    622    021    bcc 006666          2      0     n 1997-10-24    8 121.176 -21.575    0     null    null    null     null         0    null     9.959681   143.816160         -    0.3660         - 
+   10.687414  41.267632   00h42m44.98s   41d16m03.48s    0.13    0.12      93  00424497+4116034 12.371   0.034     0.036      366.5  9.627    null      null       null  9.379    null      null       null     EUU    200    100    c00 660000          2      0     n 1997-10-24    8 121.176 -21.574    0     null    null    null     null         0    null     8.765869   125.905082         -         -         - 
+   10.687611  41.270302   00h42m45.03s   41d16m13.09s    0.18    0.14     173  00424502+4116130 13.055   0.108     0.109      195.2  9.504    null      null       null  9.246    null      null       null     AUU    200    200    c00 550000          2      0     n 1997-10-24    8 121.177 -21.572    0     null    null    null     null         0    null     8.846220    59.638754         -         -         - 

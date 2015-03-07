@@ -1,0 +1,5 @@
+| object | ra        | dec       |
+| char   | double    | double    |
+|        | degrees   | degrees | |
+ 118289    359.88703   50.832570 
+ 113368    344.41273   -29.622250
