@@ -53,8 +53,17 @@ size_t Tablator::Table::read_ipac_header
             {
               std::size_t first = value.find_first_not_of ("\"'");
               std::size_t last = value.find_last_not_of ("\"'");
-              Property p (value.substr (first, last - first + 1));
-              properties.insert (std::make_pair (key, p));
+              std::string value_substr=value.substr (first, last - first + 1);
+              /// Handle duplicate keys by appending them to the end.
+              auto p=properties.find (key);
+              if (p!=properties.end ())
+                {
+                  p->second.value+=" " + value_substr;
+                }
+              else
+                {
+                  properties.insert (std::make_pair (key, Property (value_substr)));
+                }
             }
         }
       first_character=ipac_file.peek ();
