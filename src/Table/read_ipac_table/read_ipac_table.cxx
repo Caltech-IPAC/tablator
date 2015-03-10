@@ -128,7 +128,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 case Type::FLOAT:
                   try
                     {
-                      float result=stof (element);
+                      float result=std::stof (element);
                       copy_to_row (result, offsets[column], row_string);
                     }
                   catch (std::exception &error)
@@ -144,7 +144,11 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 case Type::DOUBLE:
                   try
                     {
-                      double result=stod (element);
+                      // FIXME: std::stod does not fail if the element
+                      // has trailing garbage.  Need to call strtod
+                      // instead and make sure that all input is
+                      // parsed.
+                      double result=std::stod (element);
                       copy_to_row (result, offsets[column], row_string);
                     }
                   catch (std::exception &error)
