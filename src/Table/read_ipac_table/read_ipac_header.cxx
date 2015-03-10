@@ -65,10 +65,12 @@ size_t Tablator::Table::read_ipac_header
       std::string line;
       std::getline (ipac_file,line);
       ++current_line;
-      if (line.find ("\t") != std::string::npos)
+      auto tab_position=line.find ("\t");
+      if (tab_position != std::string::npos)
         throw std::runtime_error ("In line " + std::to_string (current_line)
                                   + ", the header '" + line
-                                  + "' contains tabs.");
+                                  + "' contains tabs at character "
+                                  + std::to_string(tab_position+1));
       if (column_line > 3)
         throw std::runtime_error ("In line " + std::to_string (current_line)
                                   + ", the table has more than 4 header lines "
