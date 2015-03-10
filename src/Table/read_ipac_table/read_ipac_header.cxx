@@ -28,7 +28,7 @@ size_t Tablator::Table::read_ipac_header
  std::array<std::vector<std::string>,4> &columns,
  std::vector<size_t> &ipac_column_offsets)
 {
-  size_t current_line=1;
+  size_t current_line=0;
   char first_character=ipac_file.peek ();
   while (ipac_file && first_character=='\\')
     {
@@ -97,6 +97,8 @@ size_t Tablator::Table::read_ipac_header
       /// and pop off the end
       boost::split (columns[column_line],line,boost::is_any_of ("|"));
 
+      /// FIXME: I think this error can never happen, because it would
+      /// have been caught by check_bar_position.
       if (columns[column_line].size()<2)
         throw std::runtime_error ("In line " + std::to_string (current_line)
                                   + ", the table is missing header information in this line: '"
@@ -134,7 +136,7 @@ size_t Tablator::Table::read_ipac_header
                                   + ".  Expected at most "
                                   + std::to_string (columns[0].size ())
                                   + " but found "
-                                  + std::to_string (columns[1].size ()));
+                                  + std::to_string (columns[2].size ()));
 
       if (column_line==3 && columns[0].size () < columns[3].size ())
         throw std::runtime_error ("Too many values for null in line  "
@@ -142,7 +144,7 @@ size_t Tablator::Table::read_ipac_header
                                   + ".  Expected at most "
                                   + std::to_string (columns[0].size ())
                                   + " but found "
-                                  + std::to_string (columns[1].size ()));
+                                  + std::to_string (columns[3].size ()));
 
       ++column_line;
       first_character=ipac_file.peek ();
