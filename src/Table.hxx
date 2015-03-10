@@ -28,7 +28,6 @@ public:
   std::vector<char> data;
   std::vector<std::string> comment;
   std::vector<Field_Properties> fields_properties;
-  // size_t null_flags_size;
   H5::CompType compound_type;
   /// Type names are mostly lifted directly from the IVOA TAP spec.
   /// IVOA has fixed length char[] arrays.  We just use a string.
@@ -122,15 +121,6 @@ public:
     element_copy.resize (offset_end-offset_begin,' ');
     std::copy (element_copy.begin (), element_copy.end (), row + offset_begin);
   }
-
-  // template <typename T>
-  // void copy_to_row (const T &begin, const T &end, const size_t &offset,
-  //                   char row[])
-  // {
-  //   assert (offset < row_size);
-  //   std::copy (begin, end, row + offset);
-  // }
-
   void insert_row (const char row[])
   {
     data.insert (data.end (), row, row + row_size);
