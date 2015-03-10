@@ -40,7 +40,8 @@ void Tablator::Table::write_votable (std::ostream &os) const
     }
 
   boost::property_tree::ptree &table = tree.add ("VOTABLE.RESOURCE.TABLE", "");
-  for (size_t i = 0; i < fields_properties.size (); ++i)
+  /// Skip null_bitfield_flag
+  for (size_t i = 1; i < fields_properties.size (); ++i)
     Field_Properties_to_xml (table, compound_type.getMemberName (i),
                              types.at (i), fields_properties[i]);
 
