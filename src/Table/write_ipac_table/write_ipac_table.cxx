@@ -71,7 +71,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
       auto null = f.attributes.find ("null");
       if (null == f.attributes.end ())
         {
-          os << " ";
+          os << "null";
         }
       else
         {
@@ -83,97 +83,61 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
   if (fields_properties.size () > 1)
     os << "\n";
 
-  std::vector<char> buffer (total_record_width + 4);
+  std::stringstream ss;
   for (size_t row_offset = 0; row_offset < data.size (); row_offset += row_size)
     {
-      int current = 0;
-      current += snprintf (buffer.data () + current, buffer.size () - current,
-                           " ");
       /// Skip the null bitfield flag
       for (size_t column = 0; column < num_members; ++column)
         {
+          ss << " " << std::setw (ipac_column_widths[column+1]);
           size_t offset = offsets[column+1] + row_offset;
           if (is_null (row_offset,column+1))
             {
-              current += snprintf (
-                                   buffer.data () + current, buffer.size () - current,
-                                   "%*s ", ipac_column_widths[column+1], "null");
+              auto null_value=fields_properties.at (column+1).attributes.find ("null");
+              if (null_value==fields_properties.at (column+1).attributes.end ())
+                ss << "null";
+              else
+                ss << null_value->second;
             }
           else
             {
               switch (types[column+1])
                 {
                 case Type::BOOLEAN:
-                  current += snprintf (buffer.data () + current,
-                                       buffer.size () - current, "%*d ",
-                                       ipac_column_widths[column+1],
-                                       static_cast<int>(data[offset]));
+                  ss << static_cast<int>(data[offset]);
                   break;
 
                 case Type::SHORT:
-                  current += snprintf (buffer.data () + current,
-                                       buffer.size () - current, "%*d ",
-                                       ipac_column_widths[column+1],
-                                       *reinterpret_cast<const int16_t *>(
-                                                                          data.data () + offset));
+                  ss << *reinterpret_cast<const int16_t *>(data.data () + offset);
                   break;
 
                 case Type::INT:
-                  current += snprintf (buffer.data () + current,
-                                       buffer.size () - current, "%*d ",
-                                       ipac_column_widths[column+1],
-                                       *reinterpret_cast<const int32_t *>(
-                                                                          data.data () + offset));
+                  ss << *reinterpret_cast<const int32_t *>(data.data () + offset);
                   break;
 
                 case Type::LONG:
-                  current += snprintf (
-                                       buffer.data () + current, buffer.size () - current,
-                                       // FIXME: This is not a portable way to print a 64
-                                       // bit int, but the standard way using PRId64 does
-                                       // not work.
-                                       "%*ld ", ipac_column_widths[column+1],
-                                       *reinterpret_cast<const int64_t *>(data.data ()
-                                                                          + offset));
+                  ss << *reinterpret_cast<const int64_t *>(data.data () + offset);
                   break;
 
                 case Type::FLOAT:
-                  // FIXME: Use Table::output_precision
-                  current += snprintf (
-                                       buffer.data () + current, buffer.size () - current,
-                                       "%*.13g ", ipac_column_widths[column+1],
-                                       *reinterpret_cast<const float *>(data.data () + offset));
+                  ss.precision (output_precision);
+                  ss << *reinterpret_cast<const float *>(data.data () + offset);
                   break;
 
                 case Type::DOUBLE:
-                  current += snprintf (buffer.data () + current,
-                                       buffer.size () - current, "%*.13g ",
-                                       ipac_column_widths[column+1],
-                                       *reinterpret_cast<const double *>(
-                                                                         data.data () + offset));
+                  ss.precision (output_precision);
+                  ss << *reinterpret_cast<const double *>(data.data () + offset);
                   break;
 
                 case Type::STRING:
-                  const size_t string_size = offsets[column + 2] - offsets[column+1];
-                  for (size_t k = 0; k < ipac_column_widths[column+1] - string_size; ++k)
-                    {
-                      buffer[current] = ' ';
-                      ++current;
-                    }
-                  for (size_t k = offset; k < offset + string_size; ++k)
-                    {
-
-                      buffer[current] = data[k];
-                      ++current;
-                    }
-                  buffer[current] = ' ';
-                  ++current;
+                  ss << std::string(data.data () + offset,
+                                    offsets[column + 2] - offsets[column+1]);
                   break;
                 }
             }
         }
-      current += snprintf (buffer.data () + current, buffer.size () - current,
-                           "\n");
-      os.write (buffer.data (), current);
+      ss << " \n";
+      os << ss.str();
+      ss.str("");
     }
 }
