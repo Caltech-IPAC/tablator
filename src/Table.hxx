@@ -95,7 +95,7 @@ public:
 
   bool is_null (size_t row_offset, size_t column) const
   {
-    return data[row_offset+(column-1)/8] & (1 >> column%8);
+    return data[row_offset+(column-1)/8] & (1 << ((column-1)%8));
   }
 
   void clear_nulls (char row[]) const
