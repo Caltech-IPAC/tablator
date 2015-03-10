@@ -51,8 +51,8 @@ size_t Tablator::Table::read_ipac_header
 
           if (!boost::iequals (key, "fixlen"))
             {
-              std::size_t first = val.find_first_not_of ("'");
-              std::size_t last = val.find_last_not_of ("'");
+              std::size_t first = val.find_first_not_of ("\"'");
+              std::size_t last = val.find_last_not_of ("\"'");
               Property p (val.substr (first, last - first + 1));
               properties.insert (std::make_pair (key, p));
             }
