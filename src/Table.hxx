@@ -24,7 +24,7 @@ namespace Tablator
 class Table
 {
 public:
-  std::map<std::string, Property> properties;
+  std::multimap<std::string, Property> properties;
   std::vector<char> data;
   std::vector<std::string> comment;
   std::vector<Field_Properties> fields_properties;
