@@ -11,11 +11,17 @@ done
 
 for table in test/*.tbl; do
     build/tablator $table test.tbl
+    rm test.tbl
     build/tablator $table test.hdf5
+    rm test.hdf5
     build/tablator $table test.xml
+    rm test.xml
     build/tablator $table test.csv
+    rm test.csv
     build/tablator $table test.tsv
-    rm test.fits
+    rm test.tsv
     build/tablator $table test.fits
+    rm test.fits
     build/tablator $table test.html
+    rm test.html
 done
