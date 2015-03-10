@@ -17,16 +17,16 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
   os << std::right;
   for (size_t i = 0; i < num_members; ++i)
     {
-      total_record_width += (ipac_column_widths[i] + 1);
-      os << std::setw (ipac_column_widths[i])
-         << compound_type.getMemberName (i) << "|";
+      total_record_width += (ipac_column_widths[i+1] + 1);
+      os << std::setw (ipac_column_widths[i+1])
+         << compound_type.getMemberName (i+1) << "|";
     }
   os << "\n|";
 
   for (size_t i = 0; i < num_members; ++i)
     {
-      os << std::setw (ipac_column_widths[i]);
-      write_element_type (os, i);
+      os << std::setw (ipac_column_widths[i+1]);
+      write_element_type (os, i+1);
       os << "|";
     }
 
@@ -38,6 +38,11 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
   size_t i = 0;
   for (auto &f : fields_properties)
     {
+      if(i==0)
+        {
+          ++i;
+          continue;
+        }
       os << std::setw (ipac_column_widths[i]);
       auto unit = f.attributes.find ("unit");
       if (unit == f.attributes.end ())
@@ -51,12 +56,17 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
       os << "|";
       ++i;
     }
-  if (fields_properties.size () > 0)
+  if (fields_properties.size () > 1)
     os << "\n|";
 
   i = 0;
   for (auto &f : fields_properties)
     {
+      if(i==0)
+        {
+          ++i;
+          continue;
+        }
       os << std::setw (ipac_column_widths[i]);
       auto null = f.attributes.find ("null");
       if (null == f.attributes.end ())
@@ -70,7 +80,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
       os << "|";
       ++i;
     }
-  if (fields_properties.size () > 0)
+  if (fields_properties.size () > 1)
     os << "\n";
 
   std::vector<char> buffer (total_record_width + 4);
@@ -80,30 +90,30 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
       current += snprintf (buffer.data () + current, buffer.size () - current,
                            " ");
       /// Skip the null bitfield flag
-      for (size_t column = 1; column < num_members; ++column)
+      for (size_t column = 0; column < num_members; ++column)
         {
-          size_t offset = offsets[column] + row_offset;
-          if (is_null (row_offset,column))
+          size_t offset = offsets[column+1] + row_offset;
+          if (is_null (row_offset,column+1))
             {
               current += snprintf (
                                    buffer.data () + current, buffer.size () - current,
-                                   "%*s ", ipac_column_widths[column], "null");
+                                   "%*s ", ipac_column_widths[column+1], "null");
             }
           else
             {
-              switch (types[column])
+              switch (types[column+1])
                 {
                 case Type::BOOLEAN:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*d ",
-                                       ipac_column_widths[column],
+                                       ipac_column_widths[column+1],
                                        static_cast<int>(data[offset]));
                   break;
 
                 case Type::SHORT:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*d ",
-                                       ipac_column_widths[column],
+                                       ipac_column_widths[column+1],
                                        *reinterpret_cast<const int16_t *>(
                                                                           data.data () + offset));
                   break;
@@ -111,7 +121,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
                 case Type::INT:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*d ",
-                                       ipac_column_widths[column],
+                                       ipac_column_widths[column+1],
                                        *reinterpret_cast<const int32_t *>(
                                                                           data.data () + offset));
                   break;
@@ -122,7 +132,7 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
                                        // FIXME: This is not a portable way to print a 64
                                        // bit int, but the standard way using PRId64 does
                                        // not work.
-                                       "%*ld ", ipac_column_widths[column],
+                                       "%*ld ", ipac_column_widths[column+1],
                                        *reinterpret_cast<const int64_t *>(data.data ()
                                                                           + offset));
                   break;
@@ -131,21 +141,21 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
                   // FIXME: Use Table::output_precision
                   current += snprintf (
                                        buffer.data () + current, buffer.size () - current,
-                                       "%*.13g ", ipac_column_widths[column],
+                                       "%*.13g ", ipac_column_widths[column+1],
                                        *reinterpret_cast<const float *>(data.data () + offset));
                   break;
 
                 case Type::DOUBLE:
                   current += snprintf (buffer.data () + current,
                                        buffer.size () - current, "%*.13g ",
-                                       ipac_column_widths[column],
+                                       ipac_column_widths[column+1],
                                        *reinterpret_cast<const double *>(
                                                                          data.data () + offset));
                   break;
 
                 case Type::STRING:
-                  const size_t string_size = offsets[column + 1] - offsets[column];
-                  for (size_t k = 0; k < ipac_column_widths[column] - string_size; ++k)
+                  const size_t string_size = offsets[column + 2] - offsets[column+1];
+                  for (size_t k = 0; k < ipac_column_widths[column+1] - string_size; ++k)
                     {
                       buffer[current] = ' ';
                       ++current;

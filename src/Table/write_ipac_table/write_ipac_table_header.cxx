@@ -24,14 +24,14 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
       /// FIXME: Suggest to review this and remove this part
       for (int i = 0; i < num_members; ++i)
         {
-          os << "\\ " << compound_type.getMemberName (i);
-          auto unit = fields_properties.at (i).attributes.find ("unit");
-          if (unit != fields_properties.at (i).attributes.end ())
+          os << "\\ " << compound_type.getMemberName (i+1);
+          auto unit = fields_properties.at (i+1).attributes.find ("unit");
+          if (unit != fields_properties.at (i+1).attributes.end ())
             {
               os << " (" << unit->second << ")";
             }
           os << "\n";
-          for (auto &description : fields_properties.at (i).descriptions)
+          for (auto &description : fields_properties.at (i+1).descriptions)
             os << "\\ ___ " << description.value << "\n";
           // FIXME: Write out description attributes
         }
