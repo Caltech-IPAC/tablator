@@ -46,14 +46,14 @@ size_t Tablator::Table::read_ipac_header
           auto position_of_equal = line.find ("=");
           std::string key =
             boost::algorithm::trim_copy (line.substr (1, position_of_equal - 1));
-          std::string val =
+          std::string value =
             boost::algorithm::trim_copy (line.substr (position_of_equal + 1));
 
           if (!boost::iequals (key, "fixlen"))
             {
-              std::size_t first = val.find_first_not_of ("\"'");
-              std::size_t last = val.find_last_not_of ("\"'");
-              Property p (val.substr (first, last - first + 1));
+              std::size_t first = value.find_first_not_of ("\"'");
+              std::size_t last = value.find_last_not_of ("\"'");
+              Property p (value.substr (first, last - first + 1));
               properties.insert (std::make_pair (key, p));
             }
         }
