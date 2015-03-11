@@ -12,7 +12,8 @@ void Tablator::Table::write_html (std::ostream &os) const
   boost::property_tree::ptree &table = html.add ("body.table", "");
 
   boost::property_tree::ptree &heading_tr = table.add ("TR", "");
-  for (size_t i = 0; i < fields_properties.size (); ++i)
+  /// skip null_bitfield_flag
+  for (size_t i = 1; i < fields_properties.size (); ++i)
     heading_tr.add ("TH", compound_type.getMemberName (i));
 
   put_table_in_property_tree (table);
