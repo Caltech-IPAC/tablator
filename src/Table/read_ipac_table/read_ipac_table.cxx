@@ -33,6 +33,13 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
       clear_nulls (row_string);
       for (size_t column=1; column < columns[0].size (); ++column)
         {
+          if (line[ipac_column_offsets[column-1]]!=' ')
+            throw std::runtime_error ("Non-space found at a delimiter location on line "
+                                      + std::to_string(current_line)
+                                      + ", offset "
+                                      + std::to_string (ipac_column_offsets[column-1])
+                                      + ".  Is a column not wide enough?");
+
           std::string element=line.substr (ipac_column_offsets[column-1]+1,
                                            ipac_column_widths[column]);
           boost::algorithm::trim(element);
@@ -153,7 +160,6 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     }
                   catch (std::exception &error)
                     {
-                      std::cout << "Hello\n";
                       throw std::runtime_error ("Bad double in line "
                                                 + std::to_string(current_line)
                                                 + ", column "
