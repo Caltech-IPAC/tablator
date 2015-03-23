@@ -30,7 +30,8 @@ size_t Tablator::Table::read_ipac_header
 {
   size_t current_line=0;
   char first_character=ipac_file.peek ();
-  while (ipac_file && first_character=='\\')
+  for (; ipac_file && first_character=='\\';
+       first_character=ipac_file.peek ())
     {
       std::string line;
       std::getline (ipac_file,line);
@@ -66,13 +67,14 @@ size_t Tablator::Table::read_ipac_header
                 }
             }
         }
-      first_character=ipac_file.peek ();
     }
   size_t column_line=0;
-  while (ipac_file && first_character=='|')
+  for (; ipac_file && first_character=='|';
+       first_character=ipac_file.peek (), ++column_line)
     {
       std::string line;
       std::getline (ipac_file,line);
+
       ++current_line;
       auto tab_position=line.find ("\t");
       if (tab_position != std::string::npos)
@@ -145,9 +147,6 @@ size_t Tablator::Table::read_ipac_header
                                   + std::to_string (columns[0].size ())
                                   + " but found "
                                   + std::to_string (columns[3].size ()));
-
-      ++column_line;
-      first_character=ipac_file.peek ();
     }
   if (column_line < 1)
     throw std::runtime_error ("Could not find any lines starting with "
