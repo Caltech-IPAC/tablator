@@ -8,12 +8,13 @@ void Tablator::Table::write_csv_tsv (std::ostream &os, const char &separator)
   const int num_members = compound_type.getNmembers ();
   if (num_members == 0)
     return;
-  for (int i = 0; i < num_members; ++i)
+  /// Skip null_bitfield_flags
+  for (int i = 1; i < num_members; ++i)
     os << compound_type.getMemberName (i)
        << (i == num_members - 1 ? '\n' : separator);
 
   for (size_t j = 0; j < data.size (); j += compound_type.getSize ())
-    for (int i = 0; i < num_members; ++i)
+    for (int i = 1; i < num_members; ++i)
       {
         size_t offset = offsets[i] + j;
         switch (types[i])

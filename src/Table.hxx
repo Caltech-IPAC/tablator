@@ -114,6 +114,14 @@ public:
                reinterpret_cast<const char *>(&element + 1), row + offset);
   }
 
+  template <typename T>
+  void copy_to_row (const T &begin, const T &end, const size_t &offset,
+                    char row[])
+  {
+    assert (offset < row_size);
+    std::copy (begin, end, row + offset);
+  }
+
   void copy_to_row (const std::string &element, const size_t &offset_begin,
                     const size_t &offset_end, char row[])
   {
