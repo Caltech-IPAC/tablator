@@ -36,9 +36,9 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
           if (line[ipac_column_offsets[column-1]]!=' ')
             throw std::runtime_error ("Non-space found at a delimiter location on line "
                                       + std::to_string(current_line)
-                                      + ", offset "
+                                      + ", column "
                                       + std::to_string (ipac_column_offsets[column-1])
-                                      + ".  Is a column not wide enough?");
+                                      + ".  Is a field not wide enough?");
 
           std::string element=line.substr (ipac_column_offsets[column-1]+1,
                                            ipac_column_widths[column]);
@@ -66,7 +66,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     {
                       throw std::runtime_error ("Bad boolean in line "
                                                 + std::to_string(current_line)
-                                                + ", column "
+                                                + ", field "
                                                 + std::to_string(column)
                                                 + ".  Expected 0 or 1, but found '"
                                                 + element + "'");
@@ -86,7 +86,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     {
                       throw std::runtime_error ("Bad short in line "
                                                 + std::to_string(current_line)
-                                                + ", column "
+                                                + ", field "
                                                 + std::to_string(column)
                                                 + ".  Found '"
                                                 + element + "'");
@@ -106,7 +106,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     {
                       throw std::runtime_error ("Bad int in line "
                                                 + std::to_string(current_line)
-                                                + ", column "
+                                                + ", field "
                                                 + std::to_string(column)
                                                 + ".  Found '"
                                                 + element + "'");
@@ -126,7 +126,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     {
                       throw std::runtime_error ("Bad long in line "
                                                 + std::to_string(current_line)
-                                                + ", column "
+                                                + ", field "
                                                 + std::to_string(column)
                                                 + ".  Found '"
                                                 + element + "'");
@@ -142,7 +142,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     {
                       throw std::runtime_error ("Bad long in line "
                                                 + std::to_string(current_line)
-                                                + ", column "
+                                                + ", field "
                                                 + std::to_string(column)
                                                 + ".  Found '"
                                                 + element + "'");
@@ -162,7 +162,7 @@ void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     {
                       throw std::runtime_error ("Bad double in line "
                                                 + std::to_string(current_line)
-                                                + ", column "
+                                                + ", field "
                                                 + std::to_string(column)
                                                 + ".  Found '"
                                                 + element + "'");
