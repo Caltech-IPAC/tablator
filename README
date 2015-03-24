@@ -1,0 +1,42 @@
+Tablator is designed to be a universal table translator between
+different table formats in astronomy.  Tablator is implemented as a
+C++ library, with a bare bones command line tool to convert between
+the formats.
+
+The library currently supports reading
+
+  FITS
+  IPAC_TABLE
+  HDF5
+
+and writing
+
+  VOTABLE
+  CSV
+  TSV
+  FITS
+  IPAC_TABLE
+  TEXT
+  HTML
+  HDF5
+
+
+Copyright © 2014-2015, California Institute of Technology
+Authors: Walter Landry and Angela Zhang
+Based on Government Sponsored Research NAS7-03001 and NNN12AA01C.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
