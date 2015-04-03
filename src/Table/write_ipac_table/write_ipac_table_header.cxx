@@ -15,8 +15,26 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
   for (auto &p : flatten_properties ())
     {
       // FIXME: need to escape the key and value
-      os << "\\" << std::setw (fits_keyword_length) << p.first << "= '"
-         << p.second << "'\n";
+      os << "\\" << std::setw (fits_keyword_length) << p.first << "= ";
+
+      if (p.first != "RowsRetrieved")
+        {
+          os << "'" << p.second << "'\n";
+        }
+      else
+        {
+          try
+            {
+              os << std::stoll (p.second) << "\n";
+            }
+          catch (std::exception &error)
+            {
+              throw std::runtime_error ("When writing an ipac table, unable to"
+                                        "convert the value of RowsRetrieved"
+                                        " into an integer:"
+                                        + p.second);
+            }
+        }
     }
 
   if (comment.size () == 0 && fields_properties.size () > 0)
