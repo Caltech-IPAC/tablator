@@ -20,7 +20,7 @@ void Tablator::Table::write_votable (std::ostream &os) const
   tree.add ("VOTABLE.<xmlattr>.xmlns:stc",
             "http://www.ivoa.net/xml/STC/v1.30");
 
-  bool overflow;
+  bool overflow=false;
   for (auto &p : flatten_properties ())
     {
       if (p.first.substr (0, 8) == "VOTABLE.")
