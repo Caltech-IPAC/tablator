@@ -27,7 +27,7 @@ void Tablator::Table::write_votable (std::ostream &os) const
         {
           tree.add (p.first, p.second);
         }
-      else if (p.first!="QUERY_STATUS" || p.second!="OVERFLOW")
+      else if (p.first!="OVERFLOW")
         {
           auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
           info.add ("<xmlattr>.name", p.first);
