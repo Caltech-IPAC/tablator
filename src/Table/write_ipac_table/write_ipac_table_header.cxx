@@ -11,13 +11,16 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
 
   /// FIXME:: why related to fits?
   const int fits_keyword_length (8);
+  bool overflow = false;
 
   for (auto &p : flatten_properties ())
     {
       // FIXME: need to escape the key and value
       os << "\\" << std::setw (fits_keyword_length) << p.first << "= ";
 
-      if (p.first != "RowsRetrieved")
+      if (p.first != "OVERFLOW") overflow = true;
+
+      if (p.first != "RowsRetrieved" )
         {
           os << "'" << p.second << "'\n";
         }
@@ -25,7 +28,10 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
         {
           try
             {
-              os << std::stoll (p.second) << "\n";
+              if (overflow)
+                  os << std::stoll (p.second)-1 << "\n";
+              else
+                  os << std::stoll (p.second) << "\n";
             }
           catch (std::exception &error)
             {
