@@ -28,10 +28,14 @@ void Tablator::Table::write_ipac_table_header (std::ostream &os,
         {
           try
             {
+              int rows_retrieved = std::stoll (p.second);
               if (overflow)
-                  os << std::stoll (p.second)-1 << "\n";
+                {
+                  os << (rows_retrieved >0) ? rows_retrieved -1 : rows_retrieved;
+                  os << "\n";
+                } 
               else
-                  os << std::stoll (p.second) << "\n";
+                  os << rows_retrieved  << "\n";
             }
           catch (std::exception &error)
             {
