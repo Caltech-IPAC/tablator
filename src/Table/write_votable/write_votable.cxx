@@ -34,7 +34,8 @@ void Tablator::Table::write_votable (std::ostream &os) const
           if (overflow)
           {
              std::stringstream ss;
-             ss  <<  std::stoll(p.second) - 1; 
+             int rows_reteieved  =  std::stoll(p.second) > 0; 
+             ss  <<  (rows_reteieved > 0) ? rows_reteieved - 1 : rows_reteieved; 
              info.add ("<xmlattr>.value", ss.str());
           }
           else
