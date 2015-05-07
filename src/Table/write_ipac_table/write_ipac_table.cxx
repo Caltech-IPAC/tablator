@@ -130,8 +130,13 @@ void Tablator::Table::write_ipac_table (std::ostream &os) const
                   break;
 
                 case Type::STRING:
+                  /// The characters in the type can be shorter than
+                  /// the number of allowed bytes.  So add a
+                  /// .c_str() that will terminate the string at the
+                  /// first null.
                   ss << std::string(data.data () + offset,
-                                    offsets[column + 2] - offsets[column+1]);
+                                    offsets[column + 2]
+                                    - offsets[column+1]).c_str();
                   break;
                 }
             }

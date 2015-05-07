@@ -51,9 +51,12 @@ void Tablator::Table::put_table_in_property_tree (
                 break;
 
               case Type::STRING:
+                /// The characters in the type can be shorter than the
+                /// number of allowed bytes.  So add a .c_str() that
+                /// will terminate the string at the first null.
                 td << std::string (
                                    data.data () + row_offset + offsets[column],
-                                   compound_type.getMemberDataType (column).getSize ());
+                                   compound_type.getMemberDataType (column).getSize ()).c_str ();
                 break;
 
               default:

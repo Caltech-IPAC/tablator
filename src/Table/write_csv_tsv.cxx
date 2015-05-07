@@ -41,8 +41,11 @@ void Tablator::Table::write_csv_tsv (std::ostream &os, const char &separator)
                << (*reinterpret_cast<const double *>(data.data () + offset));
             break;
           case Type::STRING:
+            /// The characters in the type can be shorter than the
+            /// number of allowed bytes.  So add a .c_str() that will
+            /// terminate the string at the first null.
             os << std::string (data.data () + offset,
-                               compound_type.getMemberDataType (i).getSize ());
+                               compound_type.getMemberDataType (i).getSize ()).c_str();
           }
         os << (i == num_members - 1 ? '\n' : separator);
       }
