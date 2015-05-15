@@ -50,7 +50,8 @@ size_t Tablator::Table::read_ipac_header
           std::string value =
             boost::algorithm::trim_copy (line.substr (position_of_equal + 1));
 
-          if (!boost::iequals (key, "fixlen"))
+          if (!boost::iequals (key, "fixlen")
+              && !boost::iequals (key, "RowsRetrieved"))
             {
               std::size_t first = value.find_first_not_of ("\"'");
               std::size_t last = value.find_last_not_of ("\"'");

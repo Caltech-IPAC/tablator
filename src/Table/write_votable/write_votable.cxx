@@ -27,20 +27,6 @@ void Tablator::Table::write_votable (std::ostream &os) const
         {
           tree.add (p.first, p.second);
         }
-      else if (p.first == "RowsRetrieved")
-        {
-          auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
-          info.add ("<xmlattr>.name", p.first);
-          if (overflow)
-          {
-             std::stringstream ss;
-             int rows_reteieved  =  std::stoll(p.second) > 0; 
-             ss  <<  (rows_reteieved > 0) ? rows_reteieved - 1 : rows_reteieved; 
-             info.add ("<xmlattr>.value", ss.str());
-          }
-          else
-             info.add ("<xmlattr>.value", p.second);
-        }
       else if (p.first!="OVERFLOW")
         {
           auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
