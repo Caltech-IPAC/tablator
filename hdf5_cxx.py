@@ -66,6 +66,7 @@ def configure(conf):
             continue
         else:
             found_hdf5_c=True
+            break
     if not found_hdf5_c:
         conf.fatal("Could not find HDF5 C libraries")
             
