@@ -5,6 +5,7 @@ def configure(conf):
     def get_param(varname,default):
         return getattr(Options.options,varname,'')or default
 
+    conf.load('cfitsio')
     # Find CCFITS
     if conf.options.ccfits_dir:
         if not conf.options.ccfits_incdir:
@@ -27,12 +28,13 @@ def configure(conf):
         ccfits_libs=['CCfits']
 
     conf.check_cxx(msg="Checking for CCfits",
-                  header_name='CCfits/CCfits',
-                  includes=ccfits_incdir,
-                  uselib_store='CCfits',
-                  libpath=ccfits_libdir,
-                  rpath=ccfits_libdir,
-                  lib=ccfits_libs)
+                   header_name='CCfits/CCfits',
+                   includes=ccfits_incdir,
+                   uselib_store='CCfits',
+                   libpath=ccfits_libdir,
+                   rpath=ccfits_libdir,
+                   lib=ccfits_libs,
+                   use=['cfitsio'])
 
 def options(opt):
     ccfits=opt.add_option_group('CCfits Options')
@@ -45,3 +47,4 @@ def options(opt):
     ccfits.add_option('--ccfits-libs',
                    help='Names of the ccfits libraries without prefix or suffix\n'
                    '(e.g. "CCFITS")')
+    opt.load('cfitsio')
