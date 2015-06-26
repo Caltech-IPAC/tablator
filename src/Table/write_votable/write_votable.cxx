@@ -55,6 +55,5 @@ void Tablator::Table::write_votable (std::ostream &os) const
       info.add ("<xmlattr>.value", "OVERFLOW");
     }
   
-  boost::property_tree::write_xml (
-      os, tree, boost::property_tree::xml_writer_settings<char>(' ', 2));
+  boost::property_tree::write_xml (os, tree, boost::property_tree::xml_writer_make_settings(' ',2));
 }
