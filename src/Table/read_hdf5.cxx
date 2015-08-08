@@ -2,7 +2,7 @@
 
 #include "../Table.hxx"
 
-void Tablator::Table::read_hdf5 (const boost::filesystem::path &path)
+void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
 {
   H5::H5File file (path.string (), H5F_ACC_RDONLY);
   H5::Group group = file.openGroup ("/");

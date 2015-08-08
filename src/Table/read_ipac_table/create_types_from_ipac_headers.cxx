@@ -13,10 +13,10 @@ std::vector<size_t> get_ipac_column_widths (std::vector<size_t> &ipac_column_off
   return ipac_column_widths;
 }
 
-std::vector<Tablator::Table::Type>
+std::vector<tablator::Table::Type>
 get_data_types (std::vector<std::string> &data_types)
 {
-  std::vector<Tablator::Table::Type> types;
+  std::vector<tablator::Table::Type> types;
   for (auto &data_type : data_types)
     {
       std::string t=boost::to_lower_copy(data_type);
@@ -24,23 +24,23 @@ get_data_types (std::vector<std::string> &data_types)
     
       if (t.compare(0,size,"int")==0)
         {
-          types.push_back (Tablator::Table::Type::INT);
+          types.push_back (tablator::Table::Type::INT);
         }
       else if (t.compare(0,size,"long")==0)
         {
-          types.push_back (Tablator::Table::Type::LONG);
+          types.push_back (tablator::Table::Type::LONG);
         }
       else if (t.compare(0,size,"float")==0)
         {
-          types.push_back (Tablator::Table::Type::FLOAT);
+          types.push_back (tablator::Table::Type::FLOAT);
         }
       else if (t.compare(0,size,"double")==0 || t.compare(0,size,"real")==0)
         {
-          types.push_back (Tablator::Table::Type::DOUBLE);
+          types.push_back (tablator::Table::Type::DOUBLE);
         }
       else if (t.compare(0,size,"char")==0 || t.compare(0,size,"date")==0)
         {
-          types.push_back (Tablator::Table::Type::STRING);
+          types.push_back (tablator::Table::Type::STRING);
         }
       else
         {
@@ -52,7 +52,7 @@ get_data_types (std::vector<std::string> &data_types)
 
 }
 
-void Tablator::Table::create_types_from_ipac_headers
+void tablator::Table::create_types_from_ipac_headers
 (std::array<std::vector<std::string>,4> &columns,
  std::vector<size_t> &ipac_column_offsets,
  std::vector<size_t> &ipac_column_widths)

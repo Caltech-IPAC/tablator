@@ -1,6 +1,6 @@
 #include "../../Table.hxx"
 
-void Tablator::Table::write_element_type (std::ostream &os, const int &i) const
+void tablator::Table::write_element_type (std::ostream &os, const int &i) const
 {
   switch (types[i])
     {

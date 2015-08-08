@@ -34,7 +34,7 @@ void write_column (fitsfile *fits_file, const int &fits_type,
                                      row_size);
 }
 
-void Tablator::Table::write_fits (const boost::filesystem::path &filename)
+void tablator::Table::write_fits (const boost::filesystem::path &filename)
     const
 {
   int status = 0;

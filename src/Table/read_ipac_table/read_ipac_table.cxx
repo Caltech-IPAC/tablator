@@ -10,7 +10,7 @@
 
 #include "../../Table.hxx"
 
-void Tablator::Table::read_ipac_table (const boost::filesystem::path &path)
+void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
 {
   if (!exists (path))
     throw std::runtime_error ("File " + path.string () + "does not exist.");

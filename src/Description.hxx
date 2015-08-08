@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 
-namespace Tablator
+namespace tablator
 {
 class Description
 {

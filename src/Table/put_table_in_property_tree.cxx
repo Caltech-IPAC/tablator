@@ -6,7 +6,7 @@
 
 #include "../Table.hxx"
 
-void Tablator::Table::put_table_in_property_tree (
+void tablator::Table::put_table_in_property_tree (
     boost::property_tree::ptree &table) const
 {
   for (size_t row_offset = 0; row_offset < data.size (); row_offset += row_size)

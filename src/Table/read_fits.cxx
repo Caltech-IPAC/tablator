@@ -21,7 +21,7 @@ void read_column (char *position, CCfits::Column &c, const size_t &rows,
 }
 
 // FIXME: This does not copy any keywords
-void Tablator::Table::read_fits (const boost::filesystem::path &path)
+void tablator::Table::read_fits (const boost::filesystem::path &path)
 {
   CCfits::FITS fits (path.string (), CCfits::Read, false);
   if (fits.extension ().empty ())

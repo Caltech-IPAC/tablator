@@ -1,6 +1,6 @@
 #include "../Table.hxx"
 
-Tablator::Table::Table (
+tablator::Table::Table (
     const std::vector<std::pair<std::string,
                                 std::pair<std::pair<H5::PredType, size_t>,
                                           Field_Properties> > > &columns,

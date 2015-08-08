@@ -1,6 +1,6 @@
 #include "../../Table.hxx"
 
-std::vector<size_t> Tablator::Table::get_column_width () const
+std::vector<size_t> tablator::Table::get_column_width () const
 {
   std::vector<size_t> widths;
   std::string name;

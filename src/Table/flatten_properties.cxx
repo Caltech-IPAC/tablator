@@ -1,7 +1,7 @@
 #include "../Table.hxx"
 
 std::vector<std::pair<std::string, std::string> >
-Tablator::Table::flatten_properties () const
+tablator::Table::flatten_properties () const
 {
   std::vector<std::pair<std::string, std::string> > result;
   for (auto &p : properties)

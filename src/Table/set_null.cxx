@@ -1,6 +1,6 @@
 #include "../Table.hxx"
 
-void Tablator::Table::set_null (size_t column, char row[])
+void tablator::Table::set_null (size_t column, char row[])
 {
   int byte=(column-1)/8;
   char mask= (1 << ((column-1)%8));

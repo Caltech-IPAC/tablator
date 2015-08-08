@@ -1,6 +1,6 @@
 #include "../Table.hxx"
 
-void Tablator::Table::write_output (const boost::filesystem::path &path,
+void tablator::Table::write_output (const boost::filesystem::path &path,
                                     const Format &format)
 {
   const bool use_stdout (path.string () == "-");

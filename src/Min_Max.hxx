@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Tablator
+namespace tablator
 {
 class Min_Max
 {

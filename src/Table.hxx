@@ -19,7 +19,7 @@
 #include "Field_Properties.hxx"
 #include "Format.hxx"
 
-namespace Tablator
+namespace tablator
 {
 class Table
 {

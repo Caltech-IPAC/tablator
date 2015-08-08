@@ -2,7 +2,7 @@
 
 #include "../Table.hxx"
 
-void Tablator::Table::write_html (std::ostream &os) const
+void tablator::Table::write_html (std::ostream &os) const
 {
   boost::property_tree::ptree tree;
 

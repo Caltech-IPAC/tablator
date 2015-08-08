@@ -5,7 +5,7 @@
 #include "Description.hxx"
 #include "Values.hxx"
 
-namespace Tablator
+namespace tablator
 {
 class Field_Properties
 {

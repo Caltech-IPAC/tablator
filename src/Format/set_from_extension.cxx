@@ -1,6 +1,6 @@
 #include "../Format.hxx"
 
-void Tablator::Format::set_from_extension (const boost::filesystem::path &path)
+void tablator::Format::set_from_extension (const boost::filesystem::path &path)
 {
   std::string extension = path.extension ().string ().substr (1);
   bool found = false;

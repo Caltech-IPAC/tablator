@@ -7,7 +7,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
-namespace Tablator
+namespace tablator
 {
 class Format
 {
@@ -137,7 +137,7 @@ public:
 };
 }
 
-inline std::ostream &operator<<(std::ostream &os, const Tablator::Format &f)
+inline std::ostream &operator<<(std::ostream &os, const tablator::Format &f)
 {
   os << f.string ();
   return os;

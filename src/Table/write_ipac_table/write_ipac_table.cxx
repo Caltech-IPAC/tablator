@@ -5,7 +5,7 @@
 
 #include "../../Table.hxx"
 
-void Tablator::Table::write_ipac_table (std::ostream &os) const
+void tablator::Table::write_ipac_table (std::ostream &os) const
 {
   std::vector<size_t> ipac_column_widths=get_column_width ();
 

@@ -2,15 +2,15 @@
 
 #include "../../Table.hxx"
 
-namespace Tablator
+namespace tablator
 {
 void Field_Properties_to_xml (boost::property_tree::ptree &tree,
                               const std::string &name,
-                              const Tablator::Table::Type &type,
+                              const tablator::Table::Type &type,
                               const Field_Properties &field_property);
 }
 
-void Tablator::Table::write_votable (std::ostream &os) const
+void tablator::Table::write_votable (std::ostream &os) const
 {
   boost::property_tree::ptree tree;
   tree.add ("VOTABLE.<xmlattr>.version", "1.3");

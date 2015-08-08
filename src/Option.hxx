@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace Tablator
+namespace tablator
 {
 class Option
 {

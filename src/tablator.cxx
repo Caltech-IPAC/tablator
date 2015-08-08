@@ -15,10 +15,10 @@ int main (int argc, char *argv[])
   try
     {
       H5::Exception::dontPrint ();
-      Tablator::Table table (argv[1]);
+      tablator::Table table (argv[1]);
 
       boost::filesystem::path output_path (argv[2]);
-      Tablator::Format output_format (output_path);
+      tablator::Format output_format (output_path);
       table.write_output (output_path, output_format);
     }
   catch (std::runtime_error &exception)
