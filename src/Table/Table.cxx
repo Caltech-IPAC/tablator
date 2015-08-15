@@ -1,10 +1,7 @@
 #include "../Table.hxx"
 
-tablator::Table::Table (
-    const std::vector<std::pair<std::string,
-                                std::pair<std::pair<H5::PredType, size_t>,
-                                          Field_Properties> > > &columns,
-    const std::map<std::string, std::string> &property_map)
+tablator::Table::Table (const std::vector<Column> &columns,
+                        const std::map<std::string, std::string> &property_map)
     : compound_type ([&](){
         size_t sum=(columns.size ()+7)/8;
         for (auto &c: columns)
