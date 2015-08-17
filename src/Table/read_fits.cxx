@@ -57,7 +57,6 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
     }
 
   row_size = 0;
-  // add_nulls();
   for (size_t column = 1; column <= table->column ().size (); ++column)
     {
       CCfits::Column &c = table->column (column);
