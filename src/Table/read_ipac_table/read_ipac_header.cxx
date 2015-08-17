@@ -40,7 +40,7 @@ size_t tablator::Table::read_ipac_header
         continue;
       if (line[1]==' ')
         {
-          comment.push_back (line.substr (2));
+          comments.push_back (line.substr (2));
         }
       else
         {

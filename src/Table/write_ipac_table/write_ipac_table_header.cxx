@@ -20,7 +20,7 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
          << "'" << p.second << "'\n";
     }
 
-  if (comment.size () == 0 && fields_properties.size () > 0)
+  if (comments.empty () && fields_properties.size () > 0)
     {
       /// FIXME: Suggest to review this and remove this part
       for (int i = 0; i < num_members; ++i)
@@ -39,7 +39,7 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
     }
   else
     {
-      for (auto &c : comment)
+      for (auto &c : comments)
         os << "\\ " << c << "\n";
     }
 }

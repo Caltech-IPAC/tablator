@@ -26,7 +26,7 @@ class Table
 public:
   std::map<std::string, Property> properties;
   std::vector<char> data;
-  std::vector<std::string> comment;
+  std::vector<std::string> comments;
   std::vector<Field_Properties> fields_properties;
   H5::CompType compound_type;
   /// Type names are mostly lifted directly from the IVOA TAP spec.
