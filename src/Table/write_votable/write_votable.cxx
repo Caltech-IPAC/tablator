@@ -1,4 +1,5 @@
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "../../Table.hxx"
 
@@ -20,12 +21,31 @@ void tablator::Table::write_votable (std::ostream &os) const
   tree.add ("VOTABLE.<xmlattr>.xmlns:stc",
             "http://www.ivoa.net/xml/STC/v1.30");
 
+  // VOTable only allows a single DESCRIPTION element, so we have to
+  // cram all of the comments into a single line
+  if (!comments.empty ())
+    {
+      std::string description;
+      for (auto &c: comments)
+        description+=c + '\n';
+      if (!description.empty ())
+        tree.add ("VOTABLE.DESCRIPTION",
+                  description.substr (0,description.size ()-1));
+    }
   bool overflow=false;
   for (auto &p : flatten_properties ())
     {
-      if (p.first.substr (0, 8) == "VOTABLE.")
+      if (boost::starts_with (p.first,"VOTABLE."))
         {
           tree.add (p.first, p.second);
+        }
+      else if (boost::starts_with (p.first, "<xmlattr>.")
+               || boost::starts_with (p.first, "COOSYS.")
+               || boost::starts_with (p.first, "GROUP.")
+               || boost::starts_with (p.first, "PARAM.")
+               || boost::starts_with (p.first, "INFO."))
+        {
+          tree.add ("VOTABLE." + p.first, p.second);
         }
       else if (p.first!="OVERFLOW")
         {
