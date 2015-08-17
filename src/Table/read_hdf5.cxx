@@ -9,6 +9,8 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
   H5::DataSet dataset = file.openDataSet (group.getObjnameByIdx (0).c_str ());
   compound_type = dataset.getCompType ();
 
+  // TODO: handle properties and comments
+  
   offsets.clear ();
   types.clear ();
   size_t offset{ 0 };
