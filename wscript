@@ -21,6 +21,7 @@ def build(bld):
              'src/Table/read_ipac_table/read_ipac_table.cxx',
              'src/Table/read_ipac_table/read_ipac_header.cxx',
              'src/Table/read_ipac_table/create_types_from_ipac_headers.cxx',
+             'src/Table/read_votable/read_votable.cxx',
              'src/Table/set_null.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',

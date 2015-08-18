@@ -83,6 +83,10 @@ public:
       {
         read_ipac_table (input_path);
       }
+    else if (format.is_votable ())
+      {
+        read_votable (input_path);
+      }
     else
       {
         throw std::runtime_error ("Unsupported input format: "
@@ -143,7 +147,6 @@ public:
   flatten_properties () const;
 
   const int output_precision = 13;
-  void read_ipac_table (const boost::filesystem::path &path);
   void write_output (const boost::filesystem::path &path,
                      const Format &format);
   void write_output (const boost::filesystem::path &path)
@@ -167,8 +170,10 @@ public:
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (const boost::filesystem::path &filename) const;
+  void read_ipac_table (const boost::filesystem::path &path);
   void read_fits (const boost::filesystem::path &path);
   void read_hdf5 (const boost::filesystem::path &path);
+  void read_votable (const boost::filesystem::path &path);
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   void write_votable (std::ostream &os) const;
