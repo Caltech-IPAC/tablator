@@ -57,14 +57,16 @@ size_t tablator::Table::read_ipac_header
               std::size_t last = value.find_last_not_of ("\"'");
               std::string value_substr=value.substr (first, last - first + 1);
               /// Handle duplicate keys by appending them to the end.
-              auto p=properties.find (key);
+              auto p=std::find_if (properties.begin (), properties.end (),
+                                   [&](const std::pair<std::string,Property> &item)
+                                   { return item.first == key; });
               if (p!=properties.end ())
                 {
                   p->second.value+=" " + value_substr;
                 }
               else
                 {
-                  properties.insert (std::make_pair (key, Property (value_substr)));
+                  properties.emplace_back (key, Property (value_substr));
                 }
             }
         }

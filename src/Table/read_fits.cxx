@@ -53,7 +53,7 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
         }
       if (!k.second->comment ().empty ())
         p.attributes.insert (std::make_pair ("comment", k.second->comment ()));
-      properties.insert (std::make_pair (name, p));
+      properties.emplace_back (name, p);
     }
 
   row_size = 0;

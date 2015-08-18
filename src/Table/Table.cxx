@@ -62,5 +62,5 @@ tablator::Table::Table (const std::vector<Column> &columns,
   offsets.push_back (offset);
 
   for (auto &p : property_map)
-    properties.insert (std::make_pair (p.first, Property (p.second)));
+    properties.emplace_back (p.first, Property (p.second));
 }

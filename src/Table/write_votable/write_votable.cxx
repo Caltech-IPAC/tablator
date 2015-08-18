@@ -43,7 +43,8 @@ void tablator::Table::write_votable (std::ostream &os) const
                || boost::starts_with (p.first, "COOSYS.")
                || boost::starts_with (p.first, "GROUP.")
                || boost::starts_with (p.first, "PARAM.")
-               || boost::starts_with (p.first, "INFO."))
+               || boost::starts_with (p.first, "INFO.")
+               || boost::starts_with (p.first, "RESOURCE."))
         {
           tree.add ("VOTABLE." + p.first, p.second);
         }

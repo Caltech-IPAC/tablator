@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <map>
+#include <utility>
 #include <set>
 #include <vector>
 #include <tuple>
@@ -24,7 +24,7 @@ namespace tablator
 class Table
 {
 public:
-  std::map<std::string, Property> properties;
+  std::vector<std::pair<std::string, Property> > properties;
   std::vector<char> data;
   std::vector<std::string> comments;
   std::vector<Field_Properties> fields_properties;
