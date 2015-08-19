@@ -174,6 +174,13 @@ public:
   void read_fits (const boost::filesystem::path &path);
   void read_hdf5 (const boost::filesystem::path &path);
   void read_votable (const boost::filesystem::path &path);
+  void read_node_and_attributes (const std::string &node_name,
+                                 const boost::property_tree::ptree &node);
+  void read_node_and_attributes (const boost::property_tree::ptree::const_iterator &it)
+  {
+    read_node_and_attributes (it->first, it->second);
+  }
+  void read_resource (const boost::property_tree::ptree &resource);
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   void write_votable (std::ostream &os) const;

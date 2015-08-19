@@ -14,12 +14,14 @@ void Field_Properties_to_xml (boost::property_tree::ptree &tree,
 void tablator::Table::write_votable (std::ostream &os) const
 {
   boost::property_tree::ptree tree;
-  tree.add ("VOTABLE.<xmlattr>.version", "1.3");
-  tree.add ("VOTABLE.<xmlattr>.xmlns:xsi",
-            "http://www.w3.org/2001/XMLSchema-instance");
-  tree.add ("VOTABLE.<xmlattr>.xmlns", "http://www.ivoa.net/xml/VOTable/v1.3");
-  tree.add ("VOTABLE.<xmlattr>.xmlns:stc",
-            "http://www.ivoa.net/xml/STC/v1.30");
+  std::string votable_literal ("VOTABLE");
+  auto &votable=tree.add (votable_literal,"");
+  votable.add ("<xmlattr>.version", "1.3");
+  votable.add ("<xmlattr>.xmlns:xsi",
+               "http://www.w3.org/2001/XMLSchema-instance");
+  votable.add ("<xmlattr>.xmlns", "http://www.ivoa.net/xml/VOTable/v1.3");
+  votable.add ("<xmlattr>.xmlns:stc",
+               "http://www.ivoa.net/xml/STC/v1.30");
 
   // VOTable only allows a single DESCRIPTION element, so we have to
   // cram all of the comments into a single line
@@ -29,30 +31,47 @@ void tablator::Table::write_votable (std::ostream &os) const
       for (auto &c: comments)
         description+=c + '\n';
       if (!description.empty ())
-        tree.add ("VOTABLE.DESCRIPTION",
-                  description.substr (0,description.size ()-1));
+        votable.add ("DESCRIPTION",
+                     description.substr (0,description.size ()-1));
     }
   bool overflow=false;
-  for (auto &p : flatten_properties ())
+  const std::string resource_literal="RESOURCE";
+  auto &resource=votable.add (resource_literal,"");
+  for (auto &p: properties)
     {
-      if (boost::starts_with (p.first,"VOTABLE."))
+      std::cout << "prop: " << p.first << ": " << p.second.value << "\n";
+      
+      if (p.first==votable_literal)
+        continue;
+      if (boost::starts_with (p.first,votable_literal + "."))
         {
-          tree.add (p.first, p.second);
+          votable.add (p.first.substr(votable_literal.size ()+1),
+                       p.second.value);
         }
-      else if (boost::starts_with (p.first, "<xmlattr>.")
-               || boost::starts_with (p.first, "COOSYS.")
-               || boost::starts_with (p.first, "GROUP.")
-               || boost::starts_with (p.first, "PARAM.")
-               || boost::starts_with (p.first, "INFO.")
-               || boost::starts_with (p.first, "RESOURCE."))
+      else if (p.first=="COOSYS" || p.first=="GROUP" || p.first=="PARAM"
+               || p.first=="INFO")
         {
-          tree.add ("VOTABLE." + p.first, p.second);
+          auto &element=votable.add (p.first, p.second.value);
+          for (auto &a: p.second.attributes)
+            element.add ("<xmlattr>." + a.first, a.second);
+        }
+      else if (p.first==resource_literal)
+        {
+          for (auto &a: p.second.attributes)
+            resource.add ("<xmlattr>." + a.first, a.second);
+        }
+      else if (boost::starts_with (p.first, resource_literal + "."))
+        {
+          auto &element=resource.add (p.first.substr(resource_literal.size () +1),
+                                      p.second.value);
+          for (auto &a: p.second.attributes)
+            element.add ("<xmlattr>." + a.first, a.second);
         }
       else if (p.first!="OVERFLOW")
         {
-          auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
+          auto &info = resource.add ("INFO", "");
           info.add ("<xmlattr>.name", p.first);
-          info.add ("<xmlattr>.value", p.second);
+          info.add ("<xmlattr>.value", p.second.value);
         }
       else
         {
@@ -60,7 +79,7 @@ void tablator::Table::write_votable (std::ostream &os) const
         }
     }
 
-  boost::property_tree::ptree &table = tree.add ("VOTABLE.RESOURCE.TABLE", "");
+  boost::property_tree::ptree &table = resource.add ("TABLE", "");
   /// Skip null_bitfield_flag
   for (size_t i = 1; i < fields_properties.size (); ++i)
     Field_Properties_to_xml (table, compound_type.getMemberName (i),
