@@ -22,7 +22,7 @@ public:
     std::vector<std::pair<std::string, std::string> > result;
     result.push_back (std::make_pair (key, value));
     for (auto &a : attributes)
-      result.push_back (std::make_pair (key + "." + a.first, a.second));
+      result.push_back (std::make_pair (key + ".<xmlattr>." + a.first, a.second));
     return result;
   }
 };
