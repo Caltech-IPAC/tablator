@@ -30,8 +30,6 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
         types.push_back (Type::FLOAT);
       else if (d == H5::PredType::NATIVE_DOUBLE)
         types.push_back (Type::DOUBLE);
-      else if (d == H5::PredType::NATIVE_DOUBLE)
-        types.push_back (Type::DOUBLE);
       else
         {
           // Do we have to create a string_type since compound_type
