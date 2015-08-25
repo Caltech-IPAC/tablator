@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30">
+  <DESCRIPTION>                                                                              
+
+ra (deg) 
+___ right ascension (J2000 decimal deg)
+dec (deg) 
+___ declination (J2000 decimal deg)
+clon 
+___ Right ascention in Sexagesimal format.
+clat 
+___ Declination in Sexagesimal format.
+err_maj (arcsec) 
+___ Semi-major axis length of the one sigma position uncertainty ellipse
+err_min (arcsec) 
+___ Semi-minor axis length of the one sigma position uncertainty ellipse
+err_ang (deg) 
+___ angle of error ellipse major axis (E of N)
+designation 
+___ source designation formed from sexigesimal coordinates
+j_m (mag) 
+___ J band selected &quot;default&quot; magnitude
+j_cmsig (mag) 
+___ corrected J band photometric uncertainty
+j_msigcom (mag) 
+___ combined (total) J band photometric uncertainty
+j_snr 
+___ J band &quot;scan&quot; signal-to-noise ratio
+h_m (mag) 
+___ H band selected &quot;default&quot; magnitude
+h_cmsig (mag) 
+___ corrected H band photometric uncertainty
+h_msigcom (mag) 
+___ combined (total) H band photometric uncertainty
+h_snr 
+___ H band &quot;scan&quot; signal-to-noise ratio
+k_m (mag) 
+___ K band selected &quot;default&quot; magnitude
+k_cmsig (mag) 
+___ corrected K band photometric uncertainty
+k_msigcom (mag) 
+___ combined (total) K band photometric uncertainty
+k_snr 
+___ K band &quot;scan&quot; signal-to-noise ratio
+ph_qual 
+___ flag indicating photometric quality of source
+rd_flg 
+___ source of JHK &quot;default&quot; mags (AKA &quot;read flag&quot;)
+bl_flg 
+___ indicates # JHK components fit simultaneously to source
+cc_flg 
+___ indicates JHK artifact contamination and/or confusion
+ndet 
+___ number of &gt;3-sig. ap. mag measurements, # possible (jjhhkk)
+gal_contam 
+___ flag indicating if src is contaminated by extended source
+mp_flg 
+___ src is positionally associated with an asteroid, comet, etc
+hemis 
+___ hemisphere (N/S) of facility from which src was observed
+xdate 
+___ observation reference date
+scan 
+___ scan number (unique within date)
+glon (deg) 
+___ galactic longitude (decimal deg)
+glat (deg) 
+___ galactic latitude (decimal deg)
+a 
+___ optical source catalog identifier of closest match within 5&quot;
+dist_opt (arcsec) 
+___ distance in arcsec relative to associated optical source
+phi_opt (deg) 
+___ position angle relative to optical source (E of N)
+b_m_opt (mag) 
+___ catalog blue mag of associated optical source
+vr_m_opt (mag) 
+___ catalog visual or red mag of associated optical source
+nopt_mchs 
+___ number of optical sources matched to this 2MASS source
+ext_key 
+___ key to extended source data DB record
+angle (deg) 
+___ Position Angle in degree.
+dist (arcsec) 
+___ Distance between the target position and each source in arcsec.
+
+j_h -&gt;  Reference:    Input column(s): j_m, h_m, k_m, rd_flg
+h_k -&gt;  Reference:    Input column(s): j_m, h_m, k_m, rd_flg
+j_k -&gt;  Reference:    Input column(s): j_m, h_m, k_m, rd_flg</DESCRIPTION>
+  <RESOURCE>
+    <INFO name="ORIGIN" value="IPAC Infrared Science Archive (IRSA), Caltech/JPL"/>
+    <INFO name="DATETIME" value="2013-10-23 12:23:09"/>
+    <INFO name="DataTag" value="ADS/IRSA.Gator#2013/1023/122309_15417"/>
+    <INFO name="DATABASE" value="2MASS All-Sky Point Source Catalog (PSC) (fp_psc)"/>
+    <INFO name="EQUINOX" value="J2000"/>
+    <INFO name="SKYAREA" value="within 10 arcsec of  ra=10.68479 dec=+41.26906 Eq J2000 "/>
+    <INFO name="StatusFile" value="/workspace/TMP_RJwd7q_18059/Gator/irsa/15417/log.15417.html"/>
+    <INFO name="SQL" value="WHERE (no constraints) SELECT (39 column names follow in next row.)"/>
+    <TABLE>
+      <FIELD name="ra" datatype="double" null="null" unit="deg"/>
+      <FIELD name="dec" datatype="double" null="null" unit="deg"/>
+      <FIELD name="clon" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="clat" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="err_maj" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="err_min" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="err_ang" datatype="int" null="null" unit="deg"/>
+      <FIELD name="designation" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="j_m" datatype="double" null="null" unit="mag"/>
+      <FIELD name="j_cmsig" datatype="double" null="null" unit="mag"/>
+      <FIELD name="j_msigcom" datatype="double" null="null" unit="mag"/>
+      <FIELD name="j_snr" datatype="double" null="null"/>
+      <FIELD name="h_m" datatype="double" null="null" unit="mag"/>
+      <FIELD name="h_cmsig" datatype="double" null="null" unit="mag"/>
+      <FIELD name="h_msigcom" datatype="double" null="null" unit="mag"/>
+      <FIELD name="h_snr" datatype="double" null="null"/>
+      <FIELD name="k_m" datatype="double" null="null" unit="mag"/>
+      <FIELD name="k_cmsig" datatype="double" null="null" unit="mag"/>
+      <FIELD name="k_msigcom" datatype="double" null="null" unit="mag"/>
+      <FIELD name="k_snr" datatype="double" null="null"/>
+      <FIELD name="ph_qual" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="rd_flg" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="bl_flg" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="cc_flg" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="ndet" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="gal_contam" datatype="int" null="null"/>
+      <FIELD name="mp_flg" datatype="int" null="null"/>
+      <FIELD name="hemis" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="xdate" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="scan" datatype="int" null="null"/>
+      <FIELD name="glon" datatype="double" null="null" unit="deg"/>
+      <FIELD name="glat" datatype="double" null="null" unit="deg"/>
+      <FIELD name="a" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="dist_opt" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="phi_opt" datatype="int" null="null" unit="deg"/>
+      <FIELD name="b_m_opt" datatype="double" null="null" unit="mag"/>
+      <FIELD name="vr_m_opt" datatype="double" null="null" unit="mag"/>
+      <FIELD name="nopt_mchs" datatype="int" null="null"/>
+      <FIELD name="ext_key" datatype="int" null="null"/>
+      <FIELD name="dist" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="angle" datatype="double" null="null" unit="deg"/>
+      <FIELD name="j_h" datatype="double" null="-"/>
+      <FIELD name="h_k" datatype="double" null="-"/>
+      <FIELD name="j_k" datatype="double" null="-"/>
+      <DATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

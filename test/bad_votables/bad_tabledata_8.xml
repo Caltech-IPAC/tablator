@@ -1,0 +1,1025 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30">
+  <DESCRIPTION>                                                                              
+
+ra (deg) 
+___ right ascension (J2000 decimal deg)
+dec (deg) 
+___ declination (J2000 decimal deg)
+clon 
+___ Right ascention in Sexagesimal format.
+clat 
+___ Declination in Sexagesimal format.
+err_maj (arcsec) 
+___ Semi-major axis length of the one sigma position uncertainty ellipse
+err_min (arcsec) 
+___ Semi-minor axis length of the one sigma position uncertainty ellipse
+err_ang (deg) 
+___ angle of error ellipse major axis (E of N)
+designation 
+___ source designation formed from sexigesimal coordinates
+j_m (mag) 
+___ J band selected &quot;default&quot; magnitude
+j_cmsig (mag) 
+___ corrected J band photometric uncertainty
+j_msigcom (mag) 
+___ combined (total) J band photometric uncertainty
+j_snr 
+___ J band &quot;scan&quot; signal-to-noise ratio
+h_m (mag) 
+___ H band selected &quot;default&quot; magnitude
+h_cmsig (mag) 
+___ corrected H band photometric uncertainty
+h_msigcom (mag) 
+___ combined (total) H band photometric uncertainty
+h_snr 
+___ H band &quot;scan&quot; signal-to-noise ratio
+k_m (mag) 
+___ K band selected &quot;default&quot; magnitude
+k_cmsig (mag) 
+___ corrected K band photometric uncertainty
+k_msigcom (mag) 
+___ combined (total) K band photometric uncertainty
+k_snr 
+___ K band &quot;scan&quot; signal-to-noise ratio
+ph_qual 
+___ flag indicating photometric quality of source
+rd_flg 
+___ source of JHK &quot;default&quot; mags (AKA &quot;read flag&quot;)
+bl_flg 
+___ indicates # JHK components fit simultaneously to source
+cc_flg 
+___ indicates JHK artifact contamination and/or confusion
+ndet 
+___ number of &gt;3-sig. ap. mag measurements, # possible (jjhhkk)
+gal_contam 
+___ flag indicating if src is contaminated by extended source
+mp_flg 
+___ src is positionally associated with an asteroid, comet, etc
+hemis 
+___ hemisphere (N/S) of facility from which src was observed
+xdate 
+___ observation reference date
+scan 
+___ scan number (unique within date)
+glon (deg) 
+___ galactic longitude (decimal deg)
+glat (deg) 
+___ galactic latitude (decimal deg)
+a 
+___ optical source catalog identifier of closest match within 5&quot;
+dist_opt (arcsec) 
+___ distance in arcsec relative to associated optical source
+phi_opt (deg) 
+___ position angle relative to optical source (E of N)
+b_m_opt (mag) 
+___ catalog blue mag of associated optical source
+vr_m_opt (mag) 
+___ catalog visual or red mag of associated optical source
+nopt_mchs 
+___ number of optical sources matched to this 2MASS source
+ext_key 
+___ key to extended source data DB record
+angle (deg) 
+___ Position Angle in degree.
+dist (arcsec) 
+___ Distance between the target position and each source in arcsec.
+
+j_h -&gt;  Reference:    Input column(s): j_m, h_m, k_m, rd_flg
+h_k -&gt;  Reference:    Input column(s): j_m, h_m, k_m, rd_flg
+j_k -&gt;  Reference:    Input column(s): j_m, h_m, k_m, rd_flg</DESCRIPTION>
+  <RESOURCE>
+    <INFO name="ORIGIN" value="IPAC Infrared Science Archive (IRSA), Caltech/JPL"/>
+    <INFO name="DATETIME" value="2013-10-23 12:23:09"/>
+    <INFO name="DataTag" value="ADS/IRSA.Gator#2013/1023/122309_15417"/>
+    <INFO name="DATABASE" value="2MASS All-Sky Point Source Catalog (PSC) (fp_psc)"/>
+    <INFO name="EQUINOX" value="J2000"/>
+    <INFO name="SKYAREA" value="within 10 arcsec of  ra=10.68479 dec=+41.26906 Eq J2000 "/>
+    <INFO name="StatusFile" value="/workspace/TMP_RJwd7q_18059/Gator/irsa/15417/log.15417.html"/>
+    <INFO name="SQL" value="WHERE (no constraints) SELECT (39 column names follow in next row.)"/>
+    <TABLE>
+      <FIELD name="ra" datatype="double" null="null" unit="deg"/>
+      <FIELD name="dec" datatype="double" null="null" unit="deg"/>
+      <FIELD name="clon" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="clat" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="err_maj" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="err_min" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="err_ang" datatype="int" null="null" unit="deg"/>
+      <FIELD name="designation" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="j_m" datatype="double" null="null" unit="mag"/>
+      <FIELD name="j_cmsig" datatype="double" null="null" unit="mag"/>
+      <FIELD name="j_msigcom" datatype="double" null="null" unit="mag"/>
+      <FIELD name="j_snr" datatype="double" null="null"/>
+      <FIELD name="h_m" datatype="double" null="null" unit="mag"/>
+      <FIELD name="h_cmsig" datatype="double" null="null" unit="mag"/>
+      <FIELD name="h_msigcom" datatype="double" null="null" unit="mag"/>
+      <FIELD name="h_snr" datatype="double" null="null"/>
+      <FIELD name="k_m" datatype="double" null="null" unit="mag"/>
+      <FIELD name="k_cmsig" datatype="double" null="null" unit="mag"/>
+      <FIELD name="k_msigcom" datatype="double" null="null" unit="mag"/>
+      <FIELD name="k_snr" datatype="double" null="null"/>
+      <FIELD name="ph_qual" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="rd_flg" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="bl_flg" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="cc_flg" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="ndet" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="gal_contam" datatype="int" null="null"/>
+      <FIELD name="mp_flg" datatype="int" null="null"/>
+      <FIELD name="hemis" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="xdate" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="scan" datatype="int" null="null"/>
+      <FIELD name="glon" datatype="double" null="null" unit="deg"/>
+      <FIELD name="glat" datatype="double" null="null" unit="deg"/>
+      <FIELD name="a" datatype="char" arraysize="*" null="null"/>
+      <FIELD name="dist_opt" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="phi_opt" datatype="int" null="null" unit="deg"/>
+      <FIELD name="b_m_opt" datatype="double" null="null" unit="mag"/>
+      <FIELD name="vr_m_opt" datatype="double" null="null" unit="mag"/>
+      <FIELD name="nopt_mchs" datatype="int" null="null"/>
+      <FIELD name="ext_key" datatype="int" null="null"/>
+      <FIELD name="dist" datatype="double" null="null" unit="arcsec"/>
+      <FIELD name="angle" datatype="double" null="null" unit="deg"/>
+      <FIELD name="j_h" datatype="double" null="-"/>
+      <FIELD name="h_k" datatype="double" null="-"/>
+      <FIELD name="j_k" datatype="boolean" null="-"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>10.682383</TD>
+            <TD>41.267925</TD>
+            <TD>00h42m43.77s  </TD>
+            <TD>41d16m04.53s  </TD>
+            <TD>0.1</TD>
+            <TD>0.09</TD>
+            <TD>69</TD>
+            <TD>00424377+4116045 </TD>
+            <TD>12.446</TD>
+            <TD>0.06</TD>
+            <TD>0.061</TD>
+            <TD>342</TD>
+            <TD>11.753</TD>
+            <TD>0.062</TD>
+            <TD>0.063</TD>
+            <TD>297</TD>
+            <TD>9.075</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>AAU    </TD>
+            <TD>220   </TD>
+            <TD>110   </TD>
+            <TD>cc0   </TD>
+            <TD>666600</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.172</TD>
+            <TD>-21.574</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>7.688598</TD>
+            <TD>237.898243</TD>
+            <TD>0.693</TD>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.682713</TD>
+            <TD>41.267056</TD>
+            <TD>00h42m43.85s  </TD>
+            <TD>41d16m01.40s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>69</TD>
+            <TD>00424385+4116014 </TD>
+            <TD>10.176</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>11.876</TD>
+            <TD>0.049</TD>
+            <TD>0.05</TD>
+            <TD>265.2</TD>
+            <TD>9.252</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>UEU    </TD>
+            <TD>020   </TD>
+            <TD>010   </TD>
+            <TD>0c0   </TD>
+            <TD>006600</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.173</TD>
+            <TD>-21.575</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>9.145114</TD>
+            <TD>217.919695</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.682777</TD>
+            <TD>41.270111</TD>
+            <TD>00h42m43.87s  </TD>
+            <TD>41d16m12.40s  </TD>
+            <TD>0.1</TD>
+            <TD>0.09</TD>
+            <TD>111</TD>
+            <TD>00424386+4116123 </TD>
+            <TD>9.977</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>11.683</TD>
+            <TD>0.056</TD>
+            <TD>0.056</TD>
+            <TD>316.8</TD>
+            <TD>11.839</TD>
+            <TD>0.062</TD>
+            <TD>0.062</TD>
+            <TD>166.3</TD>
+            <TD>UAA    </TD>
+            <TD>022   </TD>
+            <TD>011   </TD>
+            <TD>0cc   </TD>
+            <TD>006666</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.173</TD>
+            <TD>-21.572</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>6.631987</TD>
+            <TD>304.786305</TD>
+            <TD/>
+            <TD>-0.156</TD>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.683263</TD>
+            <TD>41.267456</TD>
+            <TD>00h42m43.98s  </TD>
+            <TD>41d16m02.84s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>79</TD>
+            <TD>00424398+4116028 </TD>
+            <TD>12.136</TD>
+            <TD>0.038</TD>
+            <TD>0.04</TD>
+            <TD>455</TD>
+            <TD>9.226</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>8.994</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>AUU    </TD>
+            <TD>200   </TD>
+            <TD>100   </TD>
+            <TD>c00   </TD>
+            <TD>660000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.173</TD>
+            <TD>-21.574</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>7.100419</TD>
+            <TD>215.586031</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.683465</TD>
+            <TD>41.269676</TD>
+            <TD>00h42m44.03s  </TD>
+            <TD>41d16m10.83s  </TD>
+            <TD>0.13</TD>
+            <TD>0.11</TD>
+            <TD>119</TD>
+            <TD>00424403+4116108 </TD>
+            <TD>11.507</TD>
+            <TD>0.055</TD>
+            <TD>0.056</TD>
+            <TD>812.1</TD>
+            <TD>8.744</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>8.489</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>EUU    </TD>
+            <TD>200   </TD>
+            <TD>100   </TD>
+            <TD>c00   </TD>
+            <TD>660000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.173</TD>
+            <TD>-21.572</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>4.215626</TD>
+            <TD>301.738916</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.683469</TD>
+            <TD>41.268585</TD>
+            <TD>00h42m44.03s  </TD>
+            <TD>41d16m06.91s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>69</TD>
+            <TD>00424403+4116069 </TD>
+            <TD>9.321</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>8.614</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>10.601</TD>
+            <TD>0.023</TD>
+            <TD>0.025</TD>
+            <TD>520</TD>
+            <TD>UUE    </TD>
+            <TD>002   </TD>
+            <TD>001   </TD>
+            <TD>00c   </TD>
+            <TD>000066</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.173</TD>
+            <TD>-21.573</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>3.962395</TD>
+            <TD>244.434011</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.683944</TD>
+            <TD>41.266682</TD>
+            <TD>00h42m44.15s  </TD>
+            <TD>41d16m00.06s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>93</TD>
+            <TD>00424414+4116000 </TD>
+            <TD>12.565</TD>
+            <TD>0.054</TD>
+            <TD>0.055</TD>
+            <TD>306.5</TD>
+            <TD>9.51</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.274</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>AUU    </TD>
+            <TD>206   </TD>
+            <TD>200   </TD>
+            <TD>c00   </TD>
+            <TD>660000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.174</TD>
+            <TD>-21.575</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>8.861581</TD>
+            <TD>194.971035</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.684029</TD>
+            <TD>41.270901</TD>
+            <TD>00h42m44.17s  </TD>
+            <TD>41d16m15.24s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>111</TD>
+            <TD>00424416+4116152 </TD>
+            <TD>10.063</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.359</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>11.409</TD>
+            <TD>0.054</TD>
+            <TD>0.055</TD>
+            <TD>247.1</TD>
+            <TD>UUA    </TD>
+            <TD>002   </TD>
+            <TD>001   </TD>
+            <TD>00c   </TD>
+            <TD>000066</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.174</TD>
+            <TD>-21.571</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>6.940102</TD>
+            <TD>342.740902</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.68418</TD>
+            <TD>41.266941</TD>
+            <TD>00h42m44.20s  </TD>
+            <TD>41d16m00.99s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>101</TD>
+            <TD>00424420+4116009 </TD>
+            <TD>10.065</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.374</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>11.504</TD>
+            <TD>0.051</TD>
+            <TD>0.052</TD>
+            <TD>226.4</TD>
+            <TD>UUA    </TD>
+            <TD>002   </TD>
+            <TD>002   </TD>
+            <TD>00c   </TD>
+            <TD>000066</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.174</TD>
+            <TD>-21.575</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>7.804929</TD>
+            <TD>192.209291</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.684737</TD>
+            <TD>41.269035</TD>
+            <TD>00h42m44.34s  </TD>
+            <TD>41d16m08.53s  </TD>
+            <TD>0.08</TD>
+            <TD>0.07</TD>
+            <TD>87</TD>
+            <TD>00424433+4116085 </TD>
+            <TD>9.453</TD>
+            <TD>0.051</TD>
+            <TD>0.052</TD>
+            <TD>5385.6</TD>
+            <TD>8.668</TD>
+            <TD>0.05</TD>
+            <TD>0.051</TD>
+            <TD>5089.9</TD>
+            <TD>8.475</TD>
+            <TD>0.05</TD>
+            <TD>0.051</TD>
+            <TD>3684.8</TD>
+            <TD>EEE    </TD>
+            <TD>222   </TD>
+            <TD>111   </TD>
+            <TD>000   </TD>
+            <TD>556655</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.174</TD>
+            <TD>-21.573</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>0.169298</TD>
+            <TD>237.888672</TD>
+            <TD>0.785</TD>
+            <TD>0.193</TD>
+            <TD>t</TD>
+          </TR>
+          <TR>
+            <TD>10.68527</TD>
+            <TD>41.267124</TD>
+            <TD>00h42m44.46s  </TD>
+            <TD>41d16m01.65s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>90</TD>
+            <TD>00424446+4116016 </TD>
+            <TD>12.07</TD>
+            <TD>0.033</TD>
+            <TD>0.035</TD>
+            <TD>483.5</TD>
+            <TD>9.301</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.057</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>EUU    </TD>
+            <TD>206   </TD>
+            <TD>200   </TD>
+            <TD>c00   </TD>
+            <TD>660000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.175</TD>
+            <TD>-21.575</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>7.089588</TD>
+            <TD>169.443579</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.685657</TD>
+            <TD>41.26955</TD>
+            <TD>00h42m44.56s  </TD>
+            <TD>41d16m10.38s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>90</TD>
+            <TD>00424455+4116103 </TD>
+            <TD>10.773</TD>
+            <TD>0.067</TD>
+            <TD>0.069</TD>
+            <TD>1596.7</TD>
+            <TD>8.532</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>8.254</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>EUU    </TD>
+            <TD>200   </TD>
+            <TD>200   </TD>
+            <TD>c00   </TD>
+            <TD>550000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.175</TD>
+            <TD>-21.572</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>2.935161</TD>
+            <TD>53.058944</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.685837</TD>
+            <TD>41.270599</TD>
+            <TD>00h42m44.60s  </TD>
+            <TD>41d16m14.16s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>87</TD>
+            <TD>00424460+4116141 </TD>
+            <TD>9.88</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>12.051</TD>
+            <TD>0.067</TD>
+            <TD>0.068</TD>
+            <TD>225.7</TD>
+            <TD>8.934</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>UAU    </TD>
+            <TD>020   </TD>
+            <TD>020   </TD>
+            <TD>0c0   </TD>
+            <TD>005500</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.175</TD>
+            <TD>-21.571</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>6.222682</TD>
+            <TD>27.081691</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.686015</TD>
+            <TD>41.26963</TD>
+            <TD>00h42m44.64s  </TD>
+            <TD>41d16m10.67s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>90</TD>
+            <TD>00424464+4116106 </TD>
+            <TD>9.399</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.985</TD>
+            <TD>0.07</TD>
+            <TD>0.07</TD>
+            <TD>1513.2</TD>
+            <TD>8.429</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>UEU    </TD>
+            <TD>020   </TD>
+            <TD>020   </TD>
+            <TD>0c0   </TD>
+            <TD>006600</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.175</TD>
+            <TD>-21.572</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>3.898395</TD>
+            <TD>58.239051</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.686026</TD>
+            <TD>41.269226</TD>
+            <TD>00h42m44.65s  </TD>
+            <TD>41d16m09.21s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>90</TD>
+            <TD>00424464+4116092 </TD>
+            <TD>9.299</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>8.606</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>10.119</TD>
+            <TD>0.055</TD>
+            <TD>0.056</TD>
+            <TD>810.6</TD>
+            <TD>UUE    </TD>
+            <TD>002   </TD>
+            <TD>001   </TD>
+            <TD>00c   </TD>
+            <TD>000055</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.175</TD>
+            <TD>-21.573</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>3.397378</TD>
+            <TD>79.868535</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.686846</TD>
+            <TD>41.270714</TD>
+            <TD>00h42m44.84s  </TD>
+            <TD>41d16m14.57s  </TD>
+            <TD>0.13</TD>
+            <TD>0.11</TD>
+            <TD>61</TD>
+            <TD>00424484+4116145 </TD>
+            <TD>12.872</TD>
+            <TD>0.06</TD>
+            <TD>0.061</TD>
+            <TD>231</TD>
+            <TD>9.433</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.178</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>AUU    </TD>
+            <TD>200   </TD>
+            <TD>200   </TD>
+            <TD>c00   </TD>
+            <TD>550000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.176</TD>
+            <TD>-21.571</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>8.148817</TD>
+            <TD>43.053601</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.686963</TD>
+            <TD>41.266827</TD>
+            <TD>00h42m44.87s  </TD>
+            <TD>41d16m00.58s  </TD>
+            <TD>0.1</TD>
+            <TD>0.09</TD>
+            <TD>93</TD>
+            <TD>00424487+4116005 </TD>
+            <TD>10.45</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>12.094</TD>
+            <TD>0.032</TD>
+            <TD>0.033</TD>
+            <TD>216.9</TD>
+            <TD>11.728</TD>
+            <TD>0.038</TD>
+            <TD>0.039</TD>
+            <TD>184.2</TD>
+            <TD>UEE    </TD>
+            <TD>622   </TD>
+            <TD>021   </TD>
+            <TD>bcc   </TD>
+            <TD>006666</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.176</TD>
+            <TD>-21.575</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>9.959681</TD>
+            <TD>143.81616</TD>
+            <TD/>
+            <TD>0.366</TD>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.687414</TD>
+            <TD>41.267632</TD>
+            <TD>00h42m44.98s  </TD>
+            <TD>41d16m03.48s  </TD>
+            <TD>0.13</TD>
+            <TD>0.12</TD>
+            <TD>93</TD>
+            <TD>00424497+4116034 </TD>
+            <TD>12.371</TD>
+            <TD>0.034</TD>
+            <TD>0.036</TD>
+            <TD>366.5</TD>
+            <TD>9.627</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.379</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>EUU    </TD>
+            <TD>200   </TD>
+            <TD>100   </TD>
+            <TD>c00   </TD>
+            <TD>660000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.176</TD>
+            <TD>-21.574</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>8.765869</TD>
+            <TD>125.905082</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+          <TR>
+            <TD>10.687611</TD>
+            <TD>41.270302</TD>
+            <TD>00h42m45.03s  </TD>
+            <TD>41d16m13.09s  </TD>
+            <TD>0.18</TD>
+            <TD>0.14</TD>
+            <TD>173</TD>
+            <TD>00424502+4116130 </TD>
+            <TD>13.055</TD>
+            <TD>0.108</TD>
+            <TD>0.109</TD>
+            <TD>195.2</TD>
+            <TD>9.504</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>9.246</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>AUU    </TD>
+            <TD>200   </TD>
+            <TD>200   </TD>
+            <TD>c00   </TD>
+            <TD>550000</TD>
+            <TD>2</TD>
+            <TD>0</TD>
+            <TD>n    </TD>
+            <TD>1997-10-24</TD>
+            <TD>8</TD>
+            <TD>121.177</TD>
+            <TD>-21.572</TD>
+            <TD>0   </TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>0</TD>
+            <TD/>
+            <TD>8.84622</TD>
+            <TD>59.638754</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>
