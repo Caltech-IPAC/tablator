@@ -10,19 +10,13 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
 done
 
 for table in test/*.tbl; do
-    echo "Testing conversion of ${table}"
-    build/tablator $table test.tbl
-    rm test.tbl
-    build/tablator $table test.hdf5
-    rm test.hdf5
-    build/tablator $table test.xml
-    rm test.xml
-    build/tablator $table test.csv
-    rm test.csv
-    build/tablator $table test.tsv
-    rm test.tsv
-    build/tablator $table test.fits
-    rm test.fits
-    build/tablator $table test.html
-    rm test.html
+    for ending in tbl hdf5 xml csv tsv fits html; do
+        build/tablator $table test.$ending
+        if [ $? -eq 0 ]; then
+            echo "PASS: $table.$ending"
+        else
+            echo "FAIL: $table.$ending"
+        fi
+        rm test.$ending
+    done
 done
