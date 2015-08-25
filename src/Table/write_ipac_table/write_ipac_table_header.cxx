@@ -32,14 +32,19 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
               os << " (" << unit->second << ")";
             }
           os << "\n";
-          for (auto &description : fields_properties.at (i+1).descriptions)
-            os << "\\ ___ " << description.value << "\n";
+          if (!fields_properties.at (i+1).description.empty ())
+            os << "\\ ___ " << fields_properties.at (i+1).description << "\n";
           // FIXME: Write out description attributes
         }
     }
   else
     {
       for (auto &c : comments)
-        os << "\\ " << c << "\n";
+        {
+          std::stringstream ss(c);
+          std::string line;
+          while (std::getline (ss, line))
+            os << "\\ " << line << "\n";
+        }
     }
 }

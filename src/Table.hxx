@@ -166,7 +166,7 @@ public:
   std::vector<size_t> get_column_width () const;
   void write_ipac_table_header (std::ostream &os,
                                 const int &num_members) const;
-  void write_element_type (std::ostream &os, const int &i) const;
+  std::string to_ipac_string (const tablator::Table::Type &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (const boost::filesystem::path &filename) const;
@@ -181,6 +181,12 @@ public:
     read_node_and_attributes (it->first, it->second);
   }
   void read_resource (const boost::property_tree::ptree &resource);
+  void read_table (const boost::property_tree::ptree &resource);
+  std::string read_field (const boost::property_tree::ptree &resource);
+  void read_data (const boost::property_tree::ptree &data,
+                  const std::vector<std::string> &names);
+  void read_tabledata (const boost::property_tree::ptree &tabledata,
+                       const std::vector<std::string> &names);
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   void write_votable (std::ostream &os) const;

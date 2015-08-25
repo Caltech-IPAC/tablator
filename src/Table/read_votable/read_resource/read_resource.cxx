@@ -1,4 +1,4 @@
-#include "../../Table.hxx"
+#include "../../../Table.hxx"
 
 void tablator::Table::read_resource (const boost::property_tree::ptree &resource)
 {
@@ -41,7 +41,7 @@ void tablator::Table::read_resource (const boost::property_tree::ptree &resource
         }
       if (child != end && child->first == "TABLE")
         {
-          // read_table (*(child->second));
+          read_table (child->second);
           ++child;
         }
       if (child != end && child->first == "INFO")

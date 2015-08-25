@@ -26,7 +26,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
   for (size_t i = 0; i < num_members; ++i)
     {
       os << std::setw (ipac_column_widths[i+1]);
-      write_element_type (os, i+1);
+      os << to_ipac_string (types[i+1]);
       os << "|";
     }
 

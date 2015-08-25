@@ -35,12 +35,10 @@ void tablator::Table::write_votable (std::ostream &os) const
                      description.substr (0,description.size ()-1));
     }
   bool overflow=false;
-  const std::string resource_literal="RESOURCE";
+  const std::string resource_literal ("RESOURCE"), table_literal ("TABLE");
   auto &resource=votable.add (resource_literal,"");
   for (auto &p: properties)
     {
-      std::cout << "prop: " << p.first << ": " << p.second.value << "\n";
-      
       if (p.first==votable_literal)
         continue;
       if (boost::starts_with (p.first,votable_literal + "."))
@@ -59,6 +57,10 @@ void tablator::Table::write_votable (std::ostream &os) const
         {
           for (auto &a: p.second.attributes)
             resource.add ("<xmlattr>." + a.first, a.second);
+        }
+      else if (boost::starts_with (p.first, resource_literal + "." + table_literal))
+        {
+          /// Skip TABLE for now.
         }
       else if (boost::starts_with (p.first, resource_literal + "."))
         {
@@ -79,7 +81,16 @@ void tablator::Table::write_votable (std::ostream &os) const
         }
     }
 
-  boost::property_tree::ptree &table = resource.add ("TABLE", "");
+  boost::property_tree::ptree &table = resource.add (table_literal, "");
+
+  for (auto &p: properties)
+    {
+      if (boost::starts_with (p.first, resource_literal + "." + table_literal))
+        {
+          for (auto &a: p.second.attributes)
+            table.add ("<xmlattr>." + a.first, a.second);
+        }
+    }
   /// Skip null_bitfield_flag
   for (size_t i = 1; i < fields_properties.size (); ++i)
     Field_Properties_to_xml (table, compound_type.getMemberName (i),

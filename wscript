@@ -8,8 +8,8 @@ def configure(conf):
     conf.check_boost(lib='filesystem system regex')
 
 def build(bld):
-    default_flags=['-Wall', '-Wextra', '-Ofast']
-    # default_flags=['-Wall', '-Wextra', '-g']
+    # default_flags=['-Wall', '-Wextra', '-Ofast']
+    default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST']
 
     sources=['src/fits_keyword_mapping.cxx',
@@ -23,7 +23,11 @@ def build(bld):
              'src/Table/read_ipac_table/create_types_from_ipac_headers.cxx',
              'src/Table/read_votable/read_votable.cxx',
              'src/Table/read_votable/read_node_and_attributes.cxx',
-             'src/Table/read_votable/read_resource.cxx',
+             'src/Table/read_votable/read_resource/read_resource.cxx',
+             'src/Table/read_votable/read_resource/read_table/read_table.cxx',
+             'src/Table/read_votable/read_resource/read_table/read_field.cxx',
+             'src/Table/read_votable/read_resource/read_table/read_data/read_data.cxx',
+             'src/Table/read_votable/read_resource/read_table/read_data/read_tabledata.cxx',
              'src/Table/set_null.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
@@ -34,7 +38,7 @@ def build(bld):
              'src/Table/write_votable/Field_Properties_to_xml.cxx',
              'src/Table/write_ipac_table/write_ipac_table.cxx',
              'src/Table/write_ipac_table/write_ipac_table_header.cxx',
-             'src/Table/write_ipac_table/write_element_type.cxx',
+             'src/Table/write_ipac_table/to_ipac_string.cxx',
              'src/Table/write_ipac_table/get_column_width.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file.cxx']

@@ -27,7 +27,7 @@ void Option_to_xml (boost::property_tree::ptree &tree,
     }
 }
 
-std::string Type_to_string (const tablator::Table::Type &type)
+std::string to_string (const tablator::Table::Type &type)
 {
   std::string result;
   switch (type)
@@ -71,7 +71,7 @@ void Field_Properties_to_xml (boost::property_tree::ptree &tree,
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");
   field.add ("<xmlattr>.name", name);
-  std::string datatype=Type_to_string (type);
+  std::string datatype=to_string (type);
   field.add ("<xmlattr>.datatype", datatype);
   if (datatype=="char")
     field.add ("<xmlattr>.arraysize", "*");
@@ -86,17 +86,12 @@ void Field_Properties_to_xml (boost::property_tree::ptree &tree,
       if (a.first.empty ())
         throw std::runtime_error ("Empty attribute in field " + name
                                   + " which has type "
-                                  + Type_to_string (type));
+                                  + to_string (type));
       field.add ("<xmlattr>." + a.first, a.second);
     }
 
-  for (auto &d : field_property.descriptions)
-    {
-      boost::property_tree::ptree &description
-          = field.add ("DESCRIPTION", d.value);
-      for (auto &a : field_property.attributes)
-        description.add ("<xmlattr>." + a.first, a.second);
-    }
+  if (!field_property.description.empty ())
+    field.add ("DESCRIPTION", field_property.description);
 
   auto &v (field_property.values);
   if (!v.empty ())
@@ -116,11 +111,11 @@ void Field_Properties_to_xml (boost::property_tree::ptree &tree,
         Option_to_xml (values, o);
     }
 
-  for (auto &l : field_property.links)
+  if (!field_property.links.empty ())
     {
       boost::property_tree::ptree &link = field.add ("LINK", "");
-      for (auto &a : l)
-        link.add ("<xmlattr>." + a.first, a.second);
+      for (auto &l : field_property.links)
+        link.add ("<xmlattr>." + l.first, l.second);
     }
 }
 }

@@ -2,7 +2,6 @@
 
 #include <H5Cpp.h>
 
-#include "Description.hxx"
 #include "Values.hxx"
 
 namespace tablator
@@ -10,10 +9,10 @@ namespace tablator
 class Field_Properties
 {
 public:
-  std::vector<Description> descriptions;
+  std::string description;
   std::map<std::string, std::string> attributes;
   Values values;
-  std::vector<std::map<std::string, std::string> > links;
+  std::vector<std::pair<std::string, std::string> > links;
 
   Field_Properties (const std::map<std::string, std::string> &Attributes)
       : attributes (Attributes)
@@ -28,25 +27,17 @@ public:
   }
 
   Field_Properties (
-      const std::string &description,
+      const std::string &Description,
       const std::initializer_list<std::pair<const std::string, std::string> > &
           Attributes)
-      : attributes (Attributes)
-  {
-    descriptions.push_back (description);
-  }
-
-  Field_Properties (const std::vector<Description> &Descriptions,
-                    const std::map<std::string, std::string> &Attributes)
-      : descriptions (Descriptions), attributes (Attributes)
+    : description (Description), attributes (Attributes)
   {
   }
 
-  Field_Properties (const std::string &description,
+  Field_Properties (const std::string &Description,
                     const std::map<std::string, std::string> &Attributes)
-      : attributes (Attributes)
+    : description (Description), attributes (Attributes)
   {
-    descriptions.push_back (description);
   }
 };
 }

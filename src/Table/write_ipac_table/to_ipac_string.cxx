@@ -1,26 +1,28 @@
 #include "../../Table.hxx"
 
-void tablator::Table::write_element_type (std::ostream &os, const int &i) const
+std::string tablator::Table::to_ipac_string (const tablator::Table::Type &type) const
 {
-  switch (types[i])
+  std::string result;
+  switch (type)
     {
     case Type::BOOLEAN:
     case Type::SHORT:
     case Type::INT:
-      os << "int";
+      result="int";
       break;
 
     case Type::LONG:
-      os << "long";
+      result="long";
       break;
 
     case Type::FLOAT:
     case Type::DOUBLE:
-      os << "double";
+      result="double";
       break;
 
     case Type::STRING:
-      os << "char";
+      result="char";
       break;
     }
+  return result;
 }

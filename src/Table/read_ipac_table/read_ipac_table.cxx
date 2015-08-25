@@ -140,7 +140,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     }
                   catch (std::exception &error)
                     {
-                      throw std::runtime_error ("Bad long in line "
+                      throw std::runtime_error ("Bad float in line "
                                                 + std::to_string(current_line)
                                                 + ", field "
                                                 + std::to_string(column)

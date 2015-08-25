@@ -15,8 +15,5 @@ void tablator::Table::read_node_and_attributes
                                attribute.second.get_value<std::string> ()));
           }
     }
-  std::cout << "node: " << node_name << ": '" << property.value << "'\n";
-  for (auto &a: property.attributes)
-    std::cout << "\t" << a.first << ": " << a.second << "\n";
   properties.emplace_back(node_name, property);
 }
