@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "../../../../../Table.hxx"
 
@@ -23,11 +24,12 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
             {
               if (td == tr.second.end ())
                 throw std::runtime_error
-                  ("Not enough columns in TR number "
+                  ("Not enough columns in row "
                    + std::to_string (rows.size ())
-                   + ". Expected: "
+                   + ".  Expected "
                    + std::to_string (types.size () - 1)
-                   + "but only got " + std::to_string (c));
+                   + ", but only got " + std::to_string (c-1)
+                   + ".");
 
               if (td->first == "TD")
                 {
@@ -45,8 +47,11 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
               ++td;
             }
           if (td != tr.second.end ())
-            throw std::runtime_error ("Too many elements in TR number "
-                                      + std::to_string (rows.size ()));
+            throw std::runtime_error ("Too many elements in row "
+                                      + std::to_string (rows.size ())
+                                      + ".  Only expected "
+                                      + std::to_string (types.size () - 1)
+                                      + ".");
         }
       else if (tr.first != "<xmlattr>.encoding")
         {
@@ -148,8 +153,10 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                       && !boost::iequals(element, "false")
                       && !element.empty ())
                     throw std::runtime_error
-                      ("Invalid element for boolean.  Expected 'true', 'false', "
-                       "or empty, but found: " + element);
+                      ("Invalid 'boolean' in row " + std::to_string(current_row + 1)
+                        + ", field " + std::to_string(column)
+                       + ".  Expected  'true', 'false', or empty, but found '"
+                       + element + "'");
                   int8_t result=boost::iequals(element, "true");
                   copy_to_row (result, offsets[column], row_string);
                 }
@@ -157,7 +164,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
               case Type::SHORT:
                 try
                   {
-                    int result=stoi (element);
+                    int result=boost::lexical_cast<int> (element);
                     if (result > std::numeric_limits<int16_t>::max ()
                         || result < std::numeric_limits<int16_t>::lowest ())
                       throw std::exception ();
@@ -166,7 +173,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                   }
                 catch (std::exception &error)
                   {
-                    throw std::runtime_error ("Bad short in row "
+                    throw std::runtime_error ("Invalid 'short' in row "
                                               + std::to_string(current_row + 1)
                                               + ", field "
                                               + std::to_string(column)
@@ -177,7 +184,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
               case Type::INT:
                 try
                   {
-                    long result=stol (element);
+                    long result=boost::lexical_cast<long> (element);
                     if (result > std::numeric_limits<int32_t>::max ()
                         || result < std::numeric_limits<int32_t>::lowest ())
                       throw std::exception ();
@@ -186,7 +193,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                   }
                 catch (std::exception &error)
                   {
-                    throw std::runtime_error ("Bad int in row "
+                    throw std::runtime_error ("Invalid 'int' in row "
                                               + std::to_string(current_row + 1)
                                               + ", field "
                                               + std::to_string(column)
@@ -197,7 +204,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
               case Type::LONG:
                 try
                   {
-                    long long result=stoll (element);
+                    long long result=boost::lexical_cast<long long> (element);
                     if (result > std::numeric_limits<int64_t>::max ()
                         || result < std::numeric_limits<int64_t>::lowest ())
                       throw std::exception ();
@@ -206,7 +213,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                   }
                 catch (std::exception &error)
                   {
-                    throw std::runtime_error ("Bad long in row "
+                    throw std::runtime_error ("Invalid 'long' in row "
                                               + std::to_string(current_row + 1)
                                               + ", field "
                                               + std::to_string(column)
@@ -217,12 +224,12 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
               case Type::FLOAT:
                 try
                   {
-                    float result=stof (element);
+                    float result=boost::lexical_cast<float> (element);
                     copy_to_row (result, offsets[column], row_string);
                   }
                 catch (std::exception &error)
                   {
-                    throw std::runtime_error ("Bad float in row "
+                    throw std::runtime_error ("Invalid 'float' in row "
                                               + std::to_string(current_row + 1)
                                               + ", field "
                                               + std::to_string(column)
@@ -233,15 +240,12 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
               case Type::DOUBLE:
                 try
                   {
-                    // FIXME: std::stod does not fail if the element has
-                    // trailing garbage.  Need to call strtod instead
-                    // and make sure that all input is parsed.
-                    double result=stod (element);
+                    double result=boost::lexical_cast<double> (element);
                     copy_to_row (result, offsets[column], row_string);
                   }
                 catch (std::exception &error)
                   {
-                    throw std::runtime_error ("Bad double in row "
+                    throw std::runtime_error ("Invalid 'double' in row "
                                               + std::to_string(current_row + 1)
                                               + ", field "
                                               + std::to_string(column)

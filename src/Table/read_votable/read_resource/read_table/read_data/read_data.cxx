@@ -33,6 +33,12 @@ void tablator::Table::read_data (const boost::property_tree::ptree &data,
       throw std::runtime_error ("FITS serialization inside a VOTable not "
                                 "yet supported.");
     }
+  else
+    {
+      throw std::runtime_error ("Invalid element inside RESOURCE.TABLE.DATA.  "
+                                "Expected one of TABLEDATA, BINARY, BINARY2, "
+                                "or FITS, but got: " + child->first);
+    }
   
   for (; child!=end; ++child)
     {
