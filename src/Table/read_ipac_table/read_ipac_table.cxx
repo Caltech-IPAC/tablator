@@ -1,12 +1,8 @@
-#include <errno.h>
 #include <limits>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <cctype>
 #include <vector>
 #include <array>
+
+#include <boost/lexical_cast.hpp>
 
 #include "../../Table.hxx"
 
@@ -75,7 +71,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 case Type::SHORT:
                   try
                     {
-                      int result=stoi (element);
+                      int result=boost::lexical_cast<int> (element);
                       if (result > std::numeric_limits<int16_t>::max ()
                           || result < std::numeric_limits<int16_t>::lowest ())
                         throw std::exception ();
@@ -95,7 +91,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 case Type::INT:
                   try
                     {
-                      long result=stol (element);
+                      long result=boost::lexical_cast<long> (element);
                       if (result > std::numeric_limits<int32_t>::max ()
                           || result < std::numeric_limits<int32_t>::lowest ())
                         throw std::exception ();
@@ -115,7 +111,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 case Type::LONG:
                   try
                     {
-                      long long result=stoll (element);
+                      long long result=boost::lexical_cast<long long> (element);
                       if (result > std::numeric_limits<int64_t>::max ()
                           || result < std::numeric_limits<int64_t>::lowest ())
                         throw std::exception ();
@@ -135,7 +131,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 case Type::FLOAT:
                   try
                     {
-                      float result=std::stof (element);
+                      float result=boost::lexical_cast<float> (element);
                       copy_to_row (result, offsets[column], row_string);
                     }
                   catch (std::exception &error)
@@ -151,11 +147,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 case Type::DOUBLE:
                   try
                     {
-                      // FIXME: std::stod does not fail if the element
-                      // has trailing garbage.  Need to call strtod
-                      // instead and make sure that all input is
-                      // parsed.
-                      double result=std::stod (element);
+                      double result=boost::lexical_cast<double> (element);
                       copy_to_row (result, offsets[column], row_string);
                     }
                   catch (std::exception &error)
