@@ -57,7 +57,6 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
     }
 
   // FIXME: This assumes that the first column is null_bitfield_flags
-
   row_size = 0;
   offsets.push_back (0);
   for (size_t column = 0; column < table->column ().size (); ++column)
@@ -105,7 +104,8 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
         }
     }
 
-  // FIXME: This is going to break if we have more than 2^32 rows
+  // FIXME: table->rows () returns an int, so this is going to break
+  // if we have more than 2^32 rows
   data.resize (table->rows () * row_size);
 
   for (size_t column = 0; column < table->column ().size (); ++column)
