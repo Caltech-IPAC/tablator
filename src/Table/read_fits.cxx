@@ -56,35 +56,40 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       properties.emplace_back (name, p);
     }
 
+  // FIXME: This assumes that the first column is null_bitfield_flags
+
   row_size = 0;
-  for (size_t column = 1; column <= table->column ().size (); ++column)
+  offsets.push_back (0);
+  for (size_t column = 0; column < table->column ().size (); ++column)
     {
-      CCfits::Column &c = table->column (column);
+      /// CCfits is 1 based, not 0 based.
+      CCfits::Column &c = table->column (column+1);
       switch (c.type ())
         {
         case CCfits::Tlogical:
-          row_size += H5::PredType::NATIVE_UCHAR.getSize ();
+          append_member (c.name (), H5::PredType::NATIVE_UCHAR);
           break;
         case CCfits::Tstring:
-          row_size += H5::PredType::NATIVE_CHAR.getSize () * c.width ();
+          string_types.emplace_back (0, c.width ());
+          append_member (c.name (), *string_types.rbegin ());
           break;
         case CCfits::Tushort:
         case CCfits::Tshort:
-          row_size += H5::PredType::NATIVE_INT16.getSize ();
+          append_member (c.name (), H5::PredType::NATIVE_INT16);
           break;
         case CCfits::Tuint:
         case CCfits::Tint:
-          row_size += H5::PredType::NATIVE_INT32.getSize ();
+          append_member (c.name (), H5::PredType::NATIVE_INT32);
           break;
         case CCfits::Tulong:
         case CCfits::Tlong:
-          row_size += H5::PredType::NATIVE_INT64.getSize ();
+          append_member (c.name (), H5::PredType::NATIVE_INT64);
           break;
         case CCfits::Tfloat:
-          row_size += H5::PredType::NATIVE_FLOAT.getSize ();
+          append_member (c.name (), H5::PredType::NATIVE_FLOAT);
           break;
         case CCfits::Tdouble:
-          row_size += H5::PredType::NATIVE_DOUBLE.getSize ();
+          append_member (c.name (), H5::PredType::NATIVE_DOUBLE);
           break;
         default:
           throw std::runtime_error (
@@ -92,90 +97,74 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
               "column " + c.name ());
         }
     }
-  compound_type = H5::CompType (row_size);
 
   // FIXME: This is going to break if we have more than 2^32 rows
   data.resize (table->rows () * row_size);
 
-  size_t offset{ 0 };
-  for (size_t column = 1; column <= table->column ().size (); ++column)
+  for (size_t column = 0; column < table->column ().size (); ++column)
     {
-      CCfits::Column &c = table->column (column);
+      /// CCfits is 1 based, not 0 based.
+      CCfits::Column &c = table->column (column+1);
 
       switch (c.type ())
         {
         case CCfits::Tlogical:
-          compound_type.insertMember (c.name (), offset,
-                                      H5::PredType::NATIVE_UCHAR);
           types.push_back (Type::BOOLEAN);
           {
             std::vector<int> v;
             c.read (v, 1, table->rows ());
-            size_t total_offset = offset;
+            size_t offset = offsets[column];
             for (auto &element : v)
               {
-                data[total_offset] = element;
-                total_offset += row_size;
+                data[offset] = element;
+                offset += row_size;
               }
           }
           break;
         case CCfits::Tstring:
-          string_types.emplace_back (0, c.width ());
-          compound_type.insertMember (c.name (), offset,
-                                      *string_types.rbegin ());
           types.push_back (Type::STRING);
           {
             std::vector<std::string> v;
             c.read (v, 1, table->rows ());
 
-            size_t total_offset = offset;
+            size_t offset = offsets[column];
             for (auto &element : v)
               {
                 for (size_t i = 0; i < element.size (); ++i)
-                  data[total_offset + i] = element[i];
+                  data[offset + i] = element[i];
                 for (int i = element.size (); i < c.width (); ++i)
-                  data[total_offset + i] = ' ';
-                total_offset += row_size;
+                  data[offset + i] = ' ';
+                offset += row_size;
               }
           }
           break;
         case CCfits::Tushort:
         case CCfits::Tshort:
-          compound_type.insertMember (c.name (), offset,
-                                      H5::PredType::NATIVE_INT16);
           types.push_back (Type::SHORT);
-          read_column<int16_t>(data.data () + offset, c, table->rows (),
-                               row_size);
+          read_column<int16_t>(data.data () + offsets[column], c,
+                               table->rows (), row_size);
           break;
         case CCfits::Tuint:
         case CCfits::Tint:
-          compound_type.insertMember (c.name (), offset,
-                                      H5::PredType::NATIVE_INT32);
           types.push_back (Type::INT);
-          read_column<int32_t>(data.data () + offset, c, table->rows (),
-                               row_size);
+          read_column<int32_t>(data.data () + offsets[column], c,
+                               table->rows (), row_size);
           break;
         case CCfits::Tulong:
         case CCfits::Tlong:
-          compound_type.insertMember (c.name (), offset,
-                                      H5::PredType::NATIVE_INT64);
           types.push_back (Type::LONG);
-          read_column<int64_t>(data.data () + offset, c, table->rows (),
-                               row_size);
+          read_column<int64_t>(data.data () + offsets[column], c,
+                               table->rows (), row_size);
           break;
         case CCfits::Tfloat:
-          compound_type.insertMember (c.name (), offset,
-                                      H5::PredType::NATIVE_FLOAT);
           types.push_back (Type::FLOAT);
-          read_column<float>(data.data () + offset, c, table->rows (),
-                             row_size);
+          read_column<float>(data.data () + offsets[column], c,
+                             table->rows (), row_size);
           break;
         case CCfits::Tdouble:
-          compound_type.insertMember (c.name (), offset,
-                                      H5::PredType::NATIVE_DOUBLE);
           types.push_back (Type::DOUBLE);
-          read_column<double>(data.data () + offset, c, table->rows (),
-                              row_size);
+          read_column<double>(data.data () + offsets[column], c,
+                              table->rows (), row_size);
           break;
         default:
           throw std::runtime_error (
@@ -187,9 +176,5 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       fields_properties.push_back (Field_Properties (
           std::string (""),
           { { "unit", c.unit () } }));
-      offsets.push_back (offset);
-      offset += compound_type.getMemberDataType (compound_type.getNmembers ()
-                                                 - 1).getSize ();
     }
-  offsets.push_back (offset);
 }
