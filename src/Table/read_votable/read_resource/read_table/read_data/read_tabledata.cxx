@@ -59,75 +59,35 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
     }
 
   row_size = 0;
+  offsets.push_back (0);
   for (std::size_t c=0; c<types.size (); ++c)
     {
       switch (types[c])
         {
         case Type::BOOLEAN:
-          row_size += H5::PredType::NATIVE_UCHAR.getSize ();
+          append_member(names.at(c), H5::PredType::NATIVE_UCHAR);
           break;
         case Type::SHORT:
-          row_size += H5::PredType::NATIVE_INT16.getSize ();
+          append_member(names.at(c), H5::PredType::NATIVE_INT16);
           break;
         case Type::INT:
-          row_size += H5::PredType::NATIVE_INT32.getSize ();
+          append_member(names.at(c), H5::PredType::NATIVE_INT32);
           break;
         case Type::LONG:
-          row_size += H5::PredType::NATIVE_INT64.getSize ();
+          append_member(names.at(c), H5::PredType::NATIVE_INT64);
           break;
         case Type::FLOAT:
-          row_size += H5::PredType::NATIVE_FLOAT.getSize ();
+          append_member(names.at(c), H5::PredType::NATIVE_FLOAT);
           break;
         case Type::DOUBLE:
-          row_size += H5::PredType::NATIVE_DOUBLE.getSize ();
-          break;
-        case Type::STRING:
-          row_size += H5::PredType::NATIVE_CHAR.getSize () * column_width[c];
-          break;
-        }
-    }
-  compound_type = H5::CompType (row_size);
-
-  size_t offset=0;
-  for (std::size_t c=0; c<types.size (); ++c)
-    {
-      switch (types[c])
-        {
-        case Type::BOOLEAN:
-          compound_type.insertMember (names.at(c), offset,
-                                      H5::PredType::NATIVE_UCHAR);
-          break;
-        case Type::SHORT:
-          compound_type.insertMember (names.at(c), offset,
-                                      H5::PredType::NATIVE_INT16);
-          break;
-        case Type::INT:
-          compound_type.insertMember (names.at(c), offset,
-                                      H5::PredType::NATIVE_INT32);
-          break;
-        case Type::LONG:
-          compound_type.insertMember (names.at(c), offset,
-                                      H5::PredType::NATIVE_INT64);
-          break;
-        case Type::FLOAT:
-          compound_type.insertMember (names.at(c), offset,
-                                      H5::PredType::NATIVE_FLOAT);
-          break;
-        case Type::DOUBLE:
-          compound_type.insertMember (names.at(c), offset,
-                                      H5::PredType::NATIVE_DOUBLE);
+          append_member(names.at(c), H5::PredType::NATIVE_DOUBLE);
           break;
         case Type::STRING:
           string_types.emplace_back (0, column_width[c]);
-          compound_type.insertMember (names.at(c), offset,
-                                      *string_types.rbegin ());
+          append_member(names.at(c), *string_types.rbegin ());
           break;
         }
-      offsets.push_back (offset);
-      offset += compound_type.getMemberDataType (compound_type.getNmembers ()
-                                                 - 1).getSize ();
     }
-  offsets.push_back (offset);
 
   char row_string[row_size];
   for (size_t current_row=0; current_row<rows.size (); ++current_row)
