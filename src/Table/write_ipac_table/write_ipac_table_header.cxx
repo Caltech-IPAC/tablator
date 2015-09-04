@@ -11,12 +11,32 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
 
   os << "\\RowsRetrieved= " << size () << "\n";
 
-  for (auto &p : flatten_properties ())
+  // FIXME: need to escape the key and value and handle embedded newlines
+  const size_t keyword_alignment (8);
+  for (auto &property : properties)
     {
-      // FIXME: need to escape the key and value and handle embedded newlines
-      const size_t keyword_alignment (8);
-      os << "\\" << std::setw (keyword_alignment) << p.first << "= "
-         << "'" << p.second << "'\n";
+      auto &p=property.second;
+      if (!p.value.empty ())
+        {
+          os << "\\" << std::setw (keyword_alignment) << property.first << "= "
+             << "'" << p.value << "'\n";
+        }
+      auto &a=p.attributes;
+      auto name (a.find ("name")), value (a.find ("value"));
+      if (a.size ()==2 && name!=a.end () && value!=a.end ())
+        {
+            os << "\\" << std::setw (keyword_alignment) << name->second << "= "
+             << "'" << value->second << "'\n";
+        }
+      else
+        {
+          for (auto &attr: a)
+            {
+              os << "\\" << std::setw (keyword_alignment)
+                 << (property.first + "." + attr.first) << "= "
+                 << "'" << attr.second << "'\n";
+            }
+        }
     }
 
   if (comments.empty () && fields_properties.size () > 0)
