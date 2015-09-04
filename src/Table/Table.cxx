@@ -2,16 +2,13 @@
 
 tablator::Table::Table (const std::vector<Column> &columns,
                         const std::map<std::string, std::string> &property_map)
+  : compound_type (size_t(1))
 {
-  size_t offset(0);
+  row_size=0;
   const size_t null_flags_size=(columns.size ()+7)/8;
-
   string_types.emplace_back (0, null_flags_size);
-  compound_type.setSize (null_flags_size);
-  compound_type.insertMember ("null_bitfield_flags", offset,
-                              *string_types.rbegin ());
-  offsets.push_back (offset);
-  offset+=null_flags_size;
+  append_member ("null_bitfield_flags", *string_types.rbegin ());
+
   fields_properties.push_back (Field_Properties("Packed bit array indicating whether an entry is null", {}));
   types.push_back (Type::STRING);
 
@@ -24,15 +21,12 @@ tablator::Table::Table (const std::vector<Column> &columns,
       if (type == H5::PredType::NATIVE_CHAR)
         {
           string_types.emplace_back (0, c.second.first.second);
-          compound_type.insertMember (c.first, offset,
-                                      *string_types.rbegin ());
+          append_member (c.first, *string_types.rbegin ());
         }
       else
         {
-          compound_type.insertMember (c.first, offset, type);
+          append_member (c.first, type);
         }
-      offsets.push_back (offset);
-      offset += member_size;
       fields_properties.emplace_back (c.second.second);
 
       if (type == H5::PredType::NATIVE_UCHAR)
@@ -54,9 +48,6 @@ tablator::Table::Table (const std::vector<Column> &columns,
             "Unknown HDF5 type in compound_type with id: "
             + std::to_string (type.getId ()));
     }
-  offsets.push_back (offset);
-
-  row_size=compound_type.getSize ();
 
   for (auto &p : property_map)
     properties.emplace_back (p.first, Property (p.second));

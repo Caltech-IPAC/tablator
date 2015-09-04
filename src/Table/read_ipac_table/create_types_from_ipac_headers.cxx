@@ -49,7 +49,6 @@ get_data_types (std::vector<std::string> &data_types)
     }
   return types;
 }
-
 }
 
 void tablator::Table::create_types_from_ipac_headers
@@ -63,81 +62,42 @@ void tablator::Table::create_types_from_ipac_headers
   const size_t num_columns = columns[0].size ();
   ipac_column_widths = get_ipac_column_widths (ipac_column_offsets);
 
-  for (size_t i = 0; i < num_columns; ++i)
-    {
-      offsets.push_back (row_size);
-      switch (types.at(i))
-        {
-          /// BOOLEAN and SHORT should never be used, but we include
-          /// them here just in case
-        case Type::BOOLEAN:
-          row_size += H5::PredType::NATIVE_UCHAR.getSize ();
-          break;
-        case Type::SHORT:
-          row_size += H5::PredType::NATIVE_INT16.getSize ();
-          break;
-        case Type::INT:
-          row_size += H5::PredType::NATIVE_INT32.getSize ();
-          break;
-        case Type::LONG:
-          row_size += H5::PredType::NATIVE_INT64.getSize ();
-          break;
-        case Type::FLOAT:
-          row_size += H5::PredType::NATIVE_FLOAT.getSize ();
-          break;
-        case Type::DOUBLE:
-          row_size += H5::PredType::NATIVE_DOUBLE.getSize ();
-          break;
-        case Type::STRING:
-          row_size += ipac_column_widths.at(i);
-          break;
-
-        default:
-          throw std::runtime_error ("Unsupported data type for column "
-                                    + columns[0].at(i));
-        }
-    }
-  offsets.push_back (row_size);
-
-  compound_type = H5::CompType (row_size);
+  offsets.push_back (0);
   for (size_t i = 0; i < num_columns; ++i)
     {
       switch (types[i])
         {
         case Type::BOOLEAN:
-          compound_type.insertMember (columns[0].at(i), offsets[i],
-                                      H5::PredType::NATIVE_UCHAR);
+          append_member (columns[0].at(i), H5::PredType::NATIVE_UCHAR);
           break;
 
         case Type::SHORT:
-          compound_type.insertMember (columns[0].at(i), offsets[i],
-                                      H5::PredType::NATIVE_INT16);
+          append_member (columns[0].at(i), H5::PredType::NATIVE_INT16);
           break;
 
         case Type::INT:
-          compound_type.insertMember (columns[0].at(i), offsets[i],
-                                      H5::PredType::NATIVE_INT32);
+          append_member (columns[0].at(i), H5::PredType::NATIVE_INT32);
           break;
 
         case Type::LONG:
-          compound_type.insertMember (columns[0].at(i), offsets[i],
-                                      H5::PredType::NATIVE_INT64);
+          append_member (columns[0].at(i), H5::PredType::NATIVE_INT64);
           break;
 
         case Type::FLOAT:
-          compound_type.insertMember (columns[0].at(i), offsets[i],
-                                      H5::PredType::NATIVE_FLOAT);
+          append_member (columns[0].at(i), H5::PredType::NATIVE_FLOAT);
           break;
         case Type::DOUBLE:
-          compound_type.insertMember (columns[0].at(i), offsets[i],
-                                      H5::PredType::NATIVE_DOUBLE);
+          append_member (columns[0].at(i), H5::PredType::NATIVE_DOUBLE);
           break;
 
         case Type::STRING:
           string_types.emplace_back (0,ipac_column_widths.at(i));
-          compound_type.insertMember (columns[0].at(i), offsets[i],
-                                      *string_types.rbegin ());
+          append_member (columns[0].at(i), *string_types.rbegin ());
           break;
+
+        default:
+          throw std::runtime_error ("Unsupported data type for column "
+                                    + columns[0].at(i));
         }
     }
 

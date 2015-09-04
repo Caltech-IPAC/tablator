@@ -69,6 +69,7 @@ public:
   }
 
   Table (const boost::filesystem::path &input_path)
+    : compound_type (size_t(1))
   {
     Format format (input_path);
     if (format.is_hdf5 ())
@@ -108,6 +109,17 @@ public:
 
   void set_null (size_t column, char row[]);
 
+  // FIXME: add_member feels a little magic.
+  void append_member (const std::string &name, const H5::DataType &type)
+  {
+    size_t member_size=type.getSize ();
+    size_t old_size=row_size;
+    row_size+=member_size;
+    compound_type.setSize (row_size);
+    compound_type.insertMember (name, old_size, type);
+    offsets.push_back (row_size);
+  }
+  
   template <typename T>
   void copy_to_row (const T &element, const size_t &offset, char row[])
   {
