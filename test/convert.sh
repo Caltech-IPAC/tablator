@@ -13,9 +13,9 @@ for table in test/*.tbl; do
     for ending in tbl hdf5 xml csv tsv fits html; do
         build/tablator $table test.$ending
         if [ $? -eq 0 ]; then
-            echo "PASS: $table.$ending"
+            echo "PASS: $table -> $ending"
         else
-            echo "FAIL: $table.$ending"
+            echo "FAIL: $table -> $ending"
         fi
         rm test.$ending
     done
