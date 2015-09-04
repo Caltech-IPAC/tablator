@@ -9,20 +9,18 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
 
   os << std::left;
 
-  /// FIXME:: why related to fits?
-  const int fits_keyword_length (8);
   os << "\\RowsRetrieved= " << size () << "\n";
 
   for (auto &p : flatten_properties ())
     {
-      // FIXME: need to escape the key and value
-      os << "\\" << std::setw (fits_keyword_length) << p.first << "= "
+      // FIXME: need to escape the key and value and handle embedded newlines
+      const size_t keyword_alignment (8);
+      os << "\\" << std::setw (keyword_alignment) << p.first << "= "
          << "'" << p.second << "'\n";
     }
 
   if (comments.empty () && fields_properties.size () > 0)
     {
-      /// FIXME: Suggest to review this and remove this part
       for (int i = 0; i < num_members; ++i)
         {
           os << "\\ " << compound_type.getMemberName (i+1);
