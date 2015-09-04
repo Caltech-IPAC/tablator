@@ -68,27 +68,34 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
         {
         case CCfits::Tlogical:
           append_member (c.name (), H5::PredType::NATIVE_UCHAR);
+          types.push_back (Type::BOOLEAN);
           break;
         case CCfits::Tstring:
           string_types.emplace_back (0, c.width ());
           append_member (c.name (), *string_types.rbegin ());
+          types.push_back (Type::STRING);
           break;
         case CCfits::Tushort:
         case CCfits::Tshort:
+          types.push_back (Type::SHORT);
           append_member (c.name (), H5::PredType::NATIVE_INT16);
           break;
         case CCfits::Tuint:
         case CCfits::Tint:
+          types.push_back (Type::INT);
           append_member (c.name (), H5::PredType::NATIVE_INT32);
           break;
         case CCfits::Tulong:
         case CCfits::Tlong:
+          types.push_back (Type::LONG);
           append_member (c.name (), H5::PredType::NATIVE_INT64);
           break;
         case CCfits::Tfloat:
+          types.push_back (Type::FLOAT);
           append_member (c.name (), H5::PredType::NATIVE_FLOAT);
           break;
         case CCfits::Tdouble:
+          types.push_back (Type::DOUBLE);
           append_member (c.name (), H5::PredType::NATIVE_DOUBLE);
           break;
         default:
@@ -109,7 +116,6 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       switch (c.type ())
         {
         case CCfits::Tlogical:
-          types.push_back (Type::BOOLEAN);
           {
             std::vector<int> v;
             c.read (v, 1, table->rows ());
@@ -122,7 +128,6 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
           }
           break;
         case CCfits::Tstring:
-          types.push_back (Type::STRING);
           {
             std::vector<std::string> v;
             c.read (v, 1, table->rows ());
@@ -140,29 +145,24 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
           break;
         case CCfits::Tushort:
         case CCfits::Tshort:
-          types.push_back (Type::SHORT);
           read_column<int16_t>(data.data () + offsets[column], c,
                                table->rows (), row_size);
           break;
         case CCfits::Tuint:
         case CCfits::Tint:
-          types.push_back (Type::INT);
           read_column<int32_t>(data.data () + offsets[column], c,
                                table->rows (), row_size);
           break;
         case CCfits::Tulong:
         case CCfits::Tlong:
-          types.push_back (Type::LONG);
           read_column<int64_t>(data.data () + offsets[column], c,
                                table->rows (), row_size);
           break;
         case CCfits::Tfloat:
-          types.push_back (Type::FLOAT);
           read_column<float>(data.data () + offsets[column], c,
                              table->rows (), row_size);
           break;
         case CCfits::Tdouble:
-          types.push_back (Type::DOUBLE);
           read_column<double>(data.data () + offsets[column], c,
                               table->rows (), row_size);
           break;
