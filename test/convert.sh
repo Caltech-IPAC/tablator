@@ -12,11 +12,14 @@ done
 for table in test/*.tbl; do
     for ending in tbl hdf5 xml csv tsv fits html; do
         build/tablator $table test.$ending
-        if [ $? -eq 0 ]; then
-            echo "PASS: $table -> $ending"
-        else
-            echo "FAIL: $table -> $ending"
+        if [ $ending == "hdf5" ] || [ $ending == "xml" ] || [ $ending == "fits" ]; then
+            build/tablator test.$ending temp.tbl
         fi
-        rm test.$ending
+        if [ $? -eq 0 ]; then
+            echo "PASS: $table <-> $ending"
+        else
+            echo "FAIL: $table <-> $ending"
+        fi
+        rm -f test.$ending temp.tbl
     done
 done
