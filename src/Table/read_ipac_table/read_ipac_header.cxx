@@ -58,18 +58,8 @@ size_t tablator::Table::read_ipac_header
               std::string value_substr;
               if (first!=std::string::npos)
                 value_substr=value.substr (first, last - first + 1);
-              /// Handle duplicate keys by appending them to the end.
-              auto p=std::find_if (properties.begin (), properties.end (),
-                                   [&](const std::pair<std::string,Property> &item)
-                                   { return item.first == key; });
-              if (p!=properties.end ())
-                {
-                  p->second.value+=" " + value_substr;
-                }
-              else
-                {
-                  properties.emplace_back (key, Property (value_substr));
-                }
+
+              properties.emplace_back (key, Property (value_substr));
             }
         }
     }
