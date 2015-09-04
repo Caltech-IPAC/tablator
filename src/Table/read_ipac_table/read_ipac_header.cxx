@@ -55,7 +55,9 @@ size_t tablator::Table::read_ipac_header
             {
               std::size_t first = value.find_first_not_of ("\"'");
               std::size_t last = value.find_last_not_of ("\"'");
-              std::string value_substr=value.substr (first, last - first + 1);
+              std::string value_substr;
+              if (first!=std::string::npos)
+                value_substr=value.substr (first, last - first + 1);
               /// Handle duplicate keys by appending them to the end.
               auto p=std::find_if (properties.begin (), properties.end (),
                                    [&](const std::pair<std::string,Property> &item)
