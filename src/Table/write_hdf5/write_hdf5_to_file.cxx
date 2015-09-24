@@ -33,6 +33,7 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
 
   H5::DataSet table{ outfile.createDataSet ("table", compound_type,
                                             dataspace) };
+  /// Write the comments
   if (!comments.empty ())
     {
       std::string description;
@@ -49,6 +50,7 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
         }
     }
 
+  /// Write the attributes
   H5::StrType hdf5_string (0,H5T_VARIABLE);
   H5::CompType hdf5_attribute_type (2*hdf5_string.getSize ());
   hdf5_attribute_type.insertMember ("name",0,hdf5_string);
@@ -63,10 +65,9 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
   hdf5_property_type.insertMember ("attributes",
                                    HOFFSET (HDF5_Property,attributes),
                                    hdf5_attributes_type);
-
-  std::vector<std::vector<const char *> > strings;
   H5::VarLenType hdf5_properties_type (&hdf5_property_type);
 
+  std::vector<std::vector<const char *> > strings;
   std::vector<HDF5_Property> hdf5_properties;
 
   for (auto &property : properties)
@@ -79,7 +80,6 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
           std::vector<const char *> &s=*strings.rbegin ();
           for (auto &a: p.attributes)
             {
-              std::cout << "\t" << a.first << " " << a.second << "\n";
               s.push_back(a.first.c_str ());
               s.push_back(a.second.c_str ());
             }
@@ -100,7 +100,6 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
   H5::Attribute table_attribute
     = table.createAttribute ("METADATA", hdf5_properties_type, property_space);
   table_attribute.write (hdf5_properties_type, &hdf5_props);
-
 
   /// Write the data
   table.write (data.data (), compound_type);
