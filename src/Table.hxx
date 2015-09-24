@@ -168,6 +168,7 @@ public:
   void write_hdf5 (std::ostream &os) const;
   void write_hdf5 (const boost::filesystem::path &p) const;
   void write_hdf5_to_file (H5::H5File &outfile) const;
+  void write_hdf5_attributes (H5::DataSet &table) const;
 
   void write_ipac_table (std::ostream &os) const;
   void write_ipac_table (const boost::filesystem::path &p)

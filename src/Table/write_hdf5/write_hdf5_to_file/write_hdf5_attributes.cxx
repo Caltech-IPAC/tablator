@@ -1,9 +1,9 @@
 #include <vector>
-#include <array>
-#include <sstream>
 
-#include "../../Table.hxx"
+#include "../../../Table.hxx"
 
+namespace
+{
 class HDF5_Property
 {
 public:
@@ -24,33 +24,13 @@ public:
   HDF5_Attribute (const char *Name, const char *Value)
     : name (Name), value (Value) {}
 };
+}
 
+/// This gets a bit complicated because there are variable length
+/// arrays inside variable length arrays.
 
-void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
+void tablator::Table::write_hdf5_attributes (H5::DataSet &table) const
 {
-  std::array<hsize_t, 1> dims = { { size () } };
-  H5::DataSpace dataspace (dims.size (), dims.data ());
-
-  H5::DataSet table{ outfile.createDataSet ("table", compound_type,
-                                            dataspace) };
-  /// Write the comments
-  if (!comments.empty ())
-    {
-      std::string description;
-      for (auto &c: comments)
-        description+=c + '\n';
-      if (!description.empty ())
-        {
-          description.resize (description.size () - 1);
-          H5::StrType str_type (0, description.size ());
-          H5::DataSpace attribute_space (H5S_SCALAR);
-          H5::Attribute attribute
-            = table.createAttribute ("DESCRIPTION", str_type, attribute_space);
-          attribute.write (str_type, description.c_str ());
-        }
-    }
-
-  /// Write the attributes
   H5::StrType hdf5_string (0,H5T_VARIABLE);
   H5::CompType hdf5_attribute_type (2*hdf5_string.getSize ());
   hdf5_attribute_type.insertMember ("name",0,hdf5_string);
@@ -100,7 +80,4 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
   H5::Attribute table_attribute
     = table.createAttribute ("METADATA", hdf5_properties_type, property_space);
   table_attribute.write (hdf5_properties_type, &hdf5_props);
-
-  /// Write the data
-  table.write (data.data (), compound_type);
 }

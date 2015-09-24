@@ -41,7 +41,8 @@ def build(bld):
              'src/Table/write_ipac_table/to_ipac_string.cxx',
              'src/Table/write_ipac_table/get_column_width.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',
-             'src/Table/write_hdf5/write_hdf5_to_file.cxx']
+             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_to_file.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_attributes.cxx']
 
     bld.shlib(source=sources,
               target='tablator',
