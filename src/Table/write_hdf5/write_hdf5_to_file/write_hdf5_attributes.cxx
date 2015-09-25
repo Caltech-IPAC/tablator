@@ -1,30 +1,8 @@
 #include <vector>
 
 #include "../../../Table.hxx"
-
-namespace
-{
-class HDF5_Property
-{
-public:
-  const char *name;
-  const char *value;
-  hvl_t attributes;
-
-  HDF5_Property (const char *Name, const char *Value, const hvl_t &Attributes)
-    : name (Name), value (Value), attributes (Attributes) {}
-};
-
-class HDF5_Attribute
-{
-public:
-  const char *name;
-  const char *value;
-
-  HDF5_Attribute (const char *Name, const char *Value)
-    : name (Name), value (Value) {}
-};
-}
+#include "../../HDF5_Property.hxx"
+#include "../../HDF5_Attribute.hxx"
 
 /// This gets a bit complicated because there are variable length
 /// arrays inside variable length arrays.
