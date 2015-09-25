@@ -60,8 +60,10 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
                                   HDF5_Attribute &hdf_attribute=
                                     reinterpret_cast<HDF5_Attribute*>
                                     (hdf5_property.attributes.p)[i];
-                                  p.attributes.emplace(hdf_attribute.name,
-                                                       hdf_attribute.value);
+                                  p.attributes.insert
+                                    (std::make_pair
+                                     (std::string(hdf_attribute.name),
+                                      std::string(hdf_attribute.value)));
                                 }
                               properties.push_back(std::make_pair
                                                    (std::string
