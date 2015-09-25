@@ -8,17 +8,18 @@ The library currently supports reading
   FITS
   IPAC_TABLE
   HDF5
+  VOTABLE
 
 and writing
 
+  FITS
+  IPAC_TABLE
+  HDF5
   VOTABLE
   CSV
   TSV
-  FITS
-  IPAC_TABLE
   TEXT
   HTML
-  HDF5
 
 
 Copyright © 2014-2015, California Institute of Technology
