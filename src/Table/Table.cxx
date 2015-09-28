@@ -2,7 +2,7 @@
 
 tablator::Table::Table (const std::vector<Column> &columns,
                         const std::map<std::string, std::string> &property_map)
-  : compound_type (size_t(1))
+  : compound_type (size_t(1)), offsets({0})
 {
   row_size=0;
   const size_t null_flags_size=(columns.size ()+7)/8;
