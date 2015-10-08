@@ -142,7 +142,7 @@ public:
                     const size_t &offset_end, char row[])
   {
     std::string element_copy(element);
-    element_copy.resize (offset_end-offset_begin,' ');
+    element_copy.resize (offset_end-offset_begin,'\0');
     std::copy (element_copy.begin (), element_copy.end (), row + offset_begin);
   }
   void insert_row (const char row[])
