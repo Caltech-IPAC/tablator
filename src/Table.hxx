@@ -202,7 +202,7 @@ public:
                        const std::vector<std::string> &names);
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
-  void write_votable (std::ostream &os) const;
+  boost::property_tree::ptree generate_property_tree () const;
 
   size_t read_ipac_header
   (boost::filesystem::ifstream &ipac_file,

@@ -1,3 +1,6 @@
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include "../Table.hxx"
 
 void tablator::Table::write_output (const boost::filesystem::path &path,
@@ -24,8 +27,13 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
 
       switch (format.index->first)
         {
+        case Format::enum_format::JSON:
+          boost::property_tree::write_json (out, generate_property_tree(), true);
+          break;
         case Format::enum_format::VOTABLE:
-          write_votable (out);
+          boost::property_tree::write_xml
+            (out, generate_property_tree(),
+             boost::property_tree::xml_writer_make_settings(' ',2));
           break;
         case Format::enum_format::CSV:
           write_csv_tsv (out, ',');

@@ -1,17 +1,16 @@
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "../../Table.hxx"
 
 namespace tablator
 {
-void Field_Properties_to_xml (boost::property_tree::ptree &tree,
-                              const std::string &name,
-                              const tablator::Table::Type &type,
-                              const Field_Properties &field_property);
+void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
+                                        const std::string &name,
+                                        const tablator::Table::Type &type,
+                                        const Field_Properties &field_property);
 }
 
-void tablator::Table::write_votable (std::ostream &os) const
+boost::property_tree::ptree tablator::Table::generate_property_tree () const
 {
   boost::property_tree::ptree tree;
   std::string votable_literal ("VOTABLE");
@@ -93,8 +92,8 @@ void tablator::Table::write_votable (std::ostream &os) const
     }
   /// Skip null_bitfield_flag
   for (size_t i = 1; i < fields_properties.size (); ++i)
-    Field_Properties_to_xml (table, compound_type.getMemberName (i),
-                             types.at (i), fields_properties[i]);
+    Field_Properties_to_property_tree (table, compound_type.getMemberName (i),
+                                       types.at (i), fields_properties[i]);
 
   boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", "");
   put_table_in_property_tree (tabledata);
@@ -105,6 +104,6 @@ void tablator::Table::write_votable (std::ostream &os) const
       info.add ("<xmlattr>.name", "QUERY_STATUS");
       info.add ("<xmlattr>.value", "OVERFLOW");
     }
-  
-  boost::property_tree::write_xml (os, tree, boost::property_tree::xml_writer_make_settings(' ',2));
+
+  return tree;
 }

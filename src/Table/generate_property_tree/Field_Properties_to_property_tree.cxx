@@ -64,10 +64,10 @@ std::string to_string (const tablator::Table::Type &type)
 
 namespace tablator
 {
-void Field_Properties_to_xml (boost::property_tree::ptree &tree,
-                              const std::string &name,
-                              const tablator::Table::Type &type,
-                              const Field_Properties &field_property)
+void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
+                                        const std::string &name,
+                                        const tablator::Table::Type &type,
+                                        const Field_Properties &field_property)
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");
   field.add ("<xmlattr>.name", name);

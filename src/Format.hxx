@@ -14,7 +14,8 @@ class Format
 
 public:
   enum class enum_format
-  { VOTABLE,
+  { JSON,
+    VOTABLE,
     CSV,
     TSV,
     FITS,
@@ -31,6 +32,7 @@ public:
   // operator=().
   const std::map<Format::enum_format,
                  std::pair<std::string, std::vector<std::string> > > formats{
+    { Format::enum_format::JSON, { "json", { "js", "json" } } },
     { Format::enum_format::VOTABLE, { "votable", { "xml", "vot", "vo" } } },
     { Format::enum_format::CSV, { "csv", { "csv" } } },
     { Format::enum_format::TSV, { "tsv", { "tsv" } } },
