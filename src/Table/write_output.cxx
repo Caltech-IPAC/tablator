@@ -25,6 +25,7 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
       switch (format.index->first)
         {
         case Format::enum_format::JSON:
+        case Format::enum_format::JSON5:
           boost::property_tree::write_json (out, generate_property_tree(), true);
           break;
         case Format::enum_format::VOTABLE:
