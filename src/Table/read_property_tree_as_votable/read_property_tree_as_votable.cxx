@@ -11,11 +11,9 @@ inline void throw_if_empty(const boost::property_tree::ptree::const_iterator &ch
     throw std::runtime_error ("Missing RESOURCE in VOTABLE");
 }
 
-void tablator::Table::read_votable (const boost::filesystem::path &path)
+void tablator::Table::read_property_tree_as_votable
+(const boost::property_tree::ptree &tree)
 {
-  boost::property_tree::ptree tree;
-  boost::filesystem::ifstream file(path);
-  boost::property_tree::read_xml (file, tree);
   auto votable=tree.get_child ("VOTABLE");
   auto child = votable.begin ();
   auto end = votable.end ();

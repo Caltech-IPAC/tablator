@@ -1,6 +1,3 @@
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
 #include "../Table.hxx"
 
 void tablator::Table::write_output (const boost::filesystem::path &path,

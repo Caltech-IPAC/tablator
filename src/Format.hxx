@@ -127,6 +127,7 @@ public:
   {
     return index->first == enum_format::IPAC_TABLE;
   }
+  bool is_json () const { return index->first == enum_format::JSON; }
   bool is_votable () const { return index->first == enum_format::VOTABLE; }
   bool is_csv () const { return index->first == enum_format::CSV; }
   bool is_tsv () const { return index->first == enum_format::TSV; }

@@ -14,6 +14,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include "Property.hxx"
 #include "Field_Properties.hxx"
@@ -84,9 +86,16 @@ public:
       {
         read_ipac_table (input_path);
       }
-    else if (format.is_votable ())
+    else if (format.is_votable ()
+             || format.is_json ())
       {
-        read_votable (input_path);
+        boost::property_tree::ptree tree;
+        boost::filesystem::ifstream file(input_path);
+        if (format.is_votable ())
+          boost::property_tree::read_xml (file, tree);
+        else
+          boost::property_tree::read_json (file, tree);
+        read_property_tree_as_votable (tree);
       }
     else
       {
@@ -186,7 +195,7 @@ public:
   void read_ipac_table (const boost::filesystem::path &path);
   void read_fits (const boost::filesystem::path &path);
   void read_hdf5 (const boost::filesystem::path &path);
-  void read_votable (const boost::filesystem::path &path);
+  void read_property_tree_as_votable (const boost::property_tree::ptree &tree);
   void read_node_and_attributes (const std::string &node_name,
                                  const boost::property_tree::ptree &node);
   void read_node_and_attributes (const boost::property_tree::ptree::const_iterator &it)

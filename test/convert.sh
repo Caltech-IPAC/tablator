@@ -10,9 +10,9 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
 done
 
 for table in test/*.tbl; do
-    for ending in tbl hdf5 xml csv tsv fits html; do
+    for ending in tbl hdf5 xml csv tsv fits html json; do
         build/tablator $table test.$ending
-        if [ $ending == "hdf5" ] || [ $ending == "xml" ] || [ $ending == "fits" ]; then
+        if [ $ending == "hdf5" ] || [ $ending == "xml" ] || [ $ending == "fits" ] || [ $ending == "json" ]; then
             build/tablator test.$ending temp.tbl
         fi
         if [ $? -eq 0 ]; then
