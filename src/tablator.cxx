@@ -1,6 +1,7 @@
 /// A simple converter program to test out the tablator library.
 
 #include <CCfits/CCfits>
+#include <json5_parser.h>
 
 #include "Table.hxx"
 
@@ -38,6 +39,15 @@ int main (int argc, char *argv[])
       std::cerr << "In "
                 << exception.getFuncName () << ": "
                 << exception.getDetailMsg () << "\n";
+      std::cerr.flush ();
+      exit (1);
+    }
+  catch (json5_parser::Error_position &exception)
+    {
+      std::cerr << "On line "
+                << exception.line_ << ", column "
+                << exception.column_ << ": "
+                << exception.reason_ << "\n";
       std::cerr.flush ();
       exit (1);
     }

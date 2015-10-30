@@ -86,6 +86,10 @@ public:
       {
         read_ipac_table (input_path);
       }
+    else if (format.is_json5 ())
+      {
+        read_json5 (input_path);
+      }
     else if (format.is_votable ()
              || format.is_json ())
       {
@@ -195,6 +199,7 @@ public:
   void read_ipac_table (const boost::filesystem::path &path);
   void read_fits (const boost::filesystem::path &path);
   void read_hdf5 (const boost::filesystem::path &path);
+  void read_json5 (const boost::filesystem::path &path);
   void read_property_tree_as_votable (const boost::property_tree::ptree &tree);
   void read_node_and_attributes (const std::string &node_name,
                                  const boost::property_tree::ptree &node);

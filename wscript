@@ -1,16 +1,17 @@
 import os
 
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost')
+    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost json5_parser')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost')
+    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost json5_parser')
     conf.check_boost(lib='filesystem system regex')
 
 def build(bld):
     # default_flags=['-Wall', '-Wextra', '-Ofast']
     default_flags=['-Wall', '-Wextra', '-g']
-    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST']
+    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
+                  'json5_parser']
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
@@ -18,6 +19,7 @@ def build(bld):
              'src/Table/flatten_properties.cxx',
              'src/Table/read_fits.cxx',
              'src/Table/read_hdf5.cxx',
+             'src/Table/read_json5.cxx',
              'src/Table/read_ipac_table/read_ipac_table.cxx',
              'src/Table/read_ipac_table/read_ipac_header.cxx',
              'src/Table/read_ipac_table/create_types_from_ipac_headers.cxx',
