@@ -9,6 +9,8 @@ The library currently supports reading
   IPAC_TABLE
   HDF5
   VOTABLE
+  JSON
+  JSON5
 
 and writing
 
@@ -16,6 +18,8 @@ and writing
   IPAC_TABLE
   HDF5
   VOTABLE
+  JSON
+  JSON5
   CSV
   TSV
   TEXT
