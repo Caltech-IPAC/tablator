@@ -120,7 +120,13 @@ public:
   
   void append_row (const Row &row)
   {
+    assert (row.data.size () == row_size);
     data.insert (data.end (), row.data.begin (), row.data.end ());
+  }
+
+  void unsafe_append_row (const char *row)
+  {
+    data.insert (data.end (), row, row+row_size);
   }
 
   void pop_row ()

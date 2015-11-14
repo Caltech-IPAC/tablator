@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include "Type.hxx"
+#include "unsafe_copy_to_row.hxx"
 
 namespace tablator
 {
@@ -25,25 +26,21 @@ public:
                  const std::vector<size_t> offsets);
 
   template <typename T>
-  void copy_to_row (const T &element, const size_t &offset)
+  void insert (const T &element, const size_t &offset)
   {
     assert (offset + sizeof(T) <= data.size ());
-    // FIXME: This might be undefined, because element+1 is not
-    // guaranteed to be valid
-    std::copy (reinterpret_cast<const char *>(&element),
-               reinterpret_cast<const char *>(&element + 1),
-               data.data () + offset);
+    unsafe_copy_to_row (element, offset, data.data ());
   }
 
   template <typename T>
-  void copy_to_row (const T &begin, const T &end, const size_t &offset)
+  void insert (const T &begin, const T &end, const size_t &offset)
   {
     assert (offset + sizeof(T)*std::distance(begin,end) < data.size ());
     std::copy (begin, end, data.data () + offset);
   }
 
-  void copy_to_row (const std::string &element, const size_t &offset_begin,
-                    const size_t &offset_end)
+  void insert (const std::string &element, const size_t &offset_begin,
+               const size_t &offset_end)
   {
     std::string element_copy(element);
     element_copy.resize (offset_end-offset_begin,'\0');

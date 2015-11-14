@@ -115,7 +115,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                        + ".  Expected  'true', 'false', or empty, but found '"
                        + element + "'");
                   int8_t result=boost::iequals(element, "true");
-                  row_string.copy_to_row (result, offsets[column]);
+                  row_string.insert (result, offsets[column]);
                 }
                 break;
               case Type::SHORT:
@@ -125,8 +125,8 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                     if (result > std::numeric_limits<int16_t>::max ()
                         || result < std::numeric_limits<int16_t>::lowest ())
                       throw std::exception ();
-                    row_string.copy_to_row (static_cast<int16_t> (result),
-                                            offsets[column]);
+                    row_string.insert (static_cast<int16_t> (result),
+                                       offsets[column]);
                   }
                 catch (std::exception &error)
                   {
@@ -145,8 +145,8 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                     if (result > std::numeric_limits<int32_t>::max ()
                         || result < std::numeric_limits<int32_t>::lowest ())
                       throw std::exception ();
-                    row_string.copy_to_row (static_cast<int32_t> (result),
-                                            offsets[column]);
+                    row_string.insert (static_cast<int32_t> (result),
+                                       offsets[column]);
                   }
                 catch (std::exception &error)
                   {
@@ -165,8 +165,8 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                     if (result > std::numeric_limits<int64_t>::max ()
                         || result < std::numeric_limits<int64_t>::lowest ())
                       throw std::exception ();
-                    row_string.copy_to_row (static_cast<int64_t> (result),
-                                            offsets[column]);
+                    row_string.insert (static_cast<int64_t> (result),
+                                       offsets[column]);
                   }
                 catch (std::exception &error)
                   {
@@ -182,7 +182,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                 try
                   {
                     float result=boost::lexical_cast<float> (element);
-                    row_string.copy_to_row (result, offsets[column]);
+                    row_string.insert (result, offsets[column]);
                   }
                 catch (std::exception &error)
                   {
@@ -198,7 +198,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                 try
                   {
                     double result=boost::lexical_cast<double> (element);
-                    row_string.copy_to_row (result, offsets[column]);
+                    row_string.insert (result, offsets[column]);
                   }
                 catch (std::exception &error)
                   {
@@ -211,8 +211,8 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                   }
                 break;
               case Type::STRING:
-                row_string.copy_to_row (element, offsets[column],
-                                        offsets[column+1]);
+                row_string.insert (element, offsets[column],
+                                   offsets[column+1]);
                 break;
               }
         }
