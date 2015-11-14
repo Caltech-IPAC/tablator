@@ -6,7 +6,7 @@ namespace tablator
 {
 void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
                                         const std::string &name,
-                                        const tablator::Table::Type &type,
+                                        const tablator::Type &type,
                                         const Field_Properties &field_property);
 }
 

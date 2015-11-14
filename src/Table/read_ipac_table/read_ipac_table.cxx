@@ -23,10 +23,10 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
 
   std::string line;
   std::getline (ipac_file,line);
-  char row_string[row_size];
+  Row row_string (row_size);
   while (ipac_file)
     {
-      clear_nulls (row_string);
+      row_string.clear_nulls ();
       for (size_t column=1; column < columns[0].size (); ++column)
         {
           if (line[ipac_column_offsets[column-1]]!=' ')
@@ -42,7 +42,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
           if (!columns[3][column].empty()
               && element==columns[3][column])
             {
-              set_null (column, row_string);
+              row_string.set_null (column, types[column], offsets);
             }
           else
             {
@@ -56,7 +56,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                       int8_t result=stoi (element);
                       if (result !=0 || result !=1)
                         throw std::exception ();
-                      copy_to_row (result, offsets[column], row_string);
+                      row_string.copy_to_row (result, offsets[column]);
                     }
                   catch (std::exception &error)
                     {
@@ -75,8 +75,8 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                       if (result > std::numeric_limits<int16_t>::max ()
                           || result < std::numeric_limits<int16_t>::lowest ())
                         throw std::exception ();
-                      copy_to_row (static_cast<int16_t> (result),
-                                   offsets[column], row_string);
+                      row_string.copy_to_row (static_cast<int16_t> (result),
+                                              offsets[column]);
                     }
                   catch (std::exception &error)
                     {
@@ -95,8 +95,8 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                       if (result > std::numeric_limits<int32_t>::max ()
                           || result < std::numeric_limits<int32_t>::lowest ())
                         throw std::exception ();
-                      copy_to_row (static_cast<int32_t> (result),
-                                   offsets[column], row_string);
+                      row_string.copy_to_row (static_cast<int32_t> (result),
+                                              offsets[column]);
                     }
                   catch (std::exception &error)
                     {
@@ -115,8 +115,8 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                       if (result > std::numeric_limits<int64_t>::max ()
                           || result < std::numeric_limits<int64_t>::lowest ())
                         throw std::exception ();
-                      copy_to_row (static_cast<int64_t> (result),
-                                   offsets[column], row_string);
+                      row_string.copy_to_row (static_cast<int64_t> (result),
+                                              offsets[column]);
                     }
                   catch (std::exception &error)
                     {
@@ -132,7 +132,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                   try
                     {
                       float result=boost::lexical_cast<float> (element);
-                      copy_to_row (result, offsets[column], row_string);
+                      row_string.copy_to_row (result, offsets[column]);
                     }
                   catch (std::exception &error)
                     {
@@ -148,7 +148,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                   try
                     {
                       double result=boost::lexical_cast<double> (element);
-                      copy_to_row (result, offsets[column], row_string);
+                      row_string.copy_to_row (result, offsets[column]);
                     }
                   catch (std::exception &error)
                     {
@@ -161,13 +161,13 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                     }
                   break;
                 case Type::STRING:
-                  copy_to_row (element, offsets[column],
-                               offsets[column+1], row_string);
+                  row_string.copy_to_row (element, offsets[column],
+                                          offsets[column+1]);
                   break;
                 }
             }
         }
-      insert_row (row_string);
+      append_row (row_string);
       ++current_line;
       std::getline (ipac_file,line);
     }

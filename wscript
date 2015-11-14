@@ -15,6 +15,7 @@ def build(bld):
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
+             'src/Row/set_null.cxx',
              'src/Table/Table.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/read_fits.cxx',
@@ -30,7 +31,6 @@ def build(bld):
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_field.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_data.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_tabledata.cxx',
-             'src/Table/set_null.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
              'src/Table/write_fits.cxx',

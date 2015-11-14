@@ -1,6 +1,6 @@
 #include "../../Table.hxx"
 
-std::string tablator::Table::to_ipac_string (const tablator::Table::Type &type) const
+std::string tablator::Table::to_ipac_string (const tablator::Type &type) const
 {
   std::string result;
   switch (type)

@@ -146,30 +146,30 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
       switch (types[i])
         {
         case Type::BOOLEAN:
-          write_column<bool, char>(fits_file, TLOGICAL, i, index, size (),
+          write_column<bool, char>(fits_file, TLOGICAL, i, index, num_rows (),
                                    row_size);
           break;
         case Type::SHORT:
-          write_column<int16_t>(fits_file, TSHORT, i, index, size (),
+          write_column<int16_t>(fits_file, TSHORT, i, index, num_rows (),
                                 row_size);
           break;
         case Type::INT:
-          write_column<int32_t>(fits_file, TINT, i, index, size (), row_size);
+          write_column<int32_t>(fits_file, TINT, i, index, num_rows (), row_size);
           break;
         case Type::LONG:
-          write_column<int64_t>(fits_file, TLONG, i, index, size (), row_size);
+          write_column<int64_t>(fits_file, TLONG, i, index, num_rows (), row_size);
           break;
         case Type::FLOAT:
-          write_column<float>(fits_file, TFLOAT, i, index, size (), row_size);
+          write_column<float>(fits_file, TFLOAT, i, index, num_rows (), row_size);
           break;
         case Type::DOUBLE:
-          write_column<double>(fits_file, TDOUBLE, i, index, size (),
+          write_column<double>(fits_file, TDOUBLE, i, index, num_rows (),
                                row_size);
           break;
         case Type::STRING:
           {
-            std::vector<std::string> temp_strings (size ());
-            std::vector<char *> temp_chars (size ());
+            std::vector<std::string> temp_strings (num_rows ());
+            std::vector<char *> temp_chars (num_rows ());
             for (size_t j = 0; j < temp_strings.size (); ++j)
               {
                 temp_strings[j]
@@ -177,7 +177,7 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
                 temp_chars[j] = const_cast<char *>(temp_strings[j].c_str ());
                 index += row_size;
               }
-            fits_write_col (fits_file, TSTRING, i + 1, 1, 1, size (),
+            fits_write_col (fits_file, TSTRING, i + 1, 1, 1, num_rows (),
                             temp_chars.data (), &status);
             if (status != 0)
               throw CCfits::FitsError (status);

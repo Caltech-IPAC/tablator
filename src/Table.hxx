@@ -21,6 +21,8 @@
 #include "Field_Properties.hxx"
 #include "Format.hxx"
 
+#include "Row.hxx"
+
 namespace tablator
 {
 class Table
@@ -31,16 +33,6 @@ public:
   std::vector<std::string> comments;
   std::vector<Field_Properties> fields_properties;
   H5::CompType compound_type;
-  /// Type names are mostly lifted directly from the IVOA TAP spec.
-  /// IVOA has fixed length char[] arrays.  We just use a string.
-  enum class Type : char
-  { BOOLEAN,
-    SHORT,
-    INT,
-    LONG,
-    FLOAT,
-    DOUBLE,
-    STRING };
 
   /// These members are redundant with information in compound_type.
   /// We precompute them so that we do not have to do dynamic lookups
@@ -108,19 +100,12 @@ public:
       }
   }
 
-  size_t size () const { return data.size () / row_size; }
+  size_t num_rows () const { return data.size () / row_size; }
 
   bool is_null (size_t row_offset, size_t column) const
   {
     return data[row_offset+(column-1)/8] & (1 << ((column-1)%8));
   }
-
-  void clear_nulls (char row[]) const
-  {
-    std::fill (row,row+row_size,0);
-  }
-
-  void set_null (size_t column, char row[]);
 
   // FIXME: add_member feels a little magic.
   void append_member (const std::string &name, const H5::DataType &type)
@@ -133,34 +118,9 @@ public:
     offsets.push_back (row_size);
   }
   
-  template <typename T>
-  void copy_to_row (const T &element, const size_t &offset, char row[])
+  void append_row (const Row &row)
   {
-    assert (offset + sizeof(T) <= row_size);
-    // FIXME: I think this is undefined, because element+1 is not
-    // guaranteed to be valid
-    std::copy (reinterpret_cast<const char *>(&element),
-               reinterpret_cast<const char *>(&element + 1), row + offset);
-  }
-
-  template <typename T>
-  void copy_to_row (const T &begin, const T &end, const size_t &offset,
-                    char row[])
-  {
-    assert (offset < row_size);
-    std::copy (begin, end, row + offset);
-  }
-
-  void copy_to_row (const std::string &element, const size_t &offset_begin,
-                    const size_t &offset_end, char row[])
-  {
-    std::string element_copy(element);
-    element_copy.resize (offset_end-offset_begin,'\0');
-    std::copy (element_copy.begin (), element_copy.end (), row + offset_begin);
-  }
-  void insert_row (const char row[])
-  {
-    data.insert (data.end (), row, row + row_size);
+    data.insert (data.end (), row.data.begin (), row.data.end ());
   }
 
   void pop_row ()
@@ -192,7 +152,7 @@ public:
   std::vector<size_t> get_column_width () const;
   void write_ipac_table_header (std::ostream &os,
                                 const int &num_members) const;
-  std::string to_ipac_string (const tablator::Table::Type &type) const;
+  std::string to_ipac_string (const tablator::Type &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (const boost::filesystem::path &filename) const;

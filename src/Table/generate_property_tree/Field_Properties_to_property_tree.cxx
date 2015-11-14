@@ -27,30 +27,30 @@ void Option_to_xml (boost::property_tree::ptree &tree,
     }
 }
 
-std::string to_string (const tablator::Table::Type &type)
+std::string to_string (const tablator::Type &type)
 {
   std::string result;
   switch (type)
     {
-    case tablator::Table::Type::BOOLEAN:
+    case tablator::Type::BOOLEAN:
       result = "boolean";
       break;
-    case tablator::Table::Type::SHORT:
+    case tablator::Type::SHORT:
       result = "short";
       break;
-    case tablator::Table::Type::INT:
+    case tablator::Type::INT:
       result = "int";
       break;
-    case tablator::Table::Type::LONG:
+    case tablator::Type::LONG:
       result = "long";
       break;
-    case tablator::Table::Type::FLOAT:
+    case tablator::Type::FLOAT:
       result = "float";
       break;
-    case tablator::Table::Type::DOUBLE:
+    case tablator::Type::DOUBLE:
       result = "double";
       break;
-    case tablator::Table::Type::STRING:
+    case tablator::Type::STRING:
       result = "char";
       break;
     default:
@@ -66,7 +66,7 @@ namespace tablator
 {
 void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
                                         const std::string &name,
-                                        const tablator::Table::Type &type,
+                                        const tablator::Type &type,
                                         const Field_Properties &field_property)
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");

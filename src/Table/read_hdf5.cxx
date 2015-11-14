@@ -80,6 +80,7 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
   types.clear ();
   size_t offset{ 0 };
 
+  // FIXME: This assumes that the first column is null_bitfield_flags
   for (int i = 0; i < compound_type.getNmembers (); ++i)
     {
       H5::DataType d = compound_type.getMemberDataType (i);

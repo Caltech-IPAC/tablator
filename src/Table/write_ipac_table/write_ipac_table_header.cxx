@@ -9,7 +9,7 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
 
   os << std::left;
 
-  os << "\\RowsRetrieved= " << size () << "\n";
+  os << "\\RowsRetrieved= " << num_rows () << "\n";
 
   // FIXME: need to escape the key and value and handle embedded newlines
   const size_t keyword_alignment (8);

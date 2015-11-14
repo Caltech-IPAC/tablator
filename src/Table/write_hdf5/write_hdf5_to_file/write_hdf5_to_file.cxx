@@ -4,7 +4,7 @@
 
 void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
 {
-  std::array<hsize_t, 1> dims = { { size () } };
+  std::array<hsize_t, 1> dims = { { num_rows () } };
   H5::DataSpace dataspace (dims.size (), dims.data ());
 
   H5::DataSet table{ outfile.createDataSet ("table", compound_type,

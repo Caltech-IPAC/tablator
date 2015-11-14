@@ -2,22 +2,22 @@
 
 namespace
 {
-tablator::Table::Type string_to_Type (const std::string &s)
+tablator::Type string_to_Type (const std::string &s)
 {
   if (s=="boolean")
-    return tablator::Table::Type::BOOLEAN;
+    return tablator::Type::BOOLEAN;
   if (s=="short")
-    return tablator::Table::Type::SHORT;
+    return tablator::Type::SHORT;
   if (s=="int")
-    return tablator::Table::Type::INT;
+    return tablator::Type::INT;
   if (s=="long")
-    return tablator::Table::Type::LONG;
+    return tablator::Type::LONG;
   if (s=="float")
-    return tablator::Table::Type::FLOAT;
+    return tablator::Type::FLOAT;
   if (s=="double")
-    return tablator::Table::Type::DOUBLE;
+    return tablator::Type::DOUBLE;
   if (s=="char")
-    return tablator::Table::Type::STRING;
+    return tablator::Type::STRING;
   // FIXME: Implement these
   if (s=="bit" || s=="byte" || s=="unicodeChar" || s=="floatComplex"
       || s=="doubleComplex")
