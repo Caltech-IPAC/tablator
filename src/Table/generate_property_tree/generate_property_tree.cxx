@@ -68,15 +68,21 @@ boost::property_tree::ptree tablator::Table::generate_property_tree () const
           for (auto &a: p.second.attributes)
             element.add ("<xmlattr>." + a.first, a.second);
         }
-      else if (p.first!="OVERFLOW")
+      else if (p.first=="OVERFLOW")
+        {
+          overflow=true;
+        }
+      else
         {
           auto &info = resource.add ("INFO", "");
           info.add ("<xmlattr>.name", p.first);
           info.add ("<xmlattr>.value", p.second.value);
-        }
-      else
-        {
-          overflow=true;
+          for (auto &a: p.second.attributes)
+            {
+              auto &info_attribute = resource.add ("INFO", "");
+              info_attribute.add ("<xmlattr>.name", p.first + "." + a.first);
+              info_attribute.add ("<xmlattr>.value", a.second);
+            }
         }
     }
 
