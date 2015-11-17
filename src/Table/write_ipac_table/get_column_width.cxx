@@ -17,7 +17,7 @@ std::vector<size_t> tablator::Table::get_column_width () const
                             compound_type.getMemberDataType (i).getSize ());
           break;
         default:
-          width = 20;
+          width = output_precision+7;
         }
       widths.push_back (width);
     }
