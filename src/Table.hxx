@@ -137,7 +137,7 @@ public:
   std::vector<std::pair<std::string, std::string> >
   flatten_properties () const;
 
-  const int output_precision = 13;
+  const int output_precision = 17;
   void write_output (const boost::filesystem::path &path,
                      const Format &format);
   void write_output (const boost::filesystem::path &path)
