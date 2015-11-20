@@ -111,8 +111,7 @@ void tablator::Table::create_types_from_ipac_headers
         p.attributes.insert (std::make_pair
                              ("unit",boost::algorithm::trim_copy (columns[2].at(column))));
       if (!columns[3].at(column).empty ())
-        p.attributes.insert (std::make_pair
-                             ("null",boost::algorithm::trim_copy (columns[3].at(column))));
+        p.values.null=boost::algorithm::trim_copy (columns[3].at(column));
 
       fields_properties.emplace_back (p);
     }

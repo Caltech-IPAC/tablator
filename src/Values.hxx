@@ -14,7 +14,11 @@ public:
 
   bool empty () const
   {
-    return min.empty () && max.empty () && ID.empty () && null.empty ()
+    return empty_except_null () && null.empty ();
+  }
+  bool empty_except_null () const
+  {
+    return min.empty () && max.empty () && ID.empty ()
            && ref.empty () && options.empty ();
   }
 };

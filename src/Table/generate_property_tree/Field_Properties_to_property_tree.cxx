@@ -6,7 +6,7 @@ namespace
 void Min_Max_to_xml (boost::property_tree::ptree &tree,
                      const std::string &min_max, const tablator::Min_Max &m)
 {
-  if (!min_max.empty ())
+  if (!m.empty ())
     {
       boost::property_tree::ptree &min_max_tree = tree.add (min_max, "");
       min_max_tree.add ("<xmlattr>.value", m.value);
@@ -94,13 +94,11 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
     field.add ("DESCRIPTION", field_property.description);
 
   auto &v (field_property.values);
-  if (!v.empty ())
+  if (!v.empty_except_null ())
     {
       boost::property_tree::ptree &values = field.add ("VALUES", "");
       if (!v.ID.empty ())
         values.add ("<xmlattr>.ID", v.ID);
-      if (!v.null.empty ())
-        values.add ("<xmlattr>.null", v.null);
       if (!v.ref.empty ())
         values.add ("<xmlattr>.ref", v.ref);
 

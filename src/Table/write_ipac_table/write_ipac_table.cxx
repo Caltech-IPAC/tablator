@@ -68,14 +68,14 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
           continue;
         }
       os << std::setw (ipac_column_widths[i]);
-      auto null = f.attributes.find ("null");
-      if (null == f.attributes.end ())
+      auto null = f.values.null;
+      if (null.empty ())
         {
           os << "null";
         }
       else
         {
-          os << null->second;
+          os << null;
         }
       os << "|";
       ++i;
@@ -93,11 +93,11 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
           size_t offset = offsets[column+1] + row_offset;
           if (is_null (row_offset,column+1))
             {
-              auto null_value=fields_properties.at (column+1).attributes.find ("null");
-              if (null_value==fields_properties.at (column+1).attributes.end ())
+              auto null_value=fields_properties.at (column+1).values.null;
+              if (null_value.empty ())
                 ss << "null";
               else
-                ss << null_value->second;
+                ss << null_value;
             }
           else
             {
