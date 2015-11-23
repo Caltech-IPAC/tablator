@@ -101,35 +101,34 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
             }
           else
             {
-              switch (types[column+1])
+              if (types[column+1]==H5::PredType::STD_I8LE)
                 {
-                case Type::BOOLEAN:
                   ss << static_cast<int>(data[offset]);
-                  break;
-
-                case Type::SHORT:
+                }
+              else if (types[column+1]==H5::PredType::STD_I16LE)
+                {
                   ss << *reinterpret_cast<const int16_t *>(data.data () + offset);
-                  break;
-
-                case Type::INT:
+                }
+              else if (types[column+1]==H5::PredType::STD_I32LE)
+                {
                   ss << *reinterpret_cast<const int32_t *>(data.data () + offset);
-                  break;
-
-                case Type::LONG:
+                }
+              else if (types[column+1]==H5::PredType::STD_I64LE)
+                {
                   ss << *reinterpret_cast<const int64_t *>(data.data () + offset);
-                  break;
-
-                case Type::FLOAT:
+                }
+              else if (types[column+1]==H5::PredType::IEEE_F32LE)
+                {
                   ss.precision (output_precision);
                   ss << *reinterpret_cast<const float *>(data.data () + offset);
-                  break;
-
-                case Type::DOUBLE:
+                }
+              else if (types[column+1]==H5::PredType::IEEE_F64LE)
+                {
                   ss.precision (output_precision);
                   ss << *reinterpret_cast<const double *>(data.data () + offset);
-                  break;
-
-                case Type::STRING:
+                }
+              else if (types[column+1]==H5::PredType::C_S1)
+                {
                   /// The characters in the type can be shorter than
                   /// the number of allowed bytes.  So add a
                   /// .c_str() that will terminate the string at the
@@ -137,7 +136,6 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
                   ss << std::string(data.data () + offset,
                                     offsets[column + 2]
                                     - offsets[column+1]).c_str();
-                  break;
                 }
             }
         }

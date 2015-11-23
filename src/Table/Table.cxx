@@ -9,8 +9,9 @@ tablator::Table::Table (const std::vector<Column> &columns,
   string_types.emplace_back (0, null_flags_size);
   append_member ("null_bitfield_flags", *string_types.rbegin ());
 
-  fields_properties.push_back (Field_Properties("Packed bit array indicating whether an entry is null", {}));
-  types.push_back (Type::STRING);
+  fields_properties.push_back (Field_Properties("Packed bit array indicating "
+                                                "whether an entry is null", {}));
+  types.push_back (H5::PredType::C_S1);
 
   for (auto &c : columns)
     {
@@ -18,35 +19,22 @@ tablator::Table::Table (const std::vector<Column> &columns,
       const size_t member_size=
         c.second.first.first.getSize () * c.second.first.second;
       compound_type.setSize (compound_type.getSize () + member_size);
-      if (type == H5::PredType::NATIVE_CHAR)
+      if (type == H5::PredType::C_S1)
         {
           string_types.emplace_back (0, c.second.first.second);
           append_member (c.first, *string_types.rbegin ());
         }
+      // else if (c.second.first.second!=1)
+      //   {
+      //     array_types.emplace_back (type, 1, c.second.first.second);
+      //     append_member (c.first, *array_types.rbegin ());
+      //   }
       else
         {
           append_member (c.first, type);
         }
       fields_properties.emplace_back (c.second.second);
-
-      if (type == H5::PredType::NATIVE_UCHAR)
-        types.push_back (Type::BOOLEAN);
-      else if (type == H5::PredType::NATIVE_INT16)
-        types.push_back (Type::SHORT);
-      else if (type == H5::PredType::NATIVE_INT32)
-        types.push_back (Type::INT);
-      else if (type == H5::PredType::NATIVE_INT64)
-        types.push_back (Type::LONG);
-      else if (type == H5::PredType::NATIVE_FLOAT)
-        types.push_back (Type::FLOAT);
-      else if (type == H5::PredType::NATIVE_DOUBLE)
-        types.push_back (Type::DOUBLE);
-      else if (type == H5::PredType::NATIVE_CHAR)
-        types.push_back (Type::STRING);
-      else
-        throw std::runtime_error (
-            "Unknown HDF5 type in compound_type with id: "
-            + std::to_string (type.getId ()));
+      types.push_back (type);
     }
 
   for (auto &p : property_map)

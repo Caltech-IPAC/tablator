@@ -34,18 +34,20 @@ public:
   std::vector<Field_Properties> fields_properties;
   H5::CompType compound_type;
 
-  /// These members are redundant with information in compound_type.
-  /// We precompute them so that we do not have to do dynamic lookups
-  /// for each row.
+  /// These members are mostly redundant with information in
+  /// compound_type.  We precompute them so that we do not have to do
+  /// dynamic lookups for each row.  Also, we need a place to store
+  /// the string and array types, since compound_type only has a
+  /// reference to them.
 
-  std::vector<Type> types;
+  std::vector<H5::PredType> types;
 
   /// offsets has an extra element at the end so that we can get the
-  /// size of any element.  This is needed for strings.
+  /// size of any element.  This is needed for strings and arrays.
   std::vector<size_t> offsets;
   size_t row_size;
 
-  /// Need to keep a copy of the string types around, since
+  /// Need to keep a copy of the string and array types around, since
   /// compound_type only has a reference to the type, not a copy of
   /// the type.
   std::vector<H5::StrType> string_types;
@@ -100,6 +102,8 @@ public:
       }
   }
 
+  std::vector<Column> columns () const;
+
   size_t num_rows () const { return data.size () / row_size; }
 
   bool is_null (size_t row_offset, size_t column) const
@@ -107,7 +111,7 @@ public:
     return data[row_offset+(column-1)/8] & (1 << ((column-1)%8));
   }
 
-  // FIXME: add_member feels a little magic.
+  // FIXME: append_member does not increase the size of the null column.
   void append_member (const std::string &name, const H5::DataType &type)
   {
     size_t member_size=type.getSize ();
@@ -158,7 +162,7 @@ public:
   std::vector<size_t> get_column_width () const;
   void write_ipac_table_header (std::ostream &os,
                                 const int &num_members) const;
-  std::string to_ipac_string (const tablator::Type &type) const;
+  std::string to_ipac_string (const H5::PredType &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (const boost::filesystem::path &filename) const;

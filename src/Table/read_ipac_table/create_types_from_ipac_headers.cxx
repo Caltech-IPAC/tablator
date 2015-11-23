@@ -13,34 +13,32 @@ std::vector<size_t> get_ipac_column_widths (std::vector<size_t> &ipac_column_off
   return ipac_column_widths;
 }
 
-std::vector<tablator::Type>
+std::vector<H5::PredType>
 get_data_types (std::vector<std::string> &data_types)
 {
-  std::vector<tablator::Type> types;
+  std::vector<H5::PredType> types;
   for (auto &data_type : data_types)
     {
       std::string t=boost::to_lower_copy(data_type);
-      auto size=t.size ();
-    
-      if (t.compare(0,size,"int")==0)
+      if (t=="int")
         {
-          types.push_back (tablator::Type::INT);
+          types.push_back (H5::PredType::STD_I32LE);
         }
-      else if (t.compare(0,size,"long")==0)
+      else if (t=="long")
         {
-          types.push_back (tablator::Type::LONG);
+          types.push_back (H5::PredType::STD_I64LE);
         }
-      else if (t.compare(0,size,"float")==0)
+      else if (t=="float")
         {
-          types.push_back (tablator::Type::FLOAT);
+          types.push_back (H5::PredType::IEEE_F32LE);
         }
-      else if (t.compare(0,size,"double")==0 || t.compare(0,size,"real")==0)
+      else if (t=="double" || t=="real")
         {
-          types.push_back (tablator::Type::DOUBLE);
+          types.push_back (H5::PredType::IEEE_F64LE);
         }
-      else if (t.compare(0,size,"char")==0 || t.compare(0,size,"date")==0)
+      else if (t=="char" || t=="date")
         {
-          types.push_back (tablator::Type::STRING);
+          types.push_back (H5::PredType::C_S1);
         }
       else
         {
@@ -65,51 +63,27 @@ void tablator::Table::create_types_from_ipac_headers
   offsets.push_back (0);
   for (size_t i = 0; i < num_columns; ++i)
     {
-      switch (types[i])
+      if (types[i]==H5::PredType::C_S1)
         {
-        case Type::BOOLEAN:
-          append_member (columns[0].at(i), H5::PredType::NATIVE_UCHAR);
-          break;
-
-        case Type::SHORT:
-          append_member (columns[0].at(i), H5::PredType::NATIVE_INT16);
-          break;
-
-        case Type::INT:
-          append_member (columns[0].at(i), H5::PredType::NATIVE_INT32);
-          break;
-
-        case Type::LONG:
-          append_member (columns[0].at(i), H5::PredType::NATIVE_INT64);
-          break;
-
-        case Type::FLOAT:
-          append_member (columns[0].at(i), H5::PredType::NATIVE_FLOAT);
-          break;
-        case Type::DOUBLE:
-          append_member (columns[0].at(i), H5::PredType::NATIVE_DOUBLE);
-          break;
-
-        case Type::STRING:
           string_types.emplace_back (0,ipac_column_widths.at(i));
           append_member (columns[0].at(i), *string_types.rbegin ());
-          break;
-
-        default:
-          throw std::runtime_error ("Unsupported data type for column "
-                                    + columns[0].at(i));
+        }
+      else
+        {
+          append_member (columns[0].at(i), types[i]);
         }
     }
 
-  fields_properties.push_back(Field_Properties("Packed bit array indicating whether a "
-                                               "column is null",{}));
+  fields_properties.push_back (Field_Properties ("Packed bit array indicating "
+                                                 "whether a column is null",{}));
         
   for (size_t column = 1; column < num_columns; ++column)
     {
       Field_Properties p({});
       if (!columns[2].at(column).empty ())
-        p.attributes.insert (std::make_pair
-                             ("unit",boost::algorithm::trim_copy (columns[2].at(column))));
+        p.attributes.insert
+          (std::make_pair
+           ("unit",boost::algorithm::trim_copy (columns[2].at(column))));
       if (!columns[3].at(column).empty ())
         p.values.null=boost::algorithm::trim_copy (columns[3].at(column));
 

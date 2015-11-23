@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include "Type.hxx"
+#include <H5Cpp.h>
 #include "unsafe_copy_to_row.hxx"
 
 namespace tablator
@@ -22,7 +22,7 @@ public:
     std::fill (data.begin (), data.end (), 0);
   }
 
-  void set_null (size_t column, const Type &type,
+  void set_null (size_t column, const H5::PredType &type,
                  const std::vector<size_t> offsets);
 
   template <typename T>

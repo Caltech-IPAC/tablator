@@ -2,6 +2,7 @@
 #include <CCfits/CCfits>
 
 #include "../Table.hxx"
+#include "../to_string.hxx"
 #include "../fits_keyword_mapping.hxx"
 
 /// We need different data_type and vector_type because vector<bool>
@@ -50,36 +51,41 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
   for (size_t i = 0; i < num_columns; ++i)
     {
       fits_names.push_back (compound_type.getMemberName (i));
-      switch (types[i])
+      if (types[i]==H5::PredType::STD_I8LE)
         {
-        case Type::BOOLEAN:
           fits_types.push_back ("L");
-          break;
-        case Type::SHORT:
+        }
+      else if (types[i]==H5::PredType::STD_I16LE)
+        {
           fits_types.push_back ("I");
-          break;
-        case Type::INT:
+        }
+      else if (types[i]==H5::PredType::STD_I32LE)
+        {
           fits_types.push_back ("J");
-          break;
-        case Type::LONG:
+        }
+      else if (types[i]==H5::PredType::STD_I64LE)
+        {
           fits_types.push_back ("K");
-          break;
-        case Type::FLOAT:
+        }
+      else if (types[i]==H5::PredType::IEEE_F32LE)
+        {
           fits_types.push_back ("E");
-          break;
-        case Type::DOUBLE:
+        }
+      else if (types[i]==H5::PredType::IEEE_F64LE)
+        {
           fits_types.push_back ("D");
-          break;
-        case Type::STRING:
+        }
+      else if (types[i]==H5::PredType::C_S1)
+        {
           fits_types.push_back (
-              std::to_string (compound_type.getMemberDataType (i).getSize ())
-              + "A");
-          break;
-        default:
+                                std::to_string (compound_type.getMemberDataType (i).getSize ())
+                                + "A");
+        }
+      else
+        {
           throw std::runtime_error (
-              "Unknown data type when writing fits data: "
-              + std::to_string (static_cast<int>(types[i])));
-          break;
+                                    "Unknown data type when writing fits data: "
+                                    + to_string (types[i]));
         }
     }
 
@@ -143,50 +149,54 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
   for (size_t i = 0; i < num_columns; ++i)
     {
       const char *index = data.data () + offsets[i];
-      switch (types[i])
+      if (types[i]==H5::PredType::STD_I8LE)
         {
-        case Type::BOOLEAN:
           write_column<bool, char>(fits_file, TLOGICAL, i, index, num_rows (),
                                    row_size);
-          break;
-        case Type::SHORT:
+        }
+      else if (types[i]==H5::PredType::STD_I16LE)
+        {
           write_column<int16_t>(fits_file, TSHORT, i, index, num_rows (),
                                 row_size);
-          break;
-        case Type::INT:
+        }
+      else if (types[i]==H5::PredType::STD_I32LE)
+        {
           write_column<int32_t>(fits_file, TINT, i, index, num_rows (), row_size);
-          break;
-        case Type::LONG:
+        }
+      else if (types[i]==H5::PredType::STD_I64LE)
+        {
           write_column<int64_t>(fits_file, TLONG, i, index, num_rows (), row_size);
-          break;
-        case Type::FLOAT:
+        }
+      else if (types[i]==H5::PredType::IEEE_F32LE)
+        {
           write_column<float>(fits_file, TFLOAT, i, index, num_rows (), row_size);
-          break;
-        case Type::DOUBLE:
+        }
+      else if (types[i]==H5::PredType::IEEE_F64LE)
+        {
           write_column<double>(fits_file, TDOUBLE, i, index, num_rows (),
                                row_size);
-          break;
-        case Type::STRING:
-          {
-            std::vector<std::string> temp_strings (num_rows ());
-            std::vector<char *> temp_chars (num_rows ());
-            for (size_t j = 0; j < temp_strings.size (); ++j)
-              {
-                temp_strings[j]
-                    = std::string (index, offsets[i + 1] - offsets[i]);
-                temp_chars[j] = const_cast<char *>(temp_strings[j].c_str ());
-                index += row_size;
-              }
-            fits_write_col (fits_file, TSTRING, i + 1, 1, 1, num_rows (),
-                            temp_chars.data (), &status);
-            if (status != 0)
-              throw CCfits::FitsError (status);
-          }
-          break;
-        default:
+        }
+      else if (types[i]==H5::PredType::C_S1)
+        {
+          std::vector<std::string> temp_strings (num_rows ());
+          std::vector<char *> temp_chars (num_rows ());
+          for (size_t j = 0; j < temp_strings.size (); ++j)
+            {
+              temp_strings[j]
+                = std::string (index, offsets[i + 1] - offsets[i]);
+              temp_chars[j] = const_cast<char *>(temp_strings[j].c_str ());
+              index += row_size;
+            }
+          fits_write_col (fits_file, TSTRING, i + 1, 1, 1, num_rows (),
+                          temp_chars.data (), &status);
+          if (status != 0)
+            throw CCfits::FitsError (status);
+        }
+      else
+        {
           throw std::runtime_error (
-              "Unknown data type when writing fits data: "
-              + std::to_string (static_cast<int>(types[i])));
+                                    "Unknown data type when writing fits data: "
+                                    + to_string (types[i]));
         }
     }
   fits_close_file (fits_file, &status);

@@ -1,28 +1,27 @@
 #include "../../Table.hxx"
 
-std::string tablator::Table::to_ipac_string (const tablator::Type &type) const
+std::string tablator::Table::to_ipac_string (const H5::PredType &type) const
 {
-  std::string result;
-  switch (type)
+  if (type==H5::PredType::STD_I8LE || type==H5::PredType::STD_I16LE
+      || type==H5::PredType::STD_I32LE)
     {
-    case Type::BOOLEAN:
-    case Type::SHORT:
-    case Type::INT:
-      result="int";
-      break;
-
-    case Type::LONG:
-      result="long";
-      break;
-
-    case Type::FLOAT:
-    case Type::DOUBLE:
-      result="double";
-      break;
-
-    case Type::STRING:
-      result="char";
-      break;
+      return "int";
     }
-  return result;
+  else if (type==H5::PredType::STD_I64LE)
+    {
+      return "long";
+    }
+  else if (type==H5::PredType::IEEE_F32LE || type==H5::PredType::IEEE_F64LE)
+    {
+      return "double";
+    }
+  else if (type==H5::PredType::C_S1)
+    {
+      return "char";
+    }
+  else
+    {
+      throw std::runtime_error
+        ("Unexpected HDF5 data type in tablator::Table::to_ipac_string");
+    }
 }

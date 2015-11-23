@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../../Table.hxx"
+#include "../../to_string.hxx"
 
 void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
 {
@@ -46,30 +47,18 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
             }
           else
             {
-              switch (types[column])
+              /// BOOLEAN and SHORT should never be used, but we include
+              /// them here just in case
+              try
                 {
-                  /// BOOLEAN and SHORT should never be used, but we include
-                  /// them here just in case
-                case Type::BOOLEAN:
-                  try
+                  if (types[column]==H5::PredType::STD_I8LE)
                     {
                       int8_t result=stoi (element);
                       if (result !=0 || result !=1)
                         throw std::exception ();
                       row_string.insert (result, offsets[column]);
                     }
-                  catch (std::exception &error)
-                    {
-                      throw std::runtime_error ("Bad boolean in line "
-                                                + std::to_string(current_line)
-                                                + ", field "
-                                                + std::to_string(column)
-                                                + ".  Expected 0 or 1, but found '"
-                                                + element + "'");
-                    }
-                  break;
-                case Type::SHORT:
-                  try
+                  else if (types[column]==H5::PredType::STD_I16LE)
                     {
                       int result=boost::lexical_cast<int> (element);
                       if (result > std::numeric_limits<int16_t>::max ()
@@ -78,18 +67,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                       row_string.insert (static_cast<int16_t> (result),
                                          offsets[column]);
                     }
-                  catch (std::exception &error)
-                    {
-                      throw std::runtime_error ("Bad short in line "
-                                                + std::to_string(current_line)
-                                                + ", field "
-                                                + std::to_string(column)
-                                                + ".  Found '"
-                                                + element + "'");
-                    }
-                  break;
-                case Type::INT:
-                  try
+                  else if (types[column]==H5::PredType::STD_I32LE)
                     {
                       long result=boost::lexical_cast<long> (element);
                       if (result > std::numeric_limits<int32_t>::max ()
@@ -98,18 +76,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                       row_string.insert (static_cast<int32_t> (result),
                                          offsets[column]);
                     }
-                  catch (std::exception &error)
-                    {
-                      throw std::runtime_error ("Bad int in line "
-                                                + std::to_string(current_line)
-                                                + ", field "
-                                                + std::to_string(column)
-                                                + ".  Found '"
-                                                + element + "'");
-                    }
-                  break;
-                case Type::LONG:
-                  try
+                  else if (types[column]==H5::PredType::STD_I64LE)
                     {
                       long long result=boost::lexical_cast<long long> (element);
                       if (result > std::numeric_limits<int64_t>::max ()
@@ -118,52 +85,32 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                       row_string.insert (static_cast<int64_t> (result),
                                          offsets[column]);
                     }
-                  catch (std::exception &error)
-                    {
-                      throw std::runtime_error ("Bad long in line "
-                                                + std::to_string(current_line)
-                                                + ", field "
-                                                + std::to_string(column)
-                                                + ".  Found '"
-                                                + element + "'");
-                    }
-                  break;
-                case Type::FLOAT:
-                  try
+                  else if (types[column]==H5::PredType::IEEE_F32LE)
                     {
                       float result=boost::lexical_cast<float> (element);
                       row_string.insert (result, offsets[column]);
                     }
-                  catch (std::exception &error)
-                    {
-                      throw std::runtime_error ("Bad float in line "
-                                                + std::to_string(current_line)
-                                                + ", field "
-                                                + std::to_string(column)
-                                                + ".  Found '"
-                                                + element + "'");
-                    }
-                  break;
-                case Type::DOUBLE:
-                  try
+                  else if (types[column]==H5::PredType::IEEE_F64LE)
                     {
                       double result=boost::lexical_cast<double> (element);
                       row_string.insert (result, offsets[column]);
                     }
-                  catch (std::exception &error)
+                  else if (types[column]==H5::PredType::C_S1)
                     {
-                      throw std::runtime_error ("Bad double in line "
-                                                + std::to_string(current_line)
-                                                + ", field "
-                                                + std::to_string(column)
-                                                + ".  Found '"
-                                                + element + "'");
+                      row_string.insert (element, offsets[column],
+                                         offsets[column+1]);
                     }
-                  break;
-                case Type::STRING:
-                  row_string.insert (element, offsets[column],
-                                     offsets[column+1]);
-                  break;
+                }
+              catch (std::exception &error)
+                {
+                  throw std::runtime_error ("Bad "
+                                            + to_string (types[column])
+                                            + " in line "
+                                            + std::to_string(current_line)
+                                            + ", field "
+                                            + std::to_string(column)
+                                            + ".  Found '"
+                                            + element + "'");
                 }
             }
         }

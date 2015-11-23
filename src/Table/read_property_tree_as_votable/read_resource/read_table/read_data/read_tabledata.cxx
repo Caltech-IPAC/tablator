@@ -1,6 +1,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../../../../../Table.hxx"
+#include "../../../../../to_string.hxx"
 
 void tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
                                       const std::vector<std::string> &names)
@@ -62,30 +63,14 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
   offsets.push_back (0);
   for (std::size_t c=0; c<types.size (); ++c)
     {
-      switch (types[c])
+      if (types[c]==H5::PredType::C_S1)
         {
-        case Type::BOOLEAN:
-          append_member(names.at(c), H5::PredType::NATIVE_UCHAR);
-          break;
-        case Type::SHORT:
-          append_member(names.at(c), H5::PredType::NATIVE_INT16);
-          break;
-        case Type::INT:
-          append_member(names.at(c), H5::PredType::NATIVE_INT32);
-          break;
-        case Type::LONG:
-          append_member(names.at(c), H5::PredType::NATIVE_INT64);
-          break;
-        case Type::FLOAT:
-          append_member(names.at(c), H5::PredType::NATIVE_FLOAT);
-          break;
-        case Type::DOUBLE:
-          append_member(names.at(c), H5::PredType::NATIVE_DOUBLE);
-          break;
-        case Type::STRING:
           string_types.emplace_back (0, column_width[c]);
           append_member(names.at(c), *string_types.rbegin ());
-          break;
+        }
+      else
+        {
+          append_member(names.at(c), types[c]);
         }
     }
 
@@ -102,24 +87,18 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
               row_string.set_null (column, types[column], offsets);
             }
           else
-            switch (types[column])
+            try
               {
-              case Type::BOOLEAN:
-                {
-                  if (!boost::iequals(element, "true")
-                      && !boost::iequals(element, "false")
-                      && !element.empty ())
-                    throw std::runtime_error
-                      ("Invalid 'boolean' in row " + std::to_string(current_row + 1)
-                        + ", field " + std::to_string(column)
-                       + ".  Expected  'true', 'false', or empty, but found '"
-                       + element + "'");
-                  int8_t result=boost::iequals(element, "true");
-                  row_string.insert (result, offsets[column]);
-                }
-                break;
-              case Type::SHORT:
-                try
+                if (types[column]==H5::PredType::STD_I8LE)
+                  {
+                    if (!boost::iequals(element, "true")
+                        && !boost::iequals(element, "false")
+                        && !element.empty ())
+                      throw std::exception ();
+                    int8_t result=boost::iequals(element, "true");
+                    row_string.insert (result, offsets[column]);
+                  }
+                else if (types[column]==H5::PredType::STD_I16LE)
                   {
                     int result=boost::lexical_cast<int> (element);
                     if (result > std::numeric_limits<int16_t>::max ()
@@ -128,18 +107,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                     row_string.insert (static_cast<int16_t> (result),
                                        offsets[column]);
                   }
-                catch (std::exception &error)
-                  {
-                    throw std::runtime_error ("Invalid 'short' in row "
-                                              + std::to_string(current_row + 1)
-                                              + ", field "
-                                              + std::to_string(column)
-                                              + ".  Found '"
-                                              + element + "'");
-                  }
-                break;
-              case Type::INT:
-                try
+                else if (types[column]==H5::PredType::STD_I32LE)
                   {
                     long result=boost::lexical_cast<long> (element);
                     if (result > std::numeric_limits<int32_t>::max ()
@@ -148,18 +116,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                     row_string.insert (static_cast<int32_t> (result),
                                        offsets[column]);
                   }
-                catch (std::exception &error)
-                  {
-                    throw std::runtime_error ("Invalid 'int' in row "
-                                              + std::to_string(current_row + 1)
-                                              + ", field "
-                                              + std::to_string(column)
-                                              + ".  Found '"
-                                              + element + "'");
-                  }
-                break;
-              case Type::LONG:
-                try
+                else if (types[column]==H5::PredType::STD_I64LE)
                   {
                     long long result=boost::lexical_cast<long long> (element);
                     if (result > std::numeric_limits<int64_t>::max ()
@@ -168,52 +125,31 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
                     row_string.insert (static_cast<int64_t> (result),
                                        offsets[column]);
                   }
-                catch (std::exception &error)
-                  {
-                    throw std::runtime_error ("Invalid 'long' in row "
-                                              + std::to_string(current_row + 1)
-                                              + ", field "
-                                              + std::to_string(column)
-                                              + ".  Found '"
-                                              + element + "'");
-                  }
-                break;
-              case Type::FLOAT:
-                try
+                else if (types[column]==H5::PredType::IEEE_F32LE)
                   {
                     float result=boost::lexical_cast<float> (element);
                     row_string.insert (result, offsets[column]);
                   }
-                catch (std::exception &error)
-                  {
-                    throw std::runtime_error ("Invalid 'float' in row "
-                                              + std::to_string(current_row + 1)
-                                              + ", field "
-                                              + std::to_string(column)
-                                              + ".  Found '"
-                                              + element + "'");
-                  }
-                break;
-              case Type::DOUBLE:
-                try
+                else if (types[column]==H5::PredType::IEEE_F64LE)
                   {
                     double result=boost::lexical_cast<double> (element);
                     row_string.insert (result, offsets[column]);
                   }
-                catch (std::exception &error)
+                else if (types[column]==H5::PredType::C_S1)
                   {
-                    throw std::runtime_error ("Invalid 'double' in row "
-                                              + std::to_string(current_row + 1)
-                                              + ", field "
-                                              + std::to_string(column)
-                                              + ".  Found '"
-                                              + element + "'");
+                    row_string.insert (element, offsets[column],
+                                       offsets[column+1]);
                   }
-                break;
-              case Type::STRING:
-                row_string.insert (element, offsets[column],
-                                   offsets[column+1]);
-                break;
+              }
+            catch (std::exception &error)
+              {
+                throw std::runtime_error ("Invalid " + to_string (types[column])
+                                          + " in row "
+                                          + std::to_string(current_row + 1)
+                                          + ", field "
+                                          + std::to_string(column)
+                                          + ".  Found '"
+                                          + element + "'");
               }
         }
       append_row (row_string);

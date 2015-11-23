@@ -66,36 +66,49 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       switch (c.type ())
         {
         case CCfits::Tlogical:
-          append_member (c.name (), H5::PredType::NATIVE_UCHAR);
-          types.push_back (Type::BOOLEAN);
+          append_member (c.name (), H5::PredType::STD_I8LE);
+          types.push_back (H5::PredType::STD_I8LE);
+          break;
+        case CCfits::Tbyte:
+          append_member (c.name (), H5::PredType::STD_U8LE);
+          types.push_back (H5::PredType::STD_U8LE);
           break;
         case CCfits::Tstring:
           string_types.emplace_back (0, c.width ());
           append_member (c.name (), *string_types.rbegin ());
-          types.push_back (Type::STRING);
+          types.push_back (H5::PredType::C_S1);
           break;
         case CCfits::Tushort:
+          types.push_back (H5::PredType::STD_U16LE);
+          append_member (c.name (), H5::PredType::STD_U16LE);
+          break;
         case CCfits::Tshort:
-          types.push_back (Type::SHORT);
-          append_member (c.name (), H5::PredType::NATIVE_INT16);
+          types.push_back (H5::PredType::STD_I16LE);
+          append_member (c.name (), H5::PredType::STD_I16LE);
           break;
         case CCfits::Tuint:
+          types.push_back (H5::PredType::STD_U32LE);
+          append_member (c.name (), H5::PredType::STD_U32LE);
+          break;
         case CCfits::Tint:
-          types.push_back (Type::INT);
-          append_member (c.name (), H5::PredType::NATIVE_INT32);
+          types.push_back (H5::PredType::STD_I32LE);
+          append_member (c.name (), H5::PredType::STD_I32LE);
           break;
         case CCfits::Tulong:
+          types.push_back (H5::PredType::STD_U64LE);
+          append_member (c.name (), H5::PredType::STD_U64LE);
+          break;
         case CCfits::Tlong:
-          types.push_back (Type::LONG);
-          append_member (c.name (), H5::PredType::NATIVE_INT64);
+          types.push_back (H5::PredType::STD_I64LE);
+          append_member (c.name (), H5::PredType::STD_I64LE);
           break;
         case CCfits::Tfloat:
-          types.push_back (Type::FLOAT);
-          append_member (c.name (), H5::PredType::NATIVE_FLOAT);
+          types.push_back (H5::PredType::IEEE_F32LE);
+          append_member (c.name (), H5::PredType::IEEE_F32LE);
           break;
         case CCfits::Tdouble:
-          types.push_back (Type::DOUBLE);
-          append_member (c.name (), H5::PredType::NATIVE_DOUBLE);
+          types.push_back (H5::PredType::IEEE_F64LE);
+          append_member (c.name (), H5::PredType::IEEE_F64LE);
           break;
         default:
           throw std::runtime_error (

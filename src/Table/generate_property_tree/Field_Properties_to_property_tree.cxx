@@ -1,5 +1,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include "../../Table.hxx"
+#include "../../to_string.hxx"
 
 namespace
 {
@@ -32,14 +33,14 @@ namespace tablator
 {
 void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
                                         const std::string &name,
-                                        const tablator::Type &type,
+                                        const H5::PredType &type,
                                         const Field_Properties &field_property)
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");
   field.add ("<xmlattr>.name", name);
   std::string datatype=to_string (type);
   field.add ("<xmlattr>.datatype", datatype);
-  if (datatype=="char")
+  if (datatype=="char" || type.fromClass ()=="ArrayType")
     field.add ("<xmlattr>.arraysize", "*");
 
   for (auto &a : field_property.attributes)
@@ -52,7 +53,7 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
       if (a.first.empty ())
         throw std::runtime_error ("Empty attribute in field " + name
                                   + " which has type "
-                                  + to_string (type));
+                                  + datatype);
       field.add ("<xmlattr>." + a.first, a.second);
     }
 

@@ -19,7 +19,7 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
   
   fields_properties.push_back(Field_Properties("Packed bit array indicating whether a "
                                                "column is null",{}));
-  types.emplace_back (Type::STRING);
+  types.emplace_back (H5::PredType::C_S1);
   std::vector<std::string> names;
   names.emplace_back ("null_bitfield_flag");
   for (; child != end; ++child)

@@ -2,22 +2,22 @@
 
 namespace
 {
-tablator::Type string_to_Type (const std::string &s)
+H5::PredType string_to_Type (const std::string &s)
 {
   if (s=="boolean")
-    return tablator::Type::BOOLEAN;
+    return H5::PredType::STD_I8LE;
   if (s=="short")
-    return tablator::Type::SHORT;
+    return H5::PredType::STD_I16LE;
   if (s=="int")
-    return tablator::Type::INT;
+    return H5::PredType::STD_I32LE;
   if (s=="long")
-    return tablator::Type::LONG;
+    return H5::PredType::STD_I64LE;
   if (s=="float")
-    return tablator::Type::FLOAT;
+    return H5::PredType::IEEE_F32LE;
   if (s=="double")
-    return tablator::Type::DOUBLE;
+    return H5::PredType::IEEE_F64LE;
   if (s=="char")
-    return tablator::Type::STRING;
+    return H5::PredType::C_S1;
   // FIXME: Implement these
   if (s=="bit" || s=="byte" || s=="unicodeChar" || s=="floatComplex"
       || s=="doubleComplex")

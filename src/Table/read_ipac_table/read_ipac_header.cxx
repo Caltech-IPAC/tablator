@@ -97,9 +97,10 @@ size_t tablator::Table::read_ipac_header
       /// FIXME: I think this error can never happen, because it would
       /// have been caught by check_bar_position.
       if (columns[column_line].size()<2)
-        throw std::runtime_error ("In line " + std::to_string (current_line)
-                                  + ", the table is missing header information in this line: '"
-                                  + line + "'");
+        throw std::runtime_error
+          ("In line " + std::to_string (current_line)
+           + ", the table is missing header information in this line: '"
+           + line + "'");
       columns[column_line].pop_back ();
       for (auto &column: columns[column_line])
         boost::algorithm::trim (column);
@@ -110,9 +111,10 @@ size_t tablator::Table::read_ipac_header
           const boost::regex name_regex("[a-zA-Z_]+[a-zA-Z0-9_]*");
           for (auto &v : columns[0])
             if (!regex_match (v, name_regex))
-              throw std::runtime_error ("In line " + std::to_string (current_line)
-                                        + ", the column name '" + v
-                                        + "' contains an invalid character.");
+              throw std::runtime_error
+                ("On line " + std::to_string (current_line)
+                 + ", the column name '" + v
+                 + "' contains an invalid character.");
         }
 
       if (column_line==1)

@@ -17,30 +17,35 @@ void tablator::Table::write_csv_tsv (std::ostream &os, const char &separator)
     for (int i = 1; i < num_members; ++i)
       {
         size_t offset = offsets[i] + j;
-        switch (types[i])
+        if (types[i]==H5::PredType::STD_I8LE)
           {
-          case Type::BOOLEAN:
             /// Booleans are converted to integers
             os << static_cast<int>(data[offset]);
-            break;
-          case Type::SHORT:
+          }
+        else if (types[i]==H5::PredType::STD_I16LE)
+          {
             os << (*reinterpret_cast<const int16_t *>(data.data () + offset));
-            break;
-          case Type::INT:
+          }
+        else if (types[i]==H5::PredType::STD_I32LE)
+          {
             os << (*reinterpret_cast<const int32_t *>(data.data () + offset));
-            break;
-          case Type::LONG:
+          }
+        else if (types[i]==H5::PredType::STD_I64LE)
+          {
             os << (*reinterpret_cast<const int64_t *>(data.data () + offset));
-            break;
-          case Type::FLOAT:
+          }
+        else if (types[i]==H5::PredType::IEEE_F32LE)
+          {
             os << std::setprecision (output_precision)
                << (*reinterpret_cast<const float *>(data.data () + offset));
-            break;
-          case Type::DOUBLE:
+          }
+        else if (types[i]==H5::PredType::IEEE_F64LE)
+          {
             os << std::setprecision (output_precision)
                << (*reinterpret_cast<const double *>(data.data () + offset));
-            break;
-          case Type::STRING:
+          }
+        else if (types[i]==H5::PredType::C_S1)
+          {
             /// The characters in the type can be shorter than the
             /// number of allowed bytes.  So add a .c_str() that will
             /// terminate the string at the first null.

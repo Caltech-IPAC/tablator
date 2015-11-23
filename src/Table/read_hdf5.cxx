@@ -83,25 +83,28 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
   // FIXME: This assumes that the first column is null_bitfield_flags
   for (int i = 0; i < compound_type.getNmembers (); ++i)
     {
+      /// There is no way to get a PredType from the compound type.
+      /// So we have to manually check all of the possibilities and
+      /// hope it is string if none match.
       H5::DataType d = compound_type.getMemberDataType (i);
-      if (d == H5::PredType::NATIVE_UCHAR)
-        types.push_back (Type::BOOLEAN);
+      if (d == H5::PredType::STD_I8LE)
+        types.push_back (H5::PredType::STD_I8LE);
       else if (d == H5::PredType::NATIVE_INT16)
-        types.push_back (Type::SHORT);
+        types.push_back (H5::PredType::NATIVE_INT16);
       else if (d == H5::PredType::NATIVE_INT32)
-        types.push_back (Type::INT);
+        types.push_back (H5::PredType::NATIVE_INT32);
       else if (d == H5::PredType::NATIVE_INT64)
-        types.push_back (Type::LONG);
+        types.push_back (H5::PredType::NATIVE_INT64);
       else if (d == H5::PredType::NATIVE_FLOAT)
-        types.push_back (Type::FLOAT);
+        types.push_back (H5::PredType::NATIVE_FLOAT);
       else if (d == H5::PredType::NATIVE_DOUBLE)
-        types.push_back (Type::DOUBLE);
+        types.push_back (H5::PredType::NATIVE_DOUBLE);
       else
         {
           // Do we have to create a string_type since compound_type
           // lives on???
           string_types.push_back (compound_type.getMemberStrType (i));
-          types.push_back (Type::STRING);
+          types.push_back (H5::PredType::C_S1);
         }
       offsets.push_back (offset);
       offset += d.getSize ();
