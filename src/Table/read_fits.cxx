@@ -73,32 +73,32 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
           append_member (c.name (), H5::PredType::STD_U8LE);
           types.push_back (H5::PredType::STD_U8LE);
           break;
-        case CCfits::Tstring:
-          string_types.emplace_back (0, c.width ());
-          append_member (c.name (), *string_types.rbegin ());
-          types.push_back (H5::PredType::C_S1);
+        case CCfits::Tshort:
+          types.push_back (H5::PredType::STD_I16LE);
+          append_member (c.name (), H5::PredType::STD_I16LE);
           break;
         case CCfits::Tushort:
           types.push_back (H5::PredType::STD_U16LE);
           append_member (c.name (), H5::PredType::STD_U16LE);
           break;
-        case CCfits::Tshort:
-          types.push_back (H5::PredType::STD_I16LE);
-          append_member (c.name (), H5::PredType::STD_I16LE);
+        case CCfits::Tint:
+          types.push_back (H5::PredType::STD_I32LE);
+          append_member (c.name (), H5::PredType::STD_I32LE);
           break;
         case CCfits::Tuint:
           types.push_back (H5::PredType::STD_U32LE);
           append_member (c.name (), H5::PredType::STD_U32LE);
           break;
-        case CCfits::Tint:
+        case CCfits::Tlong:
+          /// Tlong and Tulong have indeterminate sizes.  We guess 32 bit.
           types.push_back (H5::PredType::STD_I32LE);
           append_member (c.name (), H5::PredType::STD_I32LE);
           break;
         case CCfits::Tulong:
-          types.push_back (H5::PredType::STD_U64LE);
-          append_member (c.name (), H5::PredType::STD_U64LE);
+          types.push_back (H5::PredType::STD_U32LE);
+          append_member (c.name (), H5::PredType::STD_U32LE);
           break;
-        case CCfits::Tlong:
+        case CCfits::Tlonglong:
           types.push_back (H5::PredType::STD_I64LE);
           append_member (c.name (), H5::PredType::STD_I64LE);
           break;
@@ -110,10 +110,16 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
           types.push_back (H5::PredType::IEEE_F64LE);
           append_member (c.name (), H5::PredType::IEEE_F64LE);
           break;
+        case CCfits::Tstring:
+          string_types.emplace_back (0, c.width ());
+          append_member (c.name (), *string_types.rbegin ());
+          types.push_back (H5::PredType::C_S1);
+          break;
         default:
           throw std::runtime_error (
               "Unsupported data type in the fits file for "
-              "column " + c.name ());
+              "column '" + c.name ()
+              + "'" + std::to_string (static_cast<int>(c.type ())) + " blarg");
         }
     }
 
@@ -140,34 +146,29 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
               }
           }
           break;
-        case CCfits::Tstring:
-          {
-            std::vector<std::string> v;
-            c.read (v, 1, table->rows ());
-
-            size_t offset = offsets[column];
-            for (auto &element : v)
-              {
-                for (size_t i = 0; i < element.size (); ++i)
-                  data[offset + i] = element[i];
-                for (int i = element.size (); i < c.width (); ++i)
-                  data[offset + i] = ' ';
-                offset += row_size;
-              }
-          }
+        case CCfits::Tbyte:
+          read_column<uint8_t>(data.data () + offsets[column], c,
+                               table->rows (), row_size);
           break;
-        case CCfits::Tushort:
         case CCfits::Tshort:
           read_column<int16_t>(data.data () + offsets[column], c,
                                table->rows (), row_size);
           break;
+        case CCfits::Tushort:
+          read_column<uint16_t>(data.data () + offsets[column], c,
+                                table->rows (), row_size);
+          break;
         case CCfits::Tuint:
+        case CCfits::Tulong:
+          read_column<uint32_t>(data.data () + offsets[column], c,
+                                table->rows (), row_size);
+          break;
         case CCfits::Tint:
+        case CCfits::Tlong:
           read_column<int32_t>(data.data () + offsets[column], c,
                                table->rows (), row_size);
           break;
-        case CCfits::Tulong:
-        case CCfits::Tlong:
+        case CCfits::Tlonglong:
           read_column<int64_t>(data.data () + offsets[column], c,
                                table->rows (), row_size);
           break;
@@ -179,6 +180,22 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
           read_column<double>(data.data () + offsets[column], c,
                               table->rows (), row_size);
           break;
+        case CCfits::Tstring:
+          {
+            std::vector<std::string> v;
+            c.read (v, 1, table->rows ());
+
+            size_t offset = offsets[column];
+            for (auto &element : v)
+              {
+                for (size_t i = 0; i < element.size (); ++i)
+                  data[offset + i] = element[i];
+                for (int i = element.size (); i < c.width (); ++i)
+                  data[offset + i] = '\0';
+                offset += row_size;
+              }
+          }
+          break;
         default:
           throw std::runtime_error (
               "Unsupported data type in the fits file for "
@@ -186,8 +203,11 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
         }
       // FIXME: This should get the comment, but the comment()
       // function is protected???
-      fields_properties.push_back (Field_Properties (
-          std::string (""),
-          { { "unit", c.unit () } }));
+      if (c.unit ().empty())
+        fields_properties.push_back (Field_Properties (std::string (""), { }));
+      else
+        fields_properties.push_back (Field_Properties
+                                     (std::string (""),
+                                      { { "unit", c.unit () } }));
     }
 }
