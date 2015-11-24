@@ -23,7 +23,7 @@ public:
   }
 
   void set_null (size_t column, const H5::PredType &type,
-                 const std::vector<size_t> offsets);
+                 const std::vector<size_t> &offsets);
 
   template <typename T>
   void insert (const T &element, const size_t &offset)
