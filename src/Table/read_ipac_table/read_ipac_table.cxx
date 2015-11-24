@@ -6,6 +6,7 @@
 
 #include "../../Table.hxx"
 #include "../../to_string.hxx"
+#include "../insert_ascii_in_row.hxx"
 
 void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
 {
@@ -47,63 +48,14 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
             }
           else
             {
-              /// BOOLEAN and SHORT should never be used, but we include
-              /// them here just in case
               try
                 {
-                  if (types[column]==H5::PredType::STD_I8LE)
-                    {
-                      int8_t result=stoi (element);
-                      if (result !=0 || result !=1)
-                        throw std::exception ();
-                      row_string.insert (result, offsets[column]);
-                    }
-                  else if (types[column]==H5::PredType::STD_I16LE)
-                    {
-                      int result=boost::lexical_cast<int> (element);
-                      if (result > std::numeric_limits<int16_t>::max ()
-                          || result < std::numeric_limits<int16_t>::lowest ())
-                        throw std::exception ();
-                      row_string.insert (static_cast<int16_t> (result),
-                                         offsets[column]);
-                    }
-                  else if (types[column]==H5::PredType::STD_I32LE)
-                    {
-                      long result=boost::lexical_cast<long> (element);
-                      if (result > std::numeric_limits<int32_t>::max ()
-                          || result < std::numeric_limits<int32_t>::lowest ())
-                        throw std::exception ();
-                      row_string.insert (static_cast<int32_t> (result),
-                                         offsets[column]);
-                    }
-                  else if (types[column]==H5::PredType::STD_I64LE)
-                    {
-                      long long result=boost::lexical_cast<long long> (element);
-                      if (result > std::numeric_limits<int64_t>::max ()
-                          || result < std::numeric_limits<int64_t>::lowest ())
-                        throw std::exception ();
-                      row_string.insert (static_cast<int64_t> (result),
-                                         offsets[column]);
-                    }
-                  else if (types[column]==H5::PredType::IEEE_F32LE)
-                    {
-                      float result=boost::lexical_cast<float> (element);
-                      row_string.insert (result, offsets[column]);
-                    }
-                  else if (types[column]==H5::PredType::IEEE_F64LE)
-                    {
-                      double result=boost::lexical_cast<double> (element);
-                      row_string.insert (result, offsets[column]);
-                    }
-                  else if (types[column]==H5::PredType::C_S1)
-                    {
-                      row_string.insert (element, offsets[column],
-                                         offsets[column+1]);
-                    }
+                  insert_ascii_in_row (types[column], element, column, offsets,
+                                       row_string);
                 }
               catch (std::exception &error)
                 {
-                  throw std::runtime_error ("Bad "
+                  throw std::runtime_error ("Invalid "
                                             + to_string (types[column])
                                             + " in line "
                                             + std::to_string(current_line)
