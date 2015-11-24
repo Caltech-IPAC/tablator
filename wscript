@@ -18,6 +18,7 @@ def build(bld):
              'src/Row/set_null.cxx',
              'src/Table/Table.cxx',
              'src/Table/flatten_properties.cxx',
+             'src/Table/insert_ascii_in_row.cxx',
              'src/Table/read_fits.cxx',
              'src/Table/read_hdf5.cxx',
              'src/Table/read_json5.cxx',
@@ -44,7 +45,8 @@ def build(bld):
              'src/Table/write_ipac_table/get_column_width.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_to_file.cxx',
-             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_attributes.cxx']
+             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_attributes.cxx',
+             'src/Table/write_type_as_ascii.cxx']
 
     bld.shlib(source=sources,
               target='tablator',
