@@ -2,16 +2,24 @@
 
 std::string tablator::Table::to_ipac_string (const H5::PredType &type) const
 {
-  if (type==H5::PredType::STD_I8LE || type==H5::PredType::STD_I16LE
+  /// Write out unsigned integers as integers for backwards compatibility 
+  if (type==H5::PredType::STD_I8LE || type==H5::PredType::STD_U8LE
+      || type==H5::PredType::STD_I16LE || type==H5::PredType::STD_U16LE
       || type==H5::PredType::STD_I32LE)
     {
       return "int";
     }
-  else if (type==H5::PredType::STD_I64LE)
+  /// Unsigned 32 bit ints do not fit in ints, so we use a long.
+  else if (type==H5::PredType::STD_U32LE || type==H5::PredType::STD_I64LE
+           || type==H5::PredType::STD_U64LE)
     {
       return "long";
     }
-  else if (type==H5::PredType::IEEE_F32LE || type==H5::PredType::IEEE_F64LE)
+  else if (type==H5::PredType::IEEE_F32LE)
+    {
+      return "float";
+    }
+  else if (type==H5::PredType::IEEE_F64LE)
     {
       return "double";
     }

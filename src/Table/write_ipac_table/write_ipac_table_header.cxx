@@ -39,20 +39,25 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
         }
     }
 
-  if (comments.empty () && fields_properties.size () > 0)
+  if (comments.empty () && !fields_properties.empty ())
     {
       for (int i = 0; i < num_members; ++i)
         {
-          os << "\\ " << compound_type.getMemberName (i+1);
-          auto unit = fields_properties.at (i+1).attributes.find ("unit");
-          if (unit != fields_properties.at (i+1).attributes.end ())
+          if (!fields_properties.at (i+1).attributes.empty ()
+              || !fields_properties.at (i+1).description.empty ())
             {
-              os << " (" << unit->second << ")";
+              os << "\\ " << compound_type.getMemberName (i+1);
+              auto unit = fields_properties.at (i+1).attributes.find ("unit");
+              if (unit != fields_properties.at (i+1).attributes.end ()
+                  && !unit->second.empty ())
+                {
+                  os << " (" << unit->second << ")";
+                }
+              os << "\n";
+              if (!fields_properties.at (i+1).description.empty ())
+                os << "\\ ___ " << fields_properties.at (i+1).description << "\n";
+              // FIXME: Write out description attributes
             }
-          os << "\n";
-          if (!fields_properties.at (i+1).description.empty ())
-            os << "\\ ___ " << fields_properties.at (i+1).description << "\n";
-          // FIXME: Write out description attributes
         }
     }
   else

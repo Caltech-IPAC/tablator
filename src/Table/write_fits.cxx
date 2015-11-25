@@ -55,15 +55,30 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
         {
           fits_types.push_back ("L");
         }
+      else if (types[i]==H5::PredType::STD_U8LE)
+        {
+          fits_types.push_back ("B");
+        }
       else if (types[i]==H5::PredType::STD_I16LE)
         {
           fits_types.push_back ("I");
+        }
+      else if (types[i]==H5::PredType::STD_U16LE)
+        {
+          fits_types.push_back ("U");
         }
       else if (types[i]==H5::PredType::STD_I32LE)
         {
           fits_types.push_back ("J");
         }
-      else if (types[i]==H5::PredType::STD_I64LE)
+      else if (types[i]==H5::PredType::STD_U32LE)
+        {
+          fits_types.push_back ("V");
+        }
+      /// Fits does not know what an unsigned long is.  So we write it
+      /// as a long and hope for the best.
+      else if (types[i]==H5::PredType::STD_I64LE
+               || types[i]==H5::PredType::STD_U64LE)
         {
           fits_types.push_back ("K");
         }
@@ -148,44 +163,67 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
 
   for (size_t i = 0; i < num_columns; ++i)
     {
-      const char *index = data.data () + offsets[i];
+      const char *offset_data = data.data () + offsets[i];
       if (types[i]==H5::PredType::STD_I8LE)
         {
-          write_column<bool, char>(fits_file, TLOGICAL, i, index, num_rows (),
-                                   row_size);
+          write_column<bool, char>(fits_file, TLOGICAL, i, offset_data,
+                                   num_rows (), row_size);
+        }
+      else if (types[i]==H5::PredType::STD_U8LE)
+        {
+          write_column<uint8_t>(fits_file, TBYTE, i, offset_data,
+                                num_rows (), row_size);
         }
       else if (types[i]==H5::PredType::STD_I16LE)
         {
-          write_column<int16_t>(fits_file, TSHORT, i, index, num_rows (),
+          write_column<int16_t>(fits_file, TSHORT, i, offset_data, num_rows (),
                                 row_size);
+        }
+      else if (types[i]==H5::PredType::STD_U16LE)
+        {
+          write_column<uint16_t>(fits_file, TUSHORT, i, offset_data, num_rows (),
+                                 row_size);
         }
       else if (types[i]==H5::PredType::STD_I32LE)
         {
-          write_column<int32_t>(fits_file, TINT, i, index, num_rows (), row_size);
+          write_column<int32_t>(fits_file, TINT, i, offset_data, num_rows (),
+                                row_size);
         }
-      else if (types[i]==H5::PredType::STD_I64LE)
+      else if (types[i]==H5::PredType::STD_U32LE)
         {
-          write_column<int64_t>(fits_file, TLONG, i, index, num_rows (), row_size);
+          write_column<uint32_t>(fits_file, TUINT, i, offset_data, num_rows (),
+                                 row_size);
+        }
+      /// Fits does not know what an unsigned long is.  So we write it
+      /// as a long and hope for the best.
+      else if (types[i]==H5::PredType::STD_I64LE
+               || types[i]==H5::PredType::STD_U64LE)
+        {
+          write_column<int64_t>(fits_file, TLONGLONG, i, offset_data, num_rows (),
+                                row_size);
         }
       else if (types[i]==H5::PredType::IEEE_F32LE)
         {
-          write_column<float>(fits_file, TFLOAT, i, index, num_rows (), row_size);
+          write_column<float>(fits_file, TFLOAT, i, offset_data, num_rows (),
+                              row_size);
         }
       else if (types[i]==H5::PredType::IEEE_F64LE)
         {
-          write_column<double>(fits_file, TDOUBLE, i, index, num_rows (),
+          write_column<double>(fits_file, TDOUBLE, i, offset_data, num_rows (),
                                row_size);
         }
       else if (types[i]==H5::PredType::C_S1)
         {
+          // FIXME: This adds a space ' ' if the string is empty,
+          // breaking the null_bitfield_flags column.
           std::vector<std::string> temp_strings (num_rows ());
           std::vector<char *> temp_chars (num_rows ());
           for (size_t j = 0; j < temp_strings.size (); ++j)
             {
               temp_strings[j]
-                = std::string (index, offsets[i + 1] - offsets[i]);
+                = std::string (offset_data, offsets[i + 1] - offsets[i]);
               temp_chars[j] = const_cast<char *>(temp_strings[j].c_str ());
-              index += row_size;
+              offset_data += row_size;
             }
           fits_write_col (fits_file, TSTRING, i + 1, 1, 1, num_rows (),
                           temp_chars.data (), &status);

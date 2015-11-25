@@ -105,17 +105,37 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
                 {
                   ss << static_cast<int>(data[offset]);
                 }
+              else if (types[column+1]==H5::PredType::STD_U8LE)
+                {
+                  ss << static_cast<uint>(data[offset]);
+                }
               else if (types[column+1]==H5::PredType::STD_I16LE)
                 {
-                  ss << *reinterpret_cast<const int16_t *>(data.data () + offset);
+                  ss << *reinterpret_cast<const int16_t *>
+                    (data.data () + offset);
+                }
+              else if (types[column+1]==H5::PredType::STD_U16LE)
+                {
+                  ss << *reinterpret_cast<const uint16_t *>
+                    (data.data () + offset);
                 }
               else if (types[column+1]==H5::PredType::STD_I32LE)
                 {
                   ss << *reinterpret_cast<const int32_t *>(data.data () + offset);
                 }
+              else if (types[column+1]==H5::PredType::STD_U32LE)
+                {
+                  ss << *reinterpret_cast<const uint32_t *>
+                    (data.data () + offset);
+                }
               else if (types[column+1]==H5::PredType::STD_I64LE)
                 {
                   ss << *reinterpret_cast<const int64_t *>(data.data () + offset);
+                }
+              else if (types[column+1]==H5::PredType::STD_U64LE)
+                {
+                  ss << *reinterpret_cast<const uint64_t *>
+                    (data.data () + offset);
                 }
               else if (types[column+1]==H5::PredType::IEEE_F32LE)
                 {

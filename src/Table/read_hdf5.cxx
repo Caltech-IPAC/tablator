@@ -89,16 +89,24 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
       H5::DataType d = compound_type.getMemberDataType (i);
       if (d == H5::PredType::STD_I8LE)
         types.push_back (H5::PredType::STD_I8LE);
-      else if (d == H5::PredType::NATIVE_INT16)
-        types.push_back (H5::PredType::NATIVE_INT16);
-      else if (d == H5::PredType::NATIVE_INT32)
-        types.push_back (H5::PredType::NATIVE_INT32);
-      else if (d == H5::PredType::NATIVE_INT64)
-        types.push_back (H5::PredType::NATIVE_INT64);
-      else if (d == H5::PredType::NATIVE_FLOAT)
-        types.push_back (H5::PredType::NATIVE_FLOAT);
-      else if (d == H5::PredType::NATIVE_DOUBLE)
-        types.push_back (H5::PredType::NATIVE_DOUBLE);
+      else if (d == H5::PredType::STD_U8LE)
+        types.push_back (H5::PredType::STD_U8LE);
+      else if (d == H5::PredType::STD_I16LE)
+        types.push_back (H5::PredType::STD_I16LE);
+      else if (d == H5::PredType::STD_U16LE)
+        types.push_back (H5::PredType::STD_U16LE);
+      else if (d == H5::PredType::STD_I32LE)
+        types.push_back (H5::PredType::STD_I32LE);
+      else if (d == H5::PredType::STD_U32LE)
+        types.push_back (H5::PredType::STD_U32LE);
+      else if (d == H5::PredType::STD_I64LE)
+        types.push_back (H5::PredType::STD_I64LE);
+      else if (d == H5::PredType::STD_U64LE)
+        types.push_back (H5::PredType::STD_U64LE);
+      else if (d == H5::PredType::IEEE_F32LE)
+        types.push_back (H5::PredType::IEEE_F32LE);
+      else if (d == H5::PredType::IEEE_F64LE)
+        types.push_back (H5::PredType::IEEE_F64LE);
       else
         {
           // Do we have to create a string_type since compound_type
@@ -109,7 +117,7 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
       offsets.push_back (offset);
       offset += d.getSize ();
       fields_properties.push_back (Field_Properties (
-          std::string (""), { { "unit", " " } }));
+          std::string (""), {}));
     }
   offsets.push_back (offset);
   row_size = offset;

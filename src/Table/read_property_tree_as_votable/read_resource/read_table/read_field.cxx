@@ -6,12 +6,20 @@ H5::PredType string_to_Type (const std::string &s)
 {
   if (s=="boolean")
     return H5::PredType::STD_I8LE;
+  if (s=="unsignedByte")
+    return H5::PredType::STD_U8LE;
   if (s=="short")
     return H5::PredType::STD_I16LE;
+  if (s=="ushort")
+    return H5::PredType::STD_U16LE;
   if (s=="int")
     return H5::PredType::STD_I32LE;
+  if (s=="uint")
+    return H5::PredType::STD_U32LE;
   if (s=="long")
     return H5::PredType::STD_I64LE;
+  if (s=="ulong")
+    return H5::PredType::STD_U64LE;
   if (s=="float")
     return H5::PredType::IEEE_F32LE;
   if (s=="double")
@@ -19,8 +27,7 @@ H5::PredType string_to_Type (const std::string &s)
   if (s=="char")
     return H5::PredType::C_S1;
   // FIXME: Implement these
-  if (s=="bit" || s=="byte" || s=="unicodeChar" || s=="floatComplex"
-      || s=="doubleComplex")
+  if (s=="bit" || s=="unicodeChar" || s=="floatComplex" || s=="doubleComplex")
     throw std::runtime_error ("Unimplemented data type: " + s);
   throw std::runtime_error ("Unknown data type: " + s);
 }
