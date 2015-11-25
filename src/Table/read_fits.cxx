@@ -118,8 +118,7 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
         default:
           throw std::runtime_error (
               "Unsupported data type in the fits file for "
-              "column '" + c.name ()
-              + "'" + std::to_string (static_cast<int>(c.type ())) + " blarg");
+              "column '" + c.name () + "'");
         }
     }
 
