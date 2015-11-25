@@ -28,7 +28,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
   Row row_string (row_size);
   while (ipac_file)
     {
-      row_string.clear_nulls ();
+      row_string.set_zero ();
       for (size_t column=1; column < columns[0].size (); ++column)
         {
           if (line[ipac_column_offsets[column-1]]!=' ')

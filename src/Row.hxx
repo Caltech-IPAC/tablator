@@ -17,7 +17,7 @@ public:
   Row (const size_t &size): data(size) {}
   
   // FIXME: This clears everything, not just nulls
-  void clear_nulls ()
+  void set_zero ()
   {
     std::fill (data.begin (), data.end (), 0);
   }

@@ -79,7 +79,7 @@ void tablator::Table::read_tabledata (const boost::property_tree::ptree &tableda
   for (size_t current_row=0; current_row<rows.size (); ++current_row)
     {
       auto &row(rows[current_row]);
-      row_string.clear_nulls ();
+      row_string.set_zero ();
       for (size_t column=1; column<types.size (); ++column)
         {
           auto &element(row[column-1]);
