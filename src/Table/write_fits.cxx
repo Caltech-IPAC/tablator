@@ -38,6 +38,9 @@ void write_column (fitsfile *fits_file, const int &fits_type,
 void tablator::Table::write_fits (const boost::filesystem::path &filename)
     const
 {
+  /// Remove the file because the cfitsio will fail if the file still
+  /// exists.
+  boost::filesystem::remove (filename);
   int status = 0;
   fitsfile *fits_file;
   fits_create_file (&fits_file, filename.c_str (), &status);
