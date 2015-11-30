@@ -54,46 +54,47 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
   for (size_t i = 0; i < num_columns; ++i)
     {
       fits_names.push_back (compound_type.getMemberName (i));
-      if (types[i]==H5::PredType::STD_I8LE)
+      H5::DataType datatype=compound_type.getMemberDataType (i);
+      if (datatype==H5::PredType::STD_I8LE)
         {
           fits_types.push_back ("L");
         }
-      else if (types[i]==H5::PredType::STD_U8LE)
+      else if (datatype==H5::PredType::STD_U8LE)
         {
           fits_types.push_back ("B");
         }
-      else if (types[i]==H5::PredType::STD_I16LE)
+      else if (datatype==H5::PredType::STD_I16LE)
         {
           fits_types.push_back ("I");
         }
-      else if (types[i]==H5::PredType::STD_U16LE)
+      else if (datatype==H5::PredType::STD_U16LE)
         {
           fits_types.push_back ("U");
         }
-      else if (types[i]==H5::PredType::STD_I32LE)
+      else if (datatype==H5::PredType::STD_I32LE)
         {
           fits_types.push_back ("J");
         }
-      else if (types[i]==H5::PredType::STD_U32LE)
+      else if (datatype==H5::PredType::STD_U32LE)
         {
           fits_types.push_back ("V");
         }
       /// Fits does not know what an unsigned long is.  So we write it
       /// as a long and hope for the best.
-      else if (types[i]==H5::PredType::STD_I64LE
-               || types[i]==H5::PredType::STD_U64LE)
+      else if (datatype==H5::PredType::STD_I64LE
+               || datatype==H5::PredType::STD_U64LE)
         {
           fits_types.push_back ("K");
         }
-      else if (types[i]==H5::PredType::IEEE_F32LE)
+      else if (datatype==H5::PredType::IEEE_F32LE)
         {
           fits_types.push_back ("E");
         }
-      else if (types[i]==H5::PredType::IEEE_F64LE)
+      else if (datatype==H5::PredType::IEEE_F64LE)
         {
           fits_types.push_back ("D");
         }
-      else if (types[i]==H5::PredType::C_S1)
+      else if (datatype.getClass ()==H5T_STRING)
         {
           fits_types.push_back (
                                 std::to_string (compound_type.getMemberDataType (i).getSize ())
@@ -101,9 +102,10 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
         }
       else
         {
-          throw std::runtime_error (
-                                    "Unknown data type when writing fits data: "
-                                    + to_string (types[i]));
+          throw std::runtime_error ("In column " + std::to_string (i)
+                                    + " (" +compound_type.getMemberName (i)
+                                    + "): unknown data type when writing fits data: "
+                                    + to_string (datatype));
         }
     }
 
@@ -167,55 +169,56 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
   for (size_t i = 0; i < num_columns; ++i)
     {
       const char *offset_data = data.data () + offsets[i];
-      if (types[i]==H5::PredType::STD_I8LE)
+      H5::DataType datatype=compound_type.getMemberDataType (i);
+      if (datatype==H5::PredType::STD_I8LE)
         {
           write_column<bool, char>(fits_file, TLOGICAL, i, offset_data,
                                    num_rows (), row_size);
         }
-      else if (types[i]==H5::PredType::STD_U8LE)
+      else if (datatype==H5::PredType::STD_U8LE)
         {
           write_column<uint8_t>(fits_file, TBYTE, i, offset_data,
                                 num_rows (), row_size);
         }
-      else if (types[i]==H5::PredType::STD_I16LE)
+      else if (datatype==H5::PredType::STD_I16LE)
         {
           write_column<int16_t>(fits_file, TSHORT, i, offset_data, num_rows (),
                                 row_size);
         }
-      else if (types[i]==H5::PredType::STD_U16LE)
+      else if (datatype==H5::PredType::STD_U16LE)
         {
           write_column<uint16_t>(fits_file, TUSHORT, i, offset_data, num_rows (),
                                  row_size);
         }
-      else if (types[i]==H5::PredType::STD_I32LE)
+      else if (datatype==H5::PredType::STD_I32LE)
         {
           write_column<int32_t>(fits_file, TINT, i, offset_data, num_rows (),
                                 row_size);
         }
-      else if (types[i]==H5::PredType::STD_U32LE)
+      else if (datatype==H5::PredType::STD_U32LE)
         {
           write_column<uint32_t>(fits_file, TUINT, i, offset_data, num_rows (),
                                  row_size);
         }
       /// Fits does not know what an unsigned long is.  So we write it
       /// as a long and hope for the best.
-      else if (types[i]==H5::PredType::STD_I64LE
-               || types[i]==H5::PredType::STD_U64LE)
+      else if (datatype==H5::PredType::STD_I64LE
+               || datatype==H5::PredType::STD_U64LE)
         {
           write_column<int64_t>(fits_file, TLONGLONG, i, offset_data, num_rows (),
                                 row_size);
         }
-      else if (types[i]==H5::PredType::IEEE_F32LE)
+      else if (datatype==H5::PredType::IEEE_F32LE)
         {
           write_column<float>(fits_file, TFLOAT, i, offset_data, num_rows (),
                               row_size);
         }
-      else if (types[i]==H5::PredType::IEEE_F64LE)
+      else if (datatype==H5::PredType::IEEE_F64LE)
         {
           write_column<double>(fits_file, TDOUBLE, i, offset_data, num_rows (),
                                row_size);
         }
-      else if (types[i]==H5::PredType::C_S1)
+      else if (datatype.getClass ()==H5T_STRING)
         {
           // FIXME: This adds a space ' ' if the string is empty,
           // breaking the null_bitfield_flags column.
@@ -237,7 +240,7 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
         {
           throw std::runtime_error (
                                     "Unknown data type when writing fits data: "
-                                    + to_string (types[i]));
+                                    + to_string (datatype));
         }
     }
   fits_close_file (fits_file, &status);

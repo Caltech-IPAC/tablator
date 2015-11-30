@@ -1,4 +1,5 @@
 #include "../../../../Table.hxx"
+#include "VOTable_Field.hxx"
 
 namespace
 {
@@ -33,31 +34,35 @@ H5::PredType string_to_Type (const std::string &s)
 }
 }
 
-std::string tablator::Table::read_field
+tablator::VOTable_Field
+tablator::Table::read_field
 (const boost::property_tree::ptree &field)
 {
   auto child = field.begin ();
   auto end = field.end ();
 
-  std::string name;
-  Field_Properties field_properties({});
+  VOTable_Field result;
   if (child != end && child->first == "<xmlattr>")
     {
       for (auto &attribute: child->second)
         {
           if (attribute.first == "name")
             {
-              name=attribute.second.get_value<std::string> ();
+              result.name=attribute.second.get_value<std::string> ();
             }
           else if (attribute.first == "datatype")
             {
-              types.push_back (string_to_Type
-                               (attribute.second.get_value<std::string> ()));
+              result.predtype=string_to_Type
+                (attribute.second.get_value<std::string> ());
             }
           // FIXME: We do not handle arrays correctly
-          else if (attribute.first != "arraysize")
+          else if (attribute.first == "arraysize")
             {
-              field_properties.attributes.insert
+              result.is_array=true;
+            }
+          else
+            {
+              result.properties.attributes.insert
                 (std::make_pair (attribute.first,
                                  attribute.second.get_value<std::string> ()));
             }
@@ -67,7 +72,7 @@ std::string tablator::Table::read_field
   
   if (child != end && child->first == "DESCRIPTION")
     {
-      field_properties.description=
+      result.properties.description=
         child->second.get_value<std::string> ();
       ++child;
     }
@@ -84,7 +89,7 @@ std::string tablator::Table::read_field
             {
               for (auto &attribute: link_child.second)
                 {
-                  field_properties.links.emplace_back
+                  result.properties.links.emplace_back
                     (attribute.first,
                      attribute.second.get_value<std::string> ());
                 }
@@ -98,6 +103,5 @@ std::string tablator::Table::read_field
         }
       ++child;
     }
-  fields_properties.emplace_back(field_properties);
-  return name;
+  return result;
 }

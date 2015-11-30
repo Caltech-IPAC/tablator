@@ -10,7 +10,7 @@ std::vector<size_t> tablator::Table::get_column_width () const
   for (int i = 0; i < num_members; ++i)
     {
       name = compound_type.getMemberName (i);
-      if (types[i]==H5::PredType::C_S1)
+      if (compound_type.getMemberDataType (i).getClass ()==H5T_STRING)
         {
           width = std::max (name.size (),
                             compound_type.getMemberDataType (i).getSize ());

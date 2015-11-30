@@ -9,7 +9,6 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
   H5::H5File file (path.string (), H5F_ACC_RDONLY);
   H5::Group group = file.openGroup ("/");
   H5::DataSet dataset = file.openDataSet (group.getObjnameByIdx (0).c_str ());
-  compound_type = dataset.getCompType ();
 
   if (dataset.attrExists ("DESCRIPTION"))
     {
@@ -76,51 +75,35 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
         }
     }
   
-  offsets.clear ();
-  types.clear ();
-  size_t offset{ 0 };
-
+  // FIXME: This does not handle fields_properties
   // FIXME: This assumes that the first column is null_bitfield_flags
-  for (int i = 0; i < compound_type.getNmembers (); ++i)
+  auto compound=dataset.getCompType ();
+  for (int i=0; i<compound.getNmembers (); ++i)
     {
-      /// There is no way to get a PredType from the compound type.
-      /// So we have to manually check all of the possibilities and
-      /// hope it is string if none match.
-      H5::DataType d = compound_type.getMemberDataType (i);
-      if (d == H5::PredType::STD_I8LE)
-        types.push_back (H5::PredType::STD_I8LE);
-      else if (d == H5::PredType::STD_U8LE)
-        types.push_back (H5::PredType::STD_U8LE);
-      else if (d == H5::PredType::STD_I16LE)
-        types.push_back (H5::PredType::STD_I16LE);
-      else if (d == H5::PredType::STD_U16LE)
-        types.push_back (H5::PredType::STD_U16LE);
-      else if (d == H5::PredType::STD_I32LE)
-        types.push_back (H5::PredType::STD_I32LE);
-      else if (d == H5::PredType::STD_U32LE)
-        types.push_back (H5::PredType::STD_U32LE);
-      else if (d == H5::PredType::STD_I64LE)
-        types.push_back (H5::PredType::STD_I64LE);
-      else if (d == H5::PredType::STD_U64LE)
-        types.push_back (H5::PredType::STD_U64LE);
-      else if (d == H5::PredType::IEEE_F32LE)
-        types.push_back (H5::PredType::IEEE_F32LE);
-      else if (d == H5::PredType::IEEE_F64LE)
-        types.push_back (H5::PredType::IEEE_F64LE);
+      H5::DataType datatype (compound.getMemberDataType (i));
+      std::string name (compound.getMemberName (i));
+      std::string class_name (datatype.fromClass ());
+      if (datatype.getClass ()==H5T_ARRAY)
+        {
+          append_array_member (name, datatype.getSuper (),
+                               datatype.getSize ());
+        }
+      else if (datatype.getClass ()==H5T_STRING)
+        {
+          append_string_member (name, datatype.getSize ());
+        }
+      else if (datatype.getClass ()==H5T_INTEGER
+               || datatype.getClass ()==H5T_FLOAT)
+        {
+          append_member (name, datatype);
+        }
       else
         {
-          // Do we have to create a string_type since compound_type
-          // lives on???
-          string_types.push_back (compound_type.getMemberStrType (i));
-          types.push_back (H5::PredType::C_S1);
+          throw std::runtime_error ("Unsupported type for member '" + name
+                                    + "' in hdf5 file '" + path.string ()
+                                    + "'");
         }
-      offsets.push_back (offset);
-      offset += d.getSize ();
-      fields_properties.push_back (Field_Properties (
-          std::string (""), {}));
     }
-  offsets.push_back (offset);
-  row_size = offset;
   data.resize (row_size * dataset.getSpace ().getSimpleExtentNpoints ());
   dataset.read (data.data (), compound_type);
 }

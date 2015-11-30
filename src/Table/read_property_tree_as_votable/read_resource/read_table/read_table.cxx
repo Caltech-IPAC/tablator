@@ -1,4 +1,5 @@
 #include "../../../../Table.hxx"
+#include "VOTable_Field.hxx"
 
 void tablator::Table::read_table (const boost::property_tree::ptree &table)
 {
@@ -17,16 +18,14 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
       read_node_and_attributes ("RESOURCE.TABLE.INFO", child->second);
     }
   
-  fields_properties.push_back(Field_Properties("Packed bit array indicating whether a "
-                                               "column is null",{}));
-  types.emplace_back (H5::PredType::C_S1);
-  std::vector<std::string> names;
-  names.emplace_back ("null_bitfield_flag");
+  std::vector<VOTable_Field> fields;
+  fields.emplace_back ("null_bitfield_flag", H5::PredType::C_S1, true,
+                       Field_Properties(null_bitfield_flags_description,{}));
   for (; child != end; ++child)
     {
       if (child->first == "FIELD")
         {
-          names.emplace_back(read_field (child->second));
+          fields.emplace_back(read_field (child->second));
         }
       else if (child->first == "PARAM")
         {
@@ -44,7 +43,7 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
     }      
   if (child != end && child->first == "DATA")
     {
-      read_data (child->second, names);
+      read_data (child->second, fields);
     }
   for (; child != end && child->first == "INFO"; ++child)
     {

@@ -14,6 +14,8 @@ public:
   Values values;
   std::vector<std::pair<std::string, std::string> > links;
 
+  Field_Properties () = default;
+
   Field_Properties (const std::map<std::string, std::string> &Attributes)
       : attributes (Attributes)
   {

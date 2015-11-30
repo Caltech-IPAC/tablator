@@ -15,15 +15,15 @@ void tablator::Table::put_table_in_property_tree (
     {
       boost::property_tree::ptree &tr = table.add ("TR", "");
       /// Skip the null bitfield flag
-      for (size_t column = 1; column < types.size (); ++column)
+      for (int column = 1; column < compound_type.getNmembers (); ++column)
         {
           std::stringstream td;
           if (!is_null(row_offset,column))
             {
+              H5::DataType datatype=compound_type.getMemberDataType (column);
               write_type_as_ascii
-                (td, types[column], data.data () + row_offset + offsets[column],
-                 compound_type.getMemberDataType (column).getSize (),
-                 output_precision);
+                (td, datatype, data.data () + row_offset + offsets[column],
+                 datatype.getSize (), output_precision);
             }
           tr.add ("TD", td.str ());
         }

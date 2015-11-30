@@ -1,9 +1,10 @@
 #include <algorithm>
 
 #include "../../../../../Table.hxx"
+#include "../VOTable_Field.hxx"
 
 void tablator::Table::read_data (const boost::property_tree::ptree &data,
-                                 const std::vector<std::string> &names)
+                                 const std::vector<VOTable_Field> &fields)
 {
   auto child = data.begin ();
   auto end = data.end ();
@@ -13,7 +14,7 @@ void tablator::Table::read_data (const boost::property_tree::ptree &data,
 
   if (child->first == "TABLEDATA")
     {
-      read_tabledata(child->second, names);
+      read_tabledata (child->second, fields);
       ++child;
     }
   else if (child->first == "BINARY")

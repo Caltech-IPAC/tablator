@@ -48,11 +48,14 @@ inline std::string to_string (const H5::DataType &type)
     {
       return "double";
     }
-  else if (type==H5::PredType::C_S1)
+  else if (type.getClass ()==H5T_STRING)
     {
       return "char";
     }
-  // FIXME: This does not handle arrays
+  else if (type.getClass ()==H5T_ARRAY)
+    {
+      return "array<" + to_string (type.getSuper ()) + ">";
+    }
   else
     {
       throw std::runtime_error

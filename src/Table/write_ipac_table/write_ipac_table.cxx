@@ -4,12 +4,13 @@
 #include <cmath>
 
 #include "../../Table.hxx"
+#include "../write_type_as_ascii.hxx"
 
 void tablator::Table::write_ipac_table (std::ostream &os) const
 {
   std::vector<size_t> ipac_column_widths=get_column_width ();
 
-  const size_t num_members = types.size ()-1;
+  const size_t num_members = compound_type.getNmembers ()-1;
   write_ipac_table_header (os, num_members);
   int total_record_width = 0;
 
@@ -26,7 +27,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
   for (size_t i = 0; i < num_members; ++i)
     {
       os << std::setw (ipac_column_widths[i+1]);
-      os << to_ipac_string (types[i+1]);
+      os << to_ipac_string (compound_type.getMemberDataType (i+1));
       os << "|";
     }
 
@@ -101,62 +102,11 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
             }
           else
             {
-              if (types[column+1]==H5::PredType::STD_I8LE)
-                {
-                  ss << static_cast<int>(data[offset]);
-                }
-              else if (types[column+1]==H5::PredType::STD_U8LE)
-                {
-                  ss << static_cast<uint>(data[offset]);
-                }
-              else if (types[column+1]==H5::PredType::STD_I16LE)
-                {
-                  ss << *reinterpret_cast<const int16_t *>
-                    (data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::STD_U16LE)
-                {
-                  ss << *reinterpret_cast<const uint16_t *>
-                    (data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::STD_I32LE)
-                {
-                  ss << *reinterpret_cast<const int32_t *>(data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::STD_U32LE)
-                {
-                  ss << *reinterpret_cast<const uint32_t *>
-                    (data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::STD_I64LE)
-                {
-                  ss << *reinterpret_cast<const int64_t *>(data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::STD_U64LE)
-                {
-                  ss << *reinterpret_cast<const uint64_t *>
-                    (data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::IEEE_F32LE)
-                {
-                  ss.precision (output_precision);
-                  ss << *reinterpret_cast<const float *>(data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::IEEE_F64LE)
-                {
-                  ss.precision (output_precision);
-                  ss << *reinterpret_cast<const double *>(data.data () + offset);
-                }
-              else if (types[column+1]==H5::PredType::C_S1)
-                {
-                  /// The characters in the type can be shorter than
-                  /// the number of allowed bytes.  So add a
-                  /// .c_str() that will terminate the string at the
-                  /// first null.
-                  ss << std::string(data.data () + offset,
-                                    offsets[column + 2]
-                                    - offsets[column+1]).c_str();
-                }
+              write_type_as_ascii (ss,
+                                   compound_type.getMemberDataType (column+1),
+                                   data.data () + offset,
+                                   offsets[column + 2] - offsets[column+1],
+                                   output_precision);
             }
         }
       ss << " \n";

@@ -6,6 +6,7 @@
 
 /// This gets a bit complicated because there are variable length
 /// arrays inside variable length arrays.
+// FIXME: This does not handle fields_properties
 
 void tablator::Table::write_hdf5_attributes (H5::DataSet &table) const
 {

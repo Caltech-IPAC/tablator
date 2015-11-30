@@ -22,8 +22,8 @@ public:
     std::fill (data.begin (), data.end (), 0);
   }
 
-  void set_null (size_t column, const H5::PredType &type,
-                 const std::vector<size_t> &offsets);
+  void set_null (const H5::DataType &type, const size_t &column,
+                 const size_t &offset, const size_t &offset_end);
 
   template <typename T>
   void insert (const T &element, const size_t &offset)

@@ -1,6 +1,6 @@
 #include "../../Table.hxx"
 
-std::string tablator::Table::to_ipac_string (const H5::PredType &type) const
+std::string tablator::Table::to_ipac_string (const H5::DataType &type) const
 {
   /// Write out unsigned integers as integers for backwards compatibility 
   if (type==H5::PredType::STD_I8LE || type==H5::PredType::STD_U8LE
@@ -23,9 +23,14 @@ std::string tablator::Table::to_ipac_string (const H5::PredType &type) const
     {
       return "double";
     }
-  else if (type==H5::PredType::C_S1)
+  else if (type.getClass ()==H5T_STRING)
     {
       return "char";
+    }
+  else if (type.getClass ()==H5T_ARRAY)
+    {
+      /// FIXME: Do something reasonable for array output
+      throw std::runtime_error ("Array types are unsupported in IPAC Tables");
     }
   else
     {

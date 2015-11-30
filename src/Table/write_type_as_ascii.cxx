@@ -1,3 +1,4 @@
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 
@@ -5,7 +6,7 @@
 
 namespace tablator
 {
-void write_type_as_ascii (std::ostream &os, const H5::PredType &type,
+void write_type_as_ascii (std::ostream &os, const H5::DataType &type,
                           const char* data, const size_t &size,
                           const int &output_precision)
 {   
@@ -18,9 +19,11 @@ void write_type_as_ascii (std::ostream &os, const H5::PredType &type,
     }
   else if (type==H5::PredType::STD_U8LE)
     {
-      os << "0x" << std::hex
+      std::stringstream ss;
+      ss << "0x" << std::hex
          << static_cast<const uint16_t>(static_cast<const uint8_t>(*data))
          << std::dec;
+      os << ss.str ();
     }
   else if (type==H5::PredType::STD_I16LE)
     {
@@ -56,12 +59,27 @@ void write_type_as_ascii (std::ostream &os, const H5::PredType &type,
       os << std::setprecision (output_precision)
          << *reinterpret_cast<const double *>(data);
     }
-  else if (type==H5::PredType::C_S1)
+  else if (type.getClass ()==H5T_STRING)
     {
       /// The characters in the type can be shorter than the
       /// number of allowed bytes.  So add a .c_str() that
       /// will terminate the string at the first null.
       os << std::string (data,size).c_str ();
+    }
+  else if (type.getClass ()==H5T_ARRAY)
+    {
+      hsize_t num_elements;
+      /// We can not use ArrayType::getArrayDims because it is not const.
+      H5Tget_array_dims2(type.getId (), &num_elements);
+
+      auto element_size=type.getSuper ().getSize ();
+      for (size_t n=0; n<num_elements; ++n)
+        {
+          write_type_as_ascii (os, type.getSuper (), data + n*element_size,
+                               element_size, output_precision);
+          if (n!=num_elements-1)
+            os << ' ';
+        }
     }
   else
     {

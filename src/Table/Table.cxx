@@ -1,18 +1,16 @@
 #include "../Table.hxx"
 
+const std::string tablator::Table::null_bitfield_flags_description
+= "Packed bit array indicating whether an entry is null";
+
 tablator::Table::Table (const std::vector<Column> &columns,
                         const std::map<std::string, std::string> &property_map)
-  : compound_type (size_t(1)), offsets({0})
+  : compound_type (size_t(1))
 {
-  row_size=0;
   const size_t null_flags_size=(columns.size ()+7)/8;
-  string_types.emplace_back (0, null_flags_size);
-  append_member ("null_bitfield_flags", *string_types.rbegin ());
+  append_array_member ("null_bitfield_flags", H5::PredType::STD_U8LE, null_flags_size);
 
-  fields_properties.push_back (Field_Properties("Packed bit array indicating "
-                                                "whether an entry is null", {}));
-  types.push_back (H5::PredType::C_S1);
-
+  fields_properties[0].description = null_bitfield_flags_description;
   for (auto &c : columns)
     {
       auto type = c.second.first.first;
@@ -21,20 +19,17 @@ tablator::Table::Table (const std::vector<Column> &columns,
       compound_type.setSize (compound_type.getSize () + member_size);
       if (type == H5::PredType::C_S1)
         {
-          string_types.emplace_back (0, c.second.first.second);
-          append_member (c.first, *string_types.rbegin ());
+          append_string_member (c.first, c.second.first.second);
         }
-      // else if (c.second.first.second!=1)
-      //   {
-      //     array_types.emplace_back (type, 1, c.second.first.second);
-      //     append_member (c.first, *array_types.rbegin ());
-      //   }
+      else if (c.second.first.second!=1)
+        {
+          append_array_member (c.first, type, c.second.first.second);
+        }
       else
         {
           append_member (c.first, type);
         }
-      fields_properties.emplace_back (c.second.second);
-      types.push_back (type);
+      *fields_properties.rbegin ()=c.second.second;
     }
 
   for (auto &p : property_map)

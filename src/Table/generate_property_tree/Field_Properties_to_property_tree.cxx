@@ -33,14 +33,15 @@ namespace tablator
 {
 void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
                                         const std::string &name,
-                                        const H5::PredType &type,
+                                        const H5::DataType &type,
                                         const Field_Properties &field_property)
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");
   field.add ("<xmlattr>.name", name);
-  std::string datatype=to_string (type);
+  std::string datatype=to_string (type.getClass ()==H5T_ARRAY
+                                  ? type.getSuper () : type);
   field.add ("<xmlattr>.datatype", datatype);
-  if (datatype=="char" || type.fromClass ()=="ArrayType")
+  if (datatype=="char" || type.getClass ()==H5T_ARRAY)
     field.add ("<xmlattr>.arraysize", "*");
 
   for (auto &a : field_property.attributes)
@@ -53,7 +54,7 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
       if (a.first.empty ())
         throw std::runtime_error ("Empty attribute in field " + name
                                   + " which has type "
-                                  + datatype);
+                                  + to_string (type));
       field.add ("<xmlattr>." + a.first, a.second);
     }
 

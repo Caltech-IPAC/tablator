@@ -41,24 +41,26 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
           std::string element=line.substr (ipac_column_offsets[column-1]+1,
                                            ipac_column_widths[column]);
           boost::algorithm::trim(element);
+          H5::DataType datatype=compound_type.getMemberDataType (column);
           if (!columns[3][column].empty()
               && element==columns[3][column])
             {
-              row_string.set_null (column, types[column], offsets);
+              row_string.set_null (datatype, column, offsets[column],
+                                   offsets[column+1]);
             }
           else
             {
               try
                 {
-                  insert_ascii_in_row (types[column], element, column, offsets,
-                                       row_string);
+                  insert_ascii_in_row (datatype, column, element, offsets[column],
+                                       offsets[column+1], row_string);
                 }
               catch (std::exception &error)
                 {
                   throw std::runtime_error ("Invalid "
-                                            + to_string (types[column])
+                                            + to_string (datatype)
                                             + " in line "
-                                            + std::to_string(current_line)
+                                            + std::to_string(current_line+1)
                                             + ", field "
                                             + std::to_string(column)
                                             + ".  Found '"

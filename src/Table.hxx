@@ -25,6 +25,8 @@
 
 namespace tablator
 {
+class VOTable_Field;
+
 class Table
 {
 public:
@@ -34,24 +36,19 @@ public:
   std::vector<Field_Properties> fields_properties;
   H5::CompType compound_type;
 
-  /// These members are mostly redundant with information in
-  /// compound_type.  We precompute them so that we do not have to do
-  /// dynamic lookups for each row.  Also, we need a place to store
-  /// the string and array types, since compound_type only has a
-  /// reference to them.
-
-  std::vector<H5::PredType> types;
-
-  /// offsets has an extra element at the end so that we can get the
-  /// size of any element.  This is needed for strings and arrays.
-  std::vector<size_t> offsets;
-  size_t row_size;
-
-  /// Need to keep a copy of the string and array types around, since
-  /// compound_type only has a reference to the type, not a copy of
-  /// the type.
+  /// compound_type stores only a reference to the type, so we need a
+  /// place to store string and array types.
   std::vector<H5::StrType> string_types;
+  std::vector<H5::ArrayType> array_types;
 
+  /// row_size and offsets are duplicative of information in
+  /// compound_type.  We store them here to avoid the cost of dynamic
+  /// lookups.
+  size_t row_size=0;
+  std::vector<size_t> offsets={0};
+
+  static const std::string null_bitfield_flags_description;
+  
   typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties>
   Column_Properties;
   typedef std::pair<std::string, Column_Properties> Column;
@@ -111,15 +108,28 @@ public:
     return data[row_offset+(column-1)/8] & (1 << ((column-1)%8));
   }
 
-  // FIXME: append_member does not increase the size of the null column.
+  /// WARNING: append_member does not increase the size of the null column.
+  void append_string_member (const std::string &name, const size_t &size)
+  {
+    string_types.emplace_back (0,size);
+    append_member (name, *string_types.rbegin ());
+  }
+
+  void append_array_member (const std::string &name, const H5::DataType &type,
+                            const hsize_t &size)
+  {
+    array_types.emplace_back (type, 1, &size);
+    append_member (name, *array_types.rbegin ());
+  }
+
   void append_member (const std::string &name, const H5::DataType &type)
   {
-    size_t member_size=type.getSize ();
     size_t old_size=row_size;
-    row_size+=member_size;
+    row_size+=type.getSize ();
     compound_type.setSize (row_size);
     compound_type.insertMember (name, old_size, type);
     offsets.push_back (row_size);
+    fields_properties.push_back (Field_Properties ());
   }
   
   void append_row (const Row &row)
@@ -162,7 +172,7 @@ public:
   std::vector<size_t> get_column_width () const;
   void write_ipac_table_header (std::ostream &os,
                                 const int &num_members) const;
-  std::string to_ipac_string (const H5::PredType &type) const;
+  std::string to_ipac_string (const H5::DataType &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (const boost::filesystem::path &filename) const;
@@ -178,12 +188,12 @@ public:
     read_node_and_attributes (it->first, it->second);
   }
   void read_resource (const boost::property_tree::ptree &resource);
-  void read_table (const boost::property_tree::ptree &resource);
-  std::string read_field (const boost::property_tree::ptree &resource);
+  void read_table (const boost::property_tree::ptree &table);
+  VOTable_Field read_field (const boost::property_tree::ptree &field);
   void read_data (const boost::property_tree::ptree &data,
-                  const std::vector<std::string> &names);
+                  const std::vector<VOTable_Field> &fields);
   void read_tabledata (const boost::property_tree::ptree &tabledata,
-                       const std::vector<std::string> &names);
+                       const std::vector<VOTable_Field> &fields);
   void put_table_in_property_tree (boost::property_tree::ptree &table) const;
   void write_html (std::ostream &os) const;
   boost::property_tree::ptree generate_property_tree () const;
@@ -195,7 +205,12 @@ public:
 
   void create_types_from_ipac_headers
   (std::array<std::vector<std::string>,4> &columns,
-   std::vector<size_t> &ipac_column_offsets,
+   const std::vector<size_t> &ipac_column_offsets,
    std::vector<size_t> &ipac_column_widths);
+
+  void
+  append_ipac_data_member (const std::string &name,
+                           const std::string &data_type,
+                           const size_t &size);
 };
 }
