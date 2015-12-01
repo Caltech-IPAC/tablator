@@ -8,7 +8,7 @@ tablator::Table::Table (const std::vector<Column> &columns,
   : compound_type (size_t(1))
 {
   const size_t null_flags_size=(columns.size ()+7)/8;
-  append_array_member ("null_bitfield_flags", H5::PredType::STD_U8LE, null_flags_size);
+  append_string_member ("null_bitfield_flags", null_flags_size);
 
   fields_properties[0].description = null_bitfield_flags_description;
   for (auto &c : columns)
