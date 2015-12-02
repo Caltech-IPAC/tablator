@@ -122,6 +122,15 @@ public:
     append_member (name, *array_types.rbegin ());
   }
 
+  void append_member (const std::string &name, const H5::DataType &type,
+                      const hsize_t &size)
+  {
+    if (size==1)
+      append_member (name, type);
+    else
+      append_array_member (name, type, size);
+  }
+
   void append_member (const std::string &name, const H5::DataType &type)
   {
     size_t old_size=row_size;
