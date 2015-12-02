@@ -17,6 +17,7 @@ def build(bld):
              'src/Format/set_from_extension.cxx',
              'src/Row/set_null.cxx',
              'src/Table/Table.cxx',
+             'src/Table/columns.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/insert_ascii_in_row.cxx',
              'src/Table/read_fits.cxx',
