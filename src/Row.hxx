@@ -35,7 +35,7 @@ public:
   template <typename T>
   void insert (const T &begin, const T &end, const size_t &offset)
   {
-    assert (offset + sizeof(T)*std::distance(begin,end) < data.size ());
+    assert (offset + std::distance(begin,end) <= data.size ());
     std::copy (begin, end, data.data () + offset);
   }
 
