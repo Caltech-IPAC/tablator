@@ -36,7 +36,11 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                                       + std::to_string(current_line)
                                       + ", column "
                                       + std::to_string (ipac_column_offsets[column-1])
-                                      + ".  Is a field not wide enough?");
+                                      + " between the fields '"
+                                      + compound_type.getMemberName (column-1)
+                                      + "' and '"
+                                      + compound_type.getMemberName (column)
+                                      + "'.  Is a field not wide enough?");
 
           std::string element=line.substr (ipac_column_offsets[column-1]+1,
                                            ipac_column_widths[column]);
@@ -59,10 +63,10 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 {
                   throw std::runtime_error ("Invalid "
                                             + to_string (datatype)
-                                            + " in line "
+                                            + " for field '"
+                                            + compound_type.getMemberName (column)
+                                            + "' in line "
                                             + std::to_string(current_line+1)
-                                            + ", field "
-                                            + std::to_string(column)
                                             + ".  Found '"
                                             + element + "'");
                 }

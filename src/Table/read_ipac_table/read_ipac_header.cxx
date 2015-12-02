@@ -19,7 +19,8 @@ void check_bar_position (std::vector<size_t> &bar_offsets, std::string &line,
   for (auto &offset: bar_offsets)
     if (line.size () <= offset || line.at (offset) != '|')
       throw std::runtime_error ("In line " + std::to_string (current_line)
-                                + ", the bar '|' is misaligned");
+                                + ", the bar '|' that should be at column "
+                                + std::to_string (offset+1) + " is misaligned");
 }
 }
 
@@ -119,7 +120,6 @@ size_t tablator::Table::read_ipac_header
 
       if (column_line==1)
         {
-          columns[1][0]="char";
           if (columns[0].size () != columns[1].size ())
             throw std::runtime_error ("Wrong number of data types in line "
                                       + std::to_string (current_line)

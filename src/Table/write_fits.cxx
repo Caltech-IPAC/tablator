@@ -9,30 +9,32 @@
 /// has a packed representation.
 template <typename data_type, typename vector_type>
 void write_column (fitsfile *fits_file, const int &fits_type,
-                   const int &column, const char *data, const size_t &size,
-                   const size_t &row_size)
+                   const int &column, const char *data, const hsize_t &array_size,
+                   const size_t &num_rows, const size_t &row_size)
 {
-  std::vector<vector_type> temp_array (size);
+  std::vector<vector_type> temp_array (num_rows*array_size);
   size_t offset = 0;
-  for (size_t j = 0; j < size; ++j)
+  for (size_t j = 0; j < temp_array.size (); j+=array_size)
     {
-      temp_array[j] = *(reinterpret_cast<const vector_type *>(data + offset));
+      for (size_t k=0; k<array_size; ++k)
+        temp_array[j+k] = *(reinterpret_cast<const vector_type *>(data + offset)+k);
       offset += row_size;
     }
   int status = 0;
-  fits_write_col (fits_file, fits_type, column + 1, 1, 1, size,
+  fits_write_col (fits_file, fits_type, column + 1, 1, 1, temp_array.size (),
                   reinterpret_cast<data_type *>(temp_array.data ()), &status);
   if (status != 0)
     throw CCfits::FitsError (status);
+
 }
 
 template <typename data_type>
 void write_column (fitsfile *fits_file, const int &fits_type,
-                   const int &column, const char *data, const size_t &size,
-                   const size_t &row_size)
+                   const int &column, const char *data, const hsize_t &array_size,
+                   const size_t &num_rows, const size_t &row_size)
 {
-  write_column<data_type, data_type>(fits_file, fits_type, column, data, size,
-                                     row_size);
+  write_column<data_type, data_type>(fits_file, fits_type, column, data,
+                                     array_size, num_rows, row_size);
 }
 
 void tablator::Table::write_fits (const boost::filesystem::path &filename)
@@ -55,44 +57,52 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
     {
       fits_names.push_back (compound_type.getMemberName (i));
       H5::DataType datatype=compound_type.getMemberDataType (i);
+      std::string n;
+      if (datatype.getClass ()==H5T_ARRAY)
+        {
+          hsize_t dims;
+          compound_type.getMemberArrayType (i).getArrayDims (&dims);
+          n=std::to_string (dims);
+          datatype=datatype.getSuper ();
+        }
       if (datatype==H5::PredType::STD_I8LE)
         {
-          fits_types.push_back ("L");
+          fits_types.push_back (n + "L");
         }
       else if (datatype==H5::PredType::STD_U8LE)
         {
-          fits_types.push_back ("B");
+          fits_types.push_back (n + "B");
         }
       else if (datatype==H5::PredType::STD_I16LE)
         {
-          fits_types.push_back ("I");
+          fits_types.push_back (n + "I");
         }
       else if (datatype==H5::PredType::STD_U16LE)
         {
-          fits_types.push_back ("U");
+          fits_types.push_back (n + "U");
         }
       else if (datatype==H5::PredType::STD_I32LE)
         {
-          fits_types.push_back ("J");
+          fits_types.push_back (n + "J");
         }
       else if (datatype==H5::PredType::STD_U32LE)
         {
-          fits_types.push_back ("V");
+          fits_types.push_back (n + "V");
         }
       /// Fits does not know what an unsigned long is.  So we write it
       /// as a long and hope for the best.
       else if (datatype==H5::PredType::STD_I64LE
                || datatype==H5::PredType::STD_U64LE)
         {
-          fits_types.push_back ("K");
+          fits_types.push_back (n + "K");
         }
       else if (datatype==H5::PredType::IEEE_F32LE)
         {
-          fits_types.push_back ("E");
+          fits_types.push_back (n + "E");
         }
       else if (datatype==H5::PredType::IEEE_F64LE)
         {
-          fits_types.push_back ("D");
+          fits_types.push_back (n + "D");
         }
       else if (datatype.getClass ()==H5T_STRING)
         {
@@ -170,53 +180,59 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
     {
       const char *offset_data = data.data () + offsets[i];
       H5::DataType datatype=compound_type.getMemberDataType (i);
+      hsize_t array_size=1;
+      if (datatype.getClass ()==H5T_ARRAY)
+        {
+          compound_type.getMemberArrayType (i).getArrayDims (&array_size);
+          datatype=datatype.getSuper ();
+        }
       if (datatype==H5::PredType::STD_I8LE)
         {
           write_column<bool, char>(fits_file, TLOGICAL, i, offset_data,
-                                   num_rows (), row_size);
+                                   array_size, num_rows (), row_size);
         }
       else if (datatype==H5::PredType::STD_U8LE)
         {
           write_column<uint8_t>(fits_file, TBYTE, i, offset_data,
-                                num_rows (), row_size);
+                                array_size, num_rows (), row_size);
         }
       else if (datatype==H5::PredType::STD_I16LE)
         {
-          write_column<int16_t>(fits_file, TSHORT, i, offset_data, num_rows (),
-                                row_size);
+          write_column<int16_t>(fits_file, TSHORT, i, offset_data, array_size,
+                                num_rows (), row_size);
         }
       else if (datatype==H5::PredType::STD_U16LE)
         {
-          write_column<uint16_t>(fits_file, TUSHORT, i, offset_data, num_rows (),
-                                 row_size);
+          write_column<uint16_t>(fits_file, TUSHORT, i, offset_data, array_size,
+                                num_rows (), row_size);
         }
       else if (datatype==H5::PredType::STD_I32LE)
         {
-          write_column<int32_t>(fits_file, TINT, i, offset_data, num_rows (),
-                                row_size);
+          write_column<int32_t>(fits_file, TINT, i, offset_data, array_size,
+                                num_rows (), row_size);
         }
       else if (datatype==H5::PredType::STD_U32LE)
         {
-          write_column<uint32_t>(fits_file, TUINT, i, offset_data, num_rows (),
-                                 row_size);
+          write_column<uint32_t>(fits_file, TUINT, i, offset_data, array_size,
+                                num_rows (), row_size);
         }
       /// Fits does not know what an unsigned long is.  So we write it
       /// as a long and hope for the best.
       else if (datatype==H5::PredType::STD_I64LE
                || datatype==H5::PredType::STD_U64LE)
         {
-          write_column<int64_t>(fits_file, TLONGLONG, i, offset_data, num_rows (),
-                                row_size);
+          write_column<int64_t>(fits_file, TLONGLONG, i, offset_data, array_size,
+                                num_rows (), row_size);
         }
       else if (datatype==H5::PredType::IEEE_F32LE)
         {
-          write_column<float>(fits_file, TFLOAT, i, offset_data, num_rows (),
-                              row_size);
+          write_column<float>(fits_file, TFLOAT, i, offset_data, array_size,
+                              num_rows (), row_size);
         }
       else if (datatype==H5::PredType::IEEE_F64LE)
         {
-          write_column<double>(fits_file, TDOUBLE, i, offset_data, num_rows (),
-                               row_size);
+          write_column<double>(fits_file, TDOUBLE, i, offset_data, array_size,
+                                num_rows (), row_size);
         }
       else if (datatype.getClass ()==H5T_STRING)
         {

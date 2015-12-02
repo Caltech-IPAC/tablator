@@ -6,8 +6,8 @@
 namespace
 {
 template <typename T>
-void read_column (char *position, CCfits::Column &c, const size_t &rows,
-                  const size_t &row_size)
+void read_scalar_column (char *position, CCfits::Column &c, const size_t &rows,
+                         const size_t &row_size)
 {
   std::vector<T> v;
   c.read (v, 1, rows);
@@ -17,6 +17,34 @@ void read_column (char *position, CCfits::Column &c, const size_t &rows,
       *reinterpret_cast<T *>(current) = element;
       current += row_size;
     }
+}
+
+template <typename T>
+void read_vector_column (char *position, CCfits::Column &c,
+                         const size_t &rows, const size_t &row_size)
+{
+  std::vector<std::valarray<T> > v;
+  c.readArrays (v, 1, rows);
+  char *current = position;
+  for (auto &array : v)
+    {
+      for (auto &element : array)
+        {
+          *reinterpret_cast<T *>(current) = element;
+          current += sizeof(T);
+        }
+      current += row_size;
+    }
+}
+
+template <typename T>
+void read_column (char *position, CCfits::Column &c, const bool &is_array,
+                  const size_t &rows, const size_t &row_size)
+{
+  if (!is_array)
+    read_scalar_column<T> (position, c, rows, row_size);
+  else
+    read_vector_column<T> (position, c, rows, row_size);
 }
 }
 
@@ -62,41 +90,44 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
     {
       /// CCfits is 1 based, not 0 based.
       CCfits::Column &c = table->column (column+1);
+      size_t array_size=1;
+      if (std::isdigit (c.format ().at (0)))
+        array_size=std::stoll (c.format ());
       switch (c.type ())
         {
         case CCfits::Tlogical:
-          append_member (c.name (), H5::PredType::STD_I8LE);
+          append_member (c.name (), H5::PredType::STD_I8LE, array_size);
           break;
         case CCfits::Tbyte:
-          append_member (c.name (), H5::PredType::STD_U8LE);
+          append_member (c.name (), H5::PredType::STD_U8LE, array_size);
           break;
         case CCfits::Tshort:
-          append_member (c.name (), H5::PredType::STD_I16LE);
+          append_member (c.name (), H5::PredType::STD_I16LE, array_size);
           break;
         case CCfits::Tushort:
-          append_member (c.name (), H5::PredType::STD_U16LE);
+          append_member (c.name (), H5::PredType::STD_U16LE, array_size);
           break;
         case CCfits::Tint:
-          append_member (c.name (), H5::PredType::STD_I32LE);
+          append_member (c.name (), H5::PredType::STD_I32LE, array_size);
           break;
         case CCfits::Tuint:
-          append_member (c.name (), H5::PredType::STD_U32LE);
+          append_member (c.name (), H5::PredType::STD_U32LE, array_size);
           break;
         case CCfits::Tlong:
           /// Tlong and Tulong have indeterminate sizes.  We guess 32 bit.
-          append_member (c.name (), H5::PredType::STD_I32LE);
+          append_member (c.name (), H5::PredType::STD_I32LE, array_size);
           break;
         case CCfits::Tulong:
-          append_member (c.name (), H5::PredType::STD_U32LE);
+          append_member (c.name (), H5::PredType::STD_U32LE, array_size);
           break;
         case CCfits::Tlonglong:
-          append_member (c.name (), H5::PredType::STD_I64LE);
+          append_member (c.name (), H5::PredType::STD_I64LE, array_size);
           break;
         case CCfits::Tfloat:
-          append_member (c.name (), H5::PredType::IEEE_F32LE);
+          append_member (c.name (), H5::PredType::IEEE_F32LE, array_size);
           break;
         case CCfits::Tdouble:
-          append_member (c.name (), H5::PredType::IEEE_F64LE);
+          append_member (c.name (), H5::PredType::IEEE_F64LE, array_size);
           break;
         case CCfits::Tstring:
           append_string_member (c.name (), c.width ());
@@ -116,54 +147,74 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
     {
       /// CCfits is 1 based, not 0 based.
       CCfits::Column &c = table->column (column+1);
-
+      bool is_array (false);
+      if (std::isdigit (c.format ().at (0)))
+        is_array= (std::stoll (c.format ())!=1);
       switch (c.type ())
         {
         case CCfits::Tlogical:
           {
-            std::vector<int> v;
-            c.read (v, 1, table->rows ());
-            size_t offset = offsets[column];
-            for (auto &element : v)
+            if (!is_array)
               {
-                data[offset] = element;
-                offset += row_size;
+                std::vector<int> v;
+                c.read (v, 1, table->rows ());
+                size_t offset = offsets[column];
+                for (auto &element : v)
+                  {
+                    data[offset] = element;
+                    offset += row_size;
+                  }
+              }
+            else
+              {
+                std::vector<std::valarray<int> > v;
+                c.readArrays (v, 1, table->rows ());
+                size_t offset = offsets[column];
+                for (auto &array : v)
+                  {
+                    for (auto &element : array)
+                      {
+                        data[offset] = element;
+                        ++offset;
+                      }
+                    offset += row_size;
+                  }
               }
           }
           break;
         case CCfits::Tbyte:
           read_column<uint8_t>(data.data () + offsets[column], c,
-                               table->rows (), row_size);
+                               is_array, table->rows (), row_size);
           break;
         case CCfits::Tshort:
           read_column<int16_t>(data.data () + offsets[column], c,
-                               table->rows (), row_size);
+                               is_array, table->rows (), row_size);
           break;
         case CCfits::Tushort:
           read_column<uint16_t>(data.data () + offsets[column], c,
-                                table->rows (), row_size);
+                                is_array, table->rows (), row_size);
           break;
         case CCfits::Tuint:
         case CCfits::Tulong:
           read_column<uint32_t>(data.data () + offsets[column], c,
-                                table->rows (), row_size);
+                                is_array, table->rows (), row_size);
           break;
         case CCfits::Tint:
         case CCfits::Tlong:
           read_column<int32_t>(data.data () + offsets[column], c,
-                               table->rows (), row_size);
+                               is_array, table->rows (), row_size);
           break;
         case CCfits::Tlonglong:
           read_column<int64_t>(data.data () + offsets[column], c,
-                               table->rows (), row_size);
+                               is_array, table->rows (), row_size);
           break;
         case CCfits::Tfloat:
           read_column<float>(data.data () + offsets[column], c,
-                             table->rows (), row_size);
+                             is_array, table->rows (), row_size);
           break;
         case CCfits::Tdouble:
           read_column<double>(data.data () + offsets[column], c,
-                              table->rows (), row_size);
+                              is_array, table->rows (), row_size);
           break;
         case CCfits::Tstring:
           {
