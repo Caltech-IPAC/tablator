@@ -2,7 +2,9 @@
 
 void tablator::Format::set_from_extension (const boost::filesystem::path &path)
 {
-  std::string extension = path.extension ().string ().substr (1);
+  std::string extension = path.extension ().string ();
+  if (!extension.empty ())
+    extension=extension.substr (1);
   bool found = false;
   for (index = formats.begin (); index != formats.end (); ++index)
     {
