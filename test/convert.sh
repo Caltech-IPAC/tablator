@@ -9,7 +9,7 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
     fi
 done
 
-for table in test/*.tbl test/*.json5 test/*.xml; do
+for table in test/multi test/*.tbl test/*.json5 test/*.xml; do
     for ending in tbl hdf5 xml csv tsv fits html json json5; do
         build/tablator $table test.$ending
         if [ $ending == "hdf5" ] || [ $ending == "xml" ] || [ $ending == "fits" ] || [ $ending == "json" ]; then
