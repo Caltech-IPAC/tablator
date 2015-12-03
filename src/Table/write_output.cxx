@@ -4,11 +4,11 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
                                     const Format &format)
 {
   const bool use_stdout (path.string () == "-");
-  if (format.index->first == Format::enum_format::FITS)
+  if (format.is_fits ())
     {
       write_fits (path);
     }
-  else if (format.index->first == Format::enum_format::HDF5)
+  else if (format.is_hdf5 ())
     {
       if (use_stdout)
         write_hdf5 (std::cout);
@@ -22,31 +22,31 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
         file_output.open (path);
       std::ostream &out (use_stdout ? std::cout : file_output);
 
-      switch (format.index->first)
+      switch (format.enum_format)
         {
-        case Format::enum_format::JSON:
-        case Format::enum_format::JSON5:
+        case Format::Enums::JSON:
+        case Format::Enums::JSON5:
           boost::property_tree::write_json (out, generate_property_tree(), true);
           break;
-        case Format::enum_format::VOTABLE:
+        case Format::Enums::VOTABLE:
           boost::property_tree::write_xml
             (out, generate_property_tree(),
              boost::property_tree::xml_writer_make_settings(' ',2));
           break;
-        case Format::enum_format::CSV:
+        case Format::Enums::CSV:
           write_csv_tsv (out, ',');
           break;
-        case Format::enum_format::TSV:
+        case Format::Enums::TSV:
           write_csv_tsv (out, '\t');
           break;
-        case Format::enum_format::IPAC_TABLE:
-        case Format::enum_format::TEXT:
+        case Format::Enums::IPAC_TABLE:
+        case Format::Enums::TEXT:
           write_ipac_table (out);
           break;
-        case Format::enum_format::HTML:
+        case Format::Enums::HTML:
           write_html (out);
           break;
-        case Format::enum_format::UNKNOWN:
+        case Format::Enums::UNKNOWN:
         default:
           throw std::runtime_error ("Unknown output type");
           break;

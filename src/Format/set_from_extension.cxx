@@ -1,29 +1,31 @@
 #include "../Format.hxx"
 
-void tablator::Format::set_from_extension (const boost::filesystem::path &path)
+void tablator::Format::set_from_extension
+(const boost::filesystem::path &path,
+ const Format::Enums &default_format)
 {
   std::string extension = path.extension ().string ();
-  if (!extension.empty ())
-    extension=extension.substr (1);
-  bool found = false;
-  for (index = formats.begin (); index != formats.end (); ++index)
+  if (extension.empty ())
     {
-      for (auto &e : index->second.second)
+      enum_format=default_format;
+    }
+  else
+    {
+      extension=extension.substr (1);
+      for (auto &f: formats)
         {
-          if (boost::iequals (e, extension))
+          for (auto &e : f.second.second)
             {
-              found = true;
-              break;
+              if (boost::iequals (e, extension))
+                {
+                  enum_format=f.first;
+                  break;
+                }
             }
+          if (enum_format!=Enums::UNKNOWN)
+            break;
         }
-      if (found)
-        break;
     }
-  if (index == formats.end ())
-    {
-      if (extension.empty ())
-        index = formats.find (enum_format::IPAC_TABLE);
-      else
-        throw std::runtime_error ("Unknown extension: " + extension);
-    }
+  if (enum_format==Enums::UNKNOWN)
+    throw std::runtime_error ("Unknown extension: " + extension);
 }
