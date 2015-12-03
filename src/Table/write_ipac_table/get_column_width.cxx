@@ -12,8 +12,12 @@ std::vector<size_t> tablator::Table::get_column_width () const
       name = compound_type.getMemberName (i);
       if (compound_type.getMemberDataType (i).getClass ()==H5T_STRING)
         {
-          width = std::max (name.size (),
-                            compound_type.getMemberDataType (i).getSize ());
+          /// The minimum of 4 is to accomodate the length of the
+          /// literals 'char' and 'null'.
+          width =
+            std::max ((size_t)4,
+                      std::max (name.size (),
+                                compound_type.getMemberDataType (i).getSize ()));
         }
       else
         {
