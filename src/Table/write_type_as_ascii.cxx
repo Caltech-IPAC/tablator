@@ -21,6 +21,7 @@ void write_type_as_ascii (std::ostream &os, const H5::DataType &type,
     {
       std::stringstream ss;
       ss << "0x" << std::hex
+        /// Extra cast here because we want to output a number, not a character
          << static_cast<const uint16_t>(static_cast<const uint8_t>(*data))
          << std::dec;
       os << ss.str ();
