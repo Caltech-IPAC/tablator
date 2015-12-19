@@ -32,23 +32,22 @@ void tablator::Table::read_resource (const boost::property_tree::ptree &resource
         }
     }      
   /// We only allow one TABLE per RESOURCE
-  while (child != end)
+  for (; child != end; ++child)
     {
       if (child->first == "LINK")
         {
           read_node_and_attributes ("RESOURCE.LINK", child->second);
-          ++child;
         }
-      if (child != end && child->first == "TABLE")
+      else if (child->first == "TABLE")
         {
           if (compound_type.getNmembers ()!=0)
             throw std::runtime_error ("Multiple TABLE elements is not implemented.");
           read_table (child->second);
-          ++child;
         }
-      if (child != end && child->first == "INFO")
+      else if (child->first == "INFO")
         {
           read_node_and_attributes ("RESOURCE.INFO", child->second);
         }
+      /// skip <xmlattr>
     }
 }
