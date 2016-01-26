@@ -107,16 +107,7 @@ size_t tablator::Table::read_ipac_header
         boost::algorithm::trim (column);
 
       if(column_line==0)
-        {
-          columns[0][0]="null_bitfield_flags";
-          const boost::regex name_regex("[a-zA-Z_]+[a-zA-Z0-9_]*");
-          for (auto &v : columns[0])
-            if (!regex_match (v, name_regex))
-              throw std::runtime_error
-                ("On line " + std::to_string (current_line)
-                 + ", the column name '" + v
-                 + "' contains an invalid character.");
-        }
+        columns[0][0]="null_bitfield_flags";
 
       if (column_line==1)
         {
