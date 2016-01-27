@@ -15,7 +15,9 @@ void tablator::Table::read_tabledata
  const std::vector<VOTable_Field> &fields)
 {
   std::vector<std::vector<std::string> > rows;
-  std::vector<size_t> array_sizes (fields.size ());
+  /// Need to set the size to at least 1, because H5::StrType can not
+  /// handle zero sized strings.
+  std::vector<size_t> array_sizes (fields.size (),1);
   const size_t null_flags_size((fields.size () + 6)/8);
   array_sizes.at(0)=null_flags_size;
   for (auto &tr: tabledata)

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30">
+  <DESCRIPTION>                                                                              
+
+usno_b1 
+___ Designation of the object
+tycho2 
+___ Designation in the Tycho-2 Catalog
+ra (deg) 
+___ Right ascension (J2000)
+dec (deg) 
+___ Declination (J2000)
+e_ra (mas) 
+___ Mean error on ra*cos(dec) at epoch
+e_dec (mas) 
+___ Mean error on dec at epoch
+epoch (yr) 
+___ Mean epoch of observation
+pm_ra (mas/yr) 
+___ Proper motion in ra (relative to YS4.0)
+pm_dec (mas/yr) 
+___ Proper motion in dec (relative to YS4.0)
+e_pm_ra (mas/yr) 
+___ Mean error on pm_ra
+e_pm_dec (mas/yr) 
+___ Mean error on pm_dec
+e_fit_ra (100mas) 
+___ Mean error on ra fit
+e_fit_dec (100mas) 
+___ Mean error on dec fit
+b1_mag (mag) 
+___ First blue photometry: magnitude
+b1_cal 
+___ First blue photometry: source of photometric calibration
+b1_xi (arcsec) 
+___ First blue photometry: distance of photo-center from mean object position (X)
+b1_eta (arcsec) 
+___ First blue photometry: distance of photo-center from mean object position (Y)
+r1_mag (mag) 
+___ First red photometry: magnitude
+r1_cal 
+___ First red photometry: source of photometric calibration
+r1_xi (arcsec) 
+___ First red photometry: distance of photo-center from mean object position (X)
+r1_eta (arcsec) 
+___ First red photometry: distance of photo-center from mean object position (Y)
+b2_mag (mag) 
+___ Second blue photometry: magnitude
+b2_cal 
+___ Second blue photometry: source of photometric calibration
+b2_xi (arcsec) 
+___ Second blue photometry: distance of photo-center from mean object position (X)
+b2_eta (arcsec) 
+___ Second blue photometry: distance of photo-center from mean object position (Y)
+r2_mag (mag) 
+___ Second red photometry: magnitude
+r2_cal 
+___ Second red photometry: source of photometric calibration
+r2_xi (arcsec) 
+___ Second red photometry: distance of photo-center from mean object position (X)
+r2_eta (arcsec) 
+___ Second red photometry: distance of photo-center from mean object position (Y)
+i_mag (mag) 
+___ Near-IR photometry: magnitude
+i_cal 
+___ Near-IR photometry: source of photometric calibration
+i_xi (arcsec) 
+___ Near-IR photometry: distance of photo-center from mean object position (X)
+i_eta (arcsec) 
+___ Near-IR photometry: distance of photo-center from mean object position (Y)
+cntr 
+___ Entry counter (key) number, unique within table
+angle (deg) 
+___ Position Angle in degree.
+dist (arcsec) 
+___ Distance between the target position and each source in arcsec.
+</DESCRIPTION>
+  <RESOURCE>
+    <TABLE>
+      <FIELD name="usno_b1" datatype="char" arraysize="*"/>
+      <FIELD name="tycho2" datatype="char" arraysize="*"/>
+      <FIELD name="ra" datatype="double" unit="deg"/>
+      <FIELD name="dec" datatype="double" unit="deg"/>
+      <FIELD name="e_ra" datatype="int" unit="mas"/>
+      <FIELD name="e_dec" datatype="int" unit="mas"/>
+      <FIELD name="epoch" datatype="double" unit="yr"/>
+      <FIELD name="pm_ra" datatype="int" unit="mas/yr"/>
+      <FIELD name="pm_dec" datatype="int" unit="mas/yr"/>
+      <FIELD name="e_pm_ra" datatype="int" unit="mas/yr"/>
+      <FIELD name="major" datatype="double" unit="arcsec"/>
+      <FIELD name="e_fit_ra" datatype="int" unit="100mas"/>
+      <FIELD name="e_fit_dec" datatype="int" unit="100mas"/>
+      <FIELD name="b1_mag" datatype="double" unit="mag"/>
+      <FIELD name="b1_cal" datatype="int"/>
+      <FIELD name="b1_xi" datatype="double" unit="arcsec"/>
+      <FIELD name="b1_eta" datatype="double" unit="arcsec"/>
+      <FIELD name="r1_mag" datatype="double" unit="mag"/>
+      <FIELD name="r1_cal" datatype="int"/>
+      <FIELD name="r1_xi" datatype="double" unit="arcsec"/>
+      <FIELD name="r1_eta" datatype="double" unit="arcsec"/>
+      <FIELD name="b2_mag" datatype="double" unit="mag"/>
+      <FIELD name="b2_cal" datatype="int"/>
+      <FIELD name="b2_xi" datatype="double" unit="arcsec"/>
+      <FIELD name="b2_eta" datatype="double" unit="arcsec"/>
+      <FIELD name="r2_mag" datatype="double" unit="mag"/>
+      <FIELD name="r2_cal" datatype="int"/>
+      <FIELD name="r2_xi" datatype="double" unit="arcsec"/>
+      <FIELD name="r2_eta" datatype="double" unit="arcsec"/>
+      <FIELD name="i_mag" datatype="double" unit="mag"/>
+      <FIELD name="i_cal" datatype="int"/>
+      <FIELD name="i_xi" datatype="double" unit="arcsec"/>
+      <FIELD name="i_eta" datatype="double" unit="arcsec"/>
+      <FIELD name="cntr" datatype="int"/>
+      <FIELD name="ratio" datatype="double" unit="arcsec"/>
+      <FIELD name="angle" datatype="double" unit="deg"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>0198-0170382</TD>
+            <TD/>
+            <TD>90.721536999999998</TD>
+            <TD>-70.165255999999999</TD>
+            <TD>999</TD>
+            <TD>999</TD>
+            <TD>1981.9000000000001</TD>
+            <TD>0</TD>
+            <TD>0</TD>
+            <TD>0</TD>
+            <TD>0</TD>
+            <TD>9</TD>
+            <TD>9</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>20.059999999999999</TD>
+            <TD>1</TD>
+            <TD>3.8700000000000001</TD>
+            <TD>-1.3400000000000001</TD>
+            <TD>16.390000000000001</TD>
+            <TD>1</TD>
+            <TD>-3.8799999999999999</TD>
+            <TD>1.3300000000000001</TD>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD/>
+            <TD>34358461</TD>
+            <TD>0.0067910000000000002</TD>
+            <TD>132.35829100000001</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>
