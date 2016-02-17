@@ -8,8 +8,8 @@ def configure(conf):
     conf.check_boost(lib='filesystem system regex')
 
 def build(bld):
-    default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
-    # default_flags=['-Wall', '-Wextra', '-g']
+    # default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
+    default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser']
 
@@ -25,6 +25,7 @@ def build(bld):
              'src/Table/read_json5.cxx',
              'src/Table/read_ipac_table/read_ipac_table.cxx',
              'src/Table/read_ipac_table/read_ipac_header.cxx',
+             'src/Table/read_ipac_table/shrink_ipac_string_columns_to_fit.cxx',
              'src/Table/read_ipac_table/create_types_from_ipac_headers/create_types_from_ipac_headers.cxx',
              'src/Table/read_ipac_table/create_types_from_ipac_headers/append_ipac_data_member.cxx',
              'src/Table/read_property_tree_as_votable/read_property_tree_as_votable.cxx',
