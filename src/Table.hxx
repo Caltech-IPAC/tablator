@@ -160,7 +160,7 @@ public:
   std::vector<std::pair<std::string, std::string> >
   flatten_properties () const;
 
-  const int output_precision = std::numeric_limits<double>::digits10 + 1;
+  const int output_precision = std::numeric_limits<double>::max_digits10;
   void write_output (const boost::filesystem::path &path,
                      const Format &format);
   void write_output (const boost::filesystem::path &path)
