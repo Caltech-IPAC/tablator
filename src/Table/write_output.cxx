@@ -26,11 +26,11 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
         {
         case Format::Enums::JSON:
         case Format::Enums::JSON5:
-          boost::property_tree::write_json (out, generate_property_tree(), true);
+          boost::property_tree::write_json (out, generate_property_tree(true), true);
           break;
         case Format::Enums::VOTABLE:
           boost::property_tree::write_xml
-            (out, generate_property_tree(),
+            (out, generate_property_tree(false),
              boost::property_tree::xml_writer_make_settings(' ',2));
           break;
         case Format::Enums::CSV:

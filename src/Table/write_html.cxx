@@ -16,7 +16,7 @@ void tablator::Table::write_html (std::ostream &os) const
   for (size_t i = 1; i < fields_properties.size (); ++i)
     heading_tr.add ("TH", compound_type.getMemberName (i));
 
-  put_table_in_property_tree (table);
+  put_table_in_property_tree (table, false);
   os << "<!DOCTYPE HTML>\n";
   // FIXME: This uses the undocumented function write_xml_element
   // since write_xml always writes the <?xml...> header.

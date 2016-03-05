@@ -22,7 +22,7 @@ void tablator::Table::read_tabledata
   array_sizes.at(0)=null_flags_size;
   for (auto &tr: tabledata)
     {
-      if (tr.first == "TR")
+      if (tr.first == "TR" || tr.first.empty ())
         {
           /// Add something for the null_bitfields_flag
           rows.push_back ({});
@@ -40,7 +40,7 @@ void tablator::Table::read_tabledata
                    + ", but only got " + std::to_string (c-1)
                    + ".");
 
-              if (td->first == "TD")
+              if (td->first == "TD" || td->first.empty ())
                 {
                   std::string temp=td->second.get_value<std::string> ();
                   if (fields.at(c).is_array)
