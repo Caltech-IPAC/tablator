@@ -1,3 +1,4 @@
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "../../Table.hxx"
@@ -25,14 +26,7 @@ boost::property_tree::ptree tablator::Table::generate_property_tree (const bool 
   // VOTable only allows a single DESCRIPTION element, so we have to
   // cram all of the comments into a single line
   if (!comments.empty ())
-    {
-      std::string description;
-      for (auto &c: comments)
-        description+=c + '\n';
-      if (!description.empty ())
-        votable.add ("DESCRIPTION",
-                     description.substr (0,description.size ()-1));
-    }
+    { votable.add ("DESCRIPTION", boost::join(comments, "\n")); }
   bool overflow=false;
   const std::string resource_literal ("RESOURCE"), table_literal ("TABLE");
   auto &resource=votable.add (resource_literal,"");
