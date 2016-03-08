@@ -203,10 +203,9 @@ public:
                   const std::vector<VOTable_Field> &fields);
   void read_tabledata (const boost::property_tree::ptree &tabledata,
                        const std::vector<VOTable_Field> &fields);
-  void put_table_in_property_tree (boost::property_tree::ptree &table,
-                                   const bool &is_json) const;
+  void write_tabledata (std::ostream &os, const bool &is_json) const;
   void write_html (std::ostream &os) const;
-  boost::property_tree::ptree generate_property_tree (const bool &is_json)
+  boost::property_tree::ptree generate_property_tree (const std::string &tabledata_string)
     const;
 
   size_t read_ipac_header

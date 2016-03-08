@@ -11,7 +11,7 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
                                         const Field_Properties &field_property);
 }
 
-boost::property_tree::ptree tablator::Table::generate_property_tree (const bool &is_json) const
+boost::property_tree::ptree tablator::Table::generate_property_tree (const std::string &tabledata_string) const
 {
   boost::property_tree::ptree tree;
   std::string votable_literal ("VOTABLE");
@@ -96,8 +96,10 @@ boost::property_tree::ptree tablator::Table::generate_property_tree (const bool 
                                        compound_type.getMemberDataType (i),
                                        fields_properties[i]);
 
-  boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", "");
-  put_table_in_property_tree (tabledata, is_json);
+  boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", tabledata_string);
+
+  // boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", "");
+  // put_table_in_property_tree (tabledata, is_json);
 
   if (overflow)
     {
