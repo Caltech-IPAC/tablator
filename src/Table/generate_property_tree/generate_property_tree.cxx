@@ -92,15 +92,12 @@ boost::property_tree::ptree tablator::Table::generate_property_tree (const std::
     }
   /// Skip null_bitfield_flag
   for (size_t i = 1; i < fields_properties.size (); ++i)
-    Field_Properties_to_property_tree (table, compound_type.getMemberName (i),
-                                       compound_type.getMemberDataType (i),
-                                       fields_properties[i]);
-
-  boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", tabledata_string);
-
-  // boost::property_tree::ptree &tabledata = table.add ("DATA.TABLEDATA", "");
-  // put_table_in_property_tree (tabledata, is_json);
-
+    {
+      Field_Properties_to_property_tree (table, compound_type.getMemberName (i),
+                                         compound_type.getMemberDataType (i),
+                                         fields_properties[i]);
+    }
+  table.add ("DATA.TABLEDATA", tabledata_string);
   if (overflow)
     {
       auto &info = tree.add ("VOTABLE.RESOURCE.INFO", "");
