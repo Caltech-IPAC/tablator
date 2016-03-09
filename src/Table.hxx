@@ -157,6 +157,11 @@ public:
     data.resize (data.size () - row_size);
   }
 
+  void resize_rows (const size_t &new_num_rows)
+  {
+    data.resize (row_size * new_num_rows);
+  }
+  
   std::vector<std::pair<std::string, std::string> >
   flatten_properties () const;
 
