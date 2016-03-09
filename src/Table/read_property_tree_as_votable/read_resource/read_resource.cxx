@@ -1,6 +1,7 @@
 #include "../../../Table.hxx"
 
-void tablator::Table::read_resource (const boost::property_tree::ptree &resource)
+void
+tablator::Table::read_resource (const boost::property_tree::ptree &resource)
 {
   auto child = resource.begin ();
   auto end = resource.end ();
@@ -9,13 +10,13 @@ void tablator::Table::read_resource (const boost::property_tree::ptree &resource
   if (child != end && child->first == "DESCRIPTION")
     {
       properties.emplace_back ("RESOURCE.DESCRIPTION",
-                               child->second.get_value<std::string> ());
+                               child->second.get_value<std::string>());
       ++child;
-    }      
+    }
   for (; child != end && child->first == "INFO"; ++child)
     {
       read_node_and_attributes ("RESOURCE.INFO", child->second);
-    }      
+    }
   for (; child != end; ++child)
     {
       if (child->first == "COOSYS" || child->first == "PARAM")
@@ -30,7 +31,7 @@ void tablator::Table::read_resource (const boost::property_tree::ptree &resource
         {
           break;
         }
-    }      
+    }
   /// We only allow one TABLE per RESOURCE
   for (; child != end; ++child)
     {
@@ -40,8 +41,9 @@ void tablator::Table::read_resource (const boost::property_tree::ptree &resource
         }
       else if (child->first == "TABLE")
         {
-          if (compound_type.getNmembers ()!=0)
-            throw std::runtime_error ("Multiple TABLE elements is not implemented.");
+          if (compound_type.getNmembers () != 0)
+            throw std::runtime_error (
+                "Multiple TABLE elements is not implemented.");
           read_table (child->second);
         }
       else if (child->first == "INFO")

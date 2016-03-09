@@ -7,5 +7,7 @@ public:
   const char *value;
 
   HDF5_Attribute (const char *Name, const char *Value)
-    : name (Name), value (Value) {}
+      : name (Name), value (Value)
+  {
+  }
 };

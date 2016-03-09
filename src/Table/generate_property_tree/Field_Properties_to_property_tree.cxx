@@ -38,10 +38,10 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");
   field.add ("<xmlattr>.name", name);
-  std::string datatype=to_string (type.getClass ()==H5T_ARRAY
-                                  ? type.getSuper () : type);
+  std::string datatype
+      = to_string (type.getClass () == H5T_ARRAY ? type.getSuper () : type);
   field.add ("<xmlattr>.datatype", datatype);
-  if (datatype=="char" || type.getClass ()==H5T_ARRAY)
+  if (datatype == "char" || type.getClass () == H5T_ARRAY)
     field.add ("<xmlattr>.arraysize", "*");
 
   for (auto &a : field_property.attributes)
@@ -53,8 +53,7 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
 
       if (a.first.empty ())
         throw std::runtime_error ("Empty attribute in field " + name
-                                  + " which has type "
-                                  + to_string (type));
+                                  + " which has type " + to_string (type));
       field.add ("<xmlattr>." + a.first, a.second);
     }
 

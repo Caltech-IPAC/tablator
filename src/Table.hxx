@@ -44,11 +44,11 @@ public:
   /// row_size and offsets are duplicative of information in
   /// compound_type.  We store them here to avoid the cost of dynamic
   /// lookups.
-  size_t row_size=0;
-  std::vector<size_t> offsets={0};
+  size_t row_size = 0;
+  std::vector<size_t> offsets = { 0 };
 
   static const std::string null_bitfield_flags_description;
-  
+
   typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties>
   Column_Properties;
   typedef std::pair<std::string, Column_Properties> Column;
@@ -62,7 +62,7 @@ public:
   }
 
   Table (const boost::filesystem::path &input_path)
-    : compound_type (size_t(1))
+      : compound_type (size_t (1))
   {
     Format format (input_path);
     if (format.is_hdf5 ())
@@ -81,11 +81,10 @@ public:
       {
         read_json5 (input_path);
       }
-    else if (format.is_votable ()
-             || format.is_json ())
+    else if (format.is_votable () || format.is_json ())
       {
         boost::property_tree::ptree tree;
-        boost::filesystem::ifstream file(input_path);
+        boost::filesystem::ifstream file (input_path);
         if (format.is_votable ())
           boost::property_tree::read_xml (file, tree);
         else
@@ -105,13 +104,13 @@ public:
 
   bool is_null (size_t row_offset, size_t column) const
   {
-    return data[row_offset+(column-1)/8] & (1 << ((column-1)%8));
+    return data[row_offset + (column - 1) / 8] & (1 << ((column - 1) % 8));
   }
 
   /// WARNING: append_member does not increase the size of the null column.
   void append_string_member (const std::string &name, const size_t &size)
   {
-    string_types.emplace_back (0,size);
+    string_types.emplace_back (0, size);
     append_member (name, *string_types.rbegin ());
   }
 
@@ -125,7 +124,7 @@ public:
   void append_member (const std::string &name, const H5::DataType &type,
                       const hsize_t &size)
   {
-    if (size==1)
+    if (size == 1)
       append_member (name, type);
     else
       append_array_member (name, type, size);
@@ -133,14 +132,14 @@ public:
 
   void append_member (const std::string &name, const H5::DataType &type)
   {
-    size_t old_size=row_size;
-    row_size+=type.getSize ();
+    size_t old_size = row_size;
+    row_size += type.getSize ();
     compound_type.setSize (row_size);
     compound_type.insertMember (name, old_size, type);
     offsets.push_back (row_size);
     fields_properties.push_back (Field_Properties ());
   }
-  
+
   void append_row (const Row &row)
   {
     assert (row.data.size () == row_size);
@@ -149,19 +148,16 @@ public:
 
   void unsafe_append_row (const char *row)
   {
-    data.insert (data.end (), row, row+row_size);
+    data.insert (data.end (), row, row + row_size);
   }
 
-  void pop_row ()
-  {
-    data.resize (data.size () - row_size);
-  }
+  void pop_row () { data.resize (data.size () - row_size); }
 
   void resize_rows (const size_t &new_num_rows)
   {
     data.resize (row_size * new_num_rows);
   }
-  
+
   std::vector<std::pair<std::string, std::string> >
   flatten_properties () const;
 
@@ -197,7 +193,8 @@ public:
   void read_property_tree_as_votable (const boost::property_tree::ptree &tree);
   void read_node_and_attributes (const std::string &node_name,
                                  const boost::property_tree::ptree &node);
-  void read_node_and_attributes (const boost::property_tree::ptree::const_iterator &it)
+  void read_node_and_attributes (
+      const boost::property_tree::ptree::const_iterator &it)
   {
     read_node_and_attributes (it->first, it->second);
   }
@@ -210,25 +207,23 @@ public:
                        const std::vector<VOTable_Field> &fields);
   void write_tabledata (std::ostream &os, const bool &is_json) const;
   void write_html (std::ostream &os) const;
-  boost::property_tree::ptree generate_property_tree (const std::string &tabledata_string)
-    const;
+  boost::property_tree::ptree
+  generate_property_tree (const std::string &tabledata_string) const;
 
-  size_t read_ipac_header
-  (boost::filesystem::ifstream &ipac_file,
-   std::array<std::vector<std::string>,4> &columns,
-   std::vector<size_t> &ipac_table_offsets);
+  size_t read_ipac_header (boost::filesystem::ifstream &ipac_file,
+                           std::array<std::vector<std::string>, 4> &columns,
+                           std::vector<size_t> &ipac_table_offsets);
 
-  void create_types_from_ipac_headers
-  (std::array<std::vector<std::string>,4> &columns,
-   const std::vector<size_t> &ipac_column_offsets,
-   std::vector<size_t> &ipac_column_widths);
+  void create_types_from_ipac_headers (
+      std::array<std::vector<std::string>, 4> &columns,
+      const std::vector<size_t> &ipac_column_offsets,
+      std::vector<size_t> &ipac_column_widths);
+
+  void append_ipac_data_member (const std::string &name,
+                                const std::string &data_type,
+                                const size_t &size);
 
   void
-  append_ipac_data_member (const std::string &name,
-                           const std::string &data_type,
-                           const size_t &size);
-
-  void shrink_ipac_string_columns_to_fit
-  (const std::vector<size_t> &array_sizes);
+  shrink_ipac_string_columns_to_fit (const std::vector<size_t> &array_sizes);
 };
 }

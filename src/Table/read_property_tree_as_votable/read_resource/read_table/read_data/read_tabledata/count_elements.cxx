@@ -8,7 +8,7 @@ namespace tablator
 {
 size_t count_elements (const std::string &entry, const H5::PredType &predtype)
 {
-  if (predtype==H5::PredType::C_S1)
+  if (predtype == H5::PredType::C_S1)
     {
       return entry.size ();
     }

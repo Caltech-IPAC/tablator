@@ -10,22 +10,22 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
   if (child != end && child->first == "DESCRIPTION")
     {
       properties.emplace_back ("RESOURCE.TABLE.DESCRIPTION",
-                               child->second.get_value<std::string> ());
+                               child->second.get_value<std::string>());
       ++child;
-    }      
+    }
   for (; child != end && child->first == "INFO"; ++child)
     {
       read_node_and_attributes ("RESOURCE.TABLE.INFO", child->second);
     }
-  
+
   std::vector<VOTable_Field> fields;
   fields.emplace_back ("null_bitfield_flag", H5::PredType::C_S1, true,
-                       Field_Properties(null_bitfield_flags_description,{}));
+                       Field_Properties (null_bitfield_flags_description, {}));
   for (; child != end; ++child)
     {
       if (child->first == "FIELD")
         {
-          fields.emplace_back(read_field (child->second));
+          fields.emplace_back (read_field (child->second));
         }
       else if (child->first == "PARAM")
         {
@@ -40,7 +40,7 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
         {
           break;
         }
-    }      
+    }
   if (child != end && child->first == "DATA")
     {
       read_data (child->second, fields);

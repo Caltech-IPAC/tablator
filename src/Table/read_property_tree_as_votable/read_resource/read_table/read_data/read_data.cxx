@@ -40,14 +40,14 @@ void tablator::Table::read_data (const boost::property_tree::ptree &data,
                                 "Expected one of TABLEDATA, BINARY, BINARY2, "
                                 "or FITS, but got: " + child->first);
     }
-  
-  for (; child!=end; ++child)
+
+  for (; child != end; ++child)
     {
       if (child->first == "INFO")
         read_node_and_attributes ("RESOURCE.TABLE.DATA.INFO", child->second);
       else
-        throw std::runtime_error
-          ("Invalid element inside RESOURCE.TABLE.DATA.  "
-           "Expected INFO but got: " + child->first);
+        throw std::runtime_error (
+            "Invalid element inside RESOURCE.TABLE.DATA.  "
+            "Expected INFO but got: " + child->first);
     }
 }

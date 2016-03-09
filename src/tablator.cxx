@@ -14,41 +14,38 @@ int main (int argc, char *argv[])
     }
 
   try
-    {
-      H5::Exception::dontPrint ();
-      tablator::Table table (argv[1]);
+  {
+    H5::Exception::dontPrint ();
+    tablator::Table table (argv[1]);
 
-      boost::filesystem::path output_path (argv[2]);
-      tablator::Format output_format (output_path);
-      table.write_output (output_path, output_format);
-    }
+    boost::filesystem::path output_path (argv[2]);
+    tablator::Format output_format (output_path);
+    table.write_output (output_path, output_format);
+  }
   catch (std::runtime_error &exception)
-    {
-      std::cerr << exception.what () << "\n";
-      std::cerr.flush ();
-      exit (1);
-    }
+  {
+    std::cerr << exception.what () << "\n";
+    std::cerr.flush ();
+    exit (1);
+  }
   catch (CCfits::FitsException &exception)
-    {
-      std::cerr << exception.message () << "\n";
-      std::cerr.flush ();
-      exit (1);
-    }
+  {
+    std::cerr << exception.message () << "\n";
+    std::cerr.flush ();
+    exit (1);
+  }
   catch (H5::Exception &exception)
-    {
-      std::cerr << "In "
-                << exception.getFuncName () << ": "
-                << exception.getDetailMsg () << "\n";
-      std::cerr.flush ();
-      exit (1);
-    }
+  {
+    std::cerr << "In " << exception.getFuncName () << ": "
+              << exception.getDetailMsg () << "\n";
+    std::cerr.flush ();
+    exit (1);
+  }
   catch (json5_parser::Error_position &exception)
-    {
-      std::cerr << "On line "
-                << exception.line_ << ", column "
-                << exception.column_ << ": "
-                << exception.reason_ << "\n";
-      std::cerr.flush ();
-      exit (1);
-    }
+  {
+    std::cerr << "On line " << exception.line_ << ", column "
+              << exception.column_ << ": " << exception.reason_ << "\n";
+    std::cerr.flush ();
+    exit (1);
+  }
 }

@@ -32,13 +32,13 @@ public:
       const std::string &Description,
       const std::initializer_list<std::pair<const std::string, std::string> > &
           Attributes)
-    : description (Description), attributes (Attributes)
+      : description (Description), attributes (Attributes)
   {
   }
 
   Field_Properties (const std::string &Description,
                     const std::map<std::string, std::string> &Attributes)
-    : description (Description), attributes (Attributes)
+      : description (Description), attributes (Attributes)
   {
   }
 };

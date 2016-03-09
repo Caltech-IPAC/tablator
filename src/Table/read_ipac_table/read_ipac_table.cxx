@@ -16,67 +16,64 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
   boost::filesystem::ifstream ipac_file (path, std::ios::in);
 
   size_t current_line;
-  std::array<std::vector<std::string>,4> columns;
+  std::array<std::vector<std::string>, 4> columns;
   std::vector<size_t> ipac_column_offsets, ipac_column_widths;
 
-  current_line=read_ipac_header (ipac_file,columns,ipac_column_offsets);
-  create_types_from_ipac_headers (columns,ipac_column_offsets,
+  current_line = read_ipac_header (ipac_file, columns, ipac_column_offsets);
+  create_types_from_ipac_headers (columns, ipac_column_offsets,
                                   ipac_column_widths);
 
   std::vector<size_t> array_sizes (columns[0].size (), 1);
   std::string line;
-  std::getline (ipac_file,line);
+  std::getline (ipac_file, line);
   Row row_string (row_size);
   while (ipac_file)
     {
       row_string.set_zero ();
-      for (size_t column=1; column < columns[0].size (); ++column)
+      for (size_t column = 1; column < columns[0].size (); ++column)
         {
-          if (line[ipac_column_offsets[column-1]]!=' ')
-            throw std::runtime_error ("Non-space found at a delimiter location on line "
-                                      + std::to_string(current_line)
-                                      + ", column "
-                                      + std::to_string (ipac_column_offsets[column-1])
-                                      + " between the fields '"
-                                      + compound_type.getMemberName (column-1)
-                                      + "' and '"
-                                      + compound_type.getMemberName (column)
-                                      + "'.  Is a field not wide enough?");
+          if (line[ipac_column_offsets[column - 1]] != ' ')
+            throw std::runtime_error (
+                "Non-space found at a delimiter location on line "
+                + std::to_string (current_line) + ", column "
+                + std::to_string (ipac_column_offsets[column - 1])
+                + " between the fields '"
+                + compound_type.getMemberName (column - 1) + "' and '"
+                + compound_type.getMemberName (column)
+                + "'.  Is a field not wide enough?");
 
-          std::string element=line.substr (ipac_column_offsets[column-1]+1,
-                                           ipac_column_widths[column]);
-          boost::algorithm::trim(element);
-          array_sizes[column]=std::max(array_sizes[column], element.size ());
-          H5::DataType datatype=compound_type.getMemberDataType (column);
-          if (!columns[3][column].empty()
-              && element==columns[3][column])
+          std::string element = line.substr (
+              ipac_column_offsets[column - 1] + 1, ipac_column_widths[column]);
+          boost::algorithm::trim (element);
+          array_sizes[column]
+              = std::max (array_sizes[column], element.size ());
+          H5::DataType datatype = compound_type.getMemberDataType (column);
+          if (!columns[3][column].empty () && element == columns[3][column])
             {
               row_string.set_null (datatype, column, offsets[column],
-                                   offsets[column+1]);
+                                   offsets[column + 1]);
             }
           else
             {
               try
-                {
-                  insert_ascii_in_row (datatype, column, element, offsets[column],
-                                       offsets[column+1], row_string);
-                }
+              {
+                insert_ascii_in_row (datatype, column, element,
+                                     offsets[column], offsets[column + 1],
+                                     row_string);
+              }
               catch (std::exception &error)
-                {
-                  throw std::runtime_error ("Invalid "
-                                            + to_string (datatype)
-                                            + " for field '"
-                                            + compound_type.getMemberName (column)
-                                            + "' in line "
-                                            + std::to_string(current_line+1)
-                                            + ".  Found '"
-                                            + element + "'");
-                }
+              {
+                throw std::runtime_error (
+                    "Invalid " + to_string (datatype) + " for field '"
+                    + compound_type.getMemberName (column) + "' in line "
+                    + std::to_string (current_line + 1) + ".  Found '"
+                    + element + "'");
+              }
             }
         }
       append_row (row_string);
       ++current_line;
-      std::getline (ipac_file,line);
+      std::getline (ipac_file, line);
     }
   shrink_ipac_string_columns_to_fit (array_sizes);
 }

@@ -8,9 +8,9 @@
 
 void tablator::Table::write_ipac_table (std::ostream &os) const
 {
-  std::vector<size_t> ipac_column_widths=get_column_width ();
+  std::vector<size_t> ipac_column_widths = get_column_width ();
 
-  const size_t num_members = compound_type.getNmembers ()-1;
+  const size_t num_members = compound_type.getNmembers () - 1;
   write_ipac_table_header (os, num_members);
   int total_record_width = 0;
 
@@ -18,16 +18,16 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
   os << std::right;
   for (size_t i = 0; i < num_members; ++i)
     {
-      total_record_width += (ipac_column_widths[i+1] + 1);
-      os << std::setw (ipac_column_widths[i+1])
-         << compound_type.getMemberName (i+1) << "|";
+      total_record_width += (ipac_column_widths[i + 1] + 1);
+      os << std::setw (ipac_column_widths[i + 1])
+         << compound_type.getMemberName (i + 1) << "|";
     }
   os << "\n|";
 
   for (size_t i = 0; i < num_members; ++i)
     {
-      os << std::setw (ipac_column_widths[i+1]);
-      os << to_ipac_string (compound_type.getMemberDataType (i+1));
+      os << std::setw (ipac_column_widths[i + 1]);
+      os << to_ipac_string (compound_type.getMemberDataType (i + 1));
       os << "|";
     }
 
@@ -39,7 +39,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
   size_t i = 0;
   for (auto &f : fields_properties)
     {
-      if(i==0)
+      if (i == 0)
         {
           ++i;
           continue;
@@ -63,7 +63,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
   i = 0;
   for (auto &f : fields_properties)
     {
-      if(i==0)
+      if (i == 0)
         {
           ++i;
           continue;
@@ -85,16 +85,17 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
     os << "\n";
 
   std::stringstream ss;
-  for (size_t row_offset = 0; row_offset < data.size (); row_offset += row_size)
+  for (size_t row_offset = 0; row_offset < data.size ();
+       row_offset += row_size)
     {
       /// Skip the null bitfield flag
       for (size_t column = 0; column < num_members; ++column)
         {
-          ss << " " << std::setw (ipac_column_widths[column+1]);
-          size_t offset = offsets[column+1] + row_offset;
-          if (is_null (row_offset,column+1))
+          ss << " " << std::setw (ipac_column_widths[column + 1]);
+          size_t offset = offsets[column + 1] + row_offset;
+          if (is_null (row_offset, column + 1))
             {
-              auto null_value=fields_properties.at (column+1).values.null;
+              auto null_value = fields_properties.at (column + 1).values.null;
               if (null_value.empty ())
                 ss << "null";
               else
@@ -102,30 +103,30 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
             }
           else
             {
-              auto datatype=compound_type.getMemberDataType (column+1);
+              auto datatype = compound_type.getMemberDataType (column + 1);
               /// Silently convert unsigned 64 bit ints to signed 64
               /// bit ints, since ipac tables do not support unsigned
               /// 64 bit ints.
-              if (datatype==H5::PredType::STD_U64LE)
-                datatype=H5::PredType::STD_I64LE;
+              if (datatype == H5::PredType::STD_U64LE)
+                datatype = H5::PredType::STD_I64LE;
               /// Do some gymnastics because we want to write a byte
               /// as an int
-              if (datatype==H5::PredType::STD_U8LE)
+              if (datatype == H5::PredType::STD_U8LE)
                 {
-                  ss << static_cast<const uint16_t>
-                    (static_cast<uint8_t> (*(data.data () + offset)));
+                  ss << static_cast<const uint16_t>(
+                            static_cast<uint8_t>(*(data.data () + offset)));
                 }
               else
                 {
-                  write_type_as_ascii
-                    (ss, datatype, data.data () + offset,
-                     offsets[column + 2] - offsets[column+1],
-                     output_precision);
+                  write_type_as_ascii (ss, datatype, data.data () + offset,
+                                       offsets[column + 2]
+                                       - offsets[column + 1],
+                                       output_precision);
                 }
             }
         }
       ss << " \n";
-      os << ss.str();
-      ss.str("");
+      os << ss.str ();
+      ss.str ("");
     }
 }

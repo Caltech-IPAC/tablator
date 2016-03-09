@@ -19,9 +19,9 @@ void tablator::Table::write_html (std::ostream &os) const
   for (size_t i = 1; i < fields_properties.size (); ++i)
     heading_tr.add ("TH", compound_type.getMemberName (i));
 
-  std::string tabledata_string (boost::uuids::to_string
-                                (boost::uuids::random_generator()()));
-  table.add ("TR",tabledata_string);
+  std::string tabledata_string (
+      boost::uuids::to_string (boost::uuids::random_generator ()()));
+  table.add ("TR", tabledata_string);
   os << "<!DOCTYPE HTML>\n";
   std::stringstream ss;
   // FIXME: This uses the undocumented function write_xml_element

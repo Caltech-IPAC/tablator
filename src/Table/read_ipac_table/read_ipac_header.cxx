@@ -2,7 +2,8 @@
 
 #include "../../Table.hxx"
 
-namespace {
+namespace
+{
 
 std::vector<size_t> get_bar_offsets (std::string &str)
 {
@@ -16,40 +17,41 @@ std::vector<size_t> get_bar_offsets (std::string &str)
 void check_bar_position (std::vector<size_t> &bar_offsets, std::string &line,
                          const size_t &current_line)
 {
-  for (auto &offset: bar_offsets)
+  for (auto &offset : bar_offsets)
     if (line.size () <= offset || line.at (offset) != '|')
       throw std::runtime_error ("In line " + std::to_string (current_line)
                                 + ", the bar '|' that should be at column "
-                                + std::to_string (offset+1) + " is misaligned");
+                                + std::to_string (offset + 1)
+                                + " is misaligned");
 }
 }
 
-size_t tablator::Table::read_ipac_header
-(boost::filesystem::ifstream &ipac_file,
- std::array<std::vector<std::string>,4> &columns,
- std::vector<size_t> &ipac_column_offsets)
+size_t tablator::Table::read_ipac_header (
+    boost::filesystem::ifstream &ipac_file,
+    std::array<std::vector<std::string>, 4> &columns,
+    std::vector<size_t> &ipac_column_offsets)
 {
-  size_t current_line=0;
-  char first_character=ipac_file.peek ();
-  for (; ipac_file && first_character=='\\';
-       first_character=ipac_file.peek ())
+  size_t current_line = 0;
+  char first_character = ipac_file.peek ();
+  for (; ipac_file && first_character == '\\';
+       first_character = ipac_file.peek ())
     {
       std::string line;
-      std::getline (ipac_file,line);
+      std::getline (ipac_file, line);
       ++current_line;
-      if (line.size ()==1)
+      if (line.size () == 1)
         continue;
-      if (line[1]==' ')
+      if (line[1] == ' ')
         {
           comments.push_back (line.substr (2));
         }
       else
         {
           auto position_of_equal = line.find ("=");
-          std::string key =
-            boost::algorithm::trim_copy (line.substr (1, position_of_equal - 1));
-          std::string value =
-            boost::algorithm::trim_copy (line.substr (position_of_equal + 1));
+          std::string key = boost::algorithm::trim_copy (
+              line.substr (1, position_of_equal - 1));
+          std::string value = boost::algorithm::trim_copy (
+              line.substr (position_of_equal + 1));
 
           if (!boost::iequals (key, "fixlen")
               && !boost::iequals (key, "RowsRetrieved"))
@@ -57,31 +59,31 @@ size_t tablator::Table::read_ipac_header
               std::size_t first = value.find_first_not_of ("\"'");
               std::size_t last = value.find_last_not_of ("\"'");
               std::string value_substr;
-              if (first!=std::string::npos)
-                value_substr=value.substr (first, last - first + 1);
+              if (first != std::string::npos)
+                value_substr = value.substr (first, last - first + 1);
 
               properties.emplace_back (key, Property (value_substr));
             }
         }
     }
-  size_t column_line=0;
-  for (; ipac_file && first_character=='|';
-       first_character=ipac_file.peek (), ++column_line)
+  size_t column_line = 0;
+  for (; ipac_file && first_character == '|';
+       first_character = ipac_file.peek (), ++column_line)
     {
       std::string line;
-      std::getline (ipac_file,line);
+      std::getline (ipac_file, line);
 
       ++current_line;
-      auto tab_position=line.find ("\t");
+      auto tab_position = line.find ("\t");
       if (tab_position != std::string::npos)
         throw std::runtime_error ("In line " + std::to_string (current_line)
                                   + ", the header '" + line
                                   + "' contains tabs at character "
-                                  + std::to_string(tab_position+1));
+                                  + std::to_string (tab_position + 1));
       if (column_line > 3)
         throw std::runtime_error ("In line " + std::to_string (current_line)
                                   + ", the table has more than 4 header lines "
-                                  "starting with '|'.");
+                                    "starting with '|'.");
       if (column_line == 0)
         {
           ipac_column_offsets = get_bar_offsets (line);
@@ -93,48 +95,45 @@ size_t tablator::Table::read_ipac_header
       /// This split creates an empty element at the beginning and
       /// end.  We keep the beginning to mark the null_bitfield_flag,
       /// and pop off the end
-      boost::split (columns[column_line],line,boost::is_any_of ("|"));
+      boost::split (columns[column_line], line, boost::is_any_of ("|"));
 
       /// FIXME: I think this error can never happen, because it would
       /// have been caught by check_bar_position.
-      if (columns[column_line].size()<2)
-        throw std::runtime_error
-          ("In line " + std::to_string (current_line)
-           + ", the table is missing header information in this line: '"
-           + line + "'");
+      if (columns[column_line].size () < 2)
+        throw std::runtime_error (
+            "In line " + std::to_string (current_line)
+            + ", the table is missing header information in this line: '"
+            + line + "'");
       columns[column_line].pop_back ();
-      for (auto &column: columns[column_line])
+      for (auto &column : columns[column_line])
         boost::algorithm::trim (column);
 
-      if(column_line==0)
-        columns[0][0]="null_bitfield_flags";
+      if (column_line == 0)
+        columns[0][0] = "null_bitfield_flags";
 
-      if (column_line==1)
+      if (column_line == 1)
         {
           if (columns[0].size () != columns[1].size ())
-            throw std::runtime_error ("Wrong number of data types in line "
-                                      + std::to_string (current_line)
-                                      + ". Expected "
-                                      + std::to_string (columns[0].size ())
-                                      + " but found "
-                                      + std::to_string (columns[1].size ()));
+            throw std::runtime_error (
+                "Wrong number of data types in line "
+                + std::to_string (current_line) + ". Expected "
+                + std::to_string (columns[0].size ()) + " but found "
+                + std::to_string (columns[1].size ()));
         }
 
-      if (column_line==2 && columns[0].size () < columns[2].size ())
-        throw std::runtime_error ("Too many values for units in line  "
-                                  + std::to_string (current_line)
-                                  + ".  Expected at most "
-                                  + std::to_string (columns[0].size ())
-                                  + " but found "
-                                  + std::to_string (columns[2].size ()));
+      if (column_line == 2 && columns[0].size () < columns[2].size ())
+        throw std::runtime_error (
+            "Too many values for units in line  "
+            + std::to_string (current_line) + ".  Expected at most "
+            + std::to_string (columns[0].size ()) + " but found "
+            + std::to_string (columns[2].size ()));
 
-      if (column_line==3 && columns[0].size () < columns[3].size ())
-        throw std::runtime_error ("Too many values for null in line  "
-                                  + std::to_string (current_line)
-                                  + ".  Expected at most "
-                                  + std::to_string (columns[0].size ())
-                                  + " but found "
-                                  + std::to_string (columns[3].size ()));
+      if (column_line == 3 && columns[0].size () < columns[3].size ())
+        throw std::runtime_error (
+            "Too many values for null in line  "
+            + std::to_string (current_line) + ".  Expected at most "
+            + std::to_string (columns[0].size ()) + " but found "
+            + std::to_string (columns[3].size ()));
     }
   if (column_line < 1)
     throw std::runtime_error ("Could not find any lines starting with "
