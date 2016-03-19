@@ -28,12 +28,13 @@ void read_vector_column (char *position, CCfits::Column &c, const size_t &rows,
   char *current = position;
   for (auto &array : v)
     {
+      char *element_start=current;
       for (auto &element : array)
         {
           *reinterpret_cast<T *>(current) = element;
           current += sizeof(T);
         }
-      current += row_size;
+      current = element_start + row_size;
     }
 }
 
