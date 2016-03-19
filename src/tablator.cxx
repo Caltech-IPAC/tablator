@@ -7,10 +7,16 @@
 
 int main (int argc, char *argv[])
 {
+  bool stream_intermediate (false);
   if (argc != 3)
     {
-      std::cerr << "Need two arguments but found " << argc - 1 << "\n";
-      exit (1);
+      stream_intermediate=true;
+      if (argc != 4 || std::string(argv[2])!="--stream-intermediate")
+        {
+          std::cerr << "Usage: tablator <input> [--stream-intermediate] <output>"
+                    << "\n";
+          exit (1);
+        }
     }
 
   try
@@ -18,9 +24,17 @@ int main (int argc, char *argv[])
     H5::Exception::dontPrint ();
     tablator::Table table (argv[1]);
 
-    boost::filesystem::path output_path (argv[2]);
+    boost::filesystem::path output_path (argv[stream_intermediate ? 3 : 2]);
     tablator::Format output_format (output_path);
-    table.write_output (output_path, output_format);
+    if (stream_intermediate)
+      {
+        boost::filesystem::ofstream outfile (output_path);
+        table.write_output (outfile, output_format);
+      }
+    else
+      {
+        table.write_output (output_path, output_format);
+      }
   }
   catch (std::runtime_error &exception)
   {

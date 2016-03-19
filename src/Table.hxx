@@ -16,6 +16,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <CCfits/CCfits>
 
 #include "Property.hxx"
 #include "Field_Properties.hxx"
@@ -162,6 +163,7 @@ public:
   flatten_properties () const;
 
   const int output_precision = std::numeric_limits<double>::max_digits10;
+  void write_output (std::ostream &os, const Format &format);
   void write_output (const boost::filesystem::path &path,
                      const Format &format);
   void write_output (const boost::filesystem::path &path)
@@ -185,7 +187,9 @@ public:
   std::string to_ipac_string (const H5::DataType &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
+  void write_fits (std::ostream &os) const;
   void write_fits (const boost::filesystem::path &filename) const;
+  void write_fits (fitsfile *fits_file) const;
   void read_ipac_table (const boost::filesystem::path &path);
   void read_fits (const boost::filesystem::path &path);
   void read_hdf5 (const boost::filesystem::path &path);

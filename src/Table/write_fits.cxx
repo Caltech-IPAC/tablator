@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <longnam.h>
 #include <CCfits/CCfits>
 
@@ -51,6 +52,57 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
   if (status != 0)
     throw CCfits::FitsError (status);
 
+  write_fits (fits_file);
+  fits_close_file (fits_file, &status);
+  if (status != 0)
+    { throw CCfits::FitsError (status); }
+}
+
+
+void tablator::Table::write_fits (std::ostream &os) const
+{
+  size_t buffer_size (2880);
+  void *buffer=malloc(buffer_size);
+  try
+    {
+      fitsfile *fits_file, *reopen_file;
+      int status = 0;
+      fits_create_memfile (&fits_file, &buffer, &buffer_size, 0, std::realloc,
+                           &status);
+      if (status != 0)
+        { throw CCfits::FitsError (status); }
+      write_fits (fits_file);
+  
+      /// I have to reopen the file because otherwise fits_close_file
+      /// will delete the memory
+      fits_reopen_file (fits_file, &reopen_file, &status);
+      if (status != 0)
+        { throw CCfits::FitsError (status); }
+        
+      fits_close_file (fits_file, &status);
+      if (status != 0)
+        { throw CCfits::FitsError (status); }
+
+      os.write (static_cast<const char*> (buffer), buffer_size);
+      /// This also free's buffer.
+      fits_close_file (reopen_file, &status);
+      if (status != 0)
+        { throw CCfits::FitsError (status); }
+    }
+  catch (...)
+    {
+      free (buffer);
+      throw;
+    }
+}
+
+
+/// We separate out the write_fits implementation so that we can
+/// insert a read of the memory image so that we can write to a
+/// stream.
+void tablator::Table::write_fits (fitsfile *fits_file) const
+{
+  int status = 0;
   std::vector<string> fits_names;
   std::vector<string> fits_types;
 
@@ -262,7 +314,4 @@ void tablator::Table::write_fits (const boost::filesystem::path &filename)
               + to_string (datatype));
         }
     }
-  fits_close_file (fits_file, &status);
-  if (status != 0)
-    throw CCfits::FitsError (status);
 }

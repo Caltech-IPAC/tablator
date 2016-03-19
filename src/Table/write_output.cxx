@@ -15,17 +15,38 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
   else if (format.is_hdf5 ())
     {
       if (use_stdout)
-        write_hdf5 (std::cout);
+        { write_hdf5 (std::cout); }
       else
-        write_hdf5 (path);
+        { write_hdf5 (path); }
     }
   else
     {
-      boost::filesystem::ofstream file_output;
-      if (!use_stdout)
-        file_output.open (path);
-      std::ostream &out (use_stdout ? std::cout : file_output);
+      if (use_stdout)
+        {
+          write_output (std::cout, format);
+        }
+      else
+        {
+          boost::filesystem::ofstream file_output;
+          file_output.open (path);
+          write_output (file_output, format);
+        }
+    }
+}
 
+void tablator::Table::write_output (std::ostream &os,
+                                    const Format &format)
+{
+  if (format.is_fits ())
+    {
+      write_fits (os);
+    }
+  else if (format.is_hdf5 ())
+    {
+      write_hdf5 (os);
+    }
+  else
+    {
       switch (format.enum_format)
         {
         case Format::Enums::JSON:
@@ -50,24 +71,24 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
             std::string s (ss.str ());
             size_t tabledata_offset (s.find (tabledata_string));
             bool is_json (format.enum_format != Format::Enums::VOTABLE);
-            out << s.substr (0, tabledata_offset - (is_json ? 2 : 0));
-            write_tabledata (out, is_json);
-            out << s.substr (tabledata_offset + tabledata_string.size ()
+            os << s.substr (0, tabledata_offset - (is_json ? 2 : 0));
+            write_tabledata (os, is_json);
+            os << s.substr (tabledata_offset + tabledata_string.size ()
                              + (is_json ? 2 : 0));
           }
           break;
         case Format::Enums::CSV:
-          write_csv_tsv (out, ',');
+          write_csv_tsv (os, ',');
           break;
         case Format::Enums::TSV:
-          write_csv_tsv (out, '\t');
+          write_csv_tsv (os, '\t');
           break;
         case Format::Enums::IPAC_TABLE:
         case Format::Enums::TEXT:
-          write_ipac_table (out);
+          write_ipac_table (os);
           break;
         case Format::Enums::HTML:
-          write_html (out);
+          write_html (os);
           break;
         case Format::Enums::UNKNOWN:
         default:
