@@ -1,36 +1,42 @@
-#include <utility>
-
 #include "../../Table.hxx"
+
+#include <utility>
+#include <stdexcept>
 
 void tablator::Table::shrink_ipac_string_columns_to_fit (
     const std::vector<size_t> &array_sizes)
 {
   std::vector<size_t> new_offsets = { 0 };
+  std::vector<Data_Type> new_data_types;
   std::vector<H5::StrType> new_string_types;
   H5::CompType new_compound_type (size_t (1));
 
   size_t new_row_size (0);
   for (size_t column = 0; column < offsets.size () - 1; ++column)
     {
-      H5::DataType datatype = compound_type.getMemberDataType (column);
+      H5::DataType H5_type = compound_type.getMemberDataType (column);
+      Data_Type data_type (H5_to_Data_Type (H5_type));
       size_t old_size = new_row_size;
-      if (datatype.getClass () != H5T_STRING)
+      switch (data_type)
         {
-          new_row_size += datatype.getSize ();
-          new_compound_type.setSize (new_row_size);
-          new_compound_type.insertMember (compound_type.getMemberName (column),
-                                          old_size, datatype);
-        }
-      else
-        {
+          /// Strings are shrunk.  Everything else stays the same.
+        case Data_Type::STRING:
           new_string_types.emplace_back (0, array_sizes[column]);
           new_row_size += new_string_types.rbegin ()->getSize ();
           new_compound_type.setSize (new_row_size);
           new_compound_type.insertMember (compound_type.getMemberName (column),
                                           old_size,
                                           *new_string_types.rbegin ());
+          break;
+        default:
+          new_row_size += H5_type.getSize ();
+          new_compound_type.setSize (new_row_size);
+          new_compound_type.insertMember (compound_type.getMemberName (column),
+                                          old_size, H5_type);
+          break;
         }
       new_offsets.push_back (new_row_size);
+      new_data_types.push_back (data_type);
     }
   const size_t rows = num_rows ();
   std::vector<char> new_data (rows * new_row_size);
@@ -49,6 +55,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit (
     }
   using namespace std;
   swap (data, new_data);
+  swap (data_types, new_data_types);
   swap (new_offsets, offsets);
   swap (new_string_types, string_types);
   swap (new_compound_type, compound_type);

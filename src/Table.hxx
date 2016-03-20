@@ -23,6 +23,7 @@
 #include "Format.hxx"
 
 #include "Row.hxx"
+#include "H5_to_Data_Type.hxx"
 
 namespace tablator
 {
@@ -39,6 +40,7 @@ public:
 
   /// compound_type stores only a reference to the type, so we need a
   /// place to store string and array types.
+  std::vector<Data_Type> data_types;
   std::vector<H5::StrType> string_types;
   std::vector<H5::ArrayType> array_types;
 
@@ -133,12 +135,25 @@ public:
 
   void append_member (const std::string &name, const H5::DataType &type)
   {
-    size_t old_size = row_size;
-    row_size += type.getSize ();
-    compound_type.setSize (row_size);
-    compound_type.insertMember (name, old_size, type);
-    offsets.push_back (row_size);
-    fields_properties.push_back (Field_Properties ());
+    size_t new_row_size=row_size + type.getSize ();
+    auto new_data_types (data_types);
+    auto new_offsets (offsets);
+    auto new_fields_properties (fields_properties);
+    auto new_compound_type (compound_type);
+    
+    new_data_types.emplace_back (H5_to_Data_Type (type));
+    new_offsets.push_back (new_row_size);
+    new_fields_properties.push_back (Field_Properties ());
+    new_compound_type.setSize (new_row_size);
+    new_compound_type.insertMember (name, row_size, type);
+
+    /// Copy and swap for exception safety.
+    row_size=new_row_size;
+    using namespace std;
+    swap (data_types, new_data_types);
+    swap (offsets, new_offsets);
+    swap (fields_properties, new_fields_properties);
+    swap (compound_type, new_compound_type);
   }
 
   void append_row (const Row &row)

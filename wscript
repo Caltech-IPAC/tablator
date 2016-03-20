@@ -16,6 +16,7 @@ def build(bld):
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Row/set_null.cxx',
+             'src/H5_to_Data_Type.cxx',
              'src/Table/Table.cxx',
              'src/Table/columns.cxx',
              'src/Table/flatten_properties.cxx',
