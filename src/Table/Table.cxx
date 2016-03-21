@@ -8,7 +8,7 @@ tablator::Table::Table (const std::vector<Column> &columns,
     : compound_type (size_t (1))
 {
   const size_t null_flags_size = (columns.size () + 7) / 8;
-  append_array_member ("null_bitfield_flags", H5::PredType::STD_U8LE,
+  append_array_column ("null_bitfield_flags", H5::PredType::STD_U8LE,
                        null_flags_size);
 
   fields_properties[0].description = null_bitfield_flags_description;
@@ -18,18 +18,7 @@ tablator::Table::Table (const std::vector<Column> &columns,
       const size_t member_size = c.second.first.first.getSize ()
                                  * c.second.first.second;
       compound_type.setSize (compound_type.getSize () + member_size);
-      if (type == H5::PredType::C_S1)
-        {
-          append_string_member (c.first, c.second.first.second);
-        }
-      else if (c.second.first.second != 1)
-        {
-          append_array_member (c.first, type, c.second.first.second);
-        }
-      else
-        {
-          append_member (c.first, type);
-        }
+      append_column (c.first, type, c.second.first.second);
       *fields_properties.rbegin () = c.second.second;
     }
 

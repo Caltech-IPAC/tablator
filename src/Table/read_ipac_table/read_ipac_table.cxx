@@ -23,7 +23,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
   create_types_from_ipac_headers (columns, ipac_column_offsets,
                                   ipac_column_widths);
 
-  std::vector<size_t> array_sizes (columns[0].size (), 1);
+  std::vector<size_t> minimum_column_widths (columns[0].size (), 1);
   std::string line;
   std::getline (ipac_file, line);
   Row row_string (row_size);
@@ -45,8 +45,8 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
           std::string element = line.substr (
               ipac_column_offsets[column - 1] + 1, ipac_column_widths[column]);
           boost::algorithm::trim (element);
-          array_sizes[column]
-              = std::max (array_sizes[column], element.size ());
+          minimum_column_widths[column]
+              = std::max (minimum_column_widths[column], element.size ());
           H5::DataType datatype = compound_type.getMemberDataType (column);
           if (!columns[3][column].empty () && element == columns[3][column])
             {
@@ -75,5 +75,5 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
       ++current_line;
       std::getline (ipac_file, line);
     }
-  shrink_ipac_string_columns_to_fit (array_sizes);
+  shrink_ipac_string_columns_to_fit (minimum_column_widths);
 }

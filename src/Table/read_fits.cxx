@@ -97,41 +97,41 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       switch (c.type ())
         {
         case CCfits::Tlogical:
-          append_member (c.name (), H5::PredType::STD_I8LE, array_size);
+          append_column (c.name (), H5::PredType::STD_I8LE, array_size);
           break;
         case CCfits::Tbyte:
-          append_member (c.name (), H5::PredType::STD_U8LE, array_size);
+          append_column (c.name (), H5::PredType::STD_U8LE, array_size);
           break;
         case CCfits::Tshort:
-          append_member (c.name (), H5::PredType::STD_I16LE, array_size);
+          append_column (c.name (), H5::PredType::STD_I16LE, array_size);
           break;
         case CCfits::Tushort:
-          append_member (c.name (), H5::PredType::STD_U16LE, array_size);
+          append_column (c.name (), H5::PredType::STD_U16LE, array_size);
           break;
         case CCfits::Tint:
-          append_member (c.name (), H5::PredType::STD_I32LE, array_size);
+          append_column (c.name (), H5::PredType::STD_I32LE, array_size);
           break;
         case CCfits::Tuint:
-          append_member (c.name (), H5::PredType::STD_U32LE, array_size);
+          append_column (c.name (), H5::PredType::STD_U32LE, array_size);
           break;
         case CCfits::Tlong:
           /// Tlong and Tulong have indeterminate sizes.  We guess 32 bit.
-          append_member (c.name (), H5::PredType::STD_I32LE, array_size);
+          append_column (c.name (), H5::PredType::STD_I32LE, array_size);
           break;
         case CCfits::Tulong:
-          append_member (c.name (), H5::PredType::STD_U32LE, array_size);
+          append_column (c.name (), H5::PredType::STD_U32LE, array_size);
           break;
         case CCfits::Tlonglong:
-          append_member (c.name (), H5::PredType::STD_I64LE, array_size);
+          append_column (c.name (), H5::PredType::STD_I64LE, array_size);
           break;
         case CCfits::Tfloat:
-          append_member (c.name (), H5::PredType::IEEE_F32LE, array_size);
+          append_column (c.name (), H5::PredType::IEEE_F32LE, array_size);
           break;
         case CCfits::Tdouble:
-          append_member (c.name (), H5::PredType::IEEE_F64LE, array_size);
+          append_column (c.name (), H5::PredType::IEEE_F64LE, array_size);
           break;
         case CCfits::Tstring:
-          append_string_member (c.name (), c.width ());
+          append_string_column (c.name (), c.width ());
           break;
         default:
           throw std::runtime_error (

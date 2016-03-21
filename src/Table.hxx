@@ -41,6 +41,7 @@ public:
   /// compound_type stores only a reference to the type, so we need a
   /// place to store string and array types.
   std::vector<Data_Type> data_types;
+  std::vector<size_t> array_sizes;
   std::vector<H5::StrType> string_types;
   std::vector<H5::ArrayType> array_types;
 
@@ -110,40 +111,91 @@ public:
     return data[row_offset + (column - 1) / 8] & (1 << ((column - 1) % 8));
   }
 
-  /// WARNING: append_member does not increase the size of the null column.
-  void append_string_member (const std::string &name, const size_t &size)
+  /// WARNING: append_column routines do not increase the size of the
+  /// null column.  The expectation is that the number of columns is
+  /// known before adding columns.
+  void append_string_column (const std::string &name, const size_t &size)
   {
-    string_types.emplace_back (0, size);
-    append_member (name, *string_types.rbegin ());
+    auto new_string_types (string_types);
+    new_string_types.emplace_back (0, size);
+
+    append_column_internal (name, *new_string_types.rbegin (),1);
+    using namespace std;
+    swap (string_types, new_string_types);
   }
 
-  void append_array_member (const std::string &name, const H5::DataType &type,
-                            const hsize_t &size)
+  void append_array_column (const std::string &name, const H5::PredType &type,
+                            const size_t &size)
   {
-    array_types.emplace_back (type, 1, &size);
-    append_member (name, *array_types.rbegin ());
+    auto new_array_types (array_types);
+    const hsize_t hsize (size);
+    new_array_types.emplace_back (type, 1, &hsize);
+
+    append_column_internal (name, *new_array_types.rbegin (), size);
+    using namespace std;
+    swap (array_types, new_array_types);
   }
 
-  void append_member (const std::string &name, const H5::DataType &type,
-                      const hsize_t &size)
+  // FIXME: Lots of duplicate code
+  void append_array_column (const std::string &name, const H5::ArrayType &type)
   {
-    if (size == 1)
-      append_member (name, type);
+    auto new_array_types (array_types);
+    new_array_types.emplace_back (type);
+
+    /// H5::ArrayType::getArrayDims is not const.
+    int num_dims (const_cast<H5::ArrayType &>(type).getArrayNDims ());
+    if (num_dims != 1)
+      { throw std::runtime_error ("Invalid dimension of array type.  Only valid "
+                                  "value is 1, but got: "
+                                  + std::to_string (num_dims)); }
+    hsize_t size;
+    const_cast<H5::ArrayType &>(type).getArrayDims (&size);
+
+    append_column_internal (name, *new_array_types.rbegin (), size);
+    using namespace std;
+    swap (array_types, new_array_types);
+  }
+
+  void append_column (const std::string &name, const H5::PredType &type)
+  {
+    append_column_internal (name, type, 1);
+  }
+
+  void append_column (const std::string &name, const H5::PredType &type,
+                      const size_t &size)
+  {
+    if (type == H5::PredType::C_S1)
+      {
+        append_string_column (name, size);
+      }
+    else if (size != 1)
+      {
+        append_array_column (name, type, size);
+      }
     else
-      append_array_member (name, type, size);
+      {
+        append_column_internal (name, type, 1);
+      }
   }
-
-  void append_member (const std::string &name, const H5::DataType &type)
+  
+  void append_column_internal (const std::string &name,
+                               const H5::DataType &type,
+                               const size_t &array_size)
   {
     size_t new_row_size=row_size + type.getSize ();
     auto new_data_types (data_types);
-    auto new_offsets (offsets);
-    auto new_fields_properties (fields_properties);
-    auto new_compound_type (compound_type);
-    
     new_data_types.emplace_back (H5_to_Data_Type (type));
+
+    auto new_array_sizes (array_sizes);
+    new_array_sizes.push_back(array_size);
+
+    auto new_offsets (offsets);
     new_offsets.push_back (new_row_size);
+
+    auto new_fields_properties (fields_properties);
     new_fields_properties.push_back (Field_Properties ());
+
+    auto new_compound_type (compound_type);
     new_compound_type.setSize (new_row_size);
     new_compound_type.insertMember (name, row_size, type);
 
@@ -151,6 +203,7 @@ public:
     row_size=new_row_size;
     using namespace std;
     swap (data_types, new_data_types);
+    swap (array_sizes, new_array_sizes);
     swap (offsets, new_offsets);
     swap (fields_properties, new_fields_properties);
     swap (compound_type, new_compound_type);

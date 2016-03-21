@@ -82,26 +82,17 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
     {
       H5::DataType datatype (compound.getMemberDataType (i));
       std::string name (compound.getMemberName (i));
-      std::string class_name (datatype.fromClass ());
-      if (datatype.getClass () == H5T_ARRAY)
+      if (datatype.getClass () == H5T_STRING)
         {
-          append_array_member (name, datatype.getSuper (),
-                               datatype.getSize ());
+          append_string_column (name, datatype.getSize ());
         }
-      else if (datatype.getClass () == H5T_STRING)
+      else if (datatype.getClass () == H5T_ARRAY)
         {
-          append_string_member (name, datatype.getSize ());
-        }
-      else if (datatype.getClass () == H5T_INTEGER || datatype.getClass ()
-                                                      == H5T_FLOAT)
-        {
-          append_member (name, datatype);
+          append_array_column (name, compound.getMemberArrayType (i));
         }
       else
         {
-          throw std::runtime_error ("Unsupported type for member '" + name
-                                    + "' in hdf5 file '" + path.string ()
-                                    + "'");
+          append_column_internal (name, datatype, 1);
         }
     }
   data.resize (row_size * dataset.getSpace ().getSimpleExtentNpoints ());

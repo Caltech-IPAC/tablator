@@ -17,9 +17,9 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
   std::vector<std::vector<std::string> > rows;
   /// Need to set the size to at least 1, because H5::StrType can not
   /// handle zero sized strings.
-  std::vector<size_t> array_sizes (fields.size (), 1);
+  std::vector<size_t> column_array_sizes (fields.size (), 1);
   const size_t null_flags_size ((fields.size () + 6) / 8);
-  array_sizes.at (0) = null_flags_size;
+  column_array_sizes.at (0) = null_flags_size;
   for (auto &tr : tabledata)
     {
       if (tr.first == "TR" || tr.first.empty ())
@@ -42,8 +42,8 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
                 {
                   std::string temp = td->second.get_value<std::string>();
                   if (fields.at (c).is_array)
-                    array_sizes[c] = std::max (
-                        array_sizes[c],
+                    column_array_sizes[c] = std::max (
+                        column_array_sizes[c],
                         count_elements (temp, fields.at (c).predtype));
                   rows.rbegin ()->emplace_back (temp);
                 }
@@ -71,21 +71,8 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
     }
 
   for (std::size_t c = 0; c < fields.size (); ++c)
-    {
-      if (fields[c].predtype == H5::PredType::C_S1)
-        {
-          append_string_member (fields.at (c).name, array_sizes[c]);
-        }
-      else if (fields[c].is_array)
-        {
-          append_array_member (fields.at (c).name, fields.at (c).predtype,
-                               array_sizes[c]);
-        }
-      else
-        {
-          append_member (fields.at (c).name, fields.at (c).predtype);
-        }
-    }
+    { append_column (fields.at (c).name, fields[c].predtype,
+                     column_array_sizes[c]); }
 
   Row row_string (row_size);
   for (size_t current_row = 0; current_row < rows.size (); ++current_row)
