@@ -6,7 +6,8 @@
 
 namespace tablator
 {
-void write_type_as_ascii (std::ostream &os, const H5::DataType &type,
-                          const char *data, const size_t &size,
+void write_type_as_ascii (std::ostream &os, const Data_Type &type,
+                          const size_t &array_size,
+                          const char *data,
                           const int &output_precision);
 }

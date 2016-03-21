@@ -103,25 +103,23 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
             }
           else
             {
-              auto datatype = compound_type.getMemberDataType (column + 1);
+              auto data_type = data_types [column + 1];
               /// Silently convert unsigned 64 bit ints to signed 64
               /// bit ints, since ipac tables do not support unsigned
               /// 64 bit ints.
-              if (datatype == H5::PredType::STD_U64LE)
-                datatype = H5::PredType::STD_I64LE;
+              if (data_type == Data_Type::UINT64_LE)
+                data_type = Data_Type::INT64_LE;
               /// Do some gymnastics because we want to write a byte
               /// as an int
-              if (datatype == H5::PredType::STD_U8LE)
+              if (data_type == Data_Type::UINT8_LE)
                 {
                   ss << static_cast<const uint16_t>(
                             static_cast<uint8_t>(*(data.data () + offset)));
                 }
               else
                 {
-                  write_type_as_ascii (ss, datatype, data.data () + offset,
-                                       offsets[column + 2]
-                                       - offsets[column + 1],
-                                       output_precision);
+                  write_type_as_ascii (ss, data_type, array_sizes [column+1],
+                                       data.data () + offset, output_precision);
                 }
             }
         }

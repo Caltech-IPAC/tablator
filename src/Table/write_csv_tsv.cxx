@@ -18,9 +18,8 @@ void tablator::Table::write_csv_tsv (std::ostream &os, const char &separator)
     for (int i = 1; i < num_members; ++i)
       {
         size_t offset = offsets[i] + j;
-        H5::DataType datatype = compound_type.getMemberDataType (i);
-        write_type_as_ascii (os, datatype, data.data () + offset,
-                             datatype.getSize (), output_precision);
+        write_type_as_ascii (os, data_types[i], array_sizes[i],
+                             data.data () + offset, output_precision);
         os << (i == num_members - 1 ? '\n' : separator);
       }
 }

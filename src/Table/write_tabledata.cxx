@@ -49,10 +49,9 @@ void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
           std::stringstream td;
           if (!is_null (row_offset, column))
             {
-              H5::DataType datatype = compound_type.getMemberDataType (column);
-              write_type_as_ascii (td, datatype,
+              write_type_as_ascii (td, data_types[column], array_sizes[column],
                                    data.data () + row_offset + offsets[column],
-                                   datatype.getSize (), output_precision);
+                                   output_precision);
             }
           os << td_prefix;
           if (is_json)
