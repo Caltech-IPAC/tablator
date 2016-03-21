@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace tablator
 {
 class Min_Max
