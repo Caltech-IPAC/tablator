@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 void tablator::Table::shrink_ipac_string_columns_to_fit (
-    const std::vector<size_t> &array_sizes)
+    const std::vector<size_t> &column_widths)
 {
   std::vector<size_t> new_offsets = { 0 };
   std::vector<Data_Type> new_data_types;
@@ -21,7 +21,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit (
         {
           /// Strings are shrunk.  Everything else stays the same.
         case Data_Type::STRING:
-          new_string_types.emplace_back (0, array_sizes[column]);
+          new_string_types.emplace_back (0, column_widths[column]);
           new_row_size += new_string_types.rbegin ()->getSize ();
           new_compound_type.setSize (new_row_size);
           new_compound_type.insertMember (compound_type.getMemberName (column),
@@ -39,6 +39,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit (
       new_data_types.push_back (data_type);
     }
   const size_t rows = num_rows ();
+  //FIXME: Do this in place.
   std::vector<char> new_data (rows * new_row_size);
   size_t row_offset (0), new_row_offset (0);
   for (size_t row = 0; row < rows; ++row)
@@ -56,8 +57,8 @@ void tablator::Table::shrink_ipac_string_columns_to_fit (
   using namespace std;
   swap (data, new_data);
   swap (data_types, new_data_types);
-  swap (new_offsets, offsets);
-  swap (new_string_types, string_types);
-  swap (new_compound_type, compound_type);
-  swap (new_row_size, row_size);
+  swap (offsets, new_offsets);
+  swap (string_types, new_string_types);
+  swap (compound_type, new_compound_type);
+  swap (row_size, new_row_size);
 }

@@ -243,6 +243,6 @@ public:
                                 const size_t &size);
 
   void
-  shrink_ipac_string_columns_to_fit (const std::vector<size_t> &array_sizes);
+  shrink_ipac_string_columns_to_fit (const std::vector<size_t> &column_widths);
 };
 }
