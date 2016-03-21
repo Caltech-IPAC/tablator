@@ -52,7 +52,7 @@ Data_Type H5_to_Data_Type (const H5::DataType &H5_type)
     }
   else if (H5_type.getClass () == H5T_ARRAY)
     {
-      return Data_Type::ARRAY;
+      return H5_to_Data_Type (H5_type.getSuper ());
     }
   else
     {

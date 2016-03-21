@@ -5,7 +5,8 @@
 
 namespace tablator
 {
-inline std::ostream &operator<< (std::ostream &os, tablator::Data_Type &type)
+inline std::ostream &operator<< (std::ostream &os,
+                                 const Data_Type &type)
 {
   switch (type)
     {
@@ -41,9 +42,6 @@ inline std::ostream &operator<< (std::ostream &os, tablator::Data_Type &type)
       break;
     case Data_Type::STRING:
       os << "STRING";
-      break;
-    case Data_Type::ARRAY:
-      os << "ARRAY";
       break;
     }
   return os;

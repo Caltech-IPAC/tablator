@@ -84,14 +84,14 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
           auto &element (row[column - 1]);
           if (element.empty ())
             {
-              row_string.set_null (compound_type.getMemberDataType (column),
+              row_string.set_null (data_types[column], array_sizes[column],
                                    column, offsets[column],
                                    offsets[column + 1]);
             }
           else
             try
             {
-              insert_ascii_in_row (compound_type.getMemberDataType (column),
+              insert_ascii_in_row (data_types[column], array_sizes[column],
                                    column, element, offsets[column],
                                    offsets[column + 1], row_string);
             }

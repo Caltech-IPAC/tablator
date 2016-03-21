@@ -7,6 +7,8 @@
 #include <H5Cpp.h>
 #include "unsafe_copy_to_row.hxx"
 
+#include "Data_Type.hxx"
+
 namespace tablator
 {
 class Row
@@ -19,8 +21,9 @@ public:
   // FIXME: This clears everything, not just nulls
   void set_zero () { std::fill (data.begin (), data.end (), 0); }
 
-  void set_null (const H5::DataType &type, const size_t &column,
-                 const size_t &offset, const size_t &offset_end);
+  void set_null (const Data_Type &type, const size_t &array_size,
+                 const size_t &column, const size_t &offset,
+                 const size_t &offset_end);
 
   template <typename T> void insert (const T &element, const size_t &offset)
   {

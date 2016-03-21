@@ -14,7 +14,7 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
     throw std::runtime_error ("File " + path.string () + "does not exist.");
 
   boost::filesystem::ifstream ipac_file (path, std::ios::in);
-
+  
   size_t current_line;
   std::array<std::vector<std::string>, 4> columns;
   std::vector<size_t> ipac_column_offsets, ipac_column_widths;
@@ -47,22 +47,22 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
           boost::algorithm::trim (element);
           minimum_column_widths[column]
               = std::max (minimum_column_widths[column], element.size ());
-          H5::DataType datatype = compound_type.getMemberDataType (column);
           if (!columns[3][column].empty () && element == columns[3][column])
             {
-              row_string.set_null (datatype, column, offsets[column],
-                                   offsets[column + 1]);
+              row_string.set_null (data_types[column], array_sizes[column],
+                                   column, offsets[column], offsets[column + 1]);
             }
           else
             {
               try
               {
-                insert_ascii_in_row (datatype, column, element,
-                                     offsets[column], offsets[column + 1],
-                                     row_string);
+                insert_ascii_in_row (data_types[column], array_sizes[column],
+                                     column, element, offsets[column],
+                                     offsets[column + 1], row_string);
               }
               catch (std::exception &error)
               {
+                H5::DataType datatype = compound_type.getMemberDataType (column);
                 throw std::runtime_error (
                     "Invalid " + to_string (datatype) + " for field '"
                     + compound_type.getMemberName (column) + "' in line "

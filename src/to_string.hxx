@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Data_Type_ostream.hxx"
+
 #include <string>
 #include <stdexcept>
 #include <H5Cpp.h>
+#include <sstream>
 
 namespace tablator
 {
@@ -62,5 +65,12 @@ inline std::string to_string (const H5::DataType &type)
           "Unexpected HDF5 data type in tablator::to_string: "
           + type.fromClass ());
     }
+}
+
+inline std::string to_string (const Data_Type &type)
+{
+  std::stringstream ss;
+  ss << type;
+  return ss.str ();
 }
 }
