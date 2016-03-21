@@ -18,6 +18,7 @@ def build(bld):
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
              'src/Table/Table.cxx',
+             'src/Table/append_column_internal.cxx',
              'src/Table/columns.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/insert_ascii_in_row.cxx',

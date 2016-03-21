@@ -61,46 +61,9 @@ public:
          const std::map<std::string, std::string> &property_map);
 
   Table (const std::vector<Column> &columns)
-      : Table (columns, std::map<std::string, std::string>())
-  {
-  }
+      : Table (columns, std::map<std::string, std::string>()) { }
 
-  Table (const boost::filesystem::path &input_path)
-      : compound_type (size_t (1))
-  {
-    Format format (input_path);
-    if (format.is_hdf5 ())
-      {
-        read_hdf5 (input_path);
-      }
-    else if (format.is_fits ())
-      {
-        read_fits (input_path);
-      }
-    else if (format.is_ipac_table ())
-      {
-        read_ipac_table (input_path);
-      }
-    else if (format.is_json5 ())
-      {
-        read_json5 (input_path);
-      }
-    else if (format.is_votable () || format.is_json ())
-      {
-        boost::property_tree::ptree tree;
-        boost::filesystem::ifstream file (input_path);
-        if (format.is_votable ())
-          boost::property_tree::read_xml (file, tree);
-        else
-          boost::property_tree::read_json (file, tree);
-        read_property_tree_as_votable (tree);
-      }
-    else
-      {
-        throw std::runtime_error ("Unsupported input format: "
-                                  + input_path.string ());
-      }
-  }
+  Table (const boost::filesystem::path &input_path);
 
   std::vector<Column> columns () const;
 
@@ -180,34 +143,7 @@ public:
   
   void append_column_internal (const std::string &name,
                                const H5::DataType &type,
-                               const size_t &array_size)
-  {
-    size_t new_row_size=row_size + type.getSize ();
-    auto new_data_types (data_types);
-    new_data_types.emplace_back (H5_to_Data_Type (type));
-
-    auto new_array_sizes (array_sizes);
-    new_array_sizes.push_back(array_size);
-
-    auto new_offsets (offsets);
-    new_offsets.push_back (new_row_size);
-
-    auto new_fields_properties (fields_properties);
-    new_fields_properties.push_back (Field_Properties ());
-
-    auto new_compound_type (compound_type);
-    new_compound_type.setSize (new_row_size);
-    new_compound_type.insertMember (name, row_size, type);
-
-    /// Copy and swap for exception safety.
-    row_size=new_row_size;
-    using namespace std;
-    swap (data_types, new_data_types);
-    swap (array_sizes, new_array_sizes);
-    swap (offsets, new_offsets);
-    swap (fields_properties, new_fields_properties);
-    swap (compound_type, new_compound_type);
-  }
+                               const size_t &array_size);
 
   void append_row (const Row &row)
   {
