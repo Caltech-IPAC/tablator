@@ -48,13 +48,13 @@ int main (int argc, char *argv[])
     std::cerr.flush ();
     exit (1);
   }
-  catch (H5::Exception &exception)
-  {
-    std::cerr << "In " << exception.getFuncName () << ": "
-              << exception.getDetailMsg () << "\n";
-    std::cerr.flush ();
-    exit (1);
-  }
+  // catch (H5::Exception &exception)
+  // {
+  //   std::cerr << "In " << exception.getFuncName () << ": "
+  //             << exception.getDetailMsg () << "\n";
+  //   std::cerr.flush ();
+  //   exit (1);
+  // }
   catch (json5_parser::Error_position &exception)
   {
     std::cerr << "On line " << exception.line_ << ", column "

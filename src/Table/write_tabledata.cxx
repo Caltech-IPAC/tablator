@@ -37,19 +37,19 @@ void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
       os << '\n';
     }
 
-  const int num_columns (compound_type.getNmembers ());
   for (size_t row_offset = 0; row_offset < data.size ();
-       row_offset += row_size)
+       row_offset += row_size ())
     {
       os << tr_prefix;
 
       /// Skip the null bitfield flag
-      for (int column = 1; column < num_columns; ++column)
+      for (size_t column = 1; column < columns.size (); ++column)
         {
           std::stringstream td;
           if (!is_null (row_offset, column))
             {
-              write_type_as_ascii (td, data_types[column], array_sizes[column],
+              write_type_as_ascii (td, columns[column].type,
+                                   columns[column].array_size,
                                    data.data () + row_offset + offsets[column],
                                    output_precision);
             }
@@ -66,14 +66,14 @@ void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
                         td.str ());
             }
           os << td_suffix;
-          if (is_json && column < num_columns - 1)
+          if (is_json && column < columns.size () - 1)
             {
               os << ',';
             }
           os << '\n';
         }
       os << tr_suffix;
-      if (is_json && row_offset < data.size () - row_size)
+      if (is_json && row_offset < data.size () - row_size ())
         {
           os << ',';
         }

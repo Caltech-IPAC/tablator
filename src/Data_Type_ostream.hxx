@@ -40,7 +40,7 @@ inline std::ostream &operator<< (std::ostream &os,
     case Data_Type::FLOAT64_LE:
       os << "FLOAT64_LE";
       break;
-    case Data_Type::STRING:
+    case Data_Type::CHAR:
       os << "STRING";
       break;
     }

@@ -28,6 +28,11 @@ public:
   {
   }
 
+  Field_Properties (const std::string &Description)
+      : description (Description)
+  {
+  }
+
   Field_Properties (
       const std::string &Description,
       const std::initializer_list<std::pair<const std::string, std::string> > &

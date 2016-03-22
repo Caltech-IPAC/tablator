@@ -1,39 +1,28 @@
 #include "../../Table.hxx"
 
-std::string tablator::Table::to_ipac_string (const H5::DataType &type) const
+std::string tablator::Table::to_ipac_string (const Data_Type &type) const
 {
   /// Write out unsigned integers as integers for backwards compatibility
-  if (type == H5::PredType::STD_I8LE || type == H5::PredType::STD_U8LE
-      || type == H5::PredType::STD_I16LE || type == H5::PredType::STD_U16LE
-      || type == H5::PredType::STD_I32LE)
+  switch (type)
     {
+    case Data_Type::INT8_LE:
+    case Data_Type::UINT8_LE:
+    case Data_Type::INT16_LE:
+    case Data_Type::UINT16_LE:
+    case Data_Type::INT32_LE:
       return "int";
-    }
   /// Unsigned 32 bit ints do not fit in ints, so we use a long.
-  else if (type == H5::PredType::STD_U32LE || type == H5::PredType::STD_I64LE
-           || type == H5::PredType::STD_U64LE)
-    {
+    case Data_Type::UINT32_LE:
+    case Data_Type::INT64_LE:
+    case Data_Type::UINT64_LE:
       return "long";
-    }
-  else if (type == H5::PredType::IEEE_F32LE)
-    {
+    case Data_Type::FLOAT32_LE:
       return "float";
-    }
-  else if (type == H5::PredType::IEEE_F64LE)
-    {
+    case Data_Type::FLOAT64_LE:
       return "double";
-    }
-  else if (type.getClass () == H5T_STRING)
-    {
+    case Data_Type::CHAR:
       return "char";
-    }
-  else if (type.getClass () == H5T_ARRAY)
-    {
-      /// FIXME: Do something reasonable for array output
-      throw std::runtime_error ("Array types are unsupported in IPAC Tables");
-    }
-  else
-    {
+    default:
       throw std::runtime_error (
           "Unexpected HDF5 data type in tablator::Table::to_ipac_string");
     }

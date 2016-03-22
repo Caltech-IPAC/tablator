@@ -17,6 +17,6 @@ enum class Data_Type
   UINT64_LE,
   FLOAT32_LE,
   FLOAT64_LE,
-  STRING
+  CHAR
 };
 }

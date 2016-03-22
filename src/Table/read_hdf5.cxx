@@ -1,8 +1,9 @@
-#include <limits>
-
+#include "../H5_to_Data_Type.hxx"
 #include "../Table.hxx"
 #include "HDF5_Property.hxx"
 #include "HDF5_Attribute.hxx"
+
+#include <limits>
 
 void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
 {
@@ -84,17 +85,24 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
       std::string name (compound.getMemberName (i));
       if (datatype.getClass () == H5T_STRING)
         {
-          append_string_column (name, datatype.getSize ());
+          append_column (name, Data_Type::CHAR, datatype.getSize ());
         }
       else if (datatype.getClass () == H5T_ARRAY)
         {
-          append_array_column (name, compound.getMemberArrayType (i));
+          auto array_type = compound.getMemberArrayType (i);
+          hsize_t ndims = array_type.getArrayNDims ();
+          if (ndims != 1)
+            { throw std::runtime_error ("Invalid number of dimensions when "
+                                        "reading a dataset.  Expected 1, "
+                                        "but got:" + std::to_string (ndims)); }
+          array_type.getArrayDims (&ndims);
+          append_column (name, H5_to_Data_Type (datatype), ndims);
         }
       else
         {
-          append_column_internal (name, datatype, 1);
+          append_column (name, H5_to_Data_Type (datatype));
         }
     }
-  data.resize (row_size * dataset.getSpace ().getSimpleExtentNpoints ());
-  dataset.read (data.data (), compound_type);
+  data.resize (row_size () * dataset.getSpace ().getSimpleExtentNpoints ());
+  dataset.read (data.data (), compound);
 }

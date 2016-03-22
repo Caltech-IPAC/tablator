@@ -3,27 +3,23 @@
 std::vector<size_t> tablator::Table::get_column_width () const
 {
   std::vector<size_t> widths;
-  std::string name;
-  int width;
-
-  const int num_members = compound_type.getNmembers ();
-  for (int i = 0; i < num_members; ++i)
+  for (auto &column: columns)
     {
-      name = compound_type.getMemberName (i);
-      if (compound_type.getMemberDataType (i).getClass () == H5T_STRING)
+      if (column.type == Data_Type::CHAR)
         {
           /// The minimum of 4 is to accomodate the length of the
           /// literals 'char' and 'null'.
-          width = std::max (
-              (size_t)4,
-              std::max (name.size (),
-                        compound_type.getMemberDataType (i).getSize ()));
+          widths.push_back (std::max ((size_t)4,
+                                      std::max (column.name.size (),
+                                                column.array_size)));
         }
       else
         {
-          width = output_precision + 7;
+          /// buffer_size = 1 (sign) + 1 (leading digit) + 1 (decimal)
+          /// + 1 (exponent sign) + 3 (exponent)
+          const size_t buffer_size (7);
+          widths.push_back (output_precision + buffer_size);
         }
-      widths.push_back (width);
     }
   return widths;
 }

@@ -50,8 +50,8 @@ void tablator::Row::set_null (const Data_Type &data_type,
         case Data_Type::FLOAT64_LE:
           insert (std::numeric_limits<double>::quiet_NaN (), offset);
           break;
-        case Data_Type::STRING:
-          std::fill (data.data () + offset, data.data () + offset_end, 0);
+        case Data_Type::CHAR:
+          insert ('\0', offset);
           break;
         default:
           throw std::runtime_error (

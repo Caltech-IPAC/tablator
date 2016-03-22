@@ -7,7 +7,7 @@
 
 namespace tablator
 {
-size_t count_elements (const std::string &entry, const H5::PredType &predtype);
+size_t count_elements (const std::string &entry, const Data_Type &type);
 }
 
 void
@@ -44,7 +44,7 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
                   if (fields.at (c).is_array)
                     column_array_sizes[c] = std::max (
                         column_array_sizes[c],
-                        count_elements (temp, fields.at (c).predtype));
+                        count_elements (temp, fields.at (c).type));
                   rows.rbegin ()->emplace_back (temp);
                 }
               else
@@ -71,10 +71,10 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
     }
 
   for (std::size_t c = 0; c < fields.size (); ++c)
-    { append_column (fields.at (c).name, fields[c].predtype,
+    { append_column (fields.at (c).name, fields[c].type,
                      column_array_sizes[c]); }
 
-  Row row_string (row_size);
+  Row row_string (row_size ());
   for (size_t current_row = 0; current_row < rows.size (); ++current_row)
     {
       auto &row (rows[current_row]);
@@ -84,21 +84,23 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
           auto &element (row[column - 1]);
           if (element.empty ())
             {
-              row_string.set_null (data_types[column], array_sizes[column],
+              row_string.set_null (columns[column].type,
+                                   columns[column].array_size,
                                    column, offsets[column],
                                    offsets[column + 1]);
             }
           else
             try
             {
-              insert_ascii_in_row (data_types[column], array_sizes[column],
+              insert_ascii_in_row (columns[column].type,
+                                   columns[column].array_size,
                                    column, element, offsets[column],
                                    offsets[column + 1], row_string);
             }
           catch (std::exception &error)
           {
             throw std::runtime_error (
-                "Invalid " + to_string (fields[column].predtype) + " in row "
+                "Invalid " + to_string (fields[column].type) + " in row "
                 + std::to_string (current_row + 1) + ", field "
                 + std::to_string (column) + ".  Found '" + element + "'");
           }

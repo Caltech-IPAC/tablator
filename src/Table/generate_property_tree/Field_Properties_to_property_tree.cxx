@@ -1,6 +1,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include "../../Table.hxx"
-#include "../../to_string.hxx"
+#include "../../to_xml_string.hxx"
 
 namespace
 {
@@ -32,19 +32,16 @@ void Option_to_xml (boost::property_tree::ptree &tree,
 namespace tablator
 {
 void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
-                                        const std::string &name,
-                                        const H5::DataType &type,
-                                        const Field_Properties &field_property)
+                                        const Column &column)
 {
   boost::property_tree::ptree &field = tree.add ("FIELD", "");
-  field.add ("<xmlattr>.name", name);
-  std::string datatype
-      = to_string (type.getClass () == H5T_ARRAY ? type.getSuper () : type);
+  field.add ("<xmlattr>.name", column.name);
+  std::string datatype = to_xml_string (column);
   field.add ("<xmlattr>.datatype", datatype);
-  if (datatype == "char" || type.getClass () == H5T_ARRAY)
+  if (column.type == Data_Type::CHAR || column.array_size != 1)
     field.add ("<xmlattr>.arraysize", "*");
 
-  for (auto &a : field_property.attributes)
+  for (auto &a : column.field_properties.attributes)
     {
       /// Empty attributes cause field.add to crash :(, so make sure
       /// that does not happen.
@@ -52,15 +49,15 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
       // FIXME: This error is thrown a bit too late to be useful.
 
       if (a.first.empty ())
-        throw std::runtime_error ("Empty attribute in field " + name
-                                  + " which has type " + to_string (type));
+        throw std::runtime_error ("Empty attribute in field " + column.name
+                                  + " which has type " + to_string (column.type));
       field.add ("<xmlattr>." + a.first, a.second);
     }
 
-  if (!field_property.description.empty ())
-    field.add ("DESCRIPTION", field_property.description);
+  if (!column.field_properties.description.empty ())
+    field.add ("DESCRIPTION", column.field_properties.description);
 
-  auto &v (field_property.values);
+  auto &v (column.field_properties.values);
   if (!v.empty_except_null ())
     {
       boost::property_tree::ptree &values = field.add ("VALUES", "");
@@ -76,10 +73,10 @@ void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
         Option_to_xml (values, o);
     }
 
-  if (!field_property.links.empty ())
+  if (!column.field_properties.links.empty ())
     {
       boost::property_tree::ptree &link = field.add ("LINK", "");
-      for (auto &l : field_property.links)
+      for (auto &l : column.field_properties.links)
         link.add ("<xmlattr>." + l.first, l.second);
     }
 }

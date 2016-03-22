@@ -1,14 +1,15 @@
 #include <vector>
 
-#include <H5Cpp.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 
+#include "../../../../../../Data_Type.hxx"
+
 namespace tablator
 {
-size_t count_elements (const std::string &entry, const H5::PredType &predtype)
+size_t count_elements (const std::string &entry, const Data_Type &type)
 {
-  if (predtype == H5::PredType::C_S1)
+  if (type == Data_Type::CHAR)
     {
       return entry.size ();
     }

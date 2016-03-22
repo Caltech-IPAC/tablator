@@ -13,7 +13,7 @@ void insert_ascii_in_row (const Data_Type &data_type, const size_t &array_size,
                           const size_t &offset, const size_t &offset_end,
                           Row &row)
 {
-  if (array_size != 1)
+  if (array_size != 1 && data_type != Data_Type::CHAR)
     {
       std::vector<std::string> elements;
       boost::split (elements, element, boost::is_any_of (" "));
@@ -108,7 +108,7 @@ void insert_ascii_in_row (const Data_Type &data_type, const size_t &array_size,
         case Data_Type::FLOAT64_LE:
           row.insert (boost::lexical_cast<double>(element), offset);
           break;
-        case Data_Type::STRING:
+        case Data_Type::CHAR:
           row.insert (element, offset, offset_end);
           break;
         default:

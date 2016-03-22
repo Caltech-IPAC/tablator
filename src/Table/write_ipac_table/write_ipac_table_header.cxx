@@ -2,8 +2,7 @@
 
 #include "../../Table.hxx"
 
-void tablator::Table::write_ipac_table_header (std::ostream &os,
-                                               const int &num_members) const
+void tablator::Table::write_ipac_table_header (std::ostream &os) const
 {
   os << "\\fixlen = T\n";
 
@@ -39,24 +38,24 @@ void tablator::Table::write_ipac_table_header (std::ostream &os,
         }
     }
 
-  if (comments.empty () && !fields_properties.empty ())
+  if (comments.empty ())
     {
-      for (int i = 0; i < num_members; ++i)
+      for (size_t i = 1; i < columns.size (); ++i)
         {
-          if (!fields_properties.at (i + 1).attributes.empty ()
-              || !fields_properties.at (i + 1).description.empty ())
+          if (!columns[i].field_properties.attributes.empty ()
+              || !columns[i].field_properties.description.empty ())
             {
-              os << "\\ " << compound_type.getMemberName (i + 1);
+              os << "\\ " << columns[i].name;
               auto unit
-                  = fields_properties.at (i + 1).attributes.find ("unit");
-              if (unit != fields_properties.at (i + 1).attributes.end ()
+                  = columns[i].field_properties.attributes.find ("unit");
+              if (unit != columns[i].field_properties.attributes.end ()
                   && !unit->second.empty ())
                 {
                   os << " (" << unit->second << ")";
                 }
               os << "\n";
-              if (!fields_properties.at (i + 1).description.empty ())
-                os << "\\ ___ " << fields_properties.at (i + 1).description
+              if (!columns[i].field_properties.description.empty ())
+                os << "\\ ___ " << columns[i].field_properties.description
                    << "\n";
               // FIXME: Write out description attributes
             }

@@ -3,30 +3,30 @@
 
 namespace
 {
-H5::PredType string_to_Type (const std::string &s)
+tablator::Data_Type string_to_Type (const std::string &s)
 {
   if (s == "boolean")
-    return H5::PredType::STD_I8LE;
+    return tablator::Data_Type::INT8_LE;
   if (s == "unsignedByte")
-    return H5::PredType::STD_U8LE;
+    return tablator::Data_Type::UINT8_LE;
   if (s == "short")
-    return H5::PredType::STD_I16LE;
+    return tablator::Data_Type::INT16_LE;
   if (s == "ushort")
-    return H5::PredType::STD_U16LE;
+    return tablator::Data_Type::UINT16_LE;
   if (s == "int")
-    return H5::PredType::STD_I32LE;
+    return tablator::Data_Type::INT32_LE;
   if (s == "uint")
-    return H5::PredType::STD_U32LE;
+    return tablator::Data_Type::UINT32_LE;
   if (s == "long")
-    return H5::PredType::STD_I64LE;
+    return tablator::Data_Type::INT64_LE;
   if (s == "ulong")
-    return H5::PredType::STD_U64LE;
+    return tablator::Data_Type::UINT64_LE;
   if (s == "float")
-    return H5::PredType::IEEE_F32LE;
+    return tablator::Data_Type::FLOAT32_LE;
   if (s == "double")
-    return H5::PredType::IEEE_F64LE;
+    return tablator::Data_Type::FLOAT64_LE;
   if (s == "char")
-    return H5::PredType::C_S1;
+    return tablator::Data_Type::CHAR;
   // FIXME: Implement these
   if (s == "bit" || s == "unicodeChar" || s == "floatComplex"
       || s == "doubleComplex")
@@ -52,7 +52,7 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
             }
           else if (attribute.first == "datatype")
             {
-              result.predtype
+              result.type
                   = string_to_Type (attribute.second.get_value<std::string>());
             }
           // FIXME: We do not handle arrays correctly

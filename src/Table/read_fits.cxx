@@ -97,41 +97,41 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       switch (c.type ())
         {
         case CCfits::Tlogical:
-          append_column (c.name (), H5::PredType::STD_I8LE, array_size);
+          append_column (c.name (), Data_Type::INT8_LE, array_size);
           break;
         case CCfits::Tbyte:
-          append_column (c.name (), H5::PredType::STD_U8LE, array_size);
+          append_column (c.name (), Data_Type::UINT8_LE, array_size);
           break;
         case CCfits::Tshort:
-          append_column (c.name (), H5::PredType::STD_I16LE, array_size);
+          append_column (c.name (), Data_Type::INT16_LE, array_size);
           break;
         case CCfits::Tushort:
-          append_column (c.name (), H5::PredType::STD_U16LE, array_size);
+          append_column (c.name (), Data_Type::UINT16_LE, array_size);
           break;
         case CCfits::Tint:
-          append_column (c.name (), H5::PredType::STD_I32LE, array_size);
+          append_column (c.name (), Data_Type::INT32_LE, array_size);
           break;
         case CCfits::Tuint:
-          append_column (c.name (), H5::PredType::STD_U32LE, array_size);
+          append_column (c.name (), Data_Type::UINT32_LE, array_size);
           break;
         case CCfits::Tlong:
           /// Tlong and Tulong have indeterminate sizes.  We guess 32 bit.
-          append_column (c.name (), H5::PredType::STD_I32LE, array_size);
+          append_column (c.name (), Data_Type::INT32_LE, array_size);
           break;
         case CCfits::Tulong:
-          append_column (c.name (), H5::PredType::STD_U32LE, array_size);
+          append_column (c.name (), Data_Type::UINT32_LE, array_size);
           break;
         case CCfits::Tlonglong:
-          append_column (c.name (), H5::PredType::STD_I64LE, array_size);
+          append_column (c.name (), Data_Type::INT64_LE, array_size);
           break;
         case CCfits::Tfloat:
-          append_column (c.name (), H5::PredType::IEEE_F32LE, array_size);
+          append_column (c.name (), Data_Type::FLOAT32_LE, array_size);
           break;
         case CCfits::Tdouble:
-          append_column (c.name (), H5::PredType::IEEE_F64LE, array_size);
+          append_column (c.name (), Data_Type::FLOAT64_LE, array_size);
           break;
         case CCfits::Tstring:
-          append_string_column (c.name (), c.width ());
+          append_column (c.name (), Data_Type::CHAR, c.width ());
           break;
         default:
           throw std::runtime_error (
@@ -142,7 +142,7 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
 
   // FIXME: table->rows () returns an int, so this is going to break
   // if we have more than 2^32 rows
-  data.resize (table->rows () * row_size);
+  data.resize (table->rows () * row_size ());
 
   for (size_t column = 0; column < table->column ().size (); ++column)
     {
@@ -163,7 +163,7 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
                 for (auto &element : v)
                   {
                     data[offset] = element;
-                    offset += row_size;
+                    offset += row_size ();
                   }
               }
             else
@@ -178,44 +178,44 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
                         data[offset] = element;
                         ++offset;
                       }
-                    offset += row_size;
+                    offset += row_size ();
                   }
               }
           }
           break;
         case CCfits::Tbyte:
           read_column<uint8_t>(data.data () + offsets[column], c, is_array,
-                               table->rows (), row_size);
+                               table->rows (), row_size ());
           break;
         case CCfits::Tshort:
           read_column<int16_t>(data.data () + offsets[column], c, is_array,
-                               table->rows (), row_size);
+                               table->rows (), row_size ());
           break;
         case CCfits::Tushort:
           read_column<uint16_t>(data.data () + offsets[column], c, is_array,
-                                table->rows (), row_size);
+                                table->rows (), row_size ());
           break;
         case CCfits::Tuint:
         case CCfits::Tulong:
           read_column<uint32_t>(data.data () + offsets[column], c, is_array,
-                                table->rows (), row_size);
+                                table->rows (), row_size ());
           break;
         case CCfits::Tint:
         case CCfits::Tlong:
           read_column<int32_t>(data.data () + offsets[column], c, is_array,
-                               table->rows (), row_size);
+                               table->rows (), row_size ());
           break;
         case CCfits::Tlonglong:
           read_column<int64_t>(data.data () + offsets[column], c, is_array,
-                               table->rows (), row_size);
+                               table->rows (), row_size ());
           break;
         case CCfits::Tfloat:
           read_column<float>(data.data () + offsets[column], c, is_array,
-                             table->rows (), row_size);
+                             table->rows (), row_size ());
           break;
         case CCfits::Tdouble:
           read_column<double>(data.data () + offsets[column], c, is_array,
-                              table->rows (), row_size);
+                              table->rows (), row_size ());
           break;
         case CCfits::Tstring:
           {
@@ -229,7 +229,7 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
                   data[offset + i] = element[i];
                 for (int i = element.size (); i < c.width (); ++i)
                   data[offset + i] = '\0';
-                offset += row_size;
+                offset += row_size ();
               }
           }
           break;
@@ -241,6 +241,6 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       // FIXME: This should get the comment, but the comment()
       // function is protected???
       if (!c.unit ().empty ())
-        fields_properties[column].attributes = { { "unit", c.unit () } };
+        columns[column].field_properties.attributes = { { "unit", c.unit () } };
     }
 }

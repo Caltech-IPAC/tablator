@@ -23,7 +23,7 @@
 #include "Format.hxx"
 
 #include "Row.hxx"
-#include "H5_to_Data_Type.hxx"
+#include "Column.hxx"
 
 namespace tablator
 {
@@ -35,39 +35,22 @@ public:
   std::vector<std::pair<std::string, Property> > properties;
   std::vector<char> data;
   std::vector<std::string> comments;
-  std::vector<Field_Properties> fields_properties;
-  H5::CompType compound_type;
 
-  /// compound_type stores only a reference to the type, so we need a
-  /// place to store string and array types.
-  std::vector<Data_Type> data_types;
-  std::vector<size_t> array_sizes;
-  std::vector<H5::StrType> string_types;
-  std::vector<H5::ArrayType> array_types;
-
-  /// row_size and offsets are duplicative of information in
-  /// compound_type.  We store them here to avoid the cost of dynamic
-  /// lookups.
-  size_t row_size = 0;
+  std::vector<Column> columns;
   std::vector<size_t> offsets = { 0 };
 
   static const std::string null_bitfield_flags_description;
 
-  typedef std::pair<std::pair<H5::PredType, size_t>, Field_Properties>
-  Column_Properties;
-  typedef std::pair<std::string, Column_Properties> Column;
-
-  Table (const std::vector<Column> &columns,
+  Table (const std::vector<Column> &Columns,
          const std::map<std::string, std::string> &property_map);
 
-  Table (const std::vector<Column> &columns)
-      : Table (columns, std::map<std::string, std::string>()) { }
+  Table (const std::vector<Column> &Columns)
+      : Table (Columns, std::map<std::string, std::string>()) { }
 
   Table (const boost::filesystem::path &input_path);
 
-  std::vector<Column> columns () const;
-
-  size_t num_rows () const { return data.size () / row_size; }
+  size_t row_size () const { return *offsets.rbegin (); }
+  size_t num_rows () const { return data.size () / row_size (); }
 
   bool is_null (size_t row_offset, size_t column) const
   {
@@ -77,90 +60,41 @@ public:
   /// WARNING: append_column routines do not increase the size of the
   /// null column.  The expectation is that the number of columns is
   /// known before adding columns.
-  void append_string_column (const std::string &name, const size_t &size)
+  void append_column (const std::string &name, const Data_Type &type)
   {
-    auto new_string_types (string_types);
-    new_string_types.emplace_back (0, size);
-
-    append_column_internal (name, *new_string_types.rbegin (),1);
-    using namespace std;
-    swap (string_types, new_string_types);
+    append_column (name, type, 1);
   }
-
-  void append_array_column (const std::string &name, const H5::PredType &type,
-                            const size_t &size)
-  {
-    auto new_array_types (array_types);
-    const hsize_t hsize (size);
-    new_array_types.emplace_back (type, 1, &hsize);
-
-    append_column_internal (name, *new_array_types.rbegin (), size);
-    using namespace std;
-    swap (array_types, new_array_types);
-  }
-
-  // FIXME: Lots of duplicate code
-  void append_array_column (const std::string &name, const H5::ArrayType &type)
-  {
-    auto new_array_types (array_types);
-    new_array_types.emplace_back (type);
-
-    /// H5::ArrayType::getArrayDims is not const.
-    int num_dims (const_cast<H5::ArrayType &>(type).getArrayNDims ());
-    if (num_dims != 1)
-      { throw std::runtime_error ("Invalid dimension of array type.  Only valid "
-                                  "value is 1, but got: "
-                                  + std::to_string (num_dims)); }
-    hsize_t size;
-    const_cast<H5::ArrayType &>(type).getArrayDims (&size);
-
-    append_column_internal (name, *new_array_types.rbegin (), size);
-    using namespace std;
-    swap (array_types, new_array_types);
-  }
-
-  void append_column (const std::string &name, const H5::PredType &type)
-  {
-    append_column_internal (name, type, 1);
-  }
-
-  void append_column (const std::string &name, const H5::PredType &type,
+  void append_column (const std::string &name, const Data_Type &type,
                       const size_t &size)
   {
-    if (type == H5::PredType::C_S1)
-      {
-        append_string_column (name, size);
-      }
-    else if (size != 1)
-      {
-        append_array_column (name, type, size);
-      }
-    else
-      {
-        append_column_internal (name, type, 1);
-      }
+    append_column (name, type, size, Field_Properties ());
   }
   
-  void append_column_internal (const std::string &name,
-                               const H5::DataType &type,
-                               const size_t &array_size);
+  void append_column (const std::string &name, const Data_Type &type,
+                      const size_t &size,
+                      const Field_Properties &field_properties)
+  {
+    append_column (Column (name, type, size, field_properties));
+  }
+
+  void append_column (const Column &column);
 
   void append_row (const Row &row)
   {
-    assert (row.data.size () == row_size);
+    assert (row.data.size () == row_size ());
     data.insert (data.end (), row.data.begin (), row.data.end ());
   }
 
   void unsafe_append_row (const char *row)
   {
-    data.insert (data.end (), row, row + row_size);
+    data.insert (data.end (), row, row + row_size ());
   }
 
-  void pop_row () { data.resize (data.size () - row_size); }
+  void pop_row () { data.resize (data.size () - row_size ()); }
 
   void resize_rows (const size_t &new_num_rows)
   {
-    data.resize (row_size * new_num_rows);
+    data.resize (row_size () * new_num_rows);
   }
 
   std::vector<std::pair<std::string, std::string> >
@@ -186,9 +120,8 @@ public:
     write_ipac_table (outfile);
   }
   std::vector<size_t> get_column_width () const;
-  void write_ipac_table_header (std::ostream &os,
-                                const int &num_members) const;
-  std::string to_ipac_string (const H5::DataType &type) const;
+  void write_ipac_table_header (std::ostream &os) const;
+  std::string to_ipac_string (const Data_Type &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_fits (std::ostream &os) const;
@@ -219,11 +152,11 @@ public:
   generate_property_tree (const std::string &tabledata_string) const;
 
   size_t read_ipac_header (boost::filesystem::ifstream &ipac_file,
-                           std::array<std::vector<std::string>, 4> &columns,
+                           std::array<std::vector<std::string>, 4> &Columns,
                            std::vector<size_t> &ipac_table_offsets);
 
   void create_types_from_ipac_headers (
-      std::array<std::vector<std::string>, 4> &columns,
+      std::array<std::vector<std::string>, 4> &Columns,
       const std::vector<size_t> &ipac_column_offsets,
       std::vector<size_t> &ipac_column_widths);
 

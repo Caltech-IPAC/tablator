@@ -41,9 +41,9 @@ tablator::Table::read_resource (const boost::property_tree::ptree &resource)
         }
       else if (child->first == "TABLE")
         {
-          if (compound_type.getNmembers () != 0)
+          if (!columns.empty ())
             throw std::runtime_error (
-                "Multiple TABLE elements is not implemented.");
+                "Multiple TABLE elements are not implemented.");
           read_table (child->second);
         }
       else if (child->first == "INFO")

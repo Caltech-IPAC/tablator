@@ -11,7 +11,7 @@ void write_type_as_ascii (std::ostream &os, const Data_Type &type,
                           const char *data,
                           const int &output_precision)
 {
-  if (array_size != 1)
+  if (array_size != 1 && type != Data_Type::CHAR)
     {
       for (size_t n = 0; n < array_size; ++n)
         {
@@ -65,7 +65,7 @@ void write_type_as_ascii (std::ostream &os, const Data_Type &type,
           os << std::setprecision (output_precision)
              << *reinterpret_cast<const double *>(data);
           break;
-        case Data_Type::STRING:
+        case Data_Type::CHAR:
           /// The characters in the type can be shorter than the
           /// number of allowed bytes.  So add a .c_str() that
           /// will terminate the string at the first null.

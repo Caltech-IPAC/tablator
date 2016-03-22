@@ -10,43 +10,36 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
 {
   std::vector<size_t> ipac_column_widths = get_column_width ();
 
-  const size_t num_members = compound_type.getNmembers () - 1;
-  write_ipac_table_header (os, num_members);
+  write_ipac_table_header (os);
   int total_record_width = 0;
 
   os << "|";
   os << std::right;
-  for (size_t i = 0; i < num_members; ++i)
+  for (size_t i = 1; i < columns.size (); ++i)
     {
-      total_record_width += (ipac_column_widths[i + 1] + 1);
-      os << std::setw (ipac_column_widths[i + 1])
-         << compound_type.getMemberName (i + 1) << "|";
+      total_record_width += (ipac_column_widths[i] + 1);
+      os << std::setw (ipac_column_widths[i])
+         << columns[i].name << "|";
     }
   os << "\n|";
 
-  for (size_t i = 0; i < num_members; ++i)
+  for (size_t i = 1; i < columns.size (); ++i)
     {
-      os << std::setw (ipac_column_widths[i + 1]);
-      os << to_ipac_string (compound_type.getMemberDataType (i + 1));
-      os << "|";
+      if (columns[i].type != Data_Type::CHAR && columns[i].array_size != 1)
+        { throw std::runtime_error ("Array types are unsupported in "
+                                    "IPAC Tables"); }
+      os << std::setw (ipac_column_widths[i])
+         << to_ipac_string (columns[i].type)
+         << "|";
     }
 
-  if (fields_properties.size () > 0)
-    os << "\n|";
-  else
-    os << "\n";
+  os << "\n|";
 
-  size_t i = 0;
-  for (auto &f : fields_properties)
+  for (size_t i = 1; i < columns.size (); ++i)
     {
-      if (i == 0)
-        {
-          ++i;
-          continue;
-        }
       os << std::setw (ipac_column_widths[i]);
-      auto unit = f.attributes.find ("unit");
-      if (unit == f.attributes.end ())
+      auto unit = columns[i].field_properties.attributes.find ("unit");
+      if (unit == columns[i].field_properties.attributes.end ())
         {
           os << " ";
         }
@@ -55,21 +48,13 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
           os << unit->second;
         }
       os << "|";
-      ++i;
     }
-  if (fields_properties.size () > 1)
-    os << "\n|";
+  os << "\n|";
 
-  i = 0;
-  for (auto &f : fields_properties)
+  for (size_t i = 1; i < columns.size (); ++i)
     {
-      if (i == 0)
-        {
-          ++i;
-          continue;
-        }
       os << std::setw (ipac_column_widths[i]);
-      auto null = f.values.null;
+      auto null = columns[i].field_properties.values.null;
       if (null.empty ())
         {
           os << "null";
@@ -79,23 +64,21 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
           os << null;
         }
       os << "|";
-      ++i;
     }
-  if (fields_properties.size () > 1)
-    os << "\n";
+  os << "\n";
 
   std::stringstream ss;
   for (size_t row_offset = 0; row_offset < data.size ();
-       row_offset += row_size)
+       row_offset += row_size ())
     {
       /// Skip the null bitfield flag
-      for (size_t column = 0; column < num_members; ++column)
+      for (size_t i = 1; i < columns.size (); ++i)
         {
-          ss << " " << std::setw (ipac_column_widths[column + 1]);
-          size_t offset = offsets[column + 1] + row_offset;
-          if (is_null (row_offset, column + 1))
+          ss << " " << std::setw (ipac_column_widths[i]);
+          size_t offset = offsets[i] + row_offset;
+          if (is_null (row_offset, i))
             {
-              auto null_value = fields_properties.at (column + 1).values.null;
+              auto null_value = columns[i].field_properties.values.null;
               if (null_value.empty ())
                 ss << "null";
               else
@@ -103,7 +86,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
             }
           else
             {
-              auto data_type = data_types [column + 1];
+              auto data_type = columns[i].type;
               /// Silently convert unsigned 64 bit ints to signed 64
               /// bit ints, since ipac tables do not support unsigned
               /// 64 bit ints.
@@ -118,7 +101,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
                 }
               else
                 {
-                  write_type_as_ascii (ss, data_type, array_sizes [column+1],
+                  write_type_as_ascii (ss, data_type, columns[i].array_size,
                                        data.data () + offset, output_precision);
                 }
             }

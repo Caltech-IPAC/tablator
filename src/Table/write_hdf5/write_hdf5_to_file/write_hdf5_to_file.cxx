@@ -1,12 +1,38 @@
 #include <array>
 
 #include "../../../Table.hxx"
+#include "../../../Data_Type_to_H5.hxx"
 
 void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
 {
   std::array<hsize_t, 1> dims = { { num_rows () } };
   H5::DataSpace dataspace (dims.size (), dims.data ());
 
+  std::vector<H5::StrType> string_types;
+  std::vector<H5::ArrayType> array_types;
+  H5::CompType compound_type (row_size ());
+  for (size_t i=0; i<columns.size (); ++i)
+    {
+      if (columns[i].type == Data_Type::CHAR)
+        {
+          string_types.emplace_back (0, columns[i].array_size);
+          compound_type.insertMember (columns[i].name, offsets[i],
+                                      *string_types.rbegin ());
+        }
+      else if (columns[i].array_size != 1)
+        {
+          const hsize_t hsize (columns[i].array_size);
+          array_types.emplace_back (Data_Type_to_H5 (columns[i].type), 1,
+                                    &hsize);
+          compound_type.insertMember (columns[i].name, offsets[i],
+                                      *array_types.rbegin ());
+        }
+      else
+        {
+          compound_type.insertMember (columns[i].name, offsets[i],
+                                      Data_Type_to_H5 (columns[i].type));
+        }
+    }
   H5::DataSet table{ outfile.createDataSet ("table", compound_type,
                                             dataspace) };
   if (!comments.empty ())
