@@ -258,9 +258,8 @@ void tablator::Table::write_fits (fitsfile *fits_file) const
               }
               break;
             default:
-              throw std::runtime_error (
-                                        "Unknown data type when writing fits data: "
-                                        + to_string (columns[i].type));
+              throw std::runtime_error ("Unknown data type when writing fits "
+                                        "data: " + to_string (columns[i].type));
               break;
             }
         }
