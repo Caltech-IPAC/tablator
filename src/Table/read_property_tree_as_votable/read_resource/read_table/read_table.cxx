@@ -19,7 +19,7 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
     }
 
   std::vector<VOTable_Field> fields;
-  fields.emplace_back ("null_bitfield_flag", Data_Type::CHAR, true,
+  fields.emplace_back ("null_bitfield_flag", Data_Type::UINT8_LE, true,
                        Field_Properties (null_bitfield_flags_description, {}));
   for (; child != end; ++child)
     {
