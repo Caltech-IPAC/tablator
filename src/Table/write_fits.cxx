@@ -11,21 +11,12 @@
 template <typename data_type, typename vector_type>
 void write_column (fitsfile *fits_file, const int &fits_type,
                    const int &column, const char *data,
-                   const hsize_t &array_size, const size_t &num_rows,
-                   const size_t &row_size)
+                   const hsize_t &array_size, const size_t &row)
 {
-  std::vector<vector_type> temp_array (num_rows * array_size);
-  size_t offset = 0;
-  for (size_t j = 0; j < temp_array.size (); j += array_size)
-    {
-      for (size_t k = 0; k < array_size; ++k)
-        temp_array[j + k]
-            = *(reinterpret_cast<const vector_type *>(data + offset) + k);
-      offset += row_size;
-    }
   int status = 0;
-  fits_write_col (fits_file, fits_type, column + 1, 1, 1, temp_array.size (),
-                  reinterpret_cast<data_type *>(temp_array.data ()), &status);
+  fits_write_col (fits_file, fits_type, column + 1, row, 1, array_size,
+                  reinterpret_cast<vector_type *>(const_cast<char *>(data)),
+                  &status);
   if (status != 0)
     throw CCfits::FitsError (status);
 }
@@ -33,11 +24,10 @@ void write_column (fitsfile *fits_file, const int &fits_type,
 template <typename data_type>
 void write_column (fitsfile *fits_file, const int &fits_type,
                    const int &column, const char *data,
-                   const hsize_t &array_size, const size_t &num_rows,
-                   const size_t &row_size)
+                   const hsize_t &array_size, const size_t &row)
 {
   write_column<data_type, data_type>(fits_file, fits_type, column, data,
-                                     array_size, num_rows, row_size);
+                                     array_size, row);
 }
 
 void tablator::Table::write_fits (const boost::filesystem::path &filename)
@@ -207,84 +197,74 @@ void tablator::Table::write_fits (fitsfile *fits_file) const
         throw CCfits::FitsError (status);
     }
 
-  for (size_t i = 0; i < columns.size (); ++i)
+  const char *row_pointer (data.data ());
+  const size_t number_of_rows (num_rows ());
+  for (size_t row=1; row <= number_of_rows; ++row)
     {
-      const char *offset_data = data.data () + offsets[i];
-      switch (columns[i].type)
+      for (size_t i = 0; i < columns.size (); ++i)
         {
-        case Data_Type::INT8_LE:
-          write_column<bool, char>(fits_file, TLOGICAL, i, offset_data,
-                                   columns[i].array_size, num_rows (),
-                                   row_size ());
-          break;
-        case Data_Type::UINT8_LE:
-          write_column<uint8_t>(fits_file, TBYTE, i, offset_data,
-                                columns[i].array_size, num_rows (),
-                                row_size ());
-          break;
-        case Data_Type::INT16_LE:
-          write_column<int16_t>(fits_file, TSHORT, i, offset_data,
-                                columns[i].array_size, num_rows (),
-                                row_size ());
-          break;
-        case Data_Type::UINT16_LE:
-          write_column<uint16_t>(fits_file, TUSHORT, i, offset_data,
-                                 columns[i].array_size, num_rows (),
-                                 row_size ());
-          break;
-        case Data_Type::INT32_LE:
-          write_column<int32_t>(fits_file, TINT, i, offset_data,
-                                columns[i].array_size, num_rows (),
-                                row_size ());
-          break;
-        case Data_Type::UINT32_LE:
-          write_column<uint32_t>(fits_file, TUINT, i, offset_data,
-                                 columns[i].array_size, num_rows (),
-                                 row_size ());
-          break;
-        case Data_Type::INT64_LE:
-        case Data_Type::UINT64_LE:
-          /// Fits does not know what an unsigned long is.  So we write it
-          /// as a long and hope for the best.
-          write_column<int64_t>(fits_file, TLONGLONG, i, offset_data,
-                                columns[i].array_size, num_rows (),
-                                row_size ());
-          break;
-        case Data_Type::FLOAT32_LE:
-          write_column<float>(fits_file, TFLOAT, i, offset_data,
-                              columns[i].array_size, num_rows (),
-                              row_size ());
-          break;
-        case Data_Type::FLOAT64_LE:
-          write_column<double>(fits_file, TDOUBLE, i, offset_data,
-                               columns[i].array_size, num_rows (),
-                               row_size ());
-          break;
-        case Data_Type::CHAR:
-          {
-            // FIXME: This adds a space ' ' if the string is empty,
-            // breaking the null_bitfield_flags column.
-            std::vector<std::string> temp_strings (num_rows ());
-            std::vector<char *> temp_chars (num_rows ());
-            for (size_t j = 0; j < temp_strings.size (); ++j)
+          const char *offset_data = row_pointer + offsets[i];
+          switch (columns[i].type)
+            {
+            case Data_Type::INT8_LE:
+              write_column<bool, char>(fits_file, TLOGICAL, i, offset_data,
+                                       columns[i].array_size, row);
+              break;
+            case Data_Type::UINT8_LE:
+              write_column<uint8_t>(fits_file, TBYTE, i, offset_data,
+                                    columns[i].array_size, row);
+              break;
+            case Data_Type::INT16_LE:
+              write_column<int16_t>(fits_file, TSHORT, i, offset_data,
+                                    columns[i].array_size, row);
+              break;
+            case Data_Type::UINT16_LE:
+              write_column<uint16_t>(fits_file, TUSHORT, i, offset_data,
+                                     columns[i].array_size, row);
+              break;
+            case Data_Type::INT32_LE:
+              write_column<int32_t>(fits_file, TINT, i, offset_data,
+                                    columns[i].array_size, row);
+              break;
+            case Data_Type::UINT32_LE:
+              write_column<uint32_t>(fits_file, TUINT, i, offset_data,
+                                     columns[i].array_size, row);
+              break;
+            case Data_Type::INT64_LE:
+            case Data_Type::UINT64_LE:
+              /// Fits does not know what an unsigned long is.  So we write it
+              /// as a long and hope for the best.
+              write_column<int64_t>(fits_file, TLONGLONG, i, offset_data,
+                                    columns[i].array_size, row);
+              break;
+            case Data_Type::FLOAT32_LE:
+              write_column<float>(fits_file, TFLOAT, i, offset_data,
+                                  columns[i].array_size, row);
+              break;
+            case Data_Type::FLOAT64_LE:
+              write_column<double>(fits_file, TDOUBLE, i, offset_data,
+                                   columns[i].array_size, row);
+              break;
+            case Data_Type::CHAR:
               {
-                temp_strings[j]
-                  = std::string (offset_data, offsets[i + 1] - offsets[i]);
-                temp_chars[j] = const_cast<char *>(temp_strings[j].c_str ());
-                offset_data += row_size ();
+                std::string temp_string (offset_data,
+                                         offsets[i + 1] - offsets[i]);
+                char *temp_chars = const_cast<char *>(temp_string.c_str ());
+
+                fits_write_col (fits_file, TSTRING, i + 1, row, 1, 1,
+                                &temp_chars, &status);
+                if (status != 0)
+                  throw CCfits::FitsError (status);
               }
-            fits_write_col (fits_file, TSTRING, i + 1, 1, 1, num_rows (),
-                            temp_chars.data (), &status);
-            if (status != 0)
-              throw CCfits::FitsError (status);
-          }
-          break;
-        default:
-          throw std::runtime_error (
-            "Unknown data type when writing fits data: "
-            + to_string (columns[i].type));
-          break;
+              break;
+            default:
+              throw std::runtime_error (
+                                        "Unknown data type when writing fits data: "
+                                        + to_string (columns[i].type));
+              break;
+            }
         }
+      row_pointer+=row_size ();
     }
 }
 
