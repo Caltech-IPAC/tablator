@@ -1,29 +1,27 @@
 #pragma once
 
-#include <string>
-#include <utility>
-#include <set>
-#include <vector>
-#include <tuple>
-#include <array>
-
-#include <iostream>
-#include <fstream>
-
-#include <H5Cpp.h>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <CCfits/CCfits>
-
 #include "Property.hxx"
 #include "Field_Properties.hxx"
 #include "Format.hxx"
 
 #include "Row.hxx"
 #include "Column.hxx"
+
+#include <H5Cpp.h>
+#include <CCfits/CCfits>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include <set>
+#include <tuple>
+#include <array>
+#include <stdexcept>
+
+#include <iostream>
+#include <fstream>
 
 namespace tablator
 {
@@ -55,6 +53,17 @@ public:
   bool is_null (size_t row_offset, size_t column) const
   {
     return data[row_offset + (column - 1) / 8] & (1 << ((column - 1) % 8));
+  }
+
+  std::vector<Column>::const_iterator find_column_or_throw
+  (const std::string &name) const
+  {
+    auto result (std::find_if (columns.begin (), columns.end (),
+                               [&](const Column &c)
+                               { return c.name == name;}));
+    if (result == columns.end ())
+      { throw std::runtime_error ("Unable to find column '" + name + "'."); }
+    return result;
   }
 
   /// WARNING: append_column routines do not increase the size of the
