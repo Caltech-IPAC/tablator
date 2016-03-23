@@ -6,28 +6,17 @@
 #include "../to_string.hxx"
 #include "../fits_keyword_mapping.hxx"
 
-/// We need different data_type and vector_type because vector<bool>
-/// has a packed representation.
-template <typename data_type, typename vector_type>
+template <typename data_type>
 void write_column (fitsfile *fits_file, const int &fits_type,
                    const int &column, const char *data,
                    const hsize_t &array_size, const size_t &row)
 {
   int status = 0;
   fits_write_col (fits_file, fits_type, column + 1, row, 1, array_size,
-                  reinterpret_cast<vector_type *>(const_cast<char *>(data)),
+                  reinterpret_cast<data_type *>(const_cast<char *>(data)),
                   &status);
   if (status != 0)
     throw CCfits::FitsError (status);
-}
-
-template <typename data_type>
-void write_column (fitsfile *fits_file, const int &fits_type,
-                   const int &column, const char *data,
-                   const hsize_t &array_size, const size_t &row)
-{
-  write_column<data_type, data_type>(fits_file, fits_type, column, data,
-                                     array_size, row);
 }
 
 void tablator::Table::write_fits (const boost::filesystem::path &filename)
@@ -207,7 +196,7 @@ void tablator::Table::write_fits (fitsfile *fits_file) const
           switch (columns[i].type)
             {
             case Data_Type::INT8_LE:
-              write_column<bool, char>(fits_file, TLOGICAL, i, offset_data,
+              write_column<bool>(fits_file, TLOGICAL, i, offset_data,
                                        columns[i].array_size, row);
               break;
             case Data_Type::UINT8_LE:
