@@ -1,12 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <algorithm>
 #include <cassert>
 
-#include <H5Cpp.h>
 #include "unsafe_copy_to_row.hxx"
-
 #include "Data_Type.hxx"
 
 namespace tablator
