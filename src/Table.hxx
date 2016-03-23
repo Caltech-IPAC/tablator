@@ -55,15 +55,22 @@ public:
     return data[row_offset + (column - 1) / 8] & (1 << ((column - 1) % 8));
   }
 
-  std::vector<Column>::const_iterator find_column_or_throw
-  (const std::string &name) const
+  size_t column_offset (const std::string &name) const
   {
-    auto result (std::find_if (columns.begin (), columns.end (),
-                               [&](const Column &c)
-                               { return c.name == name;}));
-    if (result == columns.end ())
-      { throw std::runtime_error ("Unable to find column '" + name + "'."); }
-    return result;
+    auto column = find_column (name);
+    if (column == columns.end ())
+      {
+        throw std::runtime_error ("Unable to find column '" + name
+                                  + "' in table.");
+      }
+    return std::distance (columns.begin (), column);
+  }
+
+  std::vector<Column>::const_iterator find_column (const std::string &name)
+    const
+  {
+    return std::find_if (columns.begin (), columns.end (),
+                         [&](const Column &c) { return c.name == name;});
   }
 
   /// WARNING: append_column routines do not increase the size of the
