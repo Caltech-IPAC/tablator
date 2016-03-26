@@ -63,7 +63,7 @@ public:
         throw std::runtime_error ("Unable to find column '" + name
                                   + "' in table.");
       }
-    return std::distance (columns.begin (), column);
+    return offsets[std::distance (columns.begin (), column)];
   }
 
   std::vector<Column>::const_iterator find_column (const std::string &name)
