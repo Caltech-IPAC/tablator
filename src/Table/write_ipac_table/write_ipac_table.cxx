@@ -26,8 +26,8 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
   for (size_t i = 1; i < columns.size (); ++i)
     {
       if (columns[i].type != Data_Type::CHAR && columns[i].array_size != 1)
-        { throw std::runtime_error ("Column '" + columns[i].name + " " + std::to_string (i) + " "
-                                    + "' is an array which is unsupported in "
+        { throw std::runtime_error ("Column '" + columns[i].name +
+                                    "' is an array which is unsupported in "
                                     "IPAC Tables"); }
       os << std::setw (ipac_column_widths[i])
          << to_ipac_string (columns[i].type)
