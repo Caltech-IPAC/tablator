@@ -117,10 +117,10 @@ public:
   flatten_properties () const;
 
   const int output_precision = std::numeric_limits<double>::max_digits10;
-  void write_output (std::ostream &os, const Format &format);
+  void write_output (std::ostream &os, const Format &format) const;
   void write_output (const boost::filesystem::path &path,
-                     const Format &format);
-  void write_output (const boost::filesystem::path &path)
+                     const Format &format) const;
+  void write_output (const boost::filesystem::path &path) const
   {
     write_output (path, Format (path));
   }

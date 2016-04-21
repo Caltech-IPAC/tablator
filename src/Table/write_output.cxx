@@ -5,7 +5,7 @@
 #include "../Table.hxx"
 
 void tablator::Table::write_output (const boost::filesystem::path &path,
-                                    const Format &format)
+                                    const Format &format) const
 {
   const bool use_stdout (path.string () == "-");
   if (format.is_fits ())
@@ -35,7 +35,7 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
 }
 
 void tablator::Table::write_output (std::ostream &os,
-                                    const Format &format)
+                                    const Format &format) const
 {
   if (format.is_fits ())
     {
