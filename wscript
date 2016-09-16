@@ -14,6 +14,7 @@ def build(bld):
                   'json5_parser']
 
     sources=['src/fits_keyword_mapping.cxx',
+             'src/csv_document.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
