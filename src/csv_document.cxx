@@ -290,6 +290,9 @@ namespace CSV
 			case LineEnd:
 				_post_line_end();
 				break;
+			case ParseCompleted:
+                          /// Silence a warning about unhandled case.
+				break;
 			}
 		}
 
