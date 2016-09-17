@@ -49,14 +49,16 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
               = std::max (minimum_column_widths[column], element.size ());
           if (!ipac_columns[3][column].empty () && element == ipac_columns[3][column])
             {
-              row_string.set_null (columns[column].type, columns[column].array_size,
+              row_string.set_null (columns[column].type,
+                                   columns[column].array_size,
                                    column, offsets[column], offsets[column + 1]);
             }
           else
             {
               try
               {
-                insert_ascii_in_row (columns[column].type, columns[column].array_size,
+                insert_ascii_in_row (columns[column].type,
+                                     columns[column].array_size,
                                      column, element, offsets[column],
                                      offsets[column + 1], row_string);
               }
