@@ -150,6 +150,11 @@ namespace CSV
 		return m_doc.size();
 	}
 
+	bool CSVDocument::empty() const
+	{
+		return m_doc.empty();
+	}
+
 	CSVDocument::iterator CSVDocument::begin()
 	{
 		return m_doc.begin();

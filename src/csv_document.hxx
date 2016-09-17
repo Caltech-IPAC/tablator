@@ -45,6 +45,7 @@ namespace CSV
 		const row_type& get_row(row_index_type row) const;
 		const element_type& get_element(row_index_type row, column_index_type col) const;
 		row_index_type size() const;
+		bool empty() const;
 		row_index_type row_count() const;
 		column_index_type col_count() const;
 		iterator begin();
