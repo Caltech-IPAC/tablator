@@ -8,8 +8,8 @@ def configure(conf):
     conf.check_boost(lib='filesystem system regex')
 
 def build(bld):
-    default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
-    # default_flags=['-Wall', '-Wextra', '-g']
+    # default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
+    default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser']
 
@@ -38,6 +38,10 @@ def build(bld):
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_data.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_tabledata/read_tabledata.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_tabledata/count_elements.cxx',
+             'src/Table/read_csv/read_csv.cxx',
+             'src/Table/read_csv/read_csv_rows.cxx',
+             'src/Table/read_csv/set_column_info/set_column_info.cxx',
+             'src/Table/read_csv/set_column_info/get_best_data_type.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
              'src/Table/write_fits.cxx',

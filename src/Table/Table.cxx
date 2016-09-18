@@ -47,6 +47,10 @@ tablator::Table::Table (const boost::filesystem::path &input_path)
         boost::property_tree::read_json (file, tree);
       read_property_tree_as_votable (tree);
     }
+  else if (format.is_csv ())
+    {
+      read_csv (input_path);
+    }
   else
     {
       throw std::runtime_error ("Unsupported input format: "
