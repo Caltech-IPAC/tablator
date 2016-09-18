@@ -1,5 +1,3 @@
-#include <boost/lexical_cast.hpp>
-
 #include "../../../../../../Table.hxx"
 #include "../../../../../../to_string.hxx"
 #include "../../../../../insert_ascii_in_row.hxx"
