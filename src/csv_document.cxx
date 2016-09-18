@@ -165,6 +165,16 @@ namespace CSV
 		return m_doc.end();
 	}
 
+	CSVDocument::const_iterator CSVDocument::begin() const
+	{
+		return m_doc.begin();
+	}
+
+	CSVDocument::const_iterator CSVDocument::end() const
+	{
+		return m_doc.end();
+	}
+
 	CSVDocument::row_type& CSVDocument::operator[]( row_index_type idx )
 	{
 		document_type::iterator itr = m_doc.begin();

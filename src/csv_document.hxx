@@ -50,6 +50,8 @@ namespace CSV
 		column_index_type col_count() const;
 		iterator begin();
 		iterator end();
+		const_iterator begin() const;
+		const_iterator end() const;
 		row_type& operator[](row_index_type idx);
 
 		void merge_document(const document_type& doc);
