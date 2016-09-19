@@ -11,6 +11,7 @@ The library currently supports reading
   VOTABLE
   JSON
   JSON5
+  CSV
 
 and writing
 
