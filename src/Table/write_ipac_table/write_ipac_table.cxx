@@ -102,8 +102,18 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
                 }
               else
                 {
-                  write_type_as_ascii (ss, data_type, columns[i].array_size,
+                  std::stringstream ss_temp;
+                  write_type_as_ascii (ss_temp, data_type, columns[i].array_size,
                                        data.data () + offset, output_precision);
+                  std::string s(ss_temp.str());
+                  /// Turn newlines into spaces
+                  auto newline_location (s.find('\n'));
+                  while (newline_location != std::string::npos)
+                    {
+                      s[newline_location]=' ';
+                      newline_location = s.find('\n',newline_location+1);
+                    }
+                  ss << s;
                 }
             }
         }
