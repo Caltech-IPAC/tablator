@@ -23,8 +23,8 @@
 #include <string>
 namespace tablator
 {
-  typedef std::list<std::vector<std::string> > CSV_Document;
-  class CSV_Parser {
+  typedef std::list<std::vector<std::string> > DSV_Document;
+  class DSV_Parser {
   public:
     enum ParseState{
       LineStart,
@@ -37,8 +37,8 @@ namespace tablator
       LineEnd,
       ParseCompleted
     };
-    CSV_Parser() = delete;
-    CSV_Parser(CSV_Document &p_doc, const std::string& file_path);		
+    DSV_Parser() = delete;
+    DSV_Parser(DSV_Document &p_doc, const std::string& file_path);		
 
   private:
     inline char _curr_char() const;
@@ -62,7 +62,7 @@ namespace tablator
     void _post_field_end();
     void _post_line_end();
 
-    void _open_csv_file(const std::string& file_path);
+    void _open_dsv_file(const std::string& file_path);
     std::ifstream& _get_line_from_file();
     void _append_another_line_from_file();
     void _initialize(const std::string& file_path);
@@ -77,7 +77,7 @@ namespace tablator
     std::string elem;
     std::vector<std::string> row;
     ParseState state;
-    CSV_Document &document;
-    std::ifstream csv_file;
+    DSV_Document &document;
+    std::ifstream dsv_file;
   };
 }

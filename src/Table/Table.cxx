@@ -49,7 +49,7 @@ tablator::Table::Table (const boost::filesystem::path &input_path)
     }
   else if (format.is_csv ())
     {
-      read_csv (input_path);
+      read_dsv (input_path);
     }
   else
     {

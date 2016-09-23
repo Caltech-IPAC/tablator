@@ -6,11 +6,11 @@ namespace tablator
                                 const std::string &element);
 }
 
-// FIXME: A bit icky.  This modifies the csv document (trims
+// FIXME: A bit icky.  This modifies the dsv document (trims
 // whitespace) while extracting metadata.
-void tablator::Table::set_column_info (std::list<std::vector<std::string> >  &csv)
+void tablator::Table::set_column_info (std::list<std::vector<std::string> > &dsv)
 {
-  auto row (csv.begin());
+  auto row (dsv.begin());
   std::vector<std::string> names;
   for (auto &name: *row)
     names.push_back(boost::trim_copy(name));
@@ -28,7 +28,7 @@ void tablator::Table::set_column_info (std::list<std::vector<std::string> >  &cs
   
   size_t line_number (1);
   ++row;
-  for (; row!=csv.end(); ++row)
+  for (; row!=dsv.end(); ++row)
     {
       if (row->size()!=names.size())
         throw std::runtime_error("In line " + std::to_string(line_number)

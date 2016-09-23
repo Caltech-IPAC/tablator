@@ -15,13 +15,13 @@
 
 /// Exensively modified by Walter Landry
 
-#include "CSV_Parser.hxx"
+#include "DSV_Parser.hxx"
 
 #include <sstream>
 #include <stdexcept>
 namespace tablator
 {
-  CSV_Parser::CSV_Parser(CSV_Document &p_doc, const std::string& file_path): document (p_doc)
+  DSV_Parser::DSV_Parser(DSV_Document &p_doc, const std::string& file_path): document (p_doc)
   {
     idx = field_beg = field_end = 0;
     row_count = col_count = 0;
@@ -63,21 +63,21 @@ namespace tablator
       }
   }
 
-  char CSV_Parser::_curr_char() const
+  char DSV_Parser::_curr_char() const
   {
     return row_str[idx];
   }
 
-  void CSV_Parser::_next()
+  void DSV_Parser::_next()
   {
     ++idx;
   }
 
-  void CSV_Parser::_post_line_start()
+  void DSV_Parser::_post_line_start()
   {
   }
 
-  void CSV_Parser::_post_field_start()
+  void DSV_Parser::_post_field_start()
   {
     if (_curr_char() == ',')
       {
@@ -99,7 +99,7 @@ namespace tablator
       }
   }
 
-  void CSV_Parser::_post_front_quote()
+  void DSV_Parser::_post_front_quote()
   {
     if (_curr_char() == '"')
       {
@@ -111,7 +111,7 @@ namespace tablator
       }
   }
 
-  void CSV_Parser::_post_escape_on()
+  void DSV_Parser::_post_escape_on()
   {
     if (_curr_char() == ',')
       {
@@ -134,7 +134,7 @@ namespace tablator
       }
   }
 
-  void CSV_Parser::_post_escape_off()
+  void DSV_Parser::_post_escape_off()
   {
     if (_curr_char() == '"')
       {
@@ -146,11 +146,11 @@ namespace tablator
       }
   }
 
-  void CSV_Parser::_post_back_quote()
+  void DSV_Parser::_post_back_quote()
   {
   }
 
-  void CSV_Parser::_post_field_end()
+  void DSV_Parser::_post_field_end()
   {
     _field_start();
 
@@ -169,7 +169,7 @@ namespace tablator
       }
   }
 
-  void CSV_Parser::_post_line_end()
+  void DSV_Parser::_post_line_end()
   {
     _line_start();
     _field_start();
@@ -188,22 +188,22 @@ namespace tablator
       }
   }
 
-  void CSV_Parser::_open_csv_file( const std::string& file_path )
+  void DSV_Parser::_open_dsv_file( const std::string& file_path )
   {
-    csv_file.open(file_path.c_str());
-    if (csv_file.fail())
+    dsv_file.open(file_path.c_str());
+    if (dsv_file.fail())
       {
         throw std::runtime_error("Failed to open file " + file_path + ".");
       }
   }
 
-  std::ifstream& CSV_Parser::_get_line_from_file()
+  std::ifstream& DSV_Parser::_get_line_from_file()
   {
-    if (std::getline(csv_file, read_str))
+    if (std::getline(dsv_file, read_str))
       {
         read_str += '\n';
       }
-    else if (csv_file.eof())
+    else if (dsv_file.eof())
       {
         state = ParseCompleted;
       }
@@ -212,10 +212,10 @@ namespace tablator
         throw std::runtime_error("Internal error: failed to read more data from file.");
       }
 
-    return csv_file;
+    return dsv_file;
   }
 
-  void CSV_Parser::_append_another_line_from_file()
+  void DSV_Parser::_append_another_line_from_file()
   {
     if (_get_line_from_file())
       {
@@ -224,19 +224,19 @@ namespace tablator
         idx -= field_beg;
         field_beg = field_end = 0;
       }
-    else if (csv_file.eof())
+    else if (dsv_file.eof())
       {
         throw std::runtime_error("No more data in file. Parsing is not completed.");
       }
   }
 
-  void CSV_Parser::_initialize(const std::string& file_path)
+  void DSV_Parser::_initialize(const std::string& file_path)
   {
-    _open_csv_file(file_path);
+    _open_dsv_file(file_path);
     _line_end();
   }
 
-  void CSV_Parser::_field_end()
+  void DSV_Parser::_field_end()
   {
     elem.append(row_str.c_str() + field_beg, field_end - field_beg);
     field_beg = idx + 1;
@@ -244,7 +244,7 @@ namespace tablator
     state = FieldEnd;
   }
 
-  void CSV_Parser::_line_start()
+  void DSV_Parser::_line_start()
   {
     row.clear();
     ++row_count;
@@ -252,38 +252,38 @@ namespace tablator
     state = LineStart;
   }
 
-  void CSV_Parser::_field_start()
+  void DSV_Parser::_field_start()
   {
     elem.clear();
     field_beg = field_end = idx;
     state = FieldStart;
   }
 
-  void CSV_Parser::_escape_on()
+  void DSV_Parser::_escape_on()
   {
     state = EscapeOn;
   }
 
-  void CSV_Parser::_escape_off()
+  void DSV_Parser::_escape_off()
   {
     elem.append(row_str.c_str() + field_beg, idx - field_beg);
     field_beg = idx + 1;
     state = EscapeOff;
   }
 
-  void CSV_Parser::_front_quote()
+  void DSV_Parser::_front_quote()
   {
     ++field_beg;
     state = FrontQuote;
   }
 
-  void CSV_Parser::_back_quote()
+  void DSV_Parser::_back_quote()
   {
     field_end = idx - 1;
     state = FrontQuote;
   }
 
-  void CSV_Parser::_line_end()
+  void DSV_Parser::_line_end()
   {
     if (row.size() > 0)
       {
