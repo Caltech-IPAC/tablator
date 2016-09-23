@@ -15,11 +15,13 @@
 
 #pragma once
 
-#include "../CSV_Document.hxx"
 #include <fstream>
-
+#include <list>
+#include <vector>
+#include <string>
 namespace tablator
 {
+  typedef std::list<std::vector<std::string> > CSV_Document;
   class CSV_Parser {
   public:
     enum ParseState{
@@ -65,13 +67,13 @@ namespace tablator
 
     std::string read_str;
     std::string row_str;
-    CSV_Document::row_index_type row_count;
-    CSV_Document::column_index_type col_count;
+    size_t row_count;
+    size_t col_count;
     std::string::size_type idx;
     std::string::size_type field_beg;
     std::string::size_type field_end;
     std::string elem;
-    CSV_Document::row_type row;
+    std::vector<std::string> row;
     ParseState state;
     CSV_Document &document;
     std::ifstream csv_file;

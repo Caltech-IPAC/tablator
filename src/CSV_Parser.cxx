@@ -300,7 +300,7 @@ namespace tablator
           }
         else
           {
-            document.add_row(row);
+            document.push_back(row);
           }
       }
     else if(col_count > 0)

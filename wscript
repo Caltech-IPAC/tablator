@@ -8,14 +8,13 @@ def configure(conf):
     conf.check_boost(lib='filesystem system regex')
 
 def build(bld):
-    # default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
-    default_flags=['-Wall', '-Wextra', '-g']
+    default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
+    # default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser']
 
     sources=['src/fits_keyword_mapping.cxx',
-             'src/CSV_Document/CSV_Document.cxx',
-             'src/CSV_Document/CSV_Parser.cxx',
+             'src/CSV_Parser.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
