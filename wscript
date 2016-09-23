@@ -14,7 +14,6 @@ def build(bld):
                   'json5_parser']
 
     sources=['src/fits_keyword_mapping.cxx',
-             'src/CSV_Parser.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
@@ -39,6 +38,8 @@ def build(bld):
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_tabledata/read_tabledata.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_tabledata/count_elements.cxx',
              'src/Table/read_csv/read_csv.cxx',
+             'src/Table/read_csv/parse_csv/parse_csv.cxx',
+             'src/Table/read_csv/parse_csv/CSV_Parser.cxx',
              'src/Table/read_csv/read_csv_rows.cxx',
              'src/Table/read_csv/set_column_info/set_column_info.cxx',
              'src/Table/read_csv/set_column_info/get_best_data_type.cxx',

@@ -1,14 +1,14 @@
 #include "../../Table.hxx"
-#include "../../CSV_Parser.hxx"
 
-void tablator::Table::read_csv (const boost::filesystem::path &path)
+namespace tablator
 {
-  CSV_Document csv;
-  CSV_Parser parser(csv, path.string());
-      
-  if (csv.empty ())
-    throw std::runtime_error ("This CSV/TSV file is empty: " + path.string());
+std::list<std::vector<std::string> > parse_csv
+(const boost::filesystem::path &path);
 
+void Table::read_csv (const boost::filesystem::path &path)
+{
+  std::list<std::vector<std::string> > csv (parse_csv(path));
   set_column_info(csv);
   read_csv_rows(csv);
+}
 }

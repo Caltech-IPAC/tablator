@@ -10,8 +10,10 @@
 /// You should have received a copy of the GNU Lesser General Public License
 /// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/// Copied from libcsv++
+/// Originally copied from libcsv++
 /// https://github.com/jainyzau/libcsv-
+
+/// Exensively modified by Walter Landry
 
 #include "CSV_Parser.hxx"
 
