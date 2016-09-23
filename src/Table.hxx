@@ -164,8 +164,8 @@ public:
   void read_tabledata (const boost::property_tree::ptree &tabledata,
                        const std::vector<VOTable_Field> &fields);
   void read_csv (const boost::filesystem::path &path);
-  void read_csv_rows (const CSV::CSV_Document &csv);
-  void set_column_info (CSV::CSV_Document &csv);
+  void read_csv_rows (const CSV_Document &csv);
+  void set_column_info (CSV_Document &csv);
   void write_tabledata (std::ostream &os, const bool &is_json) const;
   void write_html (std::ostream &os) const;
   boost::property_tree::ptree

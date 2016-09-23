@@ -18,7 +18,7 @@
 #include <vector>
 #include <list>
 #include <string>
-namespace CSV
+namespace tablator
 {
   class CSV_Document
   {

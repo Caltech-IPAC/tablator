@@ -18,7 +18,7 @@
 #include "../CSV_Document.hxx"
 #include <fstream>
 
-namespace CSV
+namespace tablator
 {
   class CSV_Parser {
   public:

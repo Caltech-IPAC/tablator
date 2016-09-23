@@ -17,7 +17,7 @@
 
 #include <sstream>
 #include <stdexcept>
-namespace CSV
+namespace tablator
 {
   CSV_Parser::CSV_Parser(CSV_Document* p_doc, const std::string& file_path)
   {

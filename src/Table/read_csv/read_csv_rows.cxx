@@ -1,7 +1,7 @@
 #include "../insert_ascii_in_row.hxx"
 #include "../../Table.hxx"
 
-void tablator::Table::read_csv_rows (const CSV::CSV_Document &csv)
+void tablator::Table::read_csv_rows (const CSV_Document &csv)
 {
   bool skipped (false);
   Row row_string(row_size());

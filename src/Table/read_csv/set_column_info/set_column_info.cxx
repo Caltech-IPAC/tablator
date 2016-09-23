@@ -8,7 +8,7 @@ namespace tablator
 
 // FIXME: A bit icky.  This modifies the csv document (trims
 // whitespace) while extracting metadata.
-void tablator::Table::set_column_info (CSV::CSV_Document &csv)
+void tablator::Table::set_column_info (CSV_Document &csv)
 {
   auto row (csv.begin());
   std::vector<std::string> names;

@@ -16,7 +16,7 @@
 #include "../CSV_Document.hxx"
 #include "CSV_Parser.hxx"
 
-namespace CSV
+namespace tablator
 {
   CSV_Document::CSV_Document(const std::string& file_path)
   {
