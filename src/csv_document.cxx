@@ -29,241 +29,54 @@ namespace CSV
 		return parser.parse(this, file_path);
 	}
 
-	CSVDocument::row_index_type CSVDocument::to_file( const std::string& file_path, OutputMode output_mode /* = OptionalEnclosure*/ )
-	{
-		std::ofstream out_file(file_path.c_str());
-		if (out_file.fail())
-		{
-			throw std::runtime_error("Failed to open file " + file_path + " for writing.");
-		}
-		for (document_type::iterator itr = m_doc.begin(); itr != m_doc.end(); ++itr)
-		{
-			for (row_type::iterator row_itr = itr->begin(); row_itr != itr->end(); ++row_itr)
-			{
-				element_type& elem = *row_itr;
-				if (output_mode == OptionalEnclosure)
-				{
-					_write_optional_enclosure_field(out_file, elem, row_itr + 1 == itr->end());
-				}
-				else
-				{
-					_write_complete_enclosure_field(out_file, elem, row_itr + 1 == itr->end());
-				}
-			}
-		}
-
-		return m_doc.size();
-	}
-
-	const CSVDocument::document_type& CSVDocument::get_document() const
-	{
-		return m_doc;
-	}
-
-	const CSVDocument::row_type& CSVDocument::get_row( row_index_type row ) const
-	{
-		_check_row_index(row);
-
-		for (document_type::const_iterator itr = m_doc.begin(); itr != m_doc.end(); ++itr)
-		{
-			if (row-- == 0)
-			{
-				return *itr;
-			}
-		}
-
-		// never reach here, but in order to make compiler happy, we add a return statement here.
-		return m_doc.front();
-	}
-
-	const CSVDocument::element_type& CSVDocument::get_element( row_index_type row, column_index_type col ) const
-	{
-		_check_row_index(row);
-		_check_col_index(col);
-
-		for (document_type::const_iterator itr = m_doc.begin(); itr != m_doc.end(); ++itr)
-		{
-			if (row-- == 0)
-			{
-				const row_type& fields = *itr;
-				return fields[col];
-			}
-		}
-
-		// never reach here, but in order to make compiler happy, we add a return statement here.
-		return m_doc.front().front();
-	}
-
-	void CSVDocument::merge_document( const document_type& doc )
-	{
-		for (document_type::const_iterator itr = doc.begin(); itr != doc.end(); ++itr)
-		{
-			m_doc.push_back(*itr);
-		}
-	}
-
 	void CSVDocument::add_row( const row_type& row )
 	{
-		m_doc.push_back(row);
-	}
-
-	void CSVDocument::remove_row( row_index_type row_idx )
-	{
-		_check_row_index(row_idx);
-
-		document_type::iterator itr = m_doc.begin();
-		std::advance(itr, row_idx);
-		m_doc.erase(itr);
-	}
-
-	void CSVDocument::replace_row( row_index_type row_idx, const row_type& row )
-	{
-		_check_row_index(row_idx);
-
-		document_type::iterator itr = m_doc.begin();
-		std::advance(itr, row_idx);
-		m_doc.erase(itr);
-
-		itr = m_doc.begin();
-		std::advance(itr, row_idx - 1);
-		m_doc.insert(itr, row);
-	}
-
-	void CSVDocument::update_elem( row_index_type row, column_index_type col, const element_type& new_val )
-	{
-		_check_row_index(row);
-		_check_col_index(col);
-
-		document_type::iterator itr = m_doc.begin();
-		std::advance(itr, row);
-		row_type& update_row = *itr;
-		update_row[col] = new_val;
-	}
-
-	void CSVDocument::clear()
-	{
-		m_doc.clear();
-	}
-
-	CSVDocument::row_index_type CSVDocument::size() const
-	{
-		return m_doc.size();
+		document.push_back(row);
 	}
 
 	bool CSVDocument::empty() const
 	{
-		return m_doc.empty();
+		return document.empty();
 	}
 
 	CSVDocument::iterator CSVDocument::begin()
 	{
-		return m_doc.begin();
+		return document.begin();
 	}
 
 	CSVDocument::iterator CSVDocument::end()
 	{
-		return m_doc.end();
+		return document.end();
 	}
 
 	CSVDocument::const_iterator CSVDocument::begin() const
 	{
-		return m_doc.begin();
+		return document.begin();
 	}
 
 	CSVDocument::const_iterator CSVDocument::end() const
 	{
-		return m_doc.end();
+		return document.end();
 	}
-
-	CSVDocument::row_type& CSVDocument::operator[]( row_index_type idx )
-	{
-		document_type::iterator itr = m_doc.begin();
-		std::advance(itr, idx);
-		return *itr;
-	}
-
-	int CSVDocument::_replace_all( std::string &field, const std::string& old_str, const std::string& new_str )
-	{
-		std::string::size_type quote_pos = 0;
-		int replace_count = 0;
-		while ((quote_pos = field.find(old_str, quote_pos)) != std::string::npos)
-		{
-			field.replace(quote_pos, old_str.size(), new_str);
-			quote_pos += new_str.size();
-			++replace_count;
-		}
-
-		return replace_count;
-	}
-
-	void CSVDocument::_write_optional_enclosure_field( std::ostream& out_stream, const element_type& elem, bool last_elem )
-	{
-		if (elem.find("\"") != std::string::npos)
-		{
-			std::string new_elem = elem;
-			_replace_all(new_elem, "\"", "\"\"");
-			out_stream << "\"" << new_elem << "\"";
-		}
-		else if (elem.find(",") != std::string::npos || elem.find("\n") != std::string::npos)
-		{
-			out_stream << "\"" << elem << "\"";
-		}
-		else
-		{
-			out_stream << elem;
-		}
-
-		out_stream << (last_elem ? "\n" : ",");
-	}
-
-	void CSVDocument::_write_complete_enclosure_field( std::ostream& out_stream, const element_type& elem, bool last_elem )
-	{
-		if (elem.find("\"") != std::string::npos)
-		{
-			std::string new_elem = elem;
-			_replace_all(new_elem, "\"", "\"\"");
-			out_stream << "\"" << new_elem << "\"";
-		}
-		else
-		{
-			out_stream << "\"" << elem << "\"";
-		}
-		out_stream << (last_elem ? "\n" : ",");
-	}
-
 
 	void CSVDocument::_check_row_index( row_index_type row_idx ) const
 	{
-		if (row_idx >= m_doc.size())
+		if (row_idx >= document.size())
 		{
 			std::ostringstream str_stream;
-			str_stream << "row index " << row_idx << " is out of range. (max: " << m_doc.size() - 1 << ")";
+			str_stream << "row index " << row_idx << " is out of range. (max: " << document.size() - 1 << ")";
 			throw std::out_of_range(str_stream.str());
 		}
 	}
 
 	void CSVDocument::_check_col_index( column_index_type col ) const
 	{
-		if (m_doc.front().size() <= col)
+		if (document.front().size() <= col)
 		{
 			std::ostringstream str_stream;
-			str_stream << "column index " << col << " is out of range. (max: " << m_doc.front().size() - 1 << ")";
+			str_stream << "column index " << col << " is out of range. (max: " << document.front().size() - 1 << ")";
 			throw std::out_of_range(str_stream.str());
 		}
-	}
-
-	CSVDocument::row_index_type CSVDocument::row_count() const
-	{
-		return size();
-	}
-
-	CSVDocument::column_index_type CSVDocument::col_count() const
-	{
-		if (m_doc.size() > 0)
-		{
-			return m_doc.front().size();
-		}
-		return 0;
 	}
 
 	CSVParser::CSVParser()
@@ -487,7 +300,7 @@ namespace CSV
 		{
 			throw std::runtime_error("Destination of parsed data is not set.");
 		}
-		m_doc = p_doc;
+		document = p_doc;
 
 		_open_csv_file(file_path);
 		_line_end();
@@ -559,7 +372,7 @@ namespace CSV
 			}
 			else
 			{
-				m_doc->add_row(row);
+				document->add_row(row);
 			}
 		}
 		else if(col_count > 0)

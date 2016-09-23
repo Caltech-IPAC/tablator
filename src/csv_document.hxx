@@ -34,41 +34,19 @@ namespace CSV
 		typedef document_type::iterator iterator;
 		typedef document_type::const_iterator const_iterator;
 
-		enum OutputMode{
-			CompleteEnclosure,
-			OptionalEnclosure
-		};
-
 		row_index_type load_file(const std::string& file_path);
-		row_index_type to_file(const std::string& file_path, OutputMode output_mode = OptionalEnclosure);
-		const document_type& get_document() const;
-		const row_type& get_row(row_index_type row) const;
-		const element_type& get_element(row_index_type row, column_index_type col) const;
-		row_index_type size() const;
 		bool empty() const;
-		row_index_type row_count() const;
-		column_index_type col_count() const;
 		iterator begin();
 		iterator end();
 		const_iterator begin() const;
 		const_iterator end() const;
-		row_type& operator[](row_index_type idx);
 
-		void merge_document(const document_type& doc);
 		void add_row(const row_type& row);
-		void remove_row(row_index_type row_idx);
-		void replace_row(row_index_type row_idx, const row_type& row);
-		void update_elem(row_index_type row, column_index_type col, const element_type& new_val);
-		void clear();
-
+		document_type document;
 	private:
-		int _replace_all( std::string &field, const std::string& old_str, const std::string& new_str );
-		void _write_optional_enclosure_field( std::ostream& out_stream, const element_type& elem, bool last_elem );
-		void _write_complete_enclosure_field( std::ostream& out_stream, const element_type& elem, bool last_elem );
 		void _check_row_index( row_index_type row_idx ) const;
 		void _check_col_index( column_index_type col ) const;
 
-		document_type m_doc;
 	};
 
 	class CSVParser {
@@ -125,7 +103,7 @@ namespace CSV
 		std::string elem;
 		CSVDocument::row_type row;
 		ParseState state;
-		CSVDocument* m_doc;
+		CSVDocument* document;
 		std::ifstream csv_file;
 	};
 
