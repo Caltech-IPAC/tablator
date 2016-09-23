@@ -2,8 +2,7 @@
 
 void tablator::Table::read_csv (const boost::filesystem::path &path)
 {
-  CSV::CSVDocument csv;
-  csv.load_file(path.string());
+  CSV::CSVDocument csv(path.string());
   if (csv.empty ())
     throw std::runtime_error ("This CSV/TSV file is empty: " + path.string());
 
