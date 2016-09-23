@@ -23,6 +23,6 @@ namespace tablator
     // why use a separate parser? 
     // Because parser uses some local variables, if we use a separate parser, all these 
     // variables are de-constructed after loading while parsed data is still valid.
-    CSV_Parser parser(this, file_path);
+    CSV_Parser parser(*this, file_path);
   }
 }

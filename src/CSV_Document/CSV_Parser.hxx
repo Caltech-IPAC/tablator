@@ -34,7 +34,7 @@ namespace tablator
       ParseCompleted
     };
     CSV_Parser() = delete;
-    CSV_Parser(CSV_Document* p_doc, const std::string& file_path);		
+    CSV_Parser(CSV_Document &p_doc, const std::string& file_path);		
 
   private:
     inline char _curr_char() const;
@@ -61,7 +61,7 @@ namespace tablator
     void _open_csv_file(const std::string& file_path);
     std::ifstream& _get_line_from_file();
     void _append_another_line_from_file();
-    void _initialize(CSV_Document* p_doc, const std::string& file_path);
+    void _initialize(const std::string& file_path);
 
     std::string read_str;
     std::string row_str;
@@ -73,7 +73,7 @@ namespace tablator
     std::string elem;
     CSV_Document::row_type row;
     ParseState state;
-    CSV_Document* document;
+    CSV_Document &document;
     std::ifstream csv_file;
   };
 }

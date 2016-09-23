@@ -19,12 +19,12 @@
 #include <stdexcept>
 namespace tablator
 {
-  CSV_Parser::CSV_Parser(CSV_Document* p_doc, const std::string& file_path)
+  CSV_Parser::CSV_Parser(CSV_Document &p_doc, const std::string& file_path): document (p_doc)
   {
     idx = field_beg = field_end = 0;
     row_count = col_count = 0;
     state = LineEnd;
-    _initialize(p_doc, file_path);
+    _initialize(file_path);
     for (; state != ParseCompleted; _next())
       {
         // I know design pattern, but I don't want to make things more complicated.
@@ -228,14 +228,8 @@ namespace tablator
       }
   }
 
-  void CSV_Parser::_initialize(CSV_Document* p_doc, const std::string& file_path)
+  void CSV_Parser::_initialize(const std::string& file_path)
   {
-    if (!p_doc)
-      {
-        throw std::runtime_error("Destination of parsed data is not set.");
-      }
-    document = p_doc;
-
     _open_csv_file(file_path);
     _line_end();
   }
@@ -306,7 +300,7 @@ namespace tablator
           }
         else
           {
-            document->add_row(row);
+            document.add_row(row);
           }
       }
     else if(col_count > 0)
