@@ -13,31 +13,17 @@
 /// Copied from libcsv++
 /// https://github.com/jainyzau/libcsv-
 
-#include "csv_document.hxx"
-#include <fstream>
+#include "CSV_Parser.hxx"
+
 #include <sstream>
 #include <stdexcept>
 namespace CSV
 {
-
-  CSVDocument::CSVDocument( const std::string& file_path )
-  {
-    // why use a separate parser? 
-    // Because parser uses some local variables, if we use a separate parser, all these 
-    // variables are de-constructed after loading while parsed data is still valid.
-    CSVParser parser;
-    parser.parse(this, file_path);
-  }
-
-  CSVParser::CSVParser()
+  CSV_Parser::CSV_Parser(CSV_Document* p_doc, const std::string& file_path)
   {
     idx = field_beg = field_end = 0;
     row_count = col_count = 0;
     state = LineEnd;
-  }
-
-  CSVDocument::row_index_type CSVParser::parse( CSVDocument* p_doc, const std::string& file_path )
-  {
     _initialize(p_doc, file_path);
     for (; state != ParseCompleted; _next())
       {
@@ -73,25 +59,23 @@ namespace CSV
             break;
           }
       }
-
-    return row_count;
   }
 
-  char CSVParser::_curr_char() const
+  char CSV_Parser::_curr_char() const
   {
     return row_str[idx];
   }
 
-  void CSVParser::_next()
+  void CSV_Parser::_next()
   {
     ++idx;
   }
 
-  void CSVParser::_post_line_start()
+  void CSV_Parser::_post_line_start()
   {
   }
 
-  void CSVParser::_post_field_start()
+  void CSV_Parser::_post_field_start()
   {
     if (_curr_char() == ',')
       {
@@ -113,7 +97,7 @@ namespace CSV
       }
   }
 
-  void CSVParser::_post_front_quote()
+  void CSV_Parser::_post_front_quote()
   {
     if (_curr_char() == '"')
       {
@@ -125,7 +109,7 @@ namespace CSV
       }
   }
 
-  void CSVParser::_post_escape_on()
+  void CSV_Parser::_post_escape_on()
   {
     if (_curr_char() == ',')
       {
@@ -148,7 +132,7 @@ namespace CSV
       }
   }
 
-  void CSVParser::_post_escape_off()
+  void CSV_Parser::_post_escape_off()
   {
     if (_curr_char() == '"')
       {
@@ -160,11 +144,11 @@ namespace CSV
       }
   }
 
-  void CSVParser::_post_back_quote()
+  void CSV_Parser::_post_back_quote()
   {
   }
 
-  void CSVParser::_post_field_end()
+  void CSV_Parser::_post_field_end()
   {
     _field_start();
 
@@ -183,7 +167,7 @@ namespace CSV
       }
   }
 
-  void CSVParser::_post_line_end()
+  void CSV_Parser::_post_line_end()
   {
     _line_start();
     _field_start();
@@ -202,7 +186,7 @@ namespace CSV
       }
   }
 
-  void CSVParser::_open_csv_file( const std::string& file_path )
+  void CSV_Parser::_open_csv_file( const std::string& file_path )
   {
     csv_file.open(file_path.c_str());
     if (csv_file.fail())
@@ -211,7 +195,7 @@ namespace CSV
       }
   }
 
-  std::ifstream& CSVParser::_get_line_from_file()
+  std::ifstream& CSV_Parser::_get_line_from_file()
   {
     if (std::getline(csv_file, read_str))
       {
@@ -229,7 +213,7 @@ namespace CSV
     return csv_file;
   }
 
-  void CSVParser::_append_another_line_from_file()
+  void CSV_Parser::_append_another_line_from_file()
   {
     if (_get_line_from_file())
       {
@@ -244,7 +228,7 @@ namespace CSV
       }
   }
 
-  void CSVParser::_initialize( CSVDocument* p_doc, const std::string& file_path )
+  void CSV_Parser::_initialize(CSV_Document* p_doc, const std::string& file_path)
   {
     if (!p_doc)
       {
@@ -256,7 +240,7 @@ namespace CSV
     _line_end();
   }
 
-  void CSVParser::_field_end()
+  void CSV_Parser::_field_end()
   {
     elem.append(row_str.c_str() + field_beg, field_end - field_beg);
     field_beg = idx + 1;
@@ -264,7 +248,7 @@ namespace CSV
     state = FieldEnd;
   }
 
-  void CSVParser::_line_start()
+  void CSV_Parser::_line_start()
   {
     row.clear();
     ++row_count;
@@ -272,38 +256,38 @@ namespace CSV
     state = LineStart;
   }
 
-  void CSVParser::_field_start()
+  void CSV_Parser::_field_start()
   {
     elem.clear();
     field_beg = field_end = idx;
     state = FieldStart;
   }
 
-  void CSVParser::_escape_on()
+  void CSV_Parser::_escape_on()
   {
     state = EscapeOn;
   }
 
-  void CSVParser::_escape_off()
+  void CSV_Parser::_escape_off()
   {
     elem.append(row_str.c_str() + field_beg, idx - field_beg);
     field_beg = idx + 1;
     state = EscapeOff;
   }
 
-  void CSVParser::_front_quote()
+  void CSV_Parser::_front_quote()
   {
     ++field_beg;
     state = FrontQuote;
   }
 
-  void CSVParser::_back_quote()
+  void CSV_Parser::_back_quote()
   {
     field_end = idx - 1;
     state = FrontQuote;
   }
 
-  void CSVParser::_line_end()
+  void CSV_Parser::_line_end()
   {
     if (row.size() > 0)
       {
