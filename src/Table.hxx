@@ -162,7 +162,7 @@ public:
                   const std::vector<VOTable_Field> &fields);
   void read_tabledata (const boost::property_tree::ptree &tabledata,
                        const std::vector<VOTable_Field> &fields);
-  void read_dsv (const boost::filesystem::path &path);
+  void read_dsv (const boost::filesystem::path &path, const Format &format);
   void read_dsv_rows (const std::list<std::vector<std::string> >  &dsv);
   void set_column_info (std::list<std::vector<std::string> > &dsv);
   void write_tabledata (std::ostream &os, const bool &is_json) const;

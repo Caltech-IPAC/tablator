@@ -47,9 +47,9 @@ tablator::Table::Table (const boost::filesystem::path &input_path)
         boost::property_tree::read_json (file, tree);
       read_property_tree_as_votable (tree);
     }
-  else if (format.is_csv ())
+  else if (format.is_csv () || format.is_tsv ())
     {
-      read_dsv (input_path);
+      read_dsv (input_path,format);
     }
   else
     {

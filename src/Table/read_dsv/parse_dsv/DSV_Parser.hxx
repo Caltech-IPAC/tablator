@@ -38,8 +38,7 @@ namespace tablator
       ParseCompleted
     };
     DSV_Parser() = delete;
-    DSV_Parser(DSV_Document &p_doc, const std::string& file_path);		
-
+    DSV_Parser(DSV_Document &p_doc, const std::string& file_path, const char &delimiter);
   private:
     inline char _curr_char() const;
     inline void _next();
@@ -79,5 +78,6 @@ namespace tablator
     ParseState state;
     DSV_Document &document;
     std::ifstream dsv_file;
+    const char delimiter;
   };
 }

@@ -21,7 +21,9 @@
 #include <stdexcept>
 namespace tablator
 {
-  DSV_Parser::DSV_Parser(DSV_Document &p_doc, const std::string& file_path): document (p_doc)
+  DSV_Parser::DSV_Parser(DSV_Document &p_doc, const std::string& file_path,
+                         const char &Delimiter)
+    : document (p_doc), delimiter (Delimiter)
   {
     idx = field_beg = field_end = 0;
     row_count = col_count = 0;
@@ -79,7 +81,7 @@ namespace tablator
 
   void DSV_Parser::_post_field_start()
   {
-    if (_curr_char() == ',')
+    if (_curr_char() == delimiter)
       {
         field_end = idx;
         _field_end();
@@ -113,7 +115,7 @@ namespace tablator
 
   void DSV_Parser::_post_escape_on()
   {
-    if (_curr_char() == ',')
+    if (_curr_char() == delimiter)
       {
         _back_quote();
         _field_end();
@@ -158,7 +160,7 @@ namespace tablator
       {
         _front_quote();
       }
-    else if (_curr_char() == ',')
+    else if (_curr_char() == delimiter)
       {
         _field_end();
       }
@@ -178,7 +180,7 @@ namespace tablator
       {
         _front_quote();
       }
-    else if (_curr_char() == ',')
+    else if (_curr_char() == delimiter)
       {
         _field_end();
       }
