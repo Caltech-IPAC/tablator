@@ -18,7 +18,8 @@ std::vector<size_t> tablator::Table::get_column_width () const
           /// buffer_size = 1 (sign) + 1 (leading digit) + 1 (decimal)
           /// + 1 (exponent sign) + 3 (exponent)
           const size_t buffer_size (7);
-          widths.push_back (output_precision + buffer_size);
+          widths.push_back (std::max (column.name.size (),
+                                      output_precision + buffer_size));
         }
     }
   return widths;
