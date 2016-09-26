@@ -50,6 +50,9 @@ public:
   size_t row_size () const { return *offsets.rbegin (); }
   size_t num_rows () const { return data.size () / row_size (); }
 
+  // FIXME: Unfortunately, this is an opposite convention from
+  // VOTable.  VOTable use the most significant bit for the
+  // first column.  This uses the least significant bit.
   bool is_null (size_t row_offset, size_t column) const
   {
     return data[row_offset + (column - 1) / 8] & (1 << ((column - 1) % 8));
@@ -162,6 +165,8 @@ public:
                   const std::vector<VOTable_Field> &fields);
   void read_tabledata (const boost::property_tree::ptree &tabledata,
                        const std::vector<VOTable_Field> &fields);
+  void read_binary2 (const boost::property_tree::ptree &tabledata,
+                     const std::vector<VOTable_Field> &fields);
   void read_dsv (const boost::filesystem::path &path, const Format &format);
   void read_dsv_rows (const std::list<std::vector<std::string> >  &dsv);
   void set_column_info (std::list<std::vector<std::string> > &dsv);
