@@ -39,7 +39,7 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
               if (td->first == "TD" || td->first.empty ())
                 {
                   std::string temp = td->second.get_value<std::string>();
-                  if (fields.at (c).is_array)
+                  if (fields.at (c).array_size != 1)
                     column_array_sizes[c] = std::max (
                         column_array_sizes[c],
                         count_elements (temp, fields.at (c).type));

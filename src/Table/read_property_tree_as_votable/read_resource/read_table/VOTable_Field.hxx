@@ -10,13 +10,14 @@ class VOTable_Field
 public:
   std::string name;
   Data_Type type = Data_Type::UINT8_LE;
-  bool is_array = false;
+  bool array_size = 1;
   Field_Properties properties;
 
   VOTable_Field () = default;
   VOTable_Field (const std::string &Name, const Data_Type &Type,
-                 const bool &Is_array, const Field_Properties &Properties)
-      : name (Name), type (Type), is_array (Is_array), properties (Properties)
+                 const bool &Array_size, const Field_Properties &Properties)
+      : name (Name), type (Type), array_size (Array_size),
+        properties (Properties)
   {
   }
 };

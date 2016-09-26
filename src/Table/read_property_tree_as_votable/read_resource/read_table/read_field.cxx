@@ -1,6 +1,8 @@
 #include "../../../../Table.hxx"
 #include "VOTable_Field.hxx"
 
+#include <boost/lexical_cast.hpp>
+
 namespace
 {
 tablator::Data_Type string_to_Type (const std::string &s)
@@ -58,7 +60,11 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
           // FIXME: We do not handle arrays correctly
           else if (attribute.first == "arraysize")
             {
-              result.is_array = true;
+              std::string array_size = attribute.second.get_value<std::string>();
+              if (array_size == "*")
+                result.array_size = std::numeric_limits<size_t>::max();
+              else
+                result.array_size = boost::lexical_cast<size_t>(array_size);
             }
           else
             {

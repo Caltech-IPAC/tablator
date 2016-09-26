@@ -33,9 +33,10 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
       for (size_t field=1; field<fields.size() && position < stream.size();
            ++field)
         {
-          if (!fields[field].is_array)
+          if (fields[field].array_size!=std::numeric_limits<size_t>::max())
             {
-              position += data_size (fields[field].type);
+              position += data_size (fields[field].type)
+                * fields[field].array_size;
             }
           else
             {
@@ -45,9 +46,14 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
                 }
               else
                 {
+                  // FIXME: This feels like the hard way to do things.
+                  // But I can not use plain old pointers, because I
+                  // then run into problems with modifying const
+                  // pointers.  So I need iterators to distinguish
+                  // between "const iterator" and "const_iterator".
                   uint32_t array_size;
-                  auto start = stream.begin();
-                  std::advance (start, position);
+                  auto begin = stream.begin();
+                  std::advance (begin, position);
                   auto end = stream.begin();
                   position += sizeof(array_size);
                   std::advance (end, position);
@@ -59,7 +65,7 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
 
                       /// This parsing can never fail, since any byte
                       /// pattern is a valid 32 bit number
-                      boost::spirit::qi::parse(start, end,
+                      boost::spirit::qi::parse(begin, end,
                                                boost::spirit::qi::big_dword,
                                                array_size);
                       column_array_sizes[field]=
