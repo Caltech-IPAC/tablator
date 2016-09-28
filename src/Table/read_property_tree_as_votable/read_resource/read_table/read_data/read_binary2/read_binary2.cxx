@@ -6,7 +6,8 @@ namespace tablator
 std::vector<uint8_t> decode_base64_stream(const std::string &val);
 void compute_column_array_sizes (const std::vector<uint8_t> &stream,
                                  const std::vector<VOTable_Field> &fields,
-                                 std::vector<size_t> &column_array_sizes);
+                                 std::vector<size_t> &column_array_sizes,
+                                 size_t &num_rows);
 
 void Table::read_binary2 (const boost::property_tree::ptree &binary2,
                           const std::vector<VOTable_Field> &fields)
@@ -45,13 +46,18 @@ void Table::read_binary2 (const boost::property_tree::ptree &binary2,
                            (stream.second.get_value<std::string>()));
     }
 
+  std::vector<size_t> rows_per_stream;
   for (auto &stream: streams)
-    compute_column_array_sizes(stream,fields,column_array_sizes);
+    {
+      size_t num_rows;
+      compute_column_array_sizes(stream,fields,column_array_sizes,num_rows);
+      rows_per_stream.push_back (num_rows);
+    }
   
   for (std::size_t c = 0; c < fields.size (); ++c)
     append_column (fields.at (c).name, fields[c].type, column_array_sizes[c]);
-
-  for (auto &stream: streams)
-    append_data_from_stream(stream,fields);
+  
+  for (std::size_t stream=0; stream<streams.size(); ++stream)
+    append_data_from_stream(streams[stream],rows_per_stream[stream],fields);
 }
 }

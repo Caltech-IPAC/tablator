@@ -10,9 +10,11 @@ namespace tablator
 {
 void compute_column_array_sizes (const std::vector<uint8_t> &stream,
                                  const std::vector<VOTable_Field> &fields,
-                                 std::vector<size_t> &column_array_sizes)
+                                 std::vector<size_t> &column_array_sizes,
+                                 size_t &num_rows)
 {
-  if (fields.empty())
+  num_rows=0;
+  if (fields.size() < 2)
     return;
   
   const size_t null_flags_size ((fields.size() + 6)/8);
@@ -21,7 +23,7 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
     {
       size_t row_offset (position);
       position += null_flags_size;
-      for (size_t field=1; field<fields.size() && position < stream.size();
+      for (size_t field=1; field<fields.size() && position <= stream.size();
            ++field)
         {
           if (!fields[field].is_array_dynamic)
@@ -47,10 +49,10 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
                   std::advance (begin, position);
                   auto end = stream.begin();
                   position += sizeof(array_size);
-                  std::advance (end, position);
-
-                  if (position < stream.size())
+                  if (position <= stream.size())
                     {
+                      std::advance (end, position);
+
                       /// VOTable spec says that array size is a 32
                       /// bit MSB integer
 
@@ -67,6 +69,8 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
                 }
             }
         }
+      if (position <= stream.size())
+        ++num_rows;
     }
 }
 }

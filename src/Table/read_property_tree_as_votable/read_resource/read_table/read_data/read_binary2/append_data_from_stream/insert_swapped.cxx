@@ -67,15 +67,15 @@ void insert_swapped_element(std::vector<uint8_t>::const_iterator &begin,
 
 namespace tablator
 {
-size_t insert_swapped (const size_t &column_offset,
-                       const Data_Type &data_type,
-                       const size_t &array_size,
-                       const std::vector<uint8_t> &stream,
-                       const size_t &old_position, Row &row)
+void insert_swapped (const size_t &column_offset,
+                     const Data_Type &data_type,
+                     const size_t &array_size,
+                     const std::vector<uint8_t> &stream,
+                     const size_t &starting_position, Row &row)
 {
   const size_t data_type_size (data_size (data_type));
   const bool is_bool (data_type==Data_Type::INT8_LE);
-  size_t position = old_position;
+  size_t position = starting_position;
   for (size_t index=0; index != array_size; ++index)
     {
       auto begin = stream.begin();
@@ -88,6 +88,5 @@ size_t insert_swapped (const size_t &column_offset,
                              column_offset + index * data_type_size,
                              is_bool, row);
     }
-  return position;
 }
 }
