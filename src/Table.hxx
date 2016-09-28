@@ -31,7 +31,7 @@ class Table
 {
 public:
   std::vector<std::pair<std::string, Property> > properties;
-  std::vector<char> data;
+  std::vector<uint8_t> data;
   std::vector<std::string> comments;
 
   std::vector<Column> columns;

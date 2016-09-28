@@ -8,12 +8,12 @@
 
 template <typename data_type>
 void write_column (fitsfile *fits_file, const int &fits_type,
-                   const int &column, const char *data,
+                   const int &column, const uint8_t *data,
                    const hsize_t &array_size, const size_t &row)
 {
   int status = 0;
   fits_write_col (fits_file, fits_type, column + 1, row, 1, array_size,
-                  reinterpret_cast<data_type *>(const_cast<char *>(data)),
+                  reinterpret_cast<data_type *>(const_cast<uint8_t *>(data)),
                   &status);
   if (status != 0)
     throw CCfits::FitsError (status);
@@ -186,13 +186,13 @@ void tablator::Table::write_fits (fitsfile *fits_file) const
         throw CCfits::FitsError (status);
     }
 
-  const char *row_pointer (data.data ());
+  const uint8_t *row_pointer (data.data ());
   const size_t number_of_rows (num_rows ());
   for (size_t row=1; row <= number_of_rows; ++row)
     {
       for (size_t i = 0; i < columns.size (); ++i)
         {
-          const char *offset_data = row_pointer + offsets[i];
+          const uint8_t *offset_data = row_pointer + offsets[i];
           switch (columns[i].type)
             {
             case Data_Type::INT8_LE:
@@ -236,8 +236,9 @@ void tablator::Table::write_fits (fitsfile *fits_file) const
               break;
             case Data_Type::CHAR:
               {
-                std::string temp_string (offset_data,
-                                         offsets[i + 1] - offsets[i]);
+                std::string temp_string
+                  (reinterpret_cast<const char*>(offset_data),
+                   offsets[i + 1] - offsets[i]);
                 char *temp_chars = const_cast<char *>(temp_string.c_str ());
 
                 fits_write_col (fits_file, TSTRING, i + 1, row, 1, 1,

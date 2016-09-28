@@ -8,7 +8,7 @@ namespace tablator
 {
 void write_type_as_ascii (std::ostream &os, const Data_Type &type,
                           const size_t &array_size,
-                          const char *data,
+                          const uint8_t *data,
                           const int &output_precision)
 {
   if (array_size != 1 && type != Data_Type::CHAR)
@@ -69,7 +69,8 @@ void write_type_as_ascii (std::ostream &os, const Data_Type &type,
           /// The characters in the type can be shorter than the
           /// number of allowed bytes.  So add a .c_str() that
           /// will terminate the string at the first null.
-          os << std::string (data, array_size).c_str ();
+          os << std::string (reinterpret_cast<const char*>(data),
+                             array_size).c_str ();
           break;
         }
     }

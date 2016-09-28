@@ -6,12 +6,12 @@
 namespace
 {
 template <typename T>
-void read_scalar_column (char *position, CCfits::Column &c, const size_t &rows,
+void read_scalar_column (uint8_t *position, CCfits::Column &c, const size_t &rows,
                          const size_t &row_size)
 {
   std::vector<T> v;
   c.read (v, 1, rows);
-  char *current = position;
+  uint8_t *current = position;
   for (auto &element : v)
     {
       *reinterpret_cast<T *>(current) = element;
@@ -20,7 +20,7 @@ void read_scalar_column (char *position, CCfits::Column &c, const size_t &rows,
 }
 
 template <typename T>
-void read_vector_column (fitsfile *fits_file, char *position, CCfits::Column &c,
+void read_vector_column (fitsfile *fits_file, uint8_t *position, CCfits::Column &c,
                          const size_t &rows, const size_t &row_size)
 {
   /// Use the C api because the C++ api (Column::readArrays) is
@@ -30,10 +30,10 @@ void read_vector_column (fitsfile *fits_file, char *position, CCfits::Column &c,
   fits_read_col (fits_file, c.type (), c.index (), 1, 1, c.repeat (), NULL,
                  temp_array.data (), &anynul, &status);
 
-  char *current = position;
+  uint8_t *current = position;
   for (size_t i=0; i < temp_array.size (); i+=c.repeat ())
     {
-      char *element_start=current;
+      uint8_t *element_start=current;
       for (size_t offset=0; offset < c.repeat (); ++offset)
         {
           *reinterpret_cast<T *>(current) = temp_array[i+offset];
@@ -44,7 +44,7 @@ void read_vector_column (fitsfile *fits_file, char *position, CCfits::Column &c,
 }
 
 template <typename T>
-void read_column (fitsfile *fits_file, char *position, CCfits::Column &c,
+void read_column (fitsfile *fits_file, uint8_t *position, CCfits::Column &c,
                   const bool &is_array, const size_t &rows,
                   const size_t &row_size)
 {

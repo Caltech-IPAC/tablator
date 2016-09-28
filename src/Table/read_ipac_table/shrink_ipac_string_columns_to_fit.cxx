@@ -19,7 +19,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit (
     }
   const size_t rows = num_rows ();
   //FIXME: Do this in place.
-  std::vector<char> new_data (rows * new_row_size);
+  std::vector<uint8_t> new_data (rows * new_row_size);
   size_t row_offset (0), new_row_offset (0);
   for (size_t row = 0; row < rows; ++row)
     {
