@@ -1,19 +1,10 @@
 #include "../../VOTable_Field.hxx"
 #include "../../../../../../data_size.hxx"
+#include "is_null_MSb.hxx"
 
 #include <boost/spirit/include/qi.hpp>
 
 #include <algorithm>
-#include <vector>
-
-namespace
-{
-bool is_null_MSb(const std::vector<uint8_t> &data,
-                 const size_t &row_offset, const size_t &column)
-{
-  return data[row_offset + (column - 1) / 8] & (128 >> ((column - 1) % 8));
-}
-}
 
 namespace tablator
 {
@@ -33,7 +24,7 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
       for (size_t field=1; field<fields.size() && position < stream.size();
            ++field)
         {
-          if (fields[field].array_size!=std::numeric_limits<size_t>::max())
+          if (!fields[field].is_array_dynamic)
             {
               position += data_size (fields[field].type)
                 * fields[field].array_size;
@@ -51,7 +42,7 @@ void compute_column_array_sizes (const std::vector<uint8_t> &stream,
                   // then run into problems with modifying const
                   // pointers.  So I need iterators to distinguish
                   // between "const iterator" and "const_iterator".
-                  uint32_t array_size;
+                  uint32_t array_size (0);
                   auto begin = stream.begin();
                   std::advance (begin, position);
                   auto end = stream.begin();

@@ -62,9 +62,14 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
             {
               std::string array_size = attribute.second.get_value<std::string>();
               if (array_size == "*")
-                result.array_size = std::numeric_limits<size_t>::max();
+                {
+                  result.array_size = std::numeric_limits<size_t>::max();
+                  result.is_array_dynamic = true;
+                }
               else
-                result.array_size = boost::lexical_cast<size_t>(array_size);
+                {
+                  result.array_size = boost::lexical_cast<size_t>(array_size);
+                }
             }
           else
             {

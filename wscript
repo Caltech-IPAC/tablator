@@ -40,6 +40,8 @@ def build(bld):
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_binary2/read_binary2.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_binary2/decode_base64_stream.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_binary2/compute_column_array_sizes.cxx',
+             'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_binary2/append_data_from_stream/append_data_from_stream.cxx',
+             'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_binary2/append_data_from_stream/insert_swapped.cxx',
              'src/Table/read_dsv/read_dsv.cxx',
              'src/Table/read_dsv/parse_dsv/parse_dsv.cxx',
              'src/Table/read_dsv/parse_dsv/DSV_Parser.cxx',

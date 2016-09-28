@@ -1,5 +1,5 @@
-#include "../../../../../../Table.hxx"
 #include "../../VOTable_Field.hxx"
+#include "../../../../../../Table.hxx"
 
 namespace tablator
 {
@@ -51,7 +51,7 @@ void Table::read_binary2 (const boost::property_tree::ptree &binary2,
   for (std::size_t c = 0; c < fields.size (); ++c)
     append_column (fields.at (c).name, fields[c].type, column_array_sizes[c]);
 
-  // for (auto &stream: streams)
-  //   append_data_from_stream(stream,fields);
+  for (auto &stream: streams)
+    append_data_from_stream(stream,fields);
 }
 }

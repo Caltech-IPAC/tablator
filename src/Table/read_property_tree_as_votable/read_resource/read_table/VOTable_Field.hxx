@@ -10,7 +10,8 @@ class VOTable_Field
 public:
   std::string name;
   Data_Type type = Data_Type::UINT8_LE;
-  bool array_size = 1;
+  size_t array_size = 1;
+  bool is_array_dynamic = false;
   Field_Properties properties;
 
   VOTable_Field () = default;
