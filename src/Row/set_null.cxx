@@ -8,7 +8,7 @@ void tablator::Row::set_null (const Data_Type &data_type,
                               const size_t &offset, const size_t &offset_end)
 {
   const int byte = (column - 1) / 8;
-  const char mask = (1 << ((column - 1) % 8));
+  const char mask = (128 >> ((column - 1) % 8));
   data[byte] = data[byte] | mask;
 
   if (array_size != 1)
