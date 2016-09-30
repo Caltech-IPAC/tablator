@@ -7,6 +7,8 @@ tablator::Table::read_resource (const boost::property_tree::ptree &resource)
   auto end = resource.end ();
 
   read_node_and_attributes ("RESOURCE", resource);
+  while (child != end && child->first == "<xmlattr>")
+    ++child;
   if (child != end && child->first == "DESCRIPTION")
     {
       properties.emplace_back ("RESOURCE.DESCRIPTION",
