@@ -1,0 +1,47 @@
+Tablator is built with waf
+
+  https://github.com/waf-project/waf
+
+Waf is written in python and included in the source tree.  Usage is
+very similar to the GNU autotools.  Specifically, you configure
+tablator with the command
+
+  ./waf configure
+
+For a list of command line options
+
+  ./waf configure --help
+
+Once configured, build with the command
+
+  ./waf
+
+and install with the command
+
+  ./waf install
+
+
+Dependencies
+============
+
+cfitsio: C Library for reading FITS files
+  http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html
+
+CCfits: C++ bindings to cfitsio
+  http://heasarc.gsfc.nasa.gov/fitsio/CCfits/
+
+boost: A collection of free C++ libraries
+  http://boost.org
+
+json5_parser: C++ Parser for JSON5
+  https://github.com/Caltech-IPAC/json5_parser
+
+HDF5: C and C++ library for reading and writing HDF5 files
+  https://www.hdfgroup.org/
+
+On Debian and Ubuntu, you can get most of these dependencies with the
+command
+
+  apt-get install libcfitsio-dev libccfits-dev libboost-dev libhdf5-dev
+
+You will still have to build and install json5_parser.
