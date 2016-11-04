@@ -45,7 +45,9 @@ public:
   Table (const std::vector<Column> &Columns)
       : Table (Columns, std::map<std::string, std::string>()) { }
 
-  Table (const boost::filesystem::path &input_path);
+  Table (const boost::filesystem::path &input_path, const Format &format);
+  Table (const boost::filesystem::path &input_path)
+    : Table (input_path, Format(input_path)) {}
 
   size_t row_size () const { return *offsets.rbegin (); }
   size_t num_rows () const { return data.size () / row_size (); }

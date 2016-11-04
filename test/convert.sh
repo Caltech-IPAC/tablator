@@ -12,7 +12,7 @@ done
 for table in test/multi test/multi.csv test/multi.tsv test/fits_medium.fits test/*.tbl test/*.json5 test/*.xml test/*.unk; do
     for ending in tbl hdf5 xml csv tsv fits html json json5; do
         if [ $ending == "fits" ]; then
-            build/tablator $table --stream-intermediate test.$ending
+            build/tablator --stream-intermediate=yes $table test.$ending
         else
             build/tablator $table test.$ending
         fi
@@ -27,3 +27,11 @@ for table in test/multi test/multi.csv test/multi.tsv test/fits_medium.fits test
         rm -f test.$ending temp.tbl
     done
 done
+
+build/tablator --input-format=hdf5 --output-format=ipac_table test/h5_as_csv.csv temp.h5
+build/tablator --input-format=ipac_table temp.h5 temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Explicit format specified"
+else
+    echo "FAIL: Explicit format specified"
+fi

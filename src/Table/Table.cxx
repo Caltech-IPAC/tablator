@@ -18,9 +18,9 @@ tablator::Table::Table (const std::vector<Column> &Columns,
     { properties.emplace_back (p.first, Property (p.second)); }
 }
 
-tablator::Table::Table (const boost::filesystem::path &input_path)
+tablator::Table::Table (const boost::filesystem::path &input_path,
+                        const Format &format)
 {
-  Format format (input_path);
   // FIXME: This has too many if(){} else {} clauses
   if (format.is_hdf5 ())
     {
