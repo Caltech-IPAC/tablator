@@ -9,7 +9,7 @@
 void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
 {
   if (!exists (path))
-    throw std::runtime_error ("File " + path.string () + "does not exist.");
+    throw std::runtime_error ("File " + path.string () + " does not exist.");
 
   boost::filesystem::ifstream ipac_file (path, std::ios::in);
   
