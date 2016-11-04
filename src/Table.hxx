@@ -150,6 +150,20 @@ public:
   void read_fits (const boost::filesystem::path &path);
   void read_hdf5 (const boost::filesystem::path &path);
   void read_json5 (const boost::filesystem::path &path);
+  void read_json (const boost::filesystem::path &path)
+  {
+    boost::property_tree::ptree tree;
+    boost::filesystem::ifstream file (path);
+    boost::property_tree::read_json (file, tree);
+    read_property_tree_as_votable (tree);
+  }
+  void read_votable (const boost::filesystem::path &path)
+  {
+    boost::property_tree::ptree tree;
+    boost::filesystem::ifstream file (path);
+    boost::property_tree::read_xml (file, tree);
+    read_property_tree_as_votable (tree);
+  }
   void read_property_tree_as_votable (const boost::property_tree::ptree &tree);
   void read_node_and_attributes (const std::string &node_name,
                                  const boost::property_tree::ptree &node);

@@ -21,6 +21,7 @@ tablator::Table::Table (const std::vector<Column> &Columns,
 tablator::Table::Table (const boost::filesystem::path &input_path)
 {
   Format format (input_path);
+  // FIXME: This has too many if(){} else {} clauses
   if (format.is_hdf5 ())
     {
       read_hdf5 (input_path);
@@ -37,15 +38,13 @@ tablator::Table::Table (const boost::filesystem::path &input_path)
     {
       read_json5 (input_path);
     }
-  else if (format.is_votable () || format.is_json ())
+  else if (format.is_votable ())
     {
-      boost::property_tree::ptree tree;
-      boost::filesystem::ifstream file (input_path);
-      if (format.is_votable ())
-        boost::property_tree::read_xml (file, tree);
-      else
-        boost::property_tree::read_json (file, tree);
-      read_property_tree_as_votable (tree);
+      read_votable (input_path);
+    }
+  else if (format.is_json ())
+    {
+      read_json (input_path);
     }
   else if (format.is_csv () || format.is_tsv ())
     {
@@ -53,7 +52,86 @@ tablator::Table::Table (const boost::filesystem::path &input_path)
     }
   else
     {
-      throw std::runtime_error ("Unsupported input format: "
-                                + input_path.string ());
+      bool is_read_successful (false);
+      try
+        {
+          read_hdf5 (input_path);
+          is_read_successful=true;
+        }
+      catch (...)
+        {}
+      if (!is_read_successful)
+        {
+          try
+            {
+              read_fits (input_path);
+              is_read_successful=true;
+            }
+          catch (...)
+            {}
+        }
+      if (!is_read_successful)
+        {
+          try
+            {
+              read_ipac_table (input_path);
+              is_read_successful=true;
+            }
+          catch (...)
+            {}
+        }
+      if (!is_read_successful)
+        {
+          try
+            {
+              read_json5 (input_path);
+              is_read_successful=true;
+            }
+          catch (...)
+            {}
+        }
+      if (!is_read_successful)
+        {
+          try
+            {
+              read_votable(input_path);
+              is_read_successful=true;
+            }
+          catch (...)
+            {}
+        }
+      if (!is_read_successful)
+        {
+          try
+            {
+              read_json(input_path);
+              is_read_successful=true;
+            }
+          catch (...)
+            {}
+        }
+      if (!is_read_successful)
+        {
+          try
+            {
+              read_dsv (input_path,Format("csv"));
+              is_read_successful=true;
+            }
+          catch (...)
+            {}
+        }
+      if (!is_read_successful)
+        {
+          try
+            {
+              read_dsv (input_path,Format("tsv"));
+              is_read_successful=true;
+            }
+          catch (...)
+            {}
+        }
+      if (!is_read_successful)
+        throw std::runtime_error ("Unsupported input: " + input_path.string ()
+                                  + ". Tried all formats.");
     }
 }

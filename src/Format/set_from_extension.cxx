@@ -25,6 +25,4 @@ void tablator::Format::set_from_extension (const boost::filesystem::path &path,
             break;
         }
     }
-  if (enum_format == Enums::UNKNOWN)
-    throw std::runtime_error ("Unknown extension: " + extension);
 }
