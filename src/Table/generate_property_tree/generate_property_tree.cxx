@@ -22,12 +22,6 @@ tablator::Table::generate_property_tree (const std::string &tabledata_string)
   votable.add ("<xmlattr>.xmlns", "http://www.ivoa.net/xml/VOTable/v1.3");
   votable.add ("<xmlattr>.xmlns:stc", "http://www.ivoa.net/xml/STC/v1.30");
 
-  // VOTable only allows a single DESCRIPTION element, so we have to
-  // cram all of the comments into a single line
-  if (!comments.empty ())
-    {
-      votable.add ("DESCRIPTION", boost::join (comments, "\n"));
-    }
   bool overflow = false;
   const std::string resource_literal ("RESOURCE"), table_literal ("TABLE");
   auto &resource = votable.add (resource_literal, "");
@@ -91,6 +85,12 @@ tablator::Table::generate_property_tree (const std::string &tabledata_string)
           for (auto &a : p.second.attributes)
             table.add ("<xmlattr>." + a.first, a.second);
         }
+    }
+  // VOTable only allows a single DESCRIPTION element, so we have to
+  // cram all of the comments into a single line
+  if (!comments.empty ())
+    {
+      table.add ("DESCRIPTION", boost::join (comments, "\n"));
     }
   /// Skip null_bitfield_flag
   for (size_t i = 1; i < columns.size (); ++i)
