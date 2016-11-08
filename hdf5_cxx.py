@@ -54,7 +54,7 @@ def configure(conf):
     
     found_hdf5_c=False
     for c in hdf5_config:
-        print "hdf5_config:" + str(c)
+        print ("hdf5_config:" + str(c))
         try:
             conf.check_cxx(msg="Checking for HDF5 C bindings using: " + str(c),
                            fragment=frag,
