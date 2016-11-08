@@ -29,9 +29,8 @@ def configure(conf):
     if not conf.options.hdf5_incdir and not conf.options.hdf5_libdir \
        and not conf.options.hdf5_c_libs and not conf.options.hdf5_cxx_libs:
         hdf5_config=[[[],[],['hdf5'],['hdf5_cpp']],
-                     [['/usr/include/hdf5/serial'],
-                      ['/usr/lib/x86_64-linux-gnu/hdf5/serial'],
-                      ['hdf5'],['hdf5_cpp']]]
+                     [['/usr/include/hdf5/serial'], [],
+                      ['hdf5_serial'],['hdf5_cpp']]]
     else:
         if conf.options.hdf5_incdir:
             hdf5_inc=[conf.options.hdf5_incdir]
@@ -54,7 +53,6 @@ def configure(conf):
     
     found_hdf5_c=False
     for c in hdf5_config:
-        print ("hdf5_config:" + str(c))
         try:
             conf.check_cxx(msg="Checking for HDF5 C bindings using: " + str(c),
                            fragment=frag,
