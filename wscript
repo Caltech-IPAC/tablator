@@ -1,5 +1,3 @@
-import os
-
 def options(opt):
     opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost json5_parser')
 
