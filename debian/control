@@ -11,7 +11,7 @@ Homepage: https://github.com/Caltech-IPAC/tablator
 Package: tablator
 Section: science
 Architecture: any
-Depends: libtablator1, ${misc:Depends}
+Depends: libtablator1, ${misc:Depends}, ${shlibs:Depends}
 Description: Universal table translator for astronomy
  Tablator is a utility for converting tables in astronomy into
  different formats.  Tablator can read and write tables in fits, ipac
