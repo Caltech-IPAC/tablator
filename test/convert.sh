@@ -35,3 +35,4 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: Explicit format specified"
 fi
+rm -f temp.tbl temp.h5
