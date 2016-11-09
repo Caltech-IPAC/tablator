@@ -1,5 +1,3 @@
-#include <boost/regex.hpp>
-
 #include "../../Table.hxx"
 
 namespace
