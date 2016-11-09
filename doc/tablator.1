@@ -1,0 +1,103 @@
+.TH TABLATOR "1" "November 2016" "tablator 1.0.0" "User Commands"
+.SH NAME
+tablator \- Tablator - The Universal Table Translator for Astronomy
+.SH SYNOPSIS
+tablator [options] [INPUT] [OUTPUT]
+.SH DESCRIPTION
+Tablator is a utility for converting tables in astronomy into
+different formats.  Tablator can read and write tables in fits, ipac
+table, hdf5, votable, json, json5, csv, and tsv, and can write html.  The
+emphasis is on speed, so all conversions are done in memory.
+.PP
+Unless passed the \fB\-\-input-format\fR option, tablator attempts to
+guess the formats of the input file by looking at the file extension.
+If it can not guess the format of the input file, then it will try all
+of the formats it understands.
+.PP
+Tablator also tries to deduce the format of the output file by looking
+at the file extension.  If OUTPUT is a single hyphen (-), then the result
+is written to standard output.
+.PP
+The supported file types and their recognized extensions are
+.TP
+.B JSON
+js, json
+.TP
+.B JSON5
+js5, json5
+.TP
+.B VOTable
+xml, vot, vo
+.TP
+.B HDF5
+h5, hdf, hdf5
+.TP
+.B Comma Separated Values (CSV)
+csv
+.TP
+.B Tab Separated Values (TSV)
+tsv
+.TP
+.B FITS
+fits
+.TP
+.B IPAC Table
+tbl, no extension
+.TP
+.B Text
+txt
+.TP
+.B HTML
+html
+.PP
+Note that a file with no extension (e.g. \fBmytable\fR) is considered an IPAC table by default.
+.PD
+.SH OPTIONS
+.PP
+.TP
+\fB\-\-help\fR
+show a help message and exit
+.TP
+\fB\-\-input-format\fR=\fI\,FORMAT\/\fR
+Format of the input file.  Allowed values for FORMAT are
+.br
+.B json
+.br
+.B json5
+.br
+.B votable
+.br
+.B hdf5
+.br
+.B csv
+.br
+.B tsv
+.br
+.B fits
+.br
+.B ipac_table
+.TP
+\fB\-\-output-format\fR=\fI\,FORMAT\/\fR
+Format of the output file.  Allowed values are those taken by the \fB\-\-input-format\fR option and
+.br
+.B text
+.br
+.B html
+.SH "EXAMPLES"
+To convert an HDF5 file named mytable.hdf5 to fits
+.PP
+.br
+.B tablator mytable.hdf5 mytable.fits
+.TP
+To convert a VOTable file named mystery.table to a JSON file named mystery_json.table.
+.PP
+.br
+.B tablator --input-format=votable --output-format=json \e
+.br
+.RS
+.B mystery.table mystery_json.table
+.RE
+
+.SH COPYRIGHT
+2014-2016 California Institute of Technology
+

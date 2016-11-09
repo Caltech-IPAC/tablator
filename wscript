@@ -89,3 +89,6 @@ def build(bld):
     bld.install_files(bld.env.INCLUDEDIR + '/tablator',
                       bld.path.ant_glob('src/*.hxx'),
                       cwd=bld.path.find_dir('src'), relative_trick=True)
+
+    bld.install_files(bld.env.MANDIR + '/man1',
+                      ['doc/tablator.1'])
