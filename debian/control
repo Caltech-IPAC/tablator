@@ -22,6 +22,7 @@ Description: Universal table translator for astronomy
 Package: libtablator-dev
 Section: libdevel
 Architecture: any
+Multi-Arch: same
 Depends: libtablator1 (= ${binary:Version}), libboost-dev, libjson5-parser-dev, ${misc:Depends}
 Description: Universal table translator for astronomy
  Tablator is a utility for converting tables in astronomy into
@@ -33,6 +34,7 @@ Description: Universal table translator for astronomy
  
 Package: libtablator1
 Architecture: any
+Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Universal table translator for astronomy
  Tablator is a utility for converting tables in astronomy into
