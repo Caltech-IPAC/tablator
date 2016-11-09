@@ -1,9 +1,9 @@
 Index: tablator_debian/wscript
 ===================================================================
---- tablator_debian.orig/wscript	2016-11-08 13:21:10.219390694 -0800
-+++ tablator_debian/wscript	2016-11-08 17:27:28.506754334 -0800
+--- tablator_debian.orig/wscript	2016-11-08 20:18:06.283995431 -0800
++++ tablator_debian/wscript	2016-11-08 20:18:06.283995431 -0800
 @@ -6,7 +6,9 @@
-     conf.check_boost(lib='filesystem system regex program_options')
+     conf.check_boost(lib='filesystem system program_options')
  
  def build(bld):
 -    default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
