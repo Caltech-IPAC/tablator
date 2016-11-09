@@ -1,0 +1,43 @@
+Source: tablator
+Priority: optional
+Maintainer: Walter Landry <wlandry@caltech.edu>
+Build-Depends: waf, libboost-dev, libhdf5-dev, libccfits-dev, libcfitsio3-dev, libjson5-parser-dev, debhelper (>= 9)
+Standards-Version: 3.9.6
+Section: libs
+Homepage: https://github.com/Caltech-IPAC/tablator
+#Vcs-Git: git://anonscm.debian.org/collab-maint/tablator.git
+#Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/tablator.git;a=summary
+
+Package: tablator
+Section: science
+Architecture: any
+Depends: libtablator1, ${misc:Depends}
+Description: Universal table translator for astronomy
+ Tablator is a utility for converting tables in astronomy into
+ different formats.  Tablator can read and write tables in fits, ipac
+ table, hdf5, votable, json, json5, csv, and tsv, and can write html.  The
+ emphasis is on speed, so all conversions are done in memory.
+
+
+Package: libtablator-dev
+Section: libdevel
+Architecture: any
+Depends: libtablator1 (= ${binary:Version}), libboost-dev, libjson5-parser-dev, ${misc:Depends}
+Description: Universal table translator for astronomy
+ Tablator is a utility for converting tables in astronomy into
+ different formats.  Tablator can read and write tables in fits, ipac
+ table, hdf5, votable, json, json5, csv, and tsv, and can write html.  The
+ emphasis is on speed, so all conversions are done in memory.
+ .
+ This package contains the files needed for developing applications in C++.
+ 
+Package: libtablator1
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Universal table translator for astronomy
+ Tablator is a utility for converting tables in astronomy into
+ different formats.  Tablator can read and write tables in fits, ipac
+ table, hdf5, votable, json, json5, csv, and tsv, and can write html.  The
+ emphasis is on speed, so all conversions are done in memory.
+ .
+ This package contains the shared library.
