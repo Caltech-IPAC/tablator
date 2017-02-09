@@ -58,7 +58,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
         {
           for (size_t element=0; element<column->array_size; ++element)
             {
-              os << std::setw (*ipac_column) << " ";
+              os << std::setw (*ipac_column) << " " << "|";
               if (column->type == Data_Type::CHAR)
                 { break; }
             }
@@ -67,12 +67,11 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
         {
           for (size_t element=0; element<column->array_size; ++element)
             {
-              os << std::setw (*ipac_column) << unit->second;
+              os << std::setw (*ipac_column) << unit->second << "|";
               if (column->type == Data_Type::CHAR)
                 { break; }
             }
         }
-      os << "|";
     }
   os << "\n|";
 
@@ -85,7 +84,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
         {
           for (size_t element=0; element<column->array_size; ++element)
             {
-              os << std::setw (*ipac_column) << "null";
+              os << std::setw (*ipac_column) << "null" << "|";
               if (column->type == Data_Type::CHAR)
                 { break; }
             }
@@ -94,12 +93,11 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
         {
           for (size_t element=0; element<column->array_size; ++element)
             {
-              os << std::setw (*ipac_column) << null;
+              os << std::setw (*ipac_column) << null << "|";
               if (column->type == Data_Type::CHAR)
                 { break; }
             }
         }
-      os << "|";
     }
   os << "\n";
 
@@ -142,7 +140,8 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
                     {
                       std::stringstream ss_temp;
                       write_type_as_ascii (ss_temp, data_type,
-                                           columns[i].array_size,
+                                           (data_type == Data_Type::CHAR
+                                            ? columns[i].array_size : 1),
                                            data.data () + offset,
                                            output_precision);
                       std::string s(ss_temp.str());

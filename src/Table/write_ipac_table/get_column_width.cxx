@@ -22,13 +22,11 @@ std::vector<size_t> tablator::Table::get_column_width () const
           /// buffer_size = 1 (sign) + 1 (leading digit) + 1 (decimal)
           /// + 1 (exponent sign) + 3 (exponent)
           const size_t buffer_size (7);
-          size_t width
-            (std::max (column->name.size ()
-                       + (column->array_size==1 ? 0 :
-                          1 + std::to_string(column->array_size-1).size()),
-                       output_precision + buffer_size));
-          for (size_t element=0; element<column->array_size; ++element)
-            { widths.push_back(width); }
+          widths.push_back (std::max
+                            (column->name.size ()
+                             + (column->array_size==1 ? 0 :
+                                1 + std::to_string(column->array_size-1).size()),
+                             output_precision + buffer_size));
         }
     }
   return widths;
