@@ -20,23 +20,24 @@ void read_scalar_column (uint8_t *position, CCfits::Column &c, const size_t &row
 }
 
 template <typename T>
-void read_vector_column (fitsfile *fits_file, uint8_t *position, CCfits::Column &c,
+void read_vector_column (fitsfile *fits_file, uint8_t *position,
+                         CCfits::Column &c,
                          const size_t &rows, const size_t &row_size)
 {
   /// Use the C api because the C++ api (Column::readArrays) is
   /// horrendously slow.
   int status (0), anynul (0);
-  std::vector<T> temp_array (rows * c.repeat ());
-  fits_read_col (fits_file, c.type (), c.index (), 1, 1, c.repeat (), NULL,
-                 temp_array.data (), &anynul, &status);
+  std::vector<T> temp_array (c.repeat ());
 
   uint8_t *current = position;
-  for (size_t i=0; i < temp_array.size (); i+=c.repeat ())
+  for (size_t row=0; row < rows; ++row)
     {
       uint8_t *element_start=current;
+      fits_read_col (fits_file, c.type (), c.index (), row + 1, 1, c.repeat (),
+                     NULL, temp_array.data (), &anynul, &status);
       for (size_t offset=0; offset < c.repeat (); ++offset)
         {
-          *reinterpret_cast<T *>(current) = temp_array[i+offset];
+          *reinterpret_cast<T *>(current) = temp_array[offset];
           current += sizeof(T);
         }
       current = element_start + row_size;
