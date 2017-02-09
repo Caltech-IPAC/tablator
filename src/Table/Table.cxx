@@ -24,6 +24,7 @@ tablator::Table::Table (const boost::filesystem::path &input_path,
   // FIXME: This has too many if(){} else {} clauses
   if (format.is_hdf5 ())
     {
+      H5::Exception::dontPrint ();
       read_hdf5 (input_path);
     }
   else if (format.is_fits ())
@@ -55,6 +56,7 @@ tablator::Table::Table (const boost::filesystem::path &input_path,
       bool is_read_successful (false);
       try
         {
+          H5::Exception::dontPrint ();
           read_hdf5 (input_path);
           is_read_successful=true;
         }
