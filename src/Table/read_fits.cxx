@@ -100,7 +100,8 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
   if(!has_null_bitfield_flags)
     {
       append_column(null_bitfield_flags_name, Data_Type::UINT8_LE,
-                    (table->column().size()+7)/8);
+                    (table->column().size()+7)/8,
+                    Field_Properties (null_bitfield_flags_description, {}));
     }
 
   for (size_t column = 0; column < table->column ().size (); ++column)
@@ -140,10 +141,22 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
           append_column (c.name (), Data_Type::INT64_LE, array_size);
           break;
         case CCfits::Tfloat:
-          append_column (c.name (), Data_Type::FLOAT32_LE, array_size);
+          {
+            Field_Properties nan_nulls;
+            nan_nulls.values.null=
+              std::to_string(std::numeric_limits<float>::quiet_NaN());
+            append_column (c.name (), Data_Type::FLOAT32_LE, array_size,
+                           nan_nulls);
+          }
           break;
         case CCfits::Tdouble:
-          append_column (c.name (), Data_Type::FLOAT64_LE, array_size);
+          {
+            Field_Properties nan_nulls;
+            nan_nulls.values.null=
+              std::to_string(std::numeric_limits<double>::quiet_NaN());
+            append_column (c.name (), Data_Type::FLOAT64_LE, array_size,
+                           nan_nulls);
+          }
           break;
         case CCfits::Tstring:
           append_column (c.name (), Data_Type::CHAR, c.width ());
