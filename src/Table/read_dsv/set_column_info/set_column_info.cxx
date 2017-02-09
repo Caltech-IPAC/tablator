@@ -15,7 +15,7 @@ void tablator::Table::set_column_info (std::list<std::vector<std::string> > &dsv
   for (auto &name: *row)
     names.push_back(boost::trim_copy(name));
   
-  append_column("null_bitfield_flags", Data_Type::UINT8_LE,
+  append_column(null_bitfield_flags_name, Data_Type::UINT8_LE,
                 (names.size() + 7) / 8,
                 Field_Properties (null_bitfield_flags_description));
   

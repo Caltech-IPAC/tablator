@@ -37,6 +37,7 @@ public:
   std::vector<Column> columns;
   std::vector<size_t> offsets = { 0 };
 
+  static const std::string null_bitfield_flags_name;
   static const std::string null_bitfield_flags_description;
 
   Table (const std::vector<Column> &Columns,
