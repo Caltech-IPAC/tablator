@@ -6,8 +6,8 @@
 namespace
 {
 template <typename T>
-void read_scalar_column (uint8_t *position, CCfits::Column &c, const size_t &rows,
-                         const size_t &row_size)
+void read_scalar_column (uint8_t *position, CCfits::Column &c,
+                         const size_t &rows, const size_t &row_size)
 {
   std::vector<T> v;
   c.read (v, 1, rows);
