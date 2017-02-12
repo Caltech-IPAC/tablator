@@ -9,62 +9,95 @@
 void tablator::Table::write_ipac_table (std::ostream &os) const
 {
   std::vector<size_t> ipac_column_widths = get_column_width ();
-
   write_ipac_table_header (os);
   int total_record_width = 0;
 
   os << "|";
   os << std::right;
-  for (size_t i = 1; i < columns.size (); ++i)
+  auto ipac_column=std::next(ipac_column_widths.begin());
+  for (auto column=std::next(columns.begin()); column!=columns.end();
+       ++column, ++ipac_column)
     {
-      total_record_width += (ipac_column_widths[i] + 1);
-      os << std::setw (ipac_column_widths[i])
-         << columns[i].name << "|";
-    }
-  os << "\n|";
-
-  for (size_t i = 1; i < columns.size (); ++i)
-    {
-      if (columns[i].type != Data_Type::CHAR && columns[i].array_size != 1)
-        { throw std::runtime_error ("Column '" + columns[i].name +
-                                    "' is an array which is unsupported in "
-                                    "IPAC Tables"); }
-      os << std::setw (ipac_column_widths[i])
-         << to_ipac_string (columns[i].type)
-         << "|";
-    }
-
-  os << "\n|";
-
-  for (size_t i = 1; i < columns.size (); ++i)
-    {
-      os << std::setw (ipac_column_widths[i]);
-      auto unit = columns[i].field_properties.attributes.find ("unit");
-      if (unit == columns[i].field_properties.attributes.end ())
+      if (column->type == Data_Type::CHAR || column->array_size==1)
         {
-          os << " ";
+          total_record_width += (*ipac_column + 1);
+          os << std::setw (*ipac_column) << column->name << "|";
         }
       else
         {
-          os << unit->second;
+          for (size_t element=0; element<column->array_size; ++element)
+            {
+              total_record_width += (*ipac_column + 1);
+              os << std::setw (*ipac_column)
+                 << (column->name + "_" + std::to_string(element)) << "|";
+            }
         }
-      os << "|";
     }
   os << "\n|";
 
-  for (size_t i = 1; i < columns.size (); ++i)
+  ipac_column=std::next(ipac_column_widths.begin());
+  for (auto column=std::next(columns.begin()); column!=columns.end();
+       ++column, ++ipac_column)
     {
-      os << std::setw (ipac_column_widths[i]);
-      auto null = columns[i].field_properties.values.null;
+      for (size_t element=0; element<column->array_size; ++element)
+        {
+          os << std::setw (*ipac_column) << to_ipac_string (column->type) << "|";
+          if (column->type == Data_Type::CHAR)
+            { break; }
+        }
+    }
+
+  os << "\n|";
+
+  ipac_column=std::next(ipac_column_widths.begin());
+  for (auto column=std::next(columns.begin()); column!=columns.end();
+       ++column, ++ipac_column)
+    {
+      auto unit = column->field_properties.attributes.find ("unit");
+      if (unit == column->field_properties.attributes.end ())
+        {
+          for (size_t element=0; element<column->array_size; ++element)
+            {
+              os << std::setw (*ipac_column) << " " << "|";
+              if (column->type == Data_Type::CHAR)
+                { break; }
+            }
+        }
+      else
+        {
+          for (size_t element=0; element<column->array_size; ++element)
+            {
+              os << std::setw (*ipac_column) << unit->second << "|";
+              if (column->type == Data_Type::CHAR)
+                { break; }
+            }
+        }
+    }
+  os << "\n|";
+
+  ipac_column=std::next(ipac_column_widths.begin());
+  for (auto column=std::next(columns.begin()); column!=columns.end();
+       ++column, ++ipac_column)
+    {
+      auto null = column->field_properties.values.null;
       if (null.empty ())
         {
-          os << "null";
+          for (size_t element=0; element<column->array_size; ++element)
+            {
+              os << std::setw (*ipac_column) << "null" << "|";
+              if (column->type == Data_Type::CHAR)
+                { break; }
+            }
         }
       else
         {
-          os << null;
+          for (size_t element=0; element<column->array_size; ++element)
+            {
+              os << std::setw (*ipac_column) << null << "|";
+              if (column->type == Data_Type::CHAR)
+                { break; }
+            }
         }
-      os << "|";
     }
   os << "\n";
 
@@ -75,46 +108,55 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
       /// Skip the null bitfield flag
       for (size_t i = 1; i < columns.size (); ++i)
         {
-          ss << " " << std::setw (ipac_column_widths[i]);
-          size_t offset = offsets[i] + row_offset;
-          if (is_null (row_offset, i))
+          for (size_t element=0; element<columns[i].array_size; ++element)
             {
-              auto null_value = columns[i].field_properties.values.null;
-              if (null_value.empty ())
-                ss << "null";
-              else
-                ss << null_value;
-            }
-          else
-            {
+              ss << " " << std::setw (ipac_column_widths[i]);
               auto data_type = columns[i].type;
-              /// Silently convert unsigned 64 bit ints to signed 64
-              /// bit ints, since ipac tables do not support unsigned
-              /// 64 bit ints.
-              if (data_type == Data_Type::UINT64_LE)
-                data_type = Data_Type::INT64_LE;
-              /// Do some gymnastics because we want to write a byte
-              /// as an int
-              if (data_type == Data_Type::UINT8_LE)
+              size_t offset = element*data_size(data_type) + offsets[i]
+                + row_offset;
+              if (is_null (row_offset, i))
                 {
-                  ss << static_cast<const uint16_t>(
-                            static_cast<uint8_t>(*(data.data () + offset)));
+                  auto null_value = columns[i].field_properties.values.null;
+                  if (null_value.empty ())
+                    ss << "null";
+                  else
+                    ss << null_value;
                 }
               else
                 {
-                  std::stringstream ss_temp;
-                  write_type_as_ascii (ss_temp, data_type, columns[i].array_size,
-                                       data.data () + offset, output_precision);
-                  std::string s(ss_temp.str());
-                  /// Turn newlines into spaces
-                  auto newline_location (s.find('\n'));
-                  while (newline_location != std::string::npos)
+                  /// Silently convert unsigned 64 bit ints to signed 64
+                  /// bit ints, since ipac tables do not support unsigned
+                  /// 64 bit ints.
+                  if (data_type == Data_Type::UINT64_LE)
+                    { data_type = Data_Type::INT64_LE; }
+                  /// Do some gymnastics because we want to write a byte
+                  /// as an int
+                  if (data_type == Data_Type::UINT8_LE)
                     {
-                      s[newline_location]=' ';
-                      newline_location = s.find('\n',newline_location+1);
+                      ss << static_cast<const uint16_t>
+                        (static_cast<uint8_t>(*(data.data () + offset)));
                     }
-                  ss << s;
+                  else
+                    {
+                      std::stringstream ss_temp;
+                      write_type_as_ascii (ss_temp, data_type,
+                                           (data_type == Data_Type::CHAR
+                                            ? columns[i].array_size : 1),
+                                           data.data () + offset,
+                                           output_precision);
+                      std::string s(ss_temp.str());
+                      /// Turn newlines into spaces
+                      auto newline_location (s.find('\n'));
+                      while (newline_location != std::string::npos)
+                        {
+                          s[newline_location]=' ';
+                          newline_location = s.find('\n',newline_location+1);
+                        }
+                      ss << s;
+                    }
                 }
+              if (data_type == Data_Type::CHAR)
+                { break; }
             }
         }
       ss << " \n";

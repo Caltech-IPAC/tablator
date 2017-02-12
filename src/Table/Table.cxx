@@ -1,6 +1,8 @@
 #include "../Table.hxx"
 #include "../data_size.hxx"
 
+const std::string tablator::Table::null_bitfield_flags_name
+    = "null_bitfield_flags";
 const std::string tablator::Table::null_bitfield_flags_description
     = "Packed bit array indicating whether an entry is null";
 
@@ -8,7 +10,7 @@ tablator::Table::Table (const std::vector<Column> &Columns,
                         const std::map<std::string, std::string> &property_map)
 {
   const size_t null_flags_size = (Columns.size () + 7) / 8;
-  append_column ("null_bitfield_flags", Data_Type::UINT8_LE, null_flags_size,
+  append_column (null_bitfield_flags_name, Data_Type::UINT8_LE, null_flags_size,
                  Field_Properties (null_bitfield_flags_description));
 
   for (auto &c : Columns)
@@ -24,6 +26,7 @@ tablator::Table::Table (const boost::filesystem::path &input_path,
   // FIXME: This has too many if(){} else {} clauses
   if (format.is_hdf5 ())
     {
+      H5::Exception::dontPrint ();
       read_hdf5 (input_path);
     }
   else if (format.is_fits ())
@@ -55,6 +58,7 @@ tablator::Table::Table (const boost::filesystem::path &input_path,
       bool is_read_successful (false);
       try
         {
+          H5::Exception::dontPrint ();
           read_hdf5 (input_path);
           is_read_successful=true;
         }

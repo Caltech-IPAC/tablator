@@ -33,5 +33,5 @@ void tablator::Table::write_html (std::ostream &os) const
   size_t tabledata_offset (s.find (tabledata_string));
   os << s.substr (0, tabledata_offset - 4);
   write_tabledata (os, false);
-  os << s.substr (tabledata_offset + 5);
+  os << s.substr (tabledata_offset + tabledata_string.size() + 5);
 }

@@ -4,7 +4,7 @@
 #include <boost/program_options.hpp>
 #include <json5_parser.h>
 
-#include "Table.hxx"
+#include "../Table.hxx"
 
 std::string usage (const boost::program_options::options_description
                    &visible_options)
@@ -97,7 +97,6 @@ int main (int argc, char *argv[])
           return 1;
         }
 
-      H5::Exception::dontPrint ();
       tablator::Table table (input_path, input_format);
 
       if (stream_intermediate)
