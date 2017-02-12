@@ -107,7 +107,7 @@ size_t tablator::Table::read_ipac_header (
         boost::algorithm::trim (column);
 
       if (column_line == 0)
-        columns[0][0] = "null_bitfield_flags";
+        columns[0][0] = null_bitfield_flags_name;
 
       if (column_line == 1)
         {
