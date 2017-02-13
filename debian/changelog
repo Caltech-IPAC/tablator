@@ -6,7 +6,7 @@ tablator (1.0.1+dfsg-1) unstable; urgency=low
   * Disable printing some HDF5 exceptions
   * Fix HTML output
 
- -- Walter Landry <wlandry@caltech.edu>  Sat, 05 Nov 2016 21:32:08 -0700
+ -- Walter Landry <wlandry@caltech.edu>  Mon, 13 Feb 2017 12:00:00 -0700
 
 tablator (1.0.0+dfsg-1) unstable; urgency=low
 
