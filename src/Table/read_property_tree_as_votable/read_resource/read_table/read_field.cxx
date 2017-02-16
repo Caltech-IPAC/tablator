@@ -73,7 +73,7 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
             }
           else
             {
-              result.properties.attributes.insert (std::make_pair (
+              result.field_properties.attributes.insert (std::make_pair (
                   attribute.first, attribute.second.get_value<std::string>()));
             }
         }
@@ -82,7 +82,8 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
 
   if (child != end && child->first == "DESCRIPTION")
     {
-      result.properties.description = child->second.get_value<std::string>();
+      result.field_properties.description
+        = child->second.get_value<std::string>();
       ++child;
     }
   if (child != end && child->first == "VALUES")
@@ -98,7 +99,7 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
             {
               for (auto &attribute : link_child.second)
                 {
-                  result.properties.links.emplace_back (
+                  result.field_properties.links.emplace_back (
                       attribute.first,
                       attribute.second.get_value<std::string>());
                 }
