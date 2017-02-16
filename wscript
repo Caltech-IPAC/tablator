@@ -52,7 +52,7 @@ def build(bld):
              'src/Table/write_html.cxx',
              'src/Table/write_tabledata.cxx',
              'src/Table/generate_property_tree/generate_property_tree.cxx',
-             'src/Table/generate_property_tree/Field_Properties_to_property_tree.cxx',
+             'src/Table/generate_property_tree/add_to_property_tree.cxx',
              'src/Table/write_ipac_table/write_ipac_table.cxx',
              'src/Table/write_ipac_table/write_ipac_table_header.cxx',
              'src/Table/write_ipac_table/to_ipac_string.cxx',
