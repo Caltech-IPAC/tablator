@@ -1,14 +1,14 @@
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost json5_parser')
+    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost json5_parser')
+    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser')
     conf.check_boost(lib='filesystem system program_options')
 
 def build(bld):
     default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
     # default_flags=['-Wall', '-Wextra', '-g']
-    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
+    use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser']
 
     sources=['src/fits_keyword_mapping.cxx',
