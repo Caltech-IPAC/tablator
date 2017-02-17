@@ -1,7 +1,12 @@
-#include "../../../../Table.hxx"
-#include "VOTable_Field.hxx"
+#include "../../../../../Table.hxx"
+#include "../VOTable_Field.hxx"
 
 #include <boost/lexical_cast.hpp>
+
+namespace tablator
+{
+Values read_values (const boost::property_tree::ptree &values);
+}
 
 namespace
 {
@@ -88,7 +93,7 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
     }
   if (child != end && child->first == "VALUES")
     {
-      // FIXME: read_values(*(child->second));
+      result.field_properties.values=read_values(child->second);
       ++child;
     }
   if (child != end && child->first == "LINK")
