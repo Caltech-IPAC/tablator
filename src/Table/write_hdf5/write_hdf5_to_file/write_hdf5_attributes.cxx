@@ -6,7 +6,6 @@
 
 /// This gets a bit complicated because there are variable length
 /// arrays inside variable length arrays.
-// FIXME: This does not handle fields_properties
 
 void tablator::Table::write_hdf5_attributes (H5::DataSet &table) const
 {
@@ -26,6 +25,8 @@ void tablator::Table::write_hdf5_attributes (H5::DataSet &table) const
       "attributes", HOFFSET (HDF5_Property, attributes), hdf5_attributes_type);
   H5::VarLenType hdf5_properties_type (&hdf5_property_type);
 
+  // FIXME: This uses .c_str() of std::string, which is not guaranteed
+  // to hang around.
   std::vector<std::vector<const char *> > strings;
   std::vector<HDF5_Property> hdf5_properties;
 
@@ -36,16 +37,16 @@ void tablator::Table::write_hdf5_attributes (H5::DataSet &table) const
       if (!p.value.empty () || !p.attributes.empty ())
         {
           strings.emplace_back ();
-          std::vector<const char *> &s = *strings.rbegin ();
+          std::vector<const char *> &sub_vector = *strings.rbegin ();
           for (auto &a : p.attributes)
             {
-              s.push_back (a.first.c_str ());
-              s.push_back (a.second.c_str ());
+              sub_vector.push_back (a.first.c_str ());
+              sub_vector.push_back (a.second.c_str ());
             }
 
           hvl_t atts;
-          atts.len = s.size () / 2;
-          atts.p = s.data ();
+          atts.len = sub_vector.size () / 2;
+          atts.p = sub_vector.data ();
           hdf5_properties.emplace_back (property.first.c_str (),
                                         p.value.c_str (), atts);
         }
