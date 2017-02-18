@@ -36,3 +36,11 @@ else
     echo "FAIL: Explicit format specified"
 fi
 rm -f temp.tbl temp.h5
+
+build/tablator --output-format=votable test/recursive_param.xml - | diff - recursive_param.xml
+
+if [ $? -eq 0 ]; then
+    echo "PASS: recursive param"
+else
+    echo "FAIL: recursive param"
+fi
