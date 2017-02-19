@@ -58,3 +58,4 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: CSV implicit float"
 fi
+
