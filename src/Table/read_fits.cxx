@@ -172,6 +172,11 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
   /// than 2^32 rows
   data.resize (table->rows () * row_size ());
 
+  /// Exit early if there is no data in the table.  Otherwise CCfits
+  /// dies in read_column() :(
+  if (data.empty ())
+    { return; }
+  
   fitsfile *fits_pointer = fits.fitsPointer ();
   const size_t column_data_offset (has_null_bitfield_flags ? 0 : 1);
   for (size_t column = 0; column < table->column ().size (); ++column)
