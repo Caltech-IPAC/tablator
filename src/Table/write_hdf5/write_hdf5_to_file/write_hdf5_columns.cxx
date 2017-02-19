@@ -1,6 +1,7 @@
 #include "../../../Column.hxx"
 #include "../../HDF5_Property.hxx"
 #include "../../HDF5_Attribute.hxx"
+#include "../../HDF5_Column.hxx"
 
 #include <vector>
 #include <deque>
@@ -11,58 +12,11 @@
 
 namespace tablator
 {
-class HDF5_Option
-{
-public:
-  const char *name, *value;
-  HDF5_Option (const char *Name, const char *Value) :
-    name (Name), value (Value)
-  {
-  }
-};
-
-class HDF5_Min_Max
-{
-public:
-  const char *value;
-  int8_t inclusive;
-};
-  
-class HDF5_Values
-{
-public:
-  HDF5_Min_Max min, max;
-  const char *ID, *null, *ref;
-  hvl_t options;
-};
-
-class HDF5_Field_Properties
-{
-public:
-  const char *description;
-  hvl_t attributes, links;
-  HDF5_Values values;
-};
-  
-class HDF5_Column
-{
-public:
-  const char *name, *type;
-  uint64_t array_size;
-  HDF5_Field_Properties field_properties;
-  HDF5_Column (const char *Name, const char *Type, const uint64_t &Array_size,
-               const HDF5_Field_Properties &Field_properties):
-    name (Name), type (Type), array_size (Array_size),
-    field_properties (Field_properties)
-  {
-  }
-};
-
 hvl_t make_option_array (const std::vector<Option> &options,
-                         std::deque<std::vector<HDF5_Option> > &option_arrays)
+                         std::deque<std::vector<HDF5_Attribute> > &option_arrays)
 {
   option_arrays.emplace_back ();
-  std::vector<HDF5_Option> &option_vector = *option_arrays.rbegin ();
+  std::vector<HDF5_Attribute> &option_vector = *option_arrays.rbegin ();
   for (auto &option: options)
     { option_vector.emplace_back (option.name.c_str (), option.value.c_str ()); }
   hvl_t hdf5_options = {option_vector.size (), option_vector.data ()};
@@ -75,9 +29,10 @@ void write_hdf5_columns (const std::vector<Column> &columns,
 
   H5::StrType hdf5_string (0, H5T_VARIABLE);
 
-  H5::CompType hdf5_option (sizeof(HDF5_Option));
-  hdf5_option.insertMember ("name", HOFFSET (HDF5_Option, name), hdf5_string);
-  hdf5_option.insertMember ("value", HOFFSET (HDF5_Option, value), hdf5_string);
+  H5::CompType hdf5_option (sizeof(HDF5_Attribute));
+  hdf5_option.insertMember ("name", HOFFSET (HDF5_Attribute, name), hdf5_string);
+  hdf5_option.insertMember ("value", HOFFSET (HDF5_Attribute, value),
+                            hdf5_string);
 
   H5::VarLenType hdf5_option_array (&hdf5_option);
 
@@ -133,7 +88,7 @@ void write_hdf5_columns (const std::vector<Column> &columns,
   std::vector<HDF5_Column> hdf5_columns;
   std::deque<std::string> type_strings;  /// Use a deque to avoid
                                          /// invalidating iterators
-  std::deque<std::vector<HDF5_Option> > option_arrays;
+  std::deque<std::vector<HDF5_Attribute> > option_arrays;
   for (auto &field : columns)
     {
       const Field_Properties &field_properties (field.field_properties);
@@ -164,7 +119,7 @@ void write_hdf5_columns (const std::vector<Column> &columns,
         hdf5_max = {values.max.value.c_str (), values.max.inclusive};
 
       option_arrays.emplace_back ();
-      std::vector<HDF5_Option> &option_vector = *option_arrays.rbegin ();
+      std::vector<HDF5_Attribute> &option_vector = *option_arrays.rbegin ();
       for (auto &option: values.options)
         {
           option_vector.emplace_back (option.name.c_str (),

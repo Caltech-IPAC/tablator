@@ -2,6 +2,8 @@
 
 #include <H5Cpp.h>
 
+namespace tablator
+{
 class HDF5_Property
 {
 public:
@@ -14,3 +16,4 @@ public:
   {
   }
 };
+}
