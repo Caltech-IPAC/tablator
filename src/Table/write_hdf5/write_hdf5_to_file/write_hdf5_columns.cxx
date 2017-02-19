@@ -15,9 +15,8 @@ class HDF5_Option
 {
 public:
   const char *name, *value;
-  hvl_t options;
-  HDF5_Option (const char *Name, const char *Value, const hvl_t &Options) :
-    name (Name), value (Value), options (Options)
+  HDF5_Option (const char *Name, const char *Value) :
+    name (Name), value (Value)
   {
   }
 };
@@ -65,12 +64,7 @@ hvl_t make_option_array (const std::vector<Option> &options,
   option_arrays.emplace_back ();
   std::vector<HDF5_Option> &option_vector = *option_arrays.rbegin ();
   for (auto &option: options)
-    {
-      option_vector.emplace_back (option.name.c_str (),
-                                  option.value.c_str (),
-                                  make_option_array(option.options,
-                                                    option_arrays));
-    }
+    { option_vector.emplace_back (option.name.c_str (), option.value.c_str ()); }
   hvl_t hdf5_options = {option_vector.size (), option_vector.data ()};
   return hdf5_options;
 }
@@ -82,14 +76,10 @@ void write_hdf5_columns (const std::vector<Column> &columns,
   H5::StrType hdf5_string (0, H5T_VARIABLE);
 
   H5::CompType hdf5_option (sizeof(HDF5_Option));
-  hdf5_option.insertMember ("name", HOFFSET (HDF5_Option, name),
-                            hdf5_string);
-  hdf5_option.insertMember ("value", HOFFSET (HDF5_Option, value),
-                            hdf5_string);
-  /// Recursively include an array of Option's in Option
+  hdf5_option.insertMember ("name", HOFFSET (HDF5_Option, name), hdf5_string);
+  hdf5_option.insertMember ("value", HOFFSET (HDF5_Option, value), hdf5_string);
+
   H5::VarLenType hdf5_option_array (&hdf5_option);
-  hdf5_option.insertMember ("options", HOFFSET (HDF5_Option, options),
-                            hdf5_option_array);
 
   H5::CompType hdf5_min_max (sizeof(HDF5_Min_Max));
   hdf5_min_max.insertMember ("value", HOFFSET (HDF5_Min_Max, value),
@@ -98,23 +88,17 @@ void write_hdf5_columns (const std::vector<Column> &columns,
                              H5::PredType::STD_I8LE);
 
   H5::CompType hdf5_values (sizeof(HDF5_Values));
-  hdf5_values.insertMember ("min", HOFFSET (HDF5_Values, min),
-                            hdf5_min_max);
-  hdf5_values.insertMember ("max", HOFFSET (HDF5_Values, max),
-                            hdf5_min_max);
-  hdf5_values.insertMember ("ID", HOFFSET (HDF5_Values, ID),
-                            hdf5_string);
-  hdf5_values.insertMember ("null", HOFFSET (HDF5_Values, null),
-                            hdf5_string);
-  hdf5_values.insertMember ("ref", HOFFSET (HDF5_Values, ref),
-                            hdf5_string);
+  hdf5_values.insertMember ("min", HOFFSET (HDF5_Values, min), hdf5_min_max);
+  hdf5_values.insertMember ("max", HOFFSET (HDF5_Values, max), hdf5_min_max);
+  hdf5_values.insertMember ("ID", HOFFSET (HDF5_Values, ID), hdf5_string);
+  hdf5_values.insertMember ("null", HOFFSET (HDF5_Values, null), hdf5_string);
+  hdf5_values.insertMember ("ref", HOFFSET (HDF5_Values, ref), hdf5_string);
   hdf5_values.insertMember ("options", HOFFSET (HDF5_Values, options),
                             hdf5_option_array);
 
   H5::CompType hdf5_attribute (2 * hdf5_string.getSize ());
   hdf5_attribute.insertMember ("name", 0, hdf5_string);
-  hdf5_attribute.insertMember ("value", hdf5_string.getSize (),
-                               hdf5_string);
+  hdf5_attribute.insertMember ("value", hdf5_string.getSize (), hdf5_string);
   
   H5::VarLenType hdf5_attribute_array (&hdf5_attribute);
 
@@ -135,10 +119,8 @@ void write_hdf5_columns (const std::vector<Column> &columns,
                                       hdf5_values);
 
   H5::CompType hdf5_column (sizeof(HDF5_Column));
-  hdf5_column.insertMember ("name", HOFFSET (HDF5_Column, name),
-                            hdf5_string);
-  hdf5_column.insertMember ("type", HOFFSET (HDF5_Column, type),
-                            hdf5_string);
+  hdf5_column.insertMember ("name", HOFFSET (HDF5_Column, name), hdf5_string);
+  hdf5_column.insertMember ("type", HOFFSET (HDF5_Column, type), hdf5_string);
   hdf5_column.insertMember ("array_size", HOFFSET (HDF5_Column, array_size),
                             H5::PredType::STD_U64LE);
   hdf5_column.insertMember ("field_properties",
@@ -181,7 +163,15 @@ void write_hdf5_columns (const std::vector<Column> &columns,
                                values.min.inclusive}, 
         hdf5_max = {values.max.value.c_str (), values.max.inclusive};
 
-      hvl_t hdf5_options (make_option_array (values.options, option_arrays));
+      option_arrays.emplace_back ();
+      std::vector<HDF5_Option> &option_vector = *option_arrays.rbegin ();
+      for (auto &option: values.options)
+        {
+          option_vector.emplace_back (option.name.c_str (),
+                                      option.value.c_str ());
+        }
+      hvl_t hdf5_options = {option_vector.size (), option_vector.data ()};
+
       HDF5_Values hdf5_values = {hdf5_min, hdf5_max, values.ID.c_str (),
                                  values.null.c_str (), values.ref.c_str (),
                                  hdf5_options};
