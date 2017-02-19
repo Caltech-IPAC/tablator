@@ -22,6 +22,8 @@ def build(bld):
              'src/Table/read_fits.cxx',
              'src/Table/read_hdf5/read_hdf5.cxx',
              'src/Table/read_hdf5/read_metadata.cxx',
+             'src/Table/read_hdf5/read_column_metadata/read_column_metadata.cxx',
+             'src/Table/read_hdf5/read_column_metadata/is_columns_valid.cxx',
              'src/Table/read_json5.cxx',
              'src/Table/read_ipac_table/read_ipac_table.cxx',
              'src/Table/read_ipac_table/read_ipac_header.cxx',

@@ -7,6 +7,9 @@ namespace tablator
 {
 std::vector<std::pair<std::string, Property> >
 read_metadata (const H5::DataSet &dataset);
+
+std::vector<Column> read_column_metadata (const H5::DataSet &dataset,
+                                          const std::string &section);
 }
 
 void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
@@ -24,7 +27,7 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
           description.read (description.getDataType (), comments[0]);
         }
     }
-
+  params = read_column_metadata (dataset, "PARAM");
   properties=read_metadata (dataset);
   
   // FIXME: This does not handle fields_properties

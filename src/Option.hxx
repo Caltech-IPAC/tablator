@@ -12,6 +12,10 @@ public:
   std::string name, value;
   std::vector<Option> options;
 
+  Option (const std::string &Name, const std::string &Value)
+    : name (Name), value (Value)
+  {
+  }
   Option (const std::initializer_list<std::string> &list)
     {
       if(list.size()!=2)
