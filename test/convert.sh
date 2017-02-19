@@ -51,3 +51,10 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: recursive param binary2"
 fi
+
+./build/tablator --output-format=csv test/al.csv - | diff -w - test/al.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: CSV implicit float"
+else
+    echo "FAIL: CSV implicit float"
+fi
