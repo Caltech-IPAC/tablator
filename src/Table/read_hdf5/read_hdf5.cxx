@@ -28,18 +28,27 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
         }
     }
   params = read_column_metadata (dataset, "PARAM");
-  properties=read_metadata (dataset);
-  
+  properties = read_metadata (dataset);
+
+  auto column_metadata (read_column_metadata (dataset, "FIELD"));
   // FIXME: This does not handle fields_properties
   // FIXME: This assumes that the first column is null_bitfield_flags
   auto compound = dataset.getCompType ();
+  if (column_metadata.size () != static_cast<size_t> (compound.getNmembers ()))
+    {
+      throw std::runtime_error
+        ("Inconsistent number of fields.  The 'FIELD' metadata lists "
+         + std::to_string (column_metadata.size ())
+         + " but the dataset has " + std::to_string (compound.getNmembers ()));
+    }
   for (int i = 0; i < compound.getNmembers (); ++i)
     {
       H5::DataType datatype (compound.getMemberDataType (i));
       std::string name (compound.getMemberName (i));
       if (datatype.getClass () == H5T_STRING)
         {
-          append_column (name, Data_Type::CHAR, datatype.getSize ());
+          append_column (name, Data_Type::CHAR, datatype.getSize (),
+                         column_metadata[i].field_properties);
         }
       else if (datatype.getClass () == H5T_ARRAY)
         {
@@ -50,11 +59,13 @@ void tablator::Table::read_hdf5 (const boost::filesystem::path &path)
                                         "reading a dataset.  Expected 1, "
                                         "but got:" + std::to_string (ndims)); }
           array_type.getArrayDims (&ndims);
-          append_column (name, H5_to_Data_Type (datatype), ndims);
+          append_column (name, H5_to_Data_Type (datatype), ndims,
+                         column_metadata[i].field_properties);
         }
       else
         {
-          append_column (name, H5_to_Data_Type (datatype));
+          append_column (name, H5_to_Data_Type (datatype), 1,
+                         column_metadata[i].field_properties);
         }
     }
   data.resize (row_size () * dataset.getSpace ().getSimpleExtentNpoints ());
