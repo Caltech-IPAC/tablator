@@ -37,10 +37,17 @@ else
 fi
 rm -f temp.tbl temp.h5
 
-build/tablator --output-format=votable test/recursive_param.xml - | diff - recursive_param.xml
+build/tablator --output-format=votable test/recursive_param.xml - | diff - test/recursive_param.xml
 
 if [ $? -eq 0 ]; then
-    echo "PASS: recursive param"
+    echo "PASS: recursive param tabledata"
 else
-    echo "FAIL: recursive param"
+    echo "FAIL: recursive param tabledata"
+fi
+
+build/tablator --output-format=votable test/recursive_param_binary2.xml  - | diff - test/recursive_param.xml
+if [ $? -eq 0 ]; then
+    echo "PASS: recursive param binary2"
+else
+    echo "FAIL: recursive param binary2"
 fi

@@ -36,8 +36,10 @@
         </VALUES>
       </FIELD>
       <DATA>
-        <TABLEDATA>
-        </TABLEDATA>
+        <BINARY2>
+          <STREAM encoding='base64'>
+          </STREAM>
+        </BINARY2>
       </DATA>
     </TABLE>
   </RESOURCE>
