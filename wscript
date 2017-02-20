@@ -1,14 +1,14 @@
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost json5_parser')
+    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx11 hdf5_cxx cfitsio CCfits boost json5_parser')
+    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser')
     conf.check_boost(lib='filesystem system program_options')
 
 def build(bld):
     default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
     # default_flags=['-Wall', '-Wextra', '-g']
-    use_packages=['cxx11', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
+    use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser']
 
     sources=['src/fits_keyword_mapping.cxx',
@@ -20,7 +20,10 @@ def build(bld):
              'src/Table/flatten_properties.cxx',
              'src/Table/insert_ascii_in_row.cxx',
              'src/Table/read_fits.cxx',
-             'src/Table/read_hdf5.cxx',
+             'src/Table/read_hdf5/read_hdf5.cxx',
+             'src/Table/read_hdf5/read_metadata.cxx',
+             'src/Table/read_hdf5/read_column_metadata/read_column_metadata.cxx',
+             'src/Table/read_hdf5/read_column_metadata/is_columns_valid.cxx',
              'src/Table/read_json5.cxx',
              'src/Table/read_ipac_table/read_ipac_table.cxx',
              'src/Table/read_ipac_table/read_ipac_header.cxx',
@@ -31,7 +34,8 @@ def build(bld):
              'src/Table/read_property_tree_as_votable/read_node_and_attributes.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_resource.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_table.cxx',
-             'src/Table/read_property_tree_as_votable/read_resource/read_table/read_field.cxx',
+             'src/Table/read_property_tree_as_votable/read_resource/read_table/read_field/read_field.cxx',
+             'src/Table/read_property_tree_as_votable/read_resource/read_table/read_field/read_values.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_data.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_tabledata/read_tabledata.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_data/read_tabledata/count_elements.cxx',
@@ -52,7 +56,7 @@ def build(bld):
              'src/Table/write_html.cxx',
              'src/Table/write_tabledata.cxx',
              'src/Table/generate_property_tree/generate_property_tree.cxx',
-             'src/Table/generate_property_tree/Field_Properties_to_property_tree.cxx',
+             'src/Table/generate_property_tree/add_to_property_tree.cxx',
              'src/Table/write_ipac_table/write_ipac_table.cxx',
              'src/Table/write_ipac_table/write_ipac_table_header.cxx',
              'src/Table/write_ipac_table/to_ipac_string.cxx',
@@ -60,6 +64,7 @@ def build(bld):
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_to_file.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_attributes.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_columns.cxx',
              'src/Table/write_type_as_ascii.cxx']
 
     bld.shlib(source=sources,
@@ -68,7 +73,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='1.0.0'
+              vnum='2.0.0'
               )
 
     bld.stlib(source=sources,

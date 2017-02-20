@@ -46,5 +46,15 @@ public:
       : description (Description), attributes (Attributes)
   {
   }
+  
+  Field_Properties
+  (const std::string &Description,
+   const std::map<std::string, std::string> &Attributes,
+   const Values &v,
+   const std::vector<std::pair<std::string, std::string> > &Links)
+    : description (Description), attributes (Attributes), values (v),
+      links (Links)
+  {
+  }
 };
 }

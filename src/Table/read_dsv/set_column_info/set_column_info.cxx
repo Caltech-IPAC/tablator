@@ -13,7 +13,7 @@ void tablator::Table::set_column_info (std::list<std::vector<std::string> > &dsv
   auto row (dsv.begin());
   std::vector<std::string> names;
   for (auto &name: *row)
-    names.push_back(boost::trim_copy(name));
+    { names.push_back(boost::trim_copy(name)); }
   
   append_column(null_bitfield_flags_name, Data_Type::UINT8_LE,
                 (names.size() + 7) / 8,
@@ -41,7 +41,7 @@ void tablator::Table::set_column_info (std::list<std::vector<std::string> > &dsv
         {
           std::string &element ((*row)[elem]);
           boost::algorithm::trim (element);
-          types[elem]=get_best_data_type(types[elem], element);
+          types[elem] = get_best_data_type(types[elem], element);
           sizes[elem] = std::max(sizes[elem], element.size());
         }
     }

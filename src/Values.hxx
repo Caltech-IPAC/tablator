@@ -12,6 +12,13 @@ public:
   std::string ID, null, ref;
   std::vector<Option> options;
 
+  Values () = default;
+  Values (const Min_Max &Min, const Min_Max &Max, const std::string &id,
+          const std::string &Null, const std::string &Ref,
+          const std::vector<Option> &Options)
+    : min (Min), max (Max), ID (id), null (Null), ref (Ref), options (Options)
+  {
+  }
   bool empty () const { return empty_except_null () && null.empty (); }
   bool empty_except_null () const
   {

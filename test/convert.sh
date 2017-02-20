@@ -36,3 +36,26 @@ else
     echo "FAIL: Explicit format specified"
 fi
 rm -f temp.tbl temp.h5
+
+build/tablator --output-format=votable test/recursive_param.xml - | diff - test/recursive_param.xml
+
+if [ $? -eq 0 ]; then
+    echo "PASS: recursive param tabledata"
+else
+    echo "FAIL: recursive param tabledata"
+fi
+
+build/tablator --output-format=votable test/recursive_param_binary2.xml  - | diff - test/recursive_param.xml
+if [ $? -eq 0 ]; then
+    echo "PASS: recursive param binary2"
+else
+    echo "FAIL: recursive param binary2"
+fi
+
+./build/tablator --output-format=csv test/al.csv - | diff -w - test/al.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: CSV implicit float"
+else
+    echo "FAIL: CSV implicit float"
+fi
+

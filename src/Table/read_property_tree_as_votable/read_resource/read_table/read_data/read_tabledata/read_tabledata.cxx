@@ -70,7 +70,8 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
 
   for (std::size_t c = 0; c < fields.size (); ++c)
     { append_column (fields.at (c).name, fields[c].type,
-                     column_array_sizes[c]); }
+                     column_array_sizes[c],
+                     fields.at (c).field_properties); }
 
   Row row_string (row_size ());
   for (size_t current_row = 0; current_row < rows.size (); ++current_row)

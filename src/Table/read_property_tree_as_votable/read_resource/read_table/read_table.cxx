@@ -31,8 +31,7 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
         }
       else if (child->first == "PARAM")
         {
-          /// PARAM is just metadata and not actually used anywhere
-          // read_param (*(child->second))
+          params.emplace_back (read_field (child->second));
         }
       else if (child->first == "GROUP")
         {
