@@ -26,9 +26,11 @@ Data_Type get_best_data_type (const Data_Type &current_type,
         case Data_Type::UINT8_LE:
           try
             {
-              int result = std::stoi (element, nullptr, 0);
-              if (!(result > std::numeric_limits<uint8_t>::max ()
-                    || result < std::numeric_limits<uint8_t>::lowest ()))
+              size_t number_of_chars_processed;
+              int result = std::stoi (element, &number_of_chars_processed, 0);
+              if (number_of_chars_processed == element.size ()
+                  && !(result > std::numeric_limits<uint8_t>::max ()
+                       || result < std::numeric_limits<uint8_t>::lowest ()))
                 break;
             }
           catch(std::exception &)

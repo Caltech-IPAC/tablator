@@ -31,10 +31,10 @@ void Option_to_xml (boost::property_tree::ptree &tree,
 
 namespace tablator
 {
-void Field_Properties_to_property_tree (boost::property_tree::ptree &tree,
-                                        const Column &column)
+void add_to_property_tree (const Column &column, const std::string &tree_name,
+                           boost::property_tree::ptree &tree)
 {
-  boost::property_tree::ptree &field = tree.add ("FIELD", "");
+  boost::property_tree::ptree &field = tree.add (tree_name, "");
   field.add ("<xmlattr>.name", column.name);
   std::string datatype = to_xml_string (column);
   field.add ("<xmlattr>.datatype", datatype);

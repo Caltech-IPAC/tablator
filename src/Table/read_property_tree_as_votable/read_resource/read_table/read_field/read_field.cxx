@@ -1,7 +1,12 @@
-#include "../../../../Table.hxx"
-#include "VOTable_Field.hxx"
+#include "../../../../../Table.hxx"
+#include "../VOTable_Field.hxx"
 
 #include <boost/lexical_cast.hpp>
+
+namespace tablator
+{
+Values read_values (const boost::property_tree::ptree &values);
+}
 
 namespace
 {
@@ -73,7 +78,7 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
             }
           else
             {
-              result.properties.attributes.insert (std::make_pair (
+              result.field_properties.attributes.insert (std::make_pair (
                   attribute.first, attribute.second.get_value<std::string>()));
             }
         }
@@ -82,12 +87,13 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
 
   if (child != end && child->first == "DESCRIPTION")
     {
-      result.properties.description = child->second.get_value<std::string>();
+      result.field_properties.description
+        = child->second.get_value<std::string>();
       ++child;
     }
   if (child != end && child->first == "VALUES")
     {
-      // FIXME: read_values(*(child->second));
+      result.field_properties.values=read_values(child->second);
       ++child;
     }
   if (child != end && child->first == "LINK")
@@ -98,7 +104,7 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
             {
               for (auto &attribute : link_child.second)
                 {
-                  result.properties.links.emplace_back (
+                  result.field_properties.links.emplace_back (
                       attribute.first,
                       attribute.second.get_value<std::string>());
                 }

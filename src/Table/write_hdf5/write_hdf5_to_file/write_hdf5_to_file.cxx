@@ -3,6 +3,12 @@
 #include "../../../Table.hxx"
 #include "../../../Data_Type_to_H5.hxx"
 
+namespace tablator
+{
+void write_hdf5_columns (const std::vector<Column> &columns,
+                         const std::string &column_type, H5::DataSet &table);
+}
+
 void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
 {
   std::array<hsize_t, 1> dims = { { num_rows () } };
@@ -56,5 +62,7 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
         }
     }
   write_hdf5_attributes (table);
+  write_hdf5_columns (columns, "FIELD", table);
+  write_hdf5_columns (params, "PARAM", table);
   table.write (data.data (), compound_type);
 }

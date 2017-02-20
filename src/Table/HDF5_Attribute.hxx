@@ -1,5 +1,7 @@
 #pragma once
 
+namespace tablator
+{
 class HDF5_Attribute
 {
 public:
@@ -11,3 +13,4 @@ public:
   {
   }
 };
+}
