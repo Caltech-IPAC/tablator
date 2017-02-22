@@ -58,20 +58,21 @@ bool is_columns_valid (H5::VarLenType &columns)
     { return false; }
   
   H5::CompType values (field_properties.getMemberCompType (3));
-  if(!(values.getNmembers () == 6
+  if(!(values.getNmembers () == 7
        && values.getMemberClass (0) == H5T_COMPOUND
        && values.getMemberClass (1) == H5T_COMPOUND
        && values.getMemberClass (2) == H5T_STRING
        && values.getMemberClass (3) == H5T_STRING
        && values.getMemberClass (4) == H5T_STRING
-       && values.getMemberClass (5) == H5T_VLEN))
+       && values.getMemberClass (5) == H5T_STRING
+       && values.getMemberClass (6) == H5T_VLEN))
     { return false; }
 
   if (!is_min_max_type (values.getMemberCompType (0))
       || !is_min_max_type (values.getMemberCompType (1)))
     { return false; }
   
-  H5::VarLenType options = values.getMemberVarLenType (5);
+  H5::VarLenType options = values.getMemberVarLenType (6);
   H5::DataType options_super = options.getSuper ();
   if (options_super.getClass () != H5T_COMPOUND)
     { return false; }

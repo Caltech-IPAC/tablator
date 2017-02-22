@@ -64,6 +64,8 @@ Values read_values (const boost::property_tree::ptree &values)
         {
           if (attribute.first == "ID")
             { result.ID = child->second.get_value<std::string>(); }
+          else if (attribute.first == "type")
+            { result.type = child->second.get_value<std::string>(); }
           else if (attribute.first == "null")
             { result.null = child->second.get_value<std::string>(); }
           else if (attribute.first == "ref")
