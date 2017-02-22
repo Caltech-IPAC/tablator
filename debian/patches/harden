@@ -1,7 +1,7 @@
 Index: tablator_debian/wscript
 ===================================================================
---- tablator_debian.orig/wscript	2017-02-19 17:30:05.467871675 -0800
-+++ tablator_debian/wscript	2017-02-19 17:30:05.467871675 -0800
+--- tablator_debian.orig/wscript	2017-02-22 14:04:52.787512214 -0800
++++ tablator_debian/wscript	2017-02-22 14:04:52.783512214 -0800
 @@ -6,7 +6,9 @@
      conf.check_boost(lib='filesystem system program_options')
  
