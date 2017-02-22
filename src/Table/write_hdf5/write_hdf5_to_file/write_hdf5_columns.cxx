@@ -46,6 +46,7 @@ void write_hdf5_columns (const std::vector<Column> &columns,
   hdf5_values.insertMember ("min", HOFFSET (HDF5_Values, min), hdf5_min_max);
   hdf5_values.insertMember ("max", HOFFSET (HDF5_Values, max), hdf5_min_max);
   hdf5_values.insertMember ("ID", HOFFSET (HDF5_Values, ID), hdf5_string);
+  hdf5_values.insertMember ("type", HOFFSET (HDF5_Values, type), hdf5_string);
   hdf5_values.insertMember ("null", HOFFSET (HDF5_Values, null), hdf5_string);
   hdf5_values.insertMember ("ref", HOFFSET (HDF5_Values, ref), hdf5_string);
   hdf5_values.insertMember ("options", HOFFSET (HDF5_Values, options),
@@ -128,8 +129,8 @@ void write_hdf5_columns (const std::vector<Column> &columns,
       hvl_t hdf5_options = {option_vector.size (), option_vector.data ()};
 
       HDF5_Values hdf5_values = {hdf5_min, hdf5_max, values.ID.c_str (),
-                                 values.null.c_str (), values.ref.c_str (),
-                                 hdf5_options};
+                                 values.type.c_str (), values.null.c_str (),
+                                 values.ref.c_str (), hdf5_options};
 
       HDF5_Field_Properties hdf5_field_properties
         = {field_properties.description.c_str(), hdf5_attributes, hdf5_links,

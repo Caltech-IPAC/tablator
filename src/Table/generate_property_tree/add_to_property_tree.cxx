@@ -63,6 +63,8 @@ void add_to_property_tree (const Column &column, const std::string &tree_name,
       boost::property_tree::ptree &values = field.add ("VALUES", "");
       if (!v.ID.empty ())
         values.add ("<xmlattr>.ID", v.ID);
+      if (!v.type.empty ())
+        values.add ("<xmlattr>.type", v.type);
       if (!v.ref.empty ())
         values.add ("<xmlattr>.ref", v.ref);
 

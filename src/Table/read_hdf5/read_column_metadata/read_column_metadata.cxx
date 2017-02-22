@@ -59,8 +59,8 @@ std::vector<Column> read_column_metadata (const H5::DataSet &dataset,
 
       Min_Max min (hdf5_values.min.value, hdf5_values.min.inclusive),
         max (hdf5_values.max.value, hdf5_values.max.inclusive);
-      Values values (min, max, hdf5_values.ID, hdf5_values.null, hdf5_values.ref,
-                     options);
+      Values values (min, max, hdf5_values.ID, hdf5_values.type,
+                     hdf5_values.null, hdf5_values.ref, options);
       
       std::vector<std::pair<std::string, std::string> > links;
       hvl_t &hdf5_links (hdf5_column.field_properties.links);
