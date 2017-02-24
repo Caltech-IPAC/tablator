@@ -6,11 +6,18 @@
 namespace tablator
 {
 void write_hdf5_columns (const std::vector<Column> &columns,
-                         const std::string &column_type, H5::DataSet &table);
+                         const std::string &column_type, H5::H5Location &table);
 }
 
 void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
 {
+  /// We map IVOA RESOURCE's to H5::Group's.  Group's must have names
+  /// and they must be unique, so we can not use RESOURCE's name
+  /// attribute.
+  // FIXME: This needs to be generalized for multiple resources
+  H5::Group group (outfile.createGroup ("RESOURCE_0"));
+  write_hdf5_columns (resource_params, "PARAM", group);
+  
   std::array<hsize_t, 1> dims = { { num_rows () } };
   H5::DataSpace dataspace (dims.size (), dims.data ());
 
@@ -48,8 +55,9 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
                                       Data_Type_to_H5 (columns[i].type));
         }
     }
-  H5::DataSet table{ outfile.createDataSet ("table", compound_type,
-                                            dataspace) };
+  // FIXME: This needs to be generalized for multiple tables
+  H5::DataSet table{ group.createDataSet ("TABLE_0", compound_type,
+                                          dataspace) };
   if (!comments.empty ())
     {
       std::string description;
@@ -67,6 +75,6 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
     }
   write_hdf5_attributes (table);
   write_hdf5_columns (columns, "FIELD", table);
-  write_hdf5_columns (params, "PARAM", table);
+  write_hdf5_columns (table_params, "PARAM", table);
   table.write (data.data (), compound_type);
 }

@@ -1,4 +1,5 @@
 #include "../../../Table.hxx"
+#include "VOTable_Field.hxx"
 
 void
 tablator::Table::read_resource (const boost::property_tree::ptree &resource)
@@ -21,9 +22,13 @@ tablator::Table::read_resource (const boost::property_tree::ptree &resource)
     }
   for (; child != end; ++child)
     {
-      if (child->first == "COOSYS" || child->first == "PARAM")
+      if (child->first == "COOSYS")
         {
           read_node_and_attributes ("RESOURCE." + child->first, child->second);
+        }
+      else if (child->first == "PARAM")
+        {
+          resource_params.emplace_back (read_field (child->second));
         }
       else if (child->first == "GROUP")
         {
