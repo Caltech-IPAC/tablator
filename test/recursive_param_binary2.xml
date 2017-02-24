@@ -19,10 +19,10 @@
     <PARAM name="INPUT:INTERSECT" datatype="char" arraysize="*" value="OVERLAPS">
       <DESCRIPTION>A parameter that indicates</DESCRIPTION>
       <VALUES>
-        <OPTION name="value" value="OVERLAPS"/>
-        <OPTION name="value" value="CENTER"/>
-        <OPTION name="value" value="COVERS"/>
-        <OPTION name="value" value="ENCLOSED"/>
+        <OPTION value="OVERLAPS"/>
+        <OPTION value="CENTER"/>
+        <OPTION value="COVERS"/>
+        <OPTION value="ENCLOSED"/>
       </VALUES>
     </PARAM>
     <TABLE>
