@@ -17,11 +17,15 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
   std::vector<H5::StrType> string_types;
   std::vector<H5::ArrayType> array_types;
   H5::CompType compound_type (row_size ());
-  std::set<std::string> unique_names;
+  std::vector<std::string> unique_names;
+  unique_names.reserve (columns.size());
   for (auto &column: columns)
-    unique_names.insert(column.name);
-  if (unique_names.size() != columns.size())
-    throw std::runtime_error ("Duplicate column names are not allowed in HDF5 tables");
+    { unique_names.push_back(column.name); }
+  std::sort (unique_names.begin (), unique_names.end ());
+  if (std::unique (unique_names.begin (), unique_names.end ())
+      != unique_names.end ())
+    { throw std::runtime_error ("Duplicate column names are not "
+                                "allowed in HDF5 tables"); }
   for (size_t i=0; i<columns.size (); ++i)
     {
       if (columns[i].type == Data_Type::CHAR)
