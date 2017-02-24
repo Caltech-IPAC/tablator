@@ -1,7 +1,7 @@
-#include <algorithm>
-
 #include "../../../../../Table.hxx"
-#include "../VOTable_Field.hxx"
+#include "../../VOTable_Field.hxx"
+
+#include <algorithm>
 
 void tablator::Table::read_data (const boost::property_tree::ptree &data,
                                  const std::vector<VOTable_Field> &fields)

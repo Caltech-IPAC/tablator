@@ -1,5 +1,5 @@
 #include "../../../../Table.hxx"
-#include "VOTable_Field.hxx"
+#include "../VOTable_Field.hxx"
 
 void tablator::Table::read_table (const boost::property_tree::ptree &table)
 {
@@ -31,7 +31,7 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
         }
       else if (child->first == "PARAM")
         {
-          params.emplace_back (read_field (child->second));
+          table_params.emplace_back (read_field (child->second));
         }
       else if (child->first == "GROUP")
         {

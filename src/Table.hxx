@@ -34,7 +34,7 @@ public:
   std::vector<uint8_t> data;
   std::vector<std::string> comments;
 
-  std::vector<Column> params;
+  std::vector<Column> resource_params, table_params;
   std::vector<Column> columns;
   std::vector<size_t> offsets = { 0 };
 
