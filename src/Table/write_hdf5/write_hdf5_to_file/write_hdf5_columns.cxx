@@ -24,9 +24,10 @@ hvl_t make_option_array (const std::vector<Option> &options,
 }
   
 void write_hdf5_columns (const std::vector<Column> &columns,
-                         const std::string &column_type, H5::DataSet &table)
+                         const std::string &column_type, H5::H5Location &location)
 {
-
+  if (columns.empty ())
+    { return; }
   H5::StrType hdf5_string (0, H5T_VARIABLE);
 
   H5::CompType hdf5_option (sizeof(HDF5_Attribute));
@@ -144,8 +145,8 @@ void write_hdf5_columns (const std::vector<Column> &columns,
   hvl_t H5_columns = {hdf5_columns.size (), hdf5_columns.data ()};
 
   H5::DataSpace column_space (H5S_SCALAR);
-  H5::Attribute table_attribute = table.createAttribute (
+  H5::Attribute location_attribute = location.createAttribute (
     column_type, hdf5_columns_type, column_space);
-  table_attribute.write (hdf5_columns_type, &H5_columns);
+  location_attribute.write (hdf5_columns_type, &H5_columns);
 }
 }

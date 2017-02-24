@@ -1,4 +1,4 @@
-#include "../../../../../Table.hxx"
+#include "../../../../Table.hxx"
 #include "../VOTable_Field.hxx"
 
 #include <boost/lexical_cast.hpp>
