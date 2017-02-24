@@ -21,8 +21,10 @@ void Option_to_xml (boost::property_tree::ptree &tree,
   if (!option.empty ())
     {
       boost::property_tree::ptree &option_tree = tree.add ("OPTION", "");
-      option_tree.add ("<xmlattr>.name", option.name);
-      option_tree.add ("<xmlattr>.value", option.value);
+      if (!option.name.empty ())
+        { option_tree.add ("<xmlattr>.name", option.name); }
+      if (!option.value.empty ())
+        { option_tree.add ("<xmlattr>.value", option.value); }
       for (auto &o : option.options)
         Option_to_xml (option_tree, o);
     }
