@@ -45,22 +45,10 @@ inline std::string to_xml_string (const Data_Type &type)
       return "char";
       break;
     default:
-      throw std::runtime_error ("Unexpected HDF5 data type in "
+      throw std::runtime_error ("Unexpected data type in "
                                 "tablator::to_xml_string: "
                                 + std::to_string(static_cast<int>(type)));
       break;
-    }
-}
-
-inline std::string to_xml_string (const Column &column)
-{
-  if (column.type != Data_Type::CHAR && column.array_size != 1)
-    {
-      return "array<" + to_xml_string (column.type) + ">";
-    }
-  else
-    {
-      return to_xml_string (column.type);
     }
 }
 }
