@@ -38,7 +38,7 @@ void add_to_property_tree (const Column &column, const std::string &tree_name,
 {
   boost::property_tree::ptree &field = tree.add (tree_name, "");
   field.add ("<xmlattr>.name", column.name);
-  std::string datatype = to_xml_string (column);
+  std::string datatype = to_xml_string (column.type);
   field.add ("<xmlattr>.datatype", datatype);
   if (column.type == Data_Type::CHAR || column.array_size != 1)
     field.add ("<xmlattr>.arraysize", "*");
