@@ -65,7 +65,7 @@ def build(bld):
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_to_file.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_attributes.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_columns.cxx',
-             'src/Table/write_type_as_ascii.cxx']
+             'src/write_type_as_ascii.cxx']
 
     bld.shlib(source=sources,
               target='tablator',
@@ -73,7 +73,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='2.0.1'
+              vnum='2.1.0'
               )
 
     bld.stlib(source=sources,

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "../data_size.hxx"
+#include "data_size.hxx"
 
 namespace tablator
 {
