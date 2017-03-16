@@ -65,7 +65,7 @@ def build(bld):
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_to_file.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_attributes.cxx',
              'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_columns.cxx',
-             'src/Table/write_type_as_ascii.cxx']
+             'src/write_type_as_ascii.cxx']
 
     bld.shlib(source=sources,
               target='tablator',

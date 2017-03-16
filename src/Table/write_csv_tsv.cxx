@@ -13,7 +13,7 @@
 #include <iomanip>
 
 #include "../Table.hxx"
-#include "write_type_as_ascii.hxx"
+#include "../write_type_as_ascii.hxx"
 
 namespace
 {
