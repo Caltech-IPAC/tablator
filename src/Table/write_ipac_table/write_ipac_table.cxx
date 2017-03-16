@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "../../Table.hxx"
-#include "../write_type_as_ascii.hxx"
+#include "../../write_type_as_ascii.hxx"
 
 void tablator::Table::write_ipac_table (std::ostream &os) const
 {

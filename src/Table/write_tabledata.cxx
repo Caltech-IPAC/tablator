@@ -4,7 +4,7 @@
 
 #include "../Table.hxx"
 #include "../to_string.hxx"
-#include "write_type_as_ascii.hxx"
+#include "../write_type_as_ascii.hxx"
 
 void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
     const
