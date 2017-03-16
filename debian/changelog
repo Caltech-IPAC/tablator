@@ -1,3 +1,9 @@
+tablator (2.1.0+dfsg-1) unstable; urgency=low
+
+  * Export write_type_as_ascii publicly
+
+ -- Walter Landry <wlandry@caltech.edu>  Thu, 16 Mar 2017 13:07:09 -0700
+
 tablator (2.0.1+dfsg-1) unstable; urgency=low
 
   * For VOTable output, Write the types for array-valued fields correctly
