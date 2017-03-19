@@ -54,7 +54,8 @@ def build(bld):
              'src/Table/write_csv_tsv.cxx',
              'src/Table/write_fits.cxx',
              'src/Table/write_html.cxx',
-             'src/Table/write_tabledata.cxx',
+             'src/Table/write_tabledata/write_tabledata.cxx',
+             'src/Table/write_tabledata/decode_links.cxx',
              'src/Table/generate_property_tree/generate_property_tree.cxx',
              'src/Table/generate_property_tree/add_to_property_tree.cxx',
              'src/Table/write_ipac_table/write_ipac_table.cxx',
@@ -73,7 +74,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='2.1.0'
+              vnum='2.1.1'
               )
 
     bld.stlib(source=sources,
