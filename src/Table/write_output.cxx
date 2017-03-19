@@ -72,7 +72,7 @@ void tablator::Table::write_output (std::ostream &os,
             size_t tabledata_offset (s.find (tabledata_string));
             bool is_json (format.enum_format != Format::Enums::VOTABLE);
             os << s.substr (0, tabledata_offset - (is_json ? 2 : 0));
-            write_tabledata (os, is_json);
+            write_tabledata (os, format.enum_format);
             os << s.substr (tabledata_offset + tabledata_string.size ()
                              + (is_json ? 2 : 0));
           }
