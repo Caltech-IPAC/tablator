@@ -2,15 +2,21 @@
 #include <limits>
 #include <cmath>
 
-#include "../Table.hxx"
-#include "../to_string.hxx"
-#include "../write_type_as_ascii.hxx"
+#include "../../Table.hxx"
+#include "../../to_string.hxx"
+#include "../../write_type_as_ascii.hxx"
 
-void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
-    const
+namespace tablator
+{
+std::string decode_links (const std::string &encoded);
+
+void Table::write_tabledata (std::ostream &os,
+                             const Format::Enums &output_format) const
 {
   std::string tr_prefix, tr_suffix, td_prefix, td_suffix;
   std::string tabledata_indent = "                    ";
+  const bool is_json (output_format == Format::Enums::JSON
+                      || output_format == Format::Enums::JSON5);
   if (is_json)
     {
       tabledata_indent = "                    ";
@@ -36,7 +42,7 @@ void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
       td_suffix = "</TD>";
       os << '\n';
     }
-
+  
   for (size_t row_offset = 0; row_offset < data.size ();
        row_offset += row_size ())
     {
@@ -54,16 +60,25 @@ void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
                                    output_precision);
             }
           os << td_prefix;
-          if (is_json)
+          switch (output_format)
             {
+            case Format::Enums::JSON:
+            case Format::Enums::JSON5:
               // FIXME: This uses the undocumented character escapes.
-              os << boost::property_tree::json_parser::create_escapes (
-                        td.str ());
-            }
-          else
-            {
-              os << boost::property_tree::xml_parser::encode_char_entities (
-                        td.str ());
+              os << boost::property_tree::json_parser::create_escapes
+                (td.str ());
+              break;
+            case Format::Enums::HTML:
+              {
+                os << decode_links
+                  (boost::property_tree::xml_parser::encode_char_entities
+                   (td.str ()));
+              }
+              break;
+            default:
+              os << boost::property_tree::xml_parser::encode_char_entities
+                (td.str ());
+              break;
             }
           os << td_suffix;
           if (is_json && column < columns.size () - 1)
@@ -84,4 +99,5 @@ void tablator::Table::write_tabledata (std::ostream &os, const bool &is_json)
     {
       os << "]\n";
     }
+}
 }

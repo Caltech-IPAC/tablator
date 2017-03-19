@@ -10,8 +10,29 @@ void tablator::Table::write_html (std::ostream &os) const
   boost::property_tree::ptree tree;
 
   boost::property_tree::ptree &html = tree.add ("html", "");
-  html.add ("head.style", "table,th,td\n{\nborder:1px solid "
-                          "black;\nborder-collapse:collapse\n}\n");
+  boost::property_tree::ptree &style =
+    html.add ("style","body {\n"
+              "font-family: Helvetica, Arial, sans-serif;\n"
+              "color: black;\n"
+              "background-color: white;\n"
+              "}\n"
+              "table {\n"
+              "font-size: x-large;\n"
+              "border: none;\n"
+              "border-spacing: 0.5em;\n"
+              "margin: 1em 1em 1em 4em;\n"
+              "}\n"
+              "td {\n"
+              "font-size: small;\n"
+              "margin: 0.5em;\n"
+              "padding: 0 4em 0 1em;\n"
+              "}\n"
+              "td.category {\n"
+              "margin: 0.5em;\n"
+              "padding: 1em 0 0 0;\n"
+              "font-weight: bold;\n"
+              "}");
+  style.add("<xmlattr>.type","text/css");
   boost::property_tree::ptree &table = html.add ("body.table", "");
 
   boost::property_tree::ptree &heading_tr = table.add ("TR", "");
@@ -32,6 +53,6 @@ void tablator::Table::write_html (std::ostream &os) const
   std::string s (ss.str ());
   size_t tabledata_offset (s.find (tabledata_string));
   os << s.substr (0, tabledata_offset - 4);
-  write_tabledata (os, false);
+  write_tabledata (os, Format::Enums::HTML);
   os << s.substr (tabledata_offset + tabledata_string.size() + 5);
 }
