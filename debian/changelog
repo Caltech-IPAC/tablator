@@ -1,3 +1,9 @@
+tablator (2.1.2+dfsg-1) unstable; urgency=low
+
+  * Handle single quoted hyperlinks in HTML
+
+ -- Walter Landry <wlandry@caltech.edu>  Sun, 19 Mar 2017 11:30:44 -0700
+
 tablator (2.1.1+dfsg-1) unstable; urgency=low
 
   * Do not escape hyperlinks when writing HTML
