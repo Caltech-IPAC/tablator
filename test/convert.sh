@@ -59,3 +59,10 @@ else
     echo "FAIL: CSV implicit float"
 fi
 
+./build/tablator --output-format=html test/multi.tbl - | diff -w - test/multi.html
+if [ $? -eq 0 ]; then
+    echo "PASS: HTML retain links"
+else
+    echo "FAIL: HTML retain links"
+fi
+
