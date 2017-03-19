@@ -1,3 +1,9 @@
+tablator (2.1.1+dfsg-1) unstable; urgency=low
+
+  * Do not escape hyperlinks when writing HTML
+
+ -- Walter Landry <wlandry@caltech.edu>  Sat, 18 Mar 2017 23:21:43 -0700
+
 tablator (2.1.0+dfsg-1) unstable; urgency=low
 
   * Export write_type_as_ascii publicly

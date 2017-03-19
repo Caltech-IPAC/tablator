@@ -3,7 +3,7 @@ Upstream-Name: json5-parser
 Source: https://github.com/Caltech-IPAC/json5_parser
 
 Files: *
-Copyright: 2014-2016 California Institute of Technology
+Copyright: 2014-2017 California Institute of Technology
 License: GPL-2+
  Based on Government Sponsored Research NAS7-03001 and NNN12AA01C.
  .
