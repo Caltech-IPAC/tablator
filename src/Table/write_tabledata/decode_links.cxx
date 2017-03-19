@@ -58,18 +58,21 @@ namespace tablator
 {
 std::string decode_links (const std::string &encoded)
 {
-  auto first (encoded.begin ()), last (encoded.end ());
-  boost::spirit::qi::rule<std::string::const_iterator, std::string ()> href;
+  boost::spirit::qi::rule<std::string::const_iterator, std::string ()> href,
+    href_single_quote, href_double_quote;
 
-  boost::spirit::qi::rule<std::string::const_iterator, Link_and_Prefix ()>
-    link_and_prefix;
+  href_single_quote %= boost::spirit::qi::lit("href=&apos;")
+    >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')))
+    >> boost::spirit::qi::lit("&apos;");
 
-  boost::spirit::qi::rule<std::string::const_iterator, Entry ()> entry_rule;
-  
-  href %= boost::spirit::qi::lit("href=&quot;")
+  href_double_quote %= boost::spirit::qi::lit("href=&quot;")
     >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')))
     >> boost::spirit::qi::lit("&quot;");
 
+  href %= href_single_quote | href_double_quote;
+  
+  boost::spirit::qi::rule<std::string::const_iterator, Link_and_Prefix ()>
+    link_and_prefix;
   link_and_prefix %=
     (*boost::spirit::qi::lexeme[boost::spirit::qi::char_
                                 - boost::spirit::qi::char_('&')])
@@ -83,10 +86,12 @@ std::string decode_links (const std::string &encoded)
     >> boost::spirit::qi::lit("&lt;")
     >> boost::spirit::qi::lit("/a&gt;");
 
+  boost::spirit::qi::rule<std::string::const_iterator, Entry ()> entry_rule;
   entry_rule %= *link_and_prefix
     >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')));
   
   Entry entry;
+  auto first (encoded.begin ()), last (encoded.end ());
   if (boost::spirit::qi::phrase_parse (first, last, entry_rule,
                                        boost::spirit::ascii::space, entry)
       && first == last)
