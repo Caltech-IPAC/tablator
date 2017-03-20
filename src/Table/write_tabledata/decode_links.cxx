@@ -82,12 +82,10 @@ std::string decode_links (const std::string &encoded)
     quoted, single_quoted, double_quoted, attribute_key;
 
   single_quoted %= boost::spirit::qi::lit("&apos;")
-    >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')))
-    >> boost::spirit::qi::lit("&apos;");
+    >> (*(boost::spirit::qi::char_ - "&apos;")) >> "&apos;";
 
   double_quoted %= boost::spirit::qi::lit("&quot;")
-    >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')))
-    >> boost::spirit::qi::lit("&quot;");
+    >> (*(boost::spirit::qi::char_ - "&quot;")) >> "&quot;";
 
   quoted %= single_quoted | double_quoted;
 
@@ -103,7 +101,7 @@ std::string decode_links (const std::string &encoded)
     | boost::spirit::qi::string("type");
 
   boost::spirit::qi::rule<std::string::const_iterator, Attribute ()> attribute;
-  attribute %= attribute_key >> boost::spirit::qi::lit("=") >> quoted;
+  attribute %= attribute_key >> "=" >> quoted;
 
   boost::spirit::qi::rule<std::string::const_iterator,
                           std::vector<Attribute> ()> attributes;
@@ -114,21 +112,16 @@ std::string decode_links (const std::string &encoded)
   boost::spirit::qi::rule<std::string::const_iterator, Link_and_Prefix ()>
     link_and_prefix;
   link_and_prefix %=
-    (*boost::spirit::qi::lexeme[boost::spirit::qi::char_
-                                - boost::spirit::qi::char_('&')])
-    >> boost::spirit::qi::lit("&lt;a")
+    (*(boost::spirit::qi::char_ - "&lt;a")) >> "&lt;a"
     >> *boost::spirit::qi::omit[boost::spirit::ascii::space]
     >> attributes
     >> *boost::spirit::qi::omit[boost::spirit::ascii::space]
-    >> boost::spirit::qi::lit("&gt;")
-    >> (*boost::spirit::qi::lexeme[boost::spirit::qi::char_
-                                   - boost::spirit::qi::char_('&')])
-    >> boost::spirit::qi::lit("&lt;")
-    >> boost::spirit::qi::lit("/a&gt;");
+    >> "&gt;"
+    >> (*(boost::spirit::qi::char_ - "&lt;")) >> "&lt;"
+    >> "/a&gt;";
 
   boost::spirit::qi::rule<std::string::const_iterator, Entry ()> entry_rule;
-  entry_rule %= *link_and_prefix
-    >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')));
+  entry_rule %= *link_and_prefix >> (*(boost::spirit::qi::char_ - "&lt;a"));
   
   Entry entry;
   auto first (encoded.begin ()), last (encoded.end ());
