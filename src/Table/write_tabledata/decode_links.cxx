@@ -13,10 +13,17 @@
 
 namespace tablator
 {
+class Attribute
+{
+public:
+  std::string key, value;
+};
+
 class Link_and_Prefix
 {
 public:
-  std::string prefix, href, link;
+  std::string prefix, link;
+  std::vector<Attribute> attributes;
 };
 
 class Entry
@@ -27,10 +34,19 @@ public:
 };
 
 std::ostream & operator<< (std::ostream &os,
+                           const tablator::Attribute &attribute)
+{
+  os << attribute.key << "=\"" << attribute.value << "\"";
+  return os;
+}
+  
+std::ostream & operator<< (std::ostream &os,
                            const tablator::Link_and_Prefix &link)
 {
-  os << link.prefix << "<a href=\"" << link.href << "\">"
-     << link.link << "</a>";
+  os << link.prefix << "<a";
+  for (auto &attribute: link.attributes)
+    { os << " " << attribute; }
+  os << ">" << link.link << "</a>";
   return os;
 }
 
@@ -44,9 +60,13 @@ std::ostream & operator<< (std::ostream &os, const tablator::Entry &entry)
 }
 }
 
+BOOST_FUSION_ADAPT_STRUCT (tablator::Attribute,
+                           (std::string, key)
+                           (std::string, value))
+
 BOOST_FUSION_ADAPT_STRUCT (tablator::Link_and_Prefix,
                            (std::string, prefix)
-                           (std::string, href)
+                           (std::vector<tablator::Attribute>, attributes)
                            (std::string, link))
 
 BOOST_FUSION_ADAPT_STRUCT (tablator::Entry,
@@ -58,18 +78,38 @@ namespace tablator
 {
 std::string decode_links (const std::string &encoded)
 {
-  boost::spirit::qi::rule<std::string::const_iterator, std::string ()> href,
-    href_single_quote, href_double_quote;
+  boost::spirit::qi::rule<std::string::const_iterator, std::string ()>
+    quoted, single_quoted, double_quoted, attribute_key;
 
-  href_single_quote %= boost::spirit::qi::lit("href=&apos;")
+  single_quoted %= boost::spirit::qi::lit("&apos;")
     >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')))
     >> boost::spirit::qi::lit("&apos;");
 
-  href_double_quote %= boost::spirit::qi::lit("href=&quot;")
+  double_quoted %= boost::spirit::qi::lit("&quot;")
     >> (*(boost::spirit::qi::char_ - boost::spirit::qi::char_('&')))
     >> boost::spirit::qi::lit("&quot;");
 
-  href %= href_single_quote | href_double_quote;
+  quoted %= single_quoted | double_quoted;
+
+  /// From https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a
+  /// Put hreflang in front of href so that we do not get a greedy
+  /// match with href instead of hreflang.
+  attribute_key %= boost::spirit::qi::string("download")
+    | boost::spirit::qi::string("hreflang")
+    | boost::spirit::qi::string("href")
+    | boost::spirit::qi::string("referrerpolicy")
+    | boost::spirit::qi::string("rel")
+    | boost::spirit::qi::string("target")
+    | boost::spirit::qi::string("type");
+
+  boost::spirit::qi::rule<std::string::const_iterator, Attribute ()> attribute;
+  attribute %= attribute_key >> boost::spirit::qi::lit("=") >> quoted;
+
+  boost::spirit::qi::rule<std::string::const_iterator,
+                          std::vector<Attribute> ()> attributes;
+                          
+  attributes %= attribute
+    % *boost::spirit::qi::omit[boost::spirit::ascii::space];
   
   boost::spirit::qi::rule<std::string::const_iterator, Link_and_Prefix ()>
     link_and_prefix;
@@ -78,7 +118,7 @@ std::string decode_links (const std::string &encoded)
                                 - boost::spirit::qi::char_('&')])
     >> boost::spirit::qi::lit("&lt;a")
     >> *boost::spirit::qi::omit[boost::spirit::ascii::space]
-    >> href
+    >> attributes
     >> *boost::spirit::qi::omit[boost::spirit::ascii::space]
     >> boost::spirit::qi::lit("&gt;")
     >> (*boost::spirit::qi::lexeme[boost::spirit::qi::char_
