@@ -1,3 +1,9 @@
+tablator (2.1.3+dfsg-1) unstable; urgency=low
+
+  * Handle most attributes in links
+
+ -- Walter Landry <wlandry@caltech.edu>  Mon, 20 Mar 2017 07:51:51 -0700
+
 tablator (2.1.2+dfsg-1) unstable; urgency=low
 
   * Handle single quoted hyperlinks in HTML
