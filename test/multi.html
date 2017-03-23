@@ -2,25 +2,49 @@
 <html>
   <style type="text/css">body {
 font-family: Helvetica, Arial, sans-serif;
+font-size: small;
 color: black;
 background-color: white;
 }
 table {
-font-size: x-large;
-border: none;
-border-spacing: 0.5em;
+border-collapse:separate;
+border-spacing: 0.2em;
 margin: 1em 1em 1em 4em;
+white-space: nowrap;
 }
 td {
-font-size: small;
-margin: 0.5em;
-padding: 0 4em 0 1em;
+margin: 0.25em;
+padding: 0 0.5em 0 0.5em;
+text-align: left;
+vertical-align: middle;
+border: 1px solid white;
 }
-td.category {
-margin: 0.5em;
-padding: 1em 0 0 0;
+td.num {
+text-align: right;
+}
+th {
+margin: 0.25em;
+padding: 0.25em 0.5em 0.25em 0.5em;
 font-weight: bold;
-}</style>
+color: grey;
+background-color: #DDD;
+text-align: center;
+vertical-align: middle;
+border: 1px solid white;
+}
+th.meta {
+color: black;
+background-color: #AAA;
+}
+tr:hover {
+color: #00F;
+background: #EEF;
+border: 1px solid blue;
+}
+td:hover {
+border: 1px solid #DDF;
+}
+</style>
   <body>
     <table>
       <TR>
