@@ -1,3 +1,9 @@
+tablator (2.1.5+dfsg-1) unstable; urgency=low
+
+  * Make html output more spiffy
+
+ -- Walter Landry <wlandry@caltech.edu>  Wed, 22 Mar 2017 17:24:56 -0700
+
 tablator (2.1.4+dfsg-1) unstable; urgency=low
 
   * Handle most attributes in links
