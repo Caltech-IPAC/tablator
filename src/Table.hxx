@@ -45,11 +45,15 @@ public:
          const std::map<std::string, std::string> &property_map);
 
   Table (const std::vector<Column> &Columns)
-      : Table (Columns, std::map<std::string, std::string>()) { }
+      : Table (Columns, std::map<std::string, std::string>())
+  {
+  }
 
   Table (const boost::filesystem::path &input_path, const Format &format);
   Table (const boost::filesystem::path &input_path)
-    : Table (input_path, Format(input_path)) {}
+      : Table (input_path, Format (input_path))
+  {
+  }
 
   size_t row_size () const { return *offsets.rbegin (); }
   size_t num_rows () const { return data.size () / row_size (); }
@@ -73,11 +77,13 @@ public:
     return offsets[std::distance (columns.begin (), column)];
   }
 
-  std::vector<Column>::const_iterator find_column (const std::string &name)
-    const
+  std::vector<Column>::const_iterator
+  find_column (const std::string &name) const
   {
-    return std::find_if (columns.begin (), columns.end (),
-                         [&](const Column &c) { return c.name == name;});
+    return std::find_if (columns.begin (), columns.end (), [&](const Column &c)
+                         {
+      return c.name == name;
+    });
   }
 
   /// WARNING: append_column routines do not increase the size of the
@@ -92,7 +98,7 @@ public:
   {
     append_column (name, type, size, Field_Properties ());
   }
-  
+
   void append_column (const std::string &name, const Data_Type &type,
                       const size_t &size,
                       const Field_Properties &field_properties)
@@ -185,11 +191,11 @@ public:
                        const std::vector<VOTable_Field> &fields);
   void read_binary2 (const boost::property_tree::ptree &tabledata,
                      const std::vector<VOTable_Field> &fields);
-  void append_data_from_stream(const std::vector<uint8_t> &stream,
-                               const size_t &num_rows,
-                               const std::vector<VOTable_Field> &fields);
+  void append_data_from_stream (const std::vector<uint8_t> &stream,
+                                const size_t &num_rows,
+                                const std::vector<VOTable_Field> &fields);
   void read_dsv (const boost::filesystem::path &path, const Format &format);
-  void read_dsv_rows (const std::list<std::vector<std::string> >  &dsv);
+  void read_dsv_rows (const std::list<std::vector<std::string> > &dsv);
   void set_column_info (std::list<std::vector<std::string> > &dsv);
   void write_tabledata (std::ostream &os,
                         const Format::Enums &output_format) const;

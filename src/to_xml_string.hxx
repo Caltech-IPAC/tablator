@@ -47,7 +47,7 @@ inline std::string to_xml_string (const Data_Type &type)
     default:
       throw std::runtime_error ("Unexpected data type in "
                                 "tablator::to_xml_string: "
-                                + std::to_string(static_cast<int>(type)));
+                                + std::to_string (static_cast<int>(type)));
       break;
     }
 }

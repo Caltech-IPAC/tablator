@@ -10,14 +10,19 @@ tablator::Table::Table (const std::vector<Column> &Columns,
                         const std::map<std::string, std::string> &property_map)
 {
   const size_t null_flags_size = (Columns.size () + 7) / 8;
-  append_column (null_bitfield_flags_name, Data_Type::UINT8_LE, null_flags_size,
+  append_column (null_bitfield_flags_name, Data_Type::UINT8_LE,
+                 null_flags_size,
                  Field_Properties (null_bitfield_flags_description));
 
   for (auto &c : Columns)
-    { append_column (c); }
+    {
+      append_column (c);
+    }
 
   for (auto &p : property_map)
-    { properties.emplace_back (p.first, Property (p.second)); }
+    {
+      properties.emplace_back (p.first, Property (p.second));
+    }
 }
 
 tablator::Table::Table (const boost::filesystem::path &input_path,
@@ -51,7 +56,7 @@ tablator::Table::Table (const boost::filesystem::path &input_path,
     }
   else if (format.is_csv () || format.is_tsv ())
     {
-      read_dsv (input_path,format);
+      read_dsv (input_path, format);
     }
   else
     {
@@ -60,79 +65,87 @@ tablator::Table::Table (const boost::filesystem::path &input_path,
         {
           H5::Exception::dontPrint ();
           read_hdf5 (input_path);
-          is_read_successful=true;
+          is_read_successful = true;
         }
       catch (...)
-        {}
+        {
+        }
       if (!is_read_successful)
         {
           try
             {
               read_fits (input_path);
-              is_read_successful=true;
+              is_read_successful = true;
             }
           catch (...)
-            {}
+            {
+            }
         }
       if (!is_read_successful)
         {
           try
             {
               read_ipac_table (input_path);
-              is_read_successful=true;
+              is_read_successful = true;
             }
           catch (...)
-            {}
+            {
+            }
         }
       if (!is_read_successful)
         {
           try
             {
               read_json5 (input_path);
-              is_read_successful=true;
+              is_read_successful = true;
             }
           catch (...)
-            {}
+            {
+            }
         }
       if (!is_read_successful)
         {
           try
             {
-              read_votable(input_path);
-              is_read_successful=true;
+              read_votable (input_path);
+              is_read_successful = true;
             }
           catch (...)
-            {}
+            {
+            }
         }
       if (!is_read_successful)
         {
           try
             {
-              read_json(input_path);
-              is_read_successful=true;
+              read_json (input_path);
+              is_read_successful = true;
             }
           catch (...)
-            {}
+            {
+            }
         }
       if (!is_read_successful)
         {
           try
             {
-              read_dsv (input_path,Format("csv"));
-              is_read_successful=true;
+              read_dsv (input_path, Format ("csv"));
+              is_read_successful = true;
             }
           catch (...)
-            {}
+            {
+            }
         }
       if (!is_read_successful)
         {
           try
             {
-              read_dsv (input_path,Format("tsv"));
-              is_read_successful=true;
+              read_dsv (input_path, Format ("tsv"));
+              is_read_successful = true;
             }
           catch (...)
-            {}
+            {
+            }
         }
       if (!is_read_successful)
         throw std::runtime_error ("Unsupported input: " + input_path.string ()

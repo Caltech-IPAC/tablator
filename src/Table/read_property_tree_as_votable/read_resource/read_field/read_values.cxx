@@ -14,9 +14,13 @@ tablator::Min_Max read_min_max (const boost::property_tree::ptree &min_max)
       for (auto &attribute : child->second)
         {
           if (attribute.first == "value")
-            { result.value = attribute.second.get_value<std::string>(); }
+            {
+              result.value = attribute.second.get_value<std::string>();
+            }
           else if (attribute.first == "inclusive")
-            { result.inclusive = attribute.second.get_value<bool>(); }
+            {
+              result.inclusive = attribute.second.get_value<bool>();
+            }
         }
       ++child;
     }
@@ -34,16 +38,20 @@ tablator::Option read_option (const boost::property_tree::ptree &option)
       for (auto &attribute : child->second)
         {
           if (attribute.first == "name")
-            { result.name = attribute.second.get_value<std::string>(); }
+            {
+              result.name = attribute.second.get_value<std::string>();
+            }
           else if (attribute.first == "value")
-            { result.value = attribute.second.get_value<std::string>(); }
+            {
+              result.value = attribute.second.get_value<std::string>();
+            }
         }
       ++child;
     }
   while (child != end && child->first == "OPTION")
     {
-      read_option(child->second);
-      result.options.emplace_back(read_option(child->second));
+      read_option (child->second);
+      result.options.emplace_back (read_option (child->second));
       ++child;
     }
   /// Ignore extra invalid elements
@@ -63,30 +71,38 @@ Values read_values (const boost::property_tree::ptree &values)
       for (auto &attribute : child->second)
         {
           if (attribute.first == "ID")
-            { result.ID = child->second.get_value<std::string>(); }
+            {
+              result.ID = child->second.get_value<std::string>();
+            }
           else if (attribute.first == "type")
-            { result.type = child->second.get_value<std::string>(); }
+            {
+              result.type = child->second.get_value<std::string>();
+            }
           else if (attribute.first == "null")
-            { result.null = child->second.get_value<std::string>(); }
+            {
+              result.null = child->second.get_value<std::string>();
+            }
           else if (attribute.first == "ref")
-            { result.ref = child->second.get_value<std::string>(); }
+            {
+              result.ref = child->second.get_value<std::string>();
+            }
           /// Ignore extra invalid elements
         }
       ++child;
     }
   if (child != end && child->first == "MIN")
     {
-      result.min = read_min_max(child->second);
+      result.min = read_min_max (child->second);
       ++child;
     }
   if (child != end && child->first == "MAX")
     {
-      result.max = read_min_max(child->second);
+      result.max = read_min_max (child->second);
       ++child;
     }
   while (child != end && child->first == "OPTION")
     {
-      result.options.emplace_back(read_option(child->second));
+      result.options.emplace_back (read_option (child->second));
       ++child;
     }
   /// Ignore extra invalid elements

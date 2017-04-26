@@ -21,8 +21,8 @@ void read_scalar_column (uint8_t *position, CCfits::Column &c,
 
 template <typename T>
 void read_vector_column (fitsfile *fits_file, uint8_t *position,
-                         CCfits::Column &c,
-                         const size_t &rows, const size_t &row_size)
+                         CCfits::Column &c, const size_t &rows,
+                         const size_t &row_size)
 {
   /// Use the C api because the C++ api (Column::readArrays) is
   /// horrendously slow.
@@ -30,12 +30,12 @@ void read_vector_column (fitsfile *fits_file, uint8_t *position,
   std::vector<T> temp_array (c.repeat ());
 
   uint8_t *current = position;
-  for (size_t row=0; row < rows; ++row)
+  for (size_t row = 0; row < rows; ++row)
     {
-      uint8_t *element_start=current;
+      uint8_t *element_start = current;
       fits_read_col (fits_file, c.type (), c.index (), row + 1, 1, c.repeat (),
                      NULL, temp_array.data (), &anynul, &status);
-      for (size_t offset=0; offset < c.repeat (); ++offset)
+      for (size_t offset = 0; offset < c.repeat (); ++offset)
         {
           *reinterpret_cast<T *>(current) = temp_array[offset];
           current += sizeof(T);
@@ -93,15 +93,15 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
     }
 
   /// CCfits is 1 based, not 0 based.
-  const bool has_null_bitfield_flags
-    (table->column().size()>0
-     && table->column (1).name ()==null_bitfield_flags_name
-     && table->column (1).type () == CCfits::Tbyte);
-  if(!has_null_bitfield_flags)
+  const bool has_null_bitfield_flags (
+      table->column ().size () > 0
+      && table->column (1).name () == null_bitfield_flags_name
+      && table->column (1).type () == CCfits::Tbyte);
+  if (!has_null_bitfield_flags)
     {
-      append_column(null_bitfield_flags_name, Data_Type::UINT8_LE,
-                    (table->column().size()+7)/8,
-                    Field_Properties (null_bitfield_flags_description, {}));
+      append_column (null_bitfield_flags_name, Data_Type::UINT8_LE,
+                     (table->column ().size () + 7) / 8,
+                     Field_Properties (null_bitfield_flags_description, {}));
     }
 
   for (size_t column = 0; column < table->column ().size (); ++column)
@@ -143,8 +143,8 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
         case CCfits::Tfloat:
           {
             Field_Properties nan_nulls;
-            nan_nulls.values.null=
-              std::to_string(std::numeric_limits<float>::quiet_NaN());
+            nan_nulls.values.null
+                = std::to_string (std::numeric_limits<float>::quiet_NaN ());
             append_column (c.name (), Data_Type::FLOAT32_LE, array_size,
                            nan_nulls);
           }
@@ -152,8 +152,8 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
         case CCfits::Tdouble:
           {
             Field_Properties nan_nulls;
-            nan_nulls.values.null=
-              std::to_string(std::numeric_limits<double>::quiet_NaN());
+            nan_nulls.values.null
+                = std::to_string (std::numeric_limits<double>::quiet_NaN ());
             append_column (c.name (), Data_Type::FLOAT64_LE, array_size,
                            nan_nulls);
           }
@@ -175,13 +175,15 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
   /// Exit early if there is no data in the table.  Otherwise CCfits
   /// dies in read_column() :(
   if (data.empty ())
-    { return; }
-  
+    {
+      return;
+    }
+
   fitsfile *fits_pointer = fits.fitsPointer ();
   const size_t column_data_offset (has_null_bitfield_flags ? 0 : 1);
   for (size_t column = 0; column < table->column ().size (); ++column)
     {
-      const size_t offset(offsets[column + column_data_offset]);
+      const size_t offset (offsets[column + column_data_offset]);
       /// CCfits is 1 based, not 0 based.
       CCfits::Column &c = table->column (column + 1);
       const bool is_array (std::isdigit (c.format ().at (0))
@@ -247,12 +249,12 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
                                is_array, table->rows (), row_size ());
           break;
         case CCfits::Tfloat:
-          read_column<float>(fits_pointer, data.data () + offset, c,
-                             is_array, table->rows (), row_size ());
+          read_column<float>(fits_pointer, data.data () + offset, c, is_array,
+                             table->rows (), row_size ());
           break;
         case CCfits::Tdouble:
-          read_column<double>(fits_pointer, data.data () + offset, c,
-                              is_array, table->rows (), row_size ());
+          read_column<double>(fits_pointer, data.data () + offset, c, is_array,
+                              table->rows (), row_size ());
           break;
         case CCfits::Tstring:
           {
@@ -278,7 +280,9 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
       // FIXME: This should get the comment, but the comment()
       // function is protected???
       if (!c.unit ().empty ())
-        { columns[column+column_data_offset].field_properties.attributes
-            = { { "unit", c.unit () } }; }
+        {
+          columns[column + column_data_offset].field_properties.attributes
+              = { { "unit", c.unit () } };
+        }
     }
 }

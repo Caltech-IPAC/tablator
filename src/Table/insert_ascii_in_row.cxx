@@ -42,10 +42,12 @@ void insert_ascii_in_row (const Data_Type &data_type, const size_t &array_size,
             }
           else
             {
-              bool result = (boost::iequals (element, "true")
-                             || boost::iequals (element, "t") || element == "1");
-              if (!result && !(boost::iequals (element, "false")
-                               || boost::iequals (element, "f") || element == "0"))
+              bool result
+                  = (boost::iequals (element, "true")
+                     || boost::iequals (element, "t") || element == "1");
+              if (!result
+                  && !(boost::iequals (element, "false")
+                       || boost::iequals (element, "f") || element == "0"))
                 throw std::exception ();
               row.insert (static_cast<uint8_t>(result), offset);
             }
@@ -112,10 +114,10 @@ void insert_ascii_in_row (const Data_Type &data_type, const size_t &array_size,
           row.insert (element, offset, offset_end);
           break;
         default:
-          throw std::runtime_error ("Unknown data type in insert_ascii_in_row: "
-                                    + to_string (data_type));
+          throw std::runtime_error (
+              "Unknown data type in insert_ascii_in_row: "
+              + to_string (data_type));
         }
     }
 }
 }
-

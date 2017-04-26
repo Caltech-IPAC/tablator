@@ -12,26 +12,33 @@
 
 namespace tablator
 {
-hvl_t make_option_array (const std::vector<Option> &options,
-                         std::deque<std::vector<HDF5_Attribute> > &option_arrays)
+hvl_t
+make_option_array (const std::vector<Option> &options,
+                   std::deque<std::vector<HDF5_Attribute> > &option_arrays)
 {
   option_arrays.emplace_back ();
   std::vector<HDF5_Attribute> &option_vector = *option_arrays.rbegin ();
-  for (auto &option: options)
-    { option_vector.emplace_back (option.name.c_str (), option.value.c_str ()); }
-  hvl_t hdf5_options = {option_vector.size (), option_vector.data ()};
+  for (auto &option : options)
+    {
+      option_vector.emplace_back (option.name.c_str (), option.value.c_str ());
+    }
+  hvl_t hdf5_options = { option_vector.size (), option_vector.data () };
   return hdf5_options;
 }
-  
+
 void write_hdf5_columns (const std::vector<Column> &columns,
-                         const std::string &column_type, H5::H5Location &location)
+                         const std::string &column_type,
+                         H5::H5Location &location)
 {
   if (columns.empty ())
-    { return; }
+    {
+      return;
+    }
   H5::StrType hdf5_string (0, H5T_VARIABLE);
 
   H5::CompType hdf5_option (sizeof(HDF5_Attribute));
-  hdf5_option.insertMember ("name", HOFFSET (HDF5_Attribute, name), hdf5_string);
+  hdf5_option.insertMember ("name", HOFFSET (HDF5_Attribute, name),
+                            hdf5_string);
   hdf5_option.insertMember ("value", HOFFSET (HDF5_Attribute, value),
                             hdf5_string);
 
@@ -56,24 +63,20 @@ void write_hdf5_columns (const std::vector<Column> &columns,
   H5::CompType hdf5_attribute (2 * hdf5_string.getSize ());
   hdf5_attribute.insertMember ("name", 0, hdf5_string);
   hdf5_attribute.insertMember ("value", hdf5_string.getSize (), hdf5_string);
-  
+
   H5::VarLenType hdf5_attribute_array (&hdf5_attribute);
 
   H5::CompType hdf5_field_properties (sizeof(HDF5_Field_Properties));
-  hdf5_field_properties.insertMember ("description",
-                                      HOFFSET (HDF5_Field_Properties,
-                                               description),
-                                      hdf5_string);
-  hdf5_field_properties.insertMember ("attributes",
-                                      HOFFSET (HDF5_Field_Properties,
-                                               attributes),
-                                      hdf5_attribute_array);
-  hdf5_field_properties.insertMember ("links",
-                                      HOFFSET (HDF5_Field_Properties, links),
-                                      hdf5_attribute_array);
-  hdf5_field_properties.insertMember ("values",
-                                      HOFFSET (HDF5_Field_Properties, values),
-                                      hdf5_values);
+  hdf5_field_properties.insertMember (
+      "description", HOFFSET (HDF5_Field_Properties, description),
+      hdf5_string);
+  hdf5_field_properties.insertMember (
+      "attributes", HOFFSET (HDF5_Field_Properties, attributes),
+      hdf5_attribute_array);
+  hdf5_field_properties.insertMember (
+      "links", HOFFSET (HDF5_Field_Properties, links), hdf5_attribute_array);
+  hdf5_field_properties.insertMember (
+      "values", HOFFSET (HDF5_Field_Properties, values), hdf5_values);
 
   H5::CompType hdf5_column (sizeof(HDF5_Column));
   hdf5_column.insertMember ("name", HOFFSET (HDF5_Column, name), hdf5_string);
@@ -85,68 +88,69 @@ void write_hdf5_columns (const std::vector<Column> &columns,
                             hdf5_field_properties);
 
   H5::VarLenType hdf5_columns_type (&hdf5_column);
-  
+
   std::deque<std::vector<const char *> > strings;
   std::vector<HDF5_Column> hdf5_columns;
-  std::deque<std::string> type_strings;  /// Use a deque to avoid
-                                         /// invalidating iterators
+  std::deque<std::string> type_strings; /// Use a deque to avoid
+                                        /// invalidating iterators
   std::deque<std::vector<HDF5_Attribute> > option_arrays;
   for (auto &field : columns)
     {
       const Field_Properties &field_properties (field.field_properties);
-      
+
       strings.emplace_back ();
       std::vector<const char *> &attributes_vector = *strings.rbegin ();
-      for(auto &a : field_properties.attributes)
+      for (auto &a : field_properties.attributes)
         {
           attributes_vector.push_back (a.first.c_str ());
           attributes_vector.push_back (a.second.c_str ());
         }
-      hvl_t hdf5_attributes = {attributes_vector.size () /2,
-                               attributes_vector.data ()};
+      hvl_t hdf5_attributes
+          = { attributes_vector.size () / 2, attributes_vector.data () };
 
       strings.emplace_back ();
       std::vector<const char *> &links_vector = *strings.rbegin ();
-      for(auto &a : field_properties.links)
+      for (auto &a : field_properties.links)
         {
           links_vector.push_back (a.first.c_str ());
           links_vector.push_back (a.second.c_str ());
         }
-      hvl_t hdf5_links = {links_vector.size () /2, links_vector.data ()};
+      hvl_t hdf5_links = { links_vector.size () / 2, links_vector.data () };
 
       const Values &values (field_properties.values);
 
-      HDF5_Min_Max hdf5_min = {values.min.value.c_str (),
-                               values.min.inclusive}, 
-        hdf5_max = {values.max.value.c_str (), values.max.inclusive};
+      HDF5_Min_Max hdf5_min
+          = { values.min.value.c_str (), values.min.inclusive },
+          hdf5_max = { values.max.value.c_str (), values.max.inclusive };
 
       option_arrays.emplace_back ();
       std::vector<HDF5_Attribute> &option_vector = *option_arrays.rbegin ();
-      for (auto &option: values.options)
+      for (auto &option : values.options)
         {
           option_vector.emplace_back (option.name.c_str (),
                                       option.value.c_str ());
         }
-      hvl_t hdf5_options = {option_vector.size (), option_vector.data ()};
+      hvl_t hdf5_options = { option_vector.size (), option_vector.data () };
 
-      HDF5_Values hdf5_values = {hdf5_min, hdf5_max, values.ID.c_str (),
-                                 values.type.c_str (), values.null.c_str (),
-                                 values.ref.c_str (), hdf5_options};
+      HDF5_Values hdf5_values
+          = { hdf5_min,             hdf5_max,             values.ID.c_str (),
+              values.type.c_str (), values.null.c_str (), values.ref.c_str (),
+              hdf5_options };
 
       HDF5_Field_Properties hdf5_field_properties
-        = {field_properties.description.c_str(), hdf5_attributes, hdf5_links,
-           hdf5_values};
-      type_strings.push_back(to_string (field.type));
-      hdf5_columns.emplace_back(field.name.c_str(),
-                                type_strings.rbegin ()->c_str (),
-                                field.array_size, hdf5_field_properties);
+          = { field_properties.description.c_str (), hdf5_attributes,
+              hdf5_links, hdf5_values };
+      type_strings.push_back (to_string (field.type));
+      hdf5_columns.emplace_back (field.name.c_str (),
+                                 type_strings.rbegin ()->c_str (),
+                                 field.array_size, hdf5_field_properties);
     }
 
-  hvl_t H5_columns = {hdf5_columns.size (), hdf5_columns.data ()};
+  hvl_t H5_columns = { hdf5_columns.size (), hdf5_columns.data () };
 
   H5::DataSpace column_space (H5S_SCALAR);
   H5::Attribute location_attribute = location.createAttribute (
-    column_type, hdf5_columns_type, column_space);
+      column_type, hdf5_columns_type, column_space);
   location_attribute.write (hdf5_columns_type, &H5_columns);
 }
 }

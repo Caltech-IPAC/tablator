@@ -17,39 +17,39 @@
 
 namespace
 {
-  /// Copied from libcsv++
-  /// https://github.com/jainyzau/libcsv-
-  std::ostream & write_escaped_string(std::ostream &os, const std::string &s,
-                                      const char &separator)
-  {
-    auto quote_location (s.find("\""));
-    if (quote_location != std::string::npos)
-      {
-        size_t start (0);
-        os << "\"";
-        while (quote_location != std::string::npos)
-          {
-            os << s.substr(start,quote_location - start) << "\"";
-            start = quote_location+1;
-            quote_location=s.find("\"",start);
-          }
-        os << "\"";
-      }
-    else if (s.find(separator) != std::string::npos
-             || s.find("\n") != std::string::npos)
-      {
-        os << "\"" << s << "\"";
-      }
-    else
-      {
-        os << s;
-      }
-    return os;
-  }
+/// Copied from libcsv++
+/// https://github.com/jainyzau/libcsv-
+std::ostream &write_escaped_string (std::ostream &os, const std::string &s,
+                                    const char &separator)
+{
+  auto quote_location (s.find ("\""));
+  if (quote_location != std::string::npos)
+    {
+      size_t start (0);
+      os << "\"";
+      while (quote_location != std::string::npos)
+        {
+          os << s.substr (start, quote_location - start) << "\"";
+          start = quote_location + 1;
+          quote_location = s.find ("\"", start);
+        }
+      os << "\"";
+    }
+  else if (s.find (separator) != std::string::npos
+           || s.find ("\n") != std::string::npos)
+    {
+      os << "\"" << s << "\"";
+    }
+  else
+    {
+      os << s;
+    }
+  return os;
+}
 }
 
-void tablator::Table::write_csv_tsv (std::ostream &os, const char &separator)
-    const
+void tablator::Table::write_csv_tsv (std::ostream &os,
+                                     const char &separator) const
 {
   const int num_members = columns.size ();
   if (num_members == 0)
@@ -57,7 +57,7 @@ void tablator::Table::write_csv_tsv (std::ostream &os, const char &separator)
   /// Skip null_bitfield_flags
   for (int i = 1; i < num_members; ++i)
     {
-      write_escaped_string(os,columns[i].name,separator);
+      write_escaped_string (os, columns[i].name, separator);
       os << (i == num_members - 1 ? '\n' : separator);
     }
 
@@ -68,7 +68,7 @@ void tablator::Table::write_csv_tsv (std::ostream &os, const char &separator)
         std::stringstream ss;
         write_type_as_ascii (ss, columns[i].type, columns[i].array_size,
                              data.data () + offset, output_precision);
-        write_escaped_string(os,ss.str(),separator);
+        write_escaped_string (os, ss.str (), separator);
         os << (i == num_members - 1 ? '\n' : separator);
       }
 }

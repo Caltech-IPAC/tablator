@@ -9,9 +9,8 @@ void add_to_property_tree (const Column &column, const std::string &tree_name,
                            boost::property_tree::ptree &tree);
 }
 
-boost::property_tree::ptree
-tablator::Table::generate_property_tree (const std::string &tabledata_string)
-    const
+boost::property_tree::ptree tablator::Table::generate_property_tree (
+    const std::string &tabledata_string) const
 {
   boost::property_tree::ptree tree;
   std::string votable_literal ("VOTABLE");
@@ -75,8 +74,10 @@ tablator::Table::generate_property_tree (const std::string &tabledata_string)
             }
         }
     }
-  for (auto &param: resource_params)
-    { add_to_property_tree (param, "PARAM", resource); }
+  for (auto &param : resource_params)
+    {
+      add_to_property_tree (param, "PARAM", resource);
+    }
 
   boost::property_tree::ptree &table = resource.add (table_literal, "");
 
@@ -91,12 +92,18 @@ tablator::Table::generate_property_tree (const std::string &tabledata_string)
   // VOTable only allows a single DESCRIPTION element, so we have to
   // cram all of the comments into a single line
   if (!comments.empty ())
-    { table.add ("DESCRIPTION", boost::join (comments, "\n")); }
-  for (auto &param: table_params)
-    { add_to_property_tree (param, "PARAM", table); }
+    {
+      table.add ("DESCRIPTION", boost::join (comments, "\n"));
+    }
+  for (auto &param : table_params)
+    {
+      add_to_property_tree (param, "PARAM", table);
+    }
   /// Skip null_bitfield_flag
   for (size_t i = 1; i < columns.size (); ++i)
-    { add_to_property_tree (columns[i], "FIELD", table); }
+    {
+      add_to_property_tree (columns[i], "FIELD", table);
+    }
   table.add ("DATA.TABLEDATA", tabledata_string);
   if (overflow)
     {

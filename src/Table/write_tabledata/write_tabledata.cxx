@@ -42,7 +42,7 @@ void Table::write_tabledata (std::ostream &os,
       td_suffix = "</TD>";
       os << '\n';
     }
-  
+
   for (size_t row_offset = 0; row_offset < data.size ();
        row_offset += row_size ())
     {
@@ -65,19 +65,19 @@ void Table::write_tabledata (std::ostream &os,
             case Format::Enums::JSON:
             case Format::Enums::JSON5:
               // FIXME: This uses the undocumented character escapes.
-              os << boost::property_tree::json_parser::create_escapes
-                (td.str ());
+              os << boost::property_tree::json_parser::create_escapes (
+                  td.str ());
               break;
             case Format::Enums::HTML:
               {
-                os << decode_links
-                  (boost::property_tree::xml_parser::encode_char_entities
-                   (td.str ()));
+                os << decode_links (
+                    boost::property_tree::xml_parser::encode_char_entities (
+                        td.str ()));
               }
               break;
             default:
-              os << boost::property_tree::xml_parser::encode_char_entities
-                (td.str ());
+              os << boost::property_tree::xml_parser::encode_char_entities (
+                  td.str ());
               break;
             }
           os << td_suffix;
