@@ -50,8 +50,8 @@ void tablator::Table::read_property_tree_as_votable (
     }
   while (child->first != "RESOURCE")
     {
-      if (child->first == "COOSYS" || child->first == "PARAM" || child->first
-                                                                 == "INFO")
+      if (child->first == "COOSYS" || child->first == "PARAM"
+          || child->first == "INFO")
         {
           read_node_and_attributes (child);
         }

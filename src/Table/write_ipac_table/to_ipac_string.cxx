@@ -11,7 +11,7 @@ std::string tablator::Table::to_ipac_string (const Data_Type &type) const
     case Data_Type::UINT16_LE:
     case Data_Type::INT32_LE:
       return "int";
-  /// Unsigned 32 bit ints do not fit in ints, so we use a long.
+    /// Unsigned 32 bit ints do not fit in ints, so we use a long.
     case Data_Type::UINT32_LE:
     case Data_Type::INT64_LE:
     case Data_Type::UINT64_LE:

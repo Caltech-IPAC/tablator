@@ -46,8 +46,7 @@ void tablator::Table::write_ipac_table_header (std::ostream &os) const
               || !columns[i].field_properties.description.empty ())
             {
               os << "\\ " << columns[i].name;
-              auto unit
-                  = columns[i].field_properties.attributes.find ("unit");
+              auto unit = columns[i].field_properties.attributes.find ("unit");
               if (unit != columns[i].field_properties.attributes.end ()
                   && !unit->second.empty ())
                 {

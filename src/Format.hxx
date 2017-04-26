@@ -32,17 +32,17 @@ public:
   // static would get destroyed before this variable, causing crashes
   // on exit.
   const std::map<Enums, std::pair<std::string, std::vector<std::string> > >
-  formats{ { Enums::JSON, { "json", { "js", "json" } } },
-           { Enums::JSON5, { "json5", { "js5", "json5" } } },
-           { Enums::VOTABLE, { "votable", { "xml", "vot", "vo" } } },
-           { Enums::CSV, { "csv", { "csv" } } },
-           { Enums::TSV, { "tsv", { "tsv" } } },
-           { Enums::FITS, { "fits", { "fits" } } },
-           { Enums::IPAC_TABLE, { "ipac_table", { "tbl" } } },
-           { Enums::TEXT, { "text", { "txt" } } },
-           { Enums::HTML, { "html", { "html" } } },
-           { Enums::HDF5, { "hdf5", { "h5", "hdf", "hdf5" } } },
-           { Enums::UNKNOWN, { "", {} } } };
+      formats{ { Enums::JSON, { "json", { "js", "json" } } },
+               { Enums::JSON5, { "json5", { "js5", "json5" } } },
+               { Enums::VOTABLE, { "votable", { "xml", "vot", "vo" } } },
+               { Enums::CSV, { "csv", { "csv" } } },
+               { Enums::TSV, { "tsv", { "tsv" } } },
+               { Enums::FITS, { "fits", { "fits" } } },
+               { Enums::IPAC_TABLE, { "ipac_table", { "tbl" } } },
+               { Enums::TEXT, { "text", { "txt" } } },
+               { Enums::HTML, { "html", { "html" } } },
+               { Enums::HDF5, { "hdf5", { "h5", "hdf", "hdf5" } } },
+               { Enums::UNKNOWN, { "", {} } } };
 
   Enums enum_format = Enums::UNKNOWN;
 

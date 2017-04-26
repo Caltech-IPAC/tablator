@@ -7,8 +7,7 @@
 namespace tablator
 {
 void write_type_as_ascii (std::ostream &os, const Data_Type &type,
-                          const size_t &array_size,
-                          const uint8_t *data,
+                          const size_t &array_size, const uint8_t *data,
                           const int &output_precision)
 {
   if (array_size != 1 && type != Data_Type::CHAR)
@@ -32,10 +31,10 @@ void write_type_as_ascii (std::ostream &os, const Data_Type &type,
           {
             std::stringstream ss;
             ss << "0x" << std::hex
-              /// Extra cast here because we want to output a number, not a
-              /// character
-               << static_cast<const uint16_t>(static_cast<const uint8_t>(*data))
-               << std::dec;
+               /// Extra cast here because we want to output a number, not a
+               /// character
+               << static_cast<const uint16_t>(
+                      static_cast<const uint8_t>(*data)) << std::dec;
             os << ss.str ();
           }
           break;
@@ -69,8 +68,8 @@ void write_type_as_ascii (std::ostream &os, const Data_Type &type,
           /// The characters in the type can be shorter than the
           /// number of allowed bytes.  So add a .c_str() that
           /// will terminate the string at the first null.
-          os << std::string (reinterpret_cast<const char*>(data),
-                             array_size).c_str ();
+          os << std::string (reinterpret_cast<const char *>(data), array_size)
+                    .c_str ();
           break;
         }
     }

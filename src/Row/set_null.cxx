@@ -14,7 +14,9 @@ void tablator::Row::set_null (const Data_Type &data_type,
   if (array_size != 1)
     {
       for (size_t o = offset; o < offset_end; o += data_size (data_type))
-        { set_null (data_type, 1, column, o, o + data_size (data_type)); }
+        {
+          set_null (data_type, 1, column, o, o + data_size (data_type));
+        }
     }
   else
     {
@@ -55,7 +57,7 @@ void tablator::Row::set_null (const Data_Type &data_type,
           break;
         default:
           throw std::runtime_error (
-            "Unexpected HDF5 data type in tablator::Row::set_null");
+              "Unexpected HDF5 data type in tablator::Row::set_null");
         }
     }
 }

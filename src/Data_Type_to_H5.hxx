@@ -36,7 +36,7 @@ inline H5::DataType Data_Type_to_H5 (const Data_Type &type)
       return H5::PredType::C_S1;
     default:
       throw std::runtime_error ("Unknown Data_Type: "
-                                + std::to_string (static_cast<int> (type)));
+                                + std::to_string (static_cast<int>(type)));
     }
 }
 }

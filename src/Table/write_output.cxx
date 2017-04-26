@@ -15,9 +15,13 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
   else if (format.is_hdf5 ())
     {
       if (use_stdout)
-        { write_hdf5 (std::cout); }
+        {
+          write_hdf5 (std::cout);
+        }
       else
-        { write_hdf5 (path); }
+        {
+          write_hdf5 (path);
+        }
     }
   else
     {
@@ -74,7 +78,7 @@ void tablator::Table::write_output (std::ostream &os,
             os << s.substr (0, tabledata_offset - (is_json ? 2 : 0));
             write_tabledata (os, format.enum_format);
             os << s.substr (tabledata_offset + tabledata_string.size ()
-                             + (is_json ? 2 : 0));
+                            + (is_json ? 2 : 0));
           }
           break;
         case Format::Enums::CSV:

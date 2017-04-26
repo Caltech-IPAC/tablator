@@ -12,7 +12,7 @@ public:
 
   Min_Max () : inclusive (true) {}
   Min_Max (const std::string &Value, const bool &Inclusive)
-    : value (Value), inclusive (Inclusive)
+      : value (Value), inclusive (Inclusive)
   {
   }
   bool empty () const { return value.empty (); }

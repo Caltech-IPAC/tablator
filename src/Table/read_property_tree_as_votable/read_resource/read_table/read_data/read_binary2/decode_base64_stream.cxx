@@ -9,10 +9,7 @@ namespace
 {
 struct is_not_space
 {
-  bool operator()(char x)
-  {
-    return std::isspace(x)==0;
-  }
+  bool operator()(char x) { return std::isspace (x) == 0; }
 };
 }
 namespace tablator
@@ -21,13 +18,15 @@ namespace tablator
 /// distinguishing between nulls added for padding and real nulls in
 /// the data.
 
-std::vector<uint8_t> decode_base64_stream(const std::string &val)
+std::vector<uint8_t> decode_base64_stream (const std::string &val)
 {
   using namespace boost::archive::iterators;
-  using It = transform_width<binary_from_base64
-                             <boost::filter_iterator
-                              <is_not_space, std::string::const_iterator> >,
-                             8, 6>;
-  return std::vector<uint8_t>(It(std::begin(val)), It(std::end(val)));
+  using It
+      = transform_width<binary_from_base64<boost::
+                                               filter_iterator<is_not_space,
+                                                               std::string::
+                                                                   const_iterator> >,
+                        8, 6>;
+  return std::vector<uint8_t>(It (std::begin (val)), It (std::end (val)));
 }
 }
