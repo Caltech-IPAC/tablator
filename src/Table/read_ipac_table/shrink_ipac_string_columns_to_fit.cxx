@@ -10,15 +10,17 @@ void tablator::Table::shrink_ipac_string_columns_to_fit (
   std::vector<Column> new_columns (columns);
 
   size_t new_row_size (0);
-  for (size_t i=0; i<columns.size (); ++i)
+  for (size_t i = 0; i < columns.size (); ++i)
     {
       if (columns[i].type == Data_Type::CHAR)
-        { new_columns[i].array_size = column_widths[i]; }
+        {
+          new_columns[i].array_size = column_widths[i];
+        }
       new_row_size += new_columns[i].data_size ();
       new_offsets.push_back (new_row_size);
     }
   const size_t rows = num_rows ();
-  //FIXME: Do this in place.
+  // FIXME: Do this in place.
   std::vector<uint8_t> new_data (rows * new_row_size);
   size_t row_offset (0), new_row_offset (0);
   for (size_t row = 0; row < rows; ++row)

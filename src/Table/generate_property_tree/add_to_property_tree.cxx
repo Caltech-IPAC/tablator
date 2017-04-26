@@ -22,9 +22,13 @@ void Option_to_xml (boost::property_tree::ptree &tree,
     {
       boost::property_tree::ptree &option_tree = tree.add ("OPTION", "");
       if (!option.name.empty ())
-        { option_tree.add ("<xmlattr>.name", option.name); }
+        {
+          option_tree.add ("<xmlattr>.name", option.name);
+        }
       if (!option.value.empty ())
-        { option_tree.add ("<xmlattr>.value", option.value); }
+        {
+          option_tree.add ("<xmlattr>.value", option.value);
+        }
       for (auto &o : option.options)
         Option_to_xml (option_tree, o);
     }
@@ -52,7 +56,8 @@ void add_to_property_tree (const Column &column, const std::string &tree_name,
 
       if (a.first.empty ())
         throw std::runtime_error ("Empty attribute in field " + column.name
-                                  + " which has type " + to_string (column.type));
+                                  + " which has type "
+                                  + to_string (column.type));
       field.add ("<xmlattr>." + a.first, a.second);
     }
 

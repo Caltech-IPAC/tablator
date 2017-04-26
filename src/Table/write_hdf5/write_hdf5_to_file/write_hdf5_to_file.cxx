@@ -6,7 +6,8 @@
 namespace tablator
 {
 void write_hdf5_columns (const std::vector<Column> &columns,
-                         const std::string &column_type, H5::H5Location &table);
+                         const std::string &column_type,
+                         H5::H5Location &table);
 }
 
 void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
@@ -17,7 +18,7 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
   // FIXME: This needs to be generalized for multiple resources
   H5::Group group (outfile.createGroup ("RESOURCE_0"));
   write_hdf5_columns (resource_params, "PARAM", group);
-  
+
   std::array<hsize_t, 1> dims = { { num_rows () } };
   H5::DataSpace dataspace (dims.size (), dims.data ());
 
@@ -25,15 +26,19 @@ void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
   std::vector<H5::ArrayType> array_types;
   H5::CompType compound_type (row_size ());
   std::vector<std::string> unique_names;
-  unique_names.reserve (columns.size());
-  for (auto &column: columns)
-    { unique_names.push_back(column.name); }
+  unique_names.reserve (columns.size ());
+  for (auto &column : columns)
+    {
+      unique_names.push_back (column.name);
+    }
   std::sort (unique_names.begin (), unique_names.end ());
   if (std::unique (unique_names.begin (), unique_names.end ())
       != unique_names.end ())
-    { throw std::runtime_error ("Duplicate column names are not "
-                                "allowed in HDF5 tables"); }
-  for (size_t i=0; i<columns.size (); ++i)
+    {
+      throw std::runtime_error ("Duplicate column names are not "
+                                "allowed in HDF5 tables");
+    }
+  for (size_t i = 0; i < columns.size (); ++i)
     {
       if (columns[i].type == Data_Type::CHAR)
         {

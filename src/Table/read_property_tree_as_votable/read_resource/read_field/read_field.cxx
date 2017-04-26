@@ -65,10 +65,11 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
           // FIXME: We do not handle arrays correctly
           else if (attribute.first == "arraysize")
             {
-              std::string array_size = attribute.second.get_value<std::string>();
+              std::string array_size
+                  = attribute.second.get_value<std::string>();
               if (array_size == "*")
                 {
-                  result.array_size = std::numeric_limits<size_t>::max();
+                  result.array_size = std::numeric_limits<size_t>::max ();
                   result.is_array_dynamic = true;
                 }
               else
@@ -88,12 +89,12 @@ tablator::Table::read_field (const boost::property_tree::ptree &field)
   if (child != end && child->first == "DESCRIPTION")
     {
       result.field_properties.description
-        = child->second.get_value<std::string>();
+          = child->second.get_value<std::string>();
       ++child;
     }
   if (child != end && child->first == "VALUES")
     {
-      result.field_properties.values=read_values(child->second);
+      result.field_properties.values = read_values (child->second);
       ++child;
     }
   if (child != end && child->first == "LINK")
