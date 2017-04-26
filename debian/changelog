@@ -1,3 +1,9 @@
+tablator (2.1.6+dfsg-1) unstable; urgency=low
+
+  * Run through clang-format.  No code changes.
+
+ -- Walter Landry <wlandry@caltech.edu>  Wed, 26 Apr 2017 10:35:32 -0700
+
 tablator (2.1.5+dfsg-1) unstable; urgency=low
 
   * Make html output more spiffy
