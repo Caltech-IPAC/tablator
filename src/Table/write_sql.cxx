@@ -26,7 +26,7 @@ void tablator::Table::write_sql (std::ostream &os,
                                  const Format::Enums &output_type) const
 {
   std::string quoted_table_name (quote_string(table_name,'"'));
-  os << "CREATE TABLE " << quoted_table_name << "(\n";
+  os << "CREATE TABLE " << quoted_table_name << " (\n";
   for (size_t i = 1; i < columns.size (); ++i)
     {
       os << quote_string (boost::to_upper_copy(columns[i].name),'"') << " "
