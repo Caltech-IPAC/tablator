@@ -3,7 +3,6 @@
 #include "Property.hxx"
 #include "Field_Properties.hxx"
 #include "Format.hxx"
-#include "Database_Type.hxx"
 
 #include "Row.hxx"
 #include "Column.hxx"
