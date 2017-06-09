@@ -12,11 +12,11 @@ inline std::string Data_Type_to_SQL (const Data_Type &data_type,
 {
   switch (output_type)
     {
-    case Format::Enums::ORACLE:
+    case Format::Enums::ORACLE_SQL:
       return Data_Type_to_Oracle (data_type);
-    case Format::Enums::POSTGRES:
+    case Format::Enums::POSTGRES_SQL:
       return Data_Type_to_Postgres (data_type);
-    case Format::Enums::SQLITE:
+    case Format::Enums::SQLITE_SQL:
       return Data_Type_to_SQLite (data_type);
     default:
       throw std::runtime_error ("Unknown Database_Type"

@@ -95,9 +95,9 @@ void tablator::Table::write_output (std::ostream &os,
         case Format::Enums::HTML:
           write_html (os);
           break;
-        case Format::Enums::POSTGRES:
-        case Format::Enums::ORACLE:
-        case Format::Enums::SQLITE:
+        case Format::Enums::POSTGRES_SQL:
+        case Format::Enums::ORACLE_SQL:
+        case Format::Enums::SQLITE_SQL:
           write_sql (os, table_name, format.enum_format);
           break;
         case Format::Enums::UNKNOWN:
