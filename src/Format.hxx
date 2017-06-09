@@ -24,6 +24,9 @@ public:
     TEXT,
     HTML,
     HDF5,
+    POSTGRES,
+    ORACLE,
+    SQLITE,
     UNKNOWN
   };
 
@@ -42,6 +45,9 @@ public:
                { Enums::TEXT, { "text", { "txt" } } },
                { Enums::HTML, { "html", { "html" } } },
                { Enums::HDF5, { "hdf5", { "h5", "hdf", "hdf5" } } },
+               { Enums::POSTGRES, { "postgres", { "postgres" } } },
+               { Enums::ORACLE, { "oracle", { "oracle" } } },
+               { Enums::SQLITE, { "sqlite", { "sqlite" } } },
                { Enums::UNKNOWN, { "", {} } } };
 
   Enums enum_format = Enums::UNKNOWN;
@@ -107,6 +113,9 @@ public:
 
       case Enums::TEXT:
       case Enums::IPAC_TABLE:
+      case Enums::POSTGRES:
+      case Enums::ORACLE:
+      case Enums::SQLITE:
         return "Content-type: text/plain\r\n\r\n";
         break;
 

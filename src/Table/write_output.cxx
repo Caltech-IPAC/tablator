@@ -27,18 +27,19 @@ void tablator::Table::write_output (const boost::filesystem::path &path,
     {
       if (use_stdout)
         {
-          write_output (std::cout, format);
+          write_output (std::cout, "stdout", format);
         }
       else
         {
           boost::filesystem::ofstream file_output;
           file_output.open (path);
-          write_output (file_output, format);
+          write_output (file_output, path.stem ().native (), format);
         }
     }
 }
 
 void tablator::Table::write_output (std::ostream &os,
+                                    const std::string &table_name,
                                     const Format &format) const
 {
   if (format.is_fits ())
@@ -93,6 +94,11 @@ void tablator::Table::write_output (std::ostream &os,
           break;
         case Format::Enums::HTML:
           write_html (os);
+          break;
+        case Format::Enums::POSTGRES:
+        case Format::Enums::ORACLE:
+        case Format::Enums::SQLITE:
+          write_sql (os, table_name, format.enum_format);
           break;
         case Format::Enums::UNKNOWN:
         default:

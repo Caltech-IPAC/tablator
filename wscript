@@ -52,6 +52,7 @@ def build(bld):
              'src/Table/read_dsv/set_column_info/get_best_data_type.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
+             'src/Table/write_sql.cxx',
              'src/Table/write_fits.cxx',
              'src/Table/write_html.cxx',
              'src/Table/write_tabledata/write_tabledata.cxx',
