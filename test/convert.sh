@@ -10,7 +10,7 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
 done
 
 for table in test/multi test/multi.csv test/multi.tsv test/fits_medium.fits test/*.tbl test/*.json5 test/*.xml test/*.unk; do
-    for ending in tbl hdf5 xml csv tsv fits html json json5; do
+    for ending in tbl hdf5 xml csv tsv fits html json json5 postgres sqlite oracle db; do
         if [ $ending == "fits" ]; then
             build/tablator --stream-intermediate=yes $table test.$ending
         else
