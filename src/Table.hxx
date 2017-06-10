@@ -158,6 +158,7 @@ public:
   void write_sql (std::ostream &os,
                   const std::string &table_name,
                   const Format::Enums &output_type) const;
+  void write_sqlite_db (const boost::filesystem::path &path) const;
   void write_fits (std::ostream &os) const;
   void write_fits (const boost::filesystem::path &filename) const;
   void write_fits (fitsfile *fits_file) const;

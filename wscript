@@ -1,15 +1,15 @@
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser')
+    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser')
+    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3')
     conf.check_boost(lib='filesystem system program_options')
 
 def build(bld):
     default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
     # default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
-                  'json5_parser']
+                  'json5_parser', 'sqlite3']
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
@@ -53,6 +53,7 @@ def build(bld):
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
              'src/Table/write_sql.cxx',
+             'src/Table/write_sqlite_db.cxx',
              'src/Table/write_fits.cxx',
              'src/Table/write_html.cxx',
              'src/Table/write_tabledata/write_tabledata.cxx',
