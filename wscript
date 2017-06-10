@@ -1,15 +1,15 @@
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3')
+    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3')
+    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
     conf.check_boost(lib='filesystem system program_options')
 
 def build(bld):
     default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
     # default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
-                  'json5_parser', 'sqlite3']
+                  'json5_parser', 'sqlite3', 'vsqlitepp']
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
