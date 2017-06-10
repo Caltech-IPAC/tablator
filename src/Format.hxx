@@ -24,6 +24,10 @@ public:
     TEXT,
     HTML,
     HDF5,
+    POSTGRES_SQL,
+    ORACLE_SQL,
+    SQLITE_SQL,
+    SQLITE_DB,
     UNKNOWN
   };
 
@@ -42,6 +46,10 @@ public:
                { Enums::TEXT, { "text", { "txt" } } },
                { Enums::HTML, { "html", { "html" } } },
                { Enums::HDF5, { "hdf5", { "h5", "hdf", "hdf5" } } },
+               { Enums::POSTGRES_SQL, { "postgres", { "postgres" } } },
+               { Enums::ORACLE_SQL, { "oracle", { "oracle" } } },
+               { Enums::SQLITE_SQL, { "sqlite", { "sqlite" } } },
+               { Enums::SQLITE_DB, { "db", { "db" } } },
                { Enums::UNKNOWN, { "", {} } } };
 
   Enums enum_format = Enums::UNKNOWN;
@@ -107,9 +115,15 @@ public:
 
       case Enums::TEXT:
       case Enums::IPAC_TABLE:
+      case Enums::POSTGRES_SQL:
+      case Enums::ORACLE_SQL:
+      case Enums::SQLITE_SQL:
         return "Content-type: text/plain\r\n\r\n";
         break;
 
+      case Enums::SQLITE_DB:
+        return "Content-type: application/x-sqlite3\r\n\r\n";
+        break;
       case Enums::VOTABLE:
         return "Content-type: application/x-votable+xml\r\n\r\n";
         break;
@@ -144,6 +158,7 @@ public:
   bool is_fits () const { return enum_format == Enums::FITS; }
   bool is_html () const { return enum_format == Enums::HTML; }
   bool is_hdf5 () const { return enum_format == Enums::HDF5; }
+  bool is_sqlite_db () const { return enum_format == Enums::SQLITE_DB; }
   bool is_unknown () const { return enum_format == Enums::UNKNOWN; }
 
   std::string string () const
