@@ -6,8 +6,9 @@ tablator [options] [INPUT] [OUTPUT]
 .SH DESCRIPTION
 Tablator is a utility for converting tables in astronomy into
 different formats.  Tablator can read and write tables in fits, ipac
-table, hdf5, votable, json, json5, csv, and tsv, and can write html.  The
-emphasis is on speed, so all conversions are done in memory.
+table, hdf5, votable, json, json5, csv, and tsv, and can write html,
+SQL commands, and SQLite databases.  The emphasis is on speed, so all
+conversions are done in memory.
 .PP
 Unless passed the \fB\-\-input-format\fR option, tablator attempts to
 guess the formats of the input file by looking at the file extension.
@@ -49,6 +50,18 @@ txt
 .TP
 .B HTML
 html
+.TP
+.B Postgres compatible SQL
+postgres
+.TP
+.B SQLite compatible SQL
+sqlite
+.TP
+.B Oracle compatible SQL
+oracle
+.TP
+.B SQLite single file database
+db
 .PP
 Note that a file with no extension (e.g. \fBmytable\fR) is considered an IPAC table by default.
 .PD
@@ -83,6 +96,14 @@ Format of the output file.  Allowed values are those taken by the \fB\-\-input-f
 .B text
 .br
 .B html
+.br
+.B postgres
+.br
+.B sqlite
+.br
+.B oracle
+.br
+.B db
 .SH "EXAMPLES"
 To convert an HDF5 file named mytable.hdf5 to fits
 .PP

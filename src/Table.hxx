@@ -130,7 +130,9 @@ public:
   flatten_properties () const;
 
   const int output_precision = std::numeric_limits<double>::max_digits10;
-  void write_output (std::ostream &os, const Format &format) const;
+  void write_output (std::ostream &os,
+                     const std::string &table_name,
+                     const Format &format) const;
   void write_output (const boost::filesystem::path &path,
                      const Format &format) const;
   void write_output (const boost::filesystem::path &path) const
@@ -153,6 +155,10 @@ public:
   std::string to_ipac_string (const Data_Type &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
+  void write_sql (std::ostream &os,
+                  const std::string &table_name,
+                  const Format::Enums &output_type) const;
+  void write_sqlite_db (const boost::filesystem::path &path) const;
   void write_fits (std::ostream &os) const;
   void write_fits (const boost::filesystem::path &filename) const;
   void write_fits (fitsfile *fits_file) const;

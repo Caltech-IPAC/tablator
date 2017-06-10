@@ -26,7 +26,10 @@ and writing
   TSV
   TEXT
   HTML
-
+  Postgres-compatible SQL
+  SQLite-compatible SQL
+  Oracle-compatible SQL
+  SQLite database
 
 Copyright © 2014-2017, California Institute of Technology
 Authors: Walter Landry and Angela Zhang
