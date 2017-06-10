@@ -1,6 +1,5 @@
 #include "../Table.hxx"
 #include "../Data_Type_to_SQL.hxx"
-#include "../write_type_as_ascii.hxx"
 
 #include <sqlite/connection.hpp>
 #include <sqlite/execute.hpp>
