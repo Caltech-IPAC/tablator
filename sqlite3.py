@@ -2,9 +2,6 @@
 # encoding: utf-8
 
 def configure(conf):
-    def get_param(varname,default):
-        return getattr(Options.options,varname,'')or default
-
     # Find sqlite3
     if conf.options.sqlite3_dir:
         if not conf.options.sqlite3_incdir:
