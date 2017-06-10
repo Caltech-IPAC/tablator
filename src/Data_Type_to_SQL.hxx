@@ -19,8 +19,9 @@ inline std::string Data_Type_to_SQL (const Data_Type &data_type,
     case Format::Enums::SQLITE_SQL:
       return Data_Type_to_SQLite (data_type);
     default:
-      throw std::runtime_error ("Unknown Database_Type"
-                                + std::to_string (static_cast<int>(output_type)));
+      throw std::runtime_error (
+          "Unknown Database_Type"
+          + std::to_string (static_cast<int>(output_type)));
     }
 }
 }

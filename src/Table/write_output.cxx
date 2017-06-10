@@ -105,7 +105,8 @@ void tablator::Table::write_output (std::ostream &os,
           write_sql (os, table_name, format.enum_format);
           break;
         case Format::Enums::SQLITE_DB:
-          throw std::runtime_error ("SQLITE_DB output to a stream not implemented");
+          throw std::runtime_error (
+              "SQLITE_DB output to a stream not implemented");
           break;
         case Format::Enums::UNKNOWN:
         default:
