@@ -1,3 +1,9 @@
+tablator (2.2.0+dfsg-1) unstable; urgency=low
+
+  * Support writing SQL text and binary SQLite databases
+
+ -- Walter Landry <wlandry@caltech.edu>  Fri, 9 Jun 2017 21:39:25 -0700
+
 tablator (2.1.6+dfsg-1) unstable; urgency=low
 
   * Run through clang-format.  No code changes.
