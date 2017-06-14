@@ -13,5 +13,5 @@ tablator::Table::write_sqlite_db (const boost::filesystem::path &path) const
              Format::Enums::SQLITE_SQL);
 
   sqlite::connection connection (path.native ());
-  sqlite::execute(connection, create_table_stream.str (), true);
+  sqlite::execute (connection, create_table_stream.str (), true);
 }

@@ -154,8 +154,16 @@ public:
   std::string to_ipac_string (const Data_Type &type) const;
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
+  void write_create_table_sql (std::ostream &os, const std::string &table_name,
+                               const Format::Enums &sql_type) const;
+  void write_insert_sql (std::ostream &os,
+                         const std::string &table_name) const;
   void write_sql (std::ostream &os, const std::string &table_name,
-                  const Format::Enums &output_type) const;
+                  const Format::Enums &sql_type) const
+  {
+    write_create_table_sql (os, table_name, sql_type);
+    write_insert_sql (os, table_name);
+  }
   void write_sqlite_db (const boost::filesystem::path &path) const;
   void write_fits (std::ostream &os) const;
   void write_fits (const boost::filesystem::path &filename) const;

@@ -15,6 +15,7 @@ def build(bld):
              'src/Format/set_from_extension.cxx',
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
+             'src/quote_sql_string.cxx',
              'src/Table/Table.cxx',
              'src/Table/append_column.cxx',
              'src/Table/flatten_properties.cxx',
@@ -52,7 +53,8 @@ def build(bld):
              'src/Table/read_dsv/set_column_info/get_best_data_type.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
-             'src/Table/write_sql.cxx',
+             'src/Table/write_create_table_sql.cxx',
+             'src/Table/write_insert_sql.cxx',
              'src/Table/write_sqlite_db.cxx',
              'src/Table/write_fits.cxx',
              'src/Table/write_html.cxx',
@@ -76,7 +78,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='2.2.0'
+              vnum='2.3.0'
               )
 
     bld.stlib(source=sources,
