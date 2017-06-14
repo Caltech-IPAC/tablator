@@ -1,20 +1,21 @@
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3')
+    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3')
+    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
     conf.check_boost(lib='filesystem system program_options')
 
 def build(bld):
     default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
     # default_flags=['-Wall', '-Wextra', '-g']
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
-                  'json5_parser', 'sqlite3']
+                  'json5_parser', 'sqlite3', 'vsqlitepp']
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
+             'src/quote_sql_string.cxx',
              'src/Table/Table.cxx',
              'src/Table/append_column.cxx',
              'src/Table/flatten_properties.cxx',
@@ -52,7 +53,8 @@ def build(bld):
              'src/Table/read_dsv/set_column_info/get_best_data_type.cxx',
              'src/Table/write_output.cxx',
              'src/Table/write_csv_tsv.cxx',
-             'src/Table/write_sql.cxx',
+             'src/Table/write_create_table_sql.cxx',
+             'src/Table/write_insert_sql.cxx',
              'src/Table/write_sqlite_db.cxx',
              'src/Table/write_fits.cxx',
              'src/Table/write_html.cxx',
@@ -76,7 +78,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='2.2.0'
+              vnum='2.3.0'
               )
 
     bld.stlib(source=sources,

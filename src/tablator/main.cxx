@@ -102,7 +102,8 @@ int main (int argc, char *argv[])
       if (stream_intermediate)
         {
           boost::filesystem::ofstream outfile (output_path);
-          table.write_output (outfile, output_path.stem ().native (), output_format);
+          table.write_output (outfile, output_path.stem ().native (),
+                              output_format);
         }
       else
         {
