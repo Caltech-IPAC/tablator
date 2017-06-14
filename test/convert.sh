@@ -10,7 +10,7 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
 done
 
 for table in test/multi test/multi.csv test/multi.tsv test/fits_medium.fits test/*.tbl test/*.json5 test/*.xml test/*.unk; do
-    for ending in tbl hdf5 xml csv tsv fits html json json5; do
+    for ending in tbl hdf5 xml csv tsv fits html json json5 postgres sqlite oracle db; do
         if [ $ending == "fits" ]; then
             build/tablator --stream-intermediate=yes $table test.$ending
         else
@@ -64,5 +64,26 @@ if [ $? -eq 0 ]; then
     echo "PASS: HTML retain links"
 else
     echo "FAIL: HTML retain links"
+fi
+
+./build/tablator --output-format=postgres test/multi.tbl - | diff -w - test/multi.postgres
+if [ $? -eq 0 ]; then
+    echo "PASS: Postgres output"
+else
+    echo "FAIL: Postgres output"
+fi
+
+./build/tablator --output-format=oracle test/multi.tbl - | diff -w - test/multi.oracle
+if [ $? -eq 0 ]; then
+    echo "PASS: Oracle output"
+else
+    echo "FAIL: Oracle output"
+fi
+
+./build/tablator --output-format=sqlite test/multi.tbl - | diff -w - test/multi.sqlite
+if [ $? -eq 0 ]; then
+    echo "PASS: SQLite output"
+else
+    echo "FAIL: SQLite output"
 fi
 
