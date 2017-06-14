@@ -1,3 +1,9 @@
+tablator (2.3.0+dfsg-1) unstable; urgency=low
+
+  * Allow writing CREATE TABLE and the INSERT clauses separately.
+
+ -- Walter Landry <wlandry@caltech.edu>  Wed, 14 Jun 2017 13:29:53 -0700
+
 tablator (2.2.0+dfsg-1) unstable; urgency=low
 
   * Support writing SQL text and binary SQLite databases
