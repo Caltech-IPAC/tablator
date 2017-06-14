@@ -66,3 +66,24 @@ else
     echo "FAIL: HTML retain links"
 fi
 
+./build/tablator --output-format=postgres test/multi.tbl - | diff -w - test/multi.postgres
+if [ $? -eq 0 ]; then
+    echo "PASS: Postgres output"
+else
+    echo "FAIL: Postgres output"
+fi
+
+./build/tablator --output-format=oracle test/multi.tbl - | diff -w - test/multi.oracle
+if [ $? -eq 0 ]; then
+    echo "PASS: Oracle output"
+else
+    echo "FAIL: Oracle output"
+fi
+
+./build/tablator --output-format=sqlite test/multi.tbl - | diff -w - test/multi.sqlite
+if [ $? -eq 0 ]; then
+    echo "PASS: SQLite output"
+else
+    echo "FAIL: SQLite output"
+fi
+
