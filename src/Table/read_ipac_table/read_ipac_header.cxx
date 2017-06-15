@@ -7,8 +7,16 @@ std::vector<size_t> get_bar_offsets (std::string &str)
 {
   std::vector<size_t> offsets;
   for (size_t i = 0; i < str.size (); i++)
-    if (str[i] == '|')
-      offsets.push_back (i);
+    {
+      if (str[i] == '|')
+        {
+          offsets.push_back (i);
+        }
+    }
+  if (offsets.size () < 2)
+    {
+      throw std::runtime_error ("This IPAC Table is empty");
+    }
   return offsets;
 }
 
