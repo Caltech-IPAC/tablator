@@ -42,6 +42,10 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
           break;
         }
     }
+  if (fields.size () < 2)
+    {
+      throw std::runtime_error ("This VOTable is empty.");
+    }
   if (child != end && child->first == "DATA")
     {
       read_data (child->second, fields);

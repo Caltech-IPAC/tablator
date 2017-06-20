@@ -9,6 +9,10 @@ const std::string tablator::Table::null_bitfield_flags_description
 tablator::Table::Table (const std::vector<Column> &Columns,
                         const std::map<std::string, std::string> &property_map)
 {
+  if (Columns.empty ())
+    {
+      throw std::runtime_error ("This table has no columns");
+    }
   const size_t null_flags_size = (Columns.size () + 7) / 8;
   append_column (null_bitfield_flags_name, Data_Type::UINT8_LE,
                  null_flags_size,
@@ -150,5 +154,10 @@ tablator::Table::Table (const boost::filesystem::path &input_path,
       if (!is_read_successful)
         throw std::runtime_error ("Unsupported input: " + input_path.string ()
                                   + ". Tried all formats.");
+    }
+  if (columns.size () < 2)
+    {
+      throw std::runtime_error ("This file : " + input_path.string ()
+                                + " has no columns");
     }
 }
