@@ -45,8 +45,11 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
           boost::algorithm::trim (element);
           minimum_column_widths[column]
               = std::max (minimum_column_widths[column], element.size ());
-          if (!ipac_columns[3][column].empty ()
-              && element == ipac_columns[3][column])
+          if ((!ipac_columns[3][column].empty ()
+               && element == ipac_columns[3][column])
+              || (ipac_columns[3][column].empty ()
+                  && columns[column].type != Data_Type::CHAR
+                  && element.empty ()))
             {
               row_string.set_null (columns[column].type,
                                    columns[column].array_size, column,
