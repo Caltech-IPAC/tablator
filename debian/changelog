@@ -1,3 +1,11 @@
+tablator (2.3.1+dfsg-1) unstable; urgency=low
+
+  * Write csv/tsv nulls as empty columns
+  * Interpret empty columns in IPAC_TABLE as nulls
+  * Better error messages when reading a table with no columns
+
+ -- Walter Landry <wlandry@caltech.edu>  Tue, 20 Jun 2017 14:31:55 -0700
+
 tablator (2.3.0+dfsg-1) unstable; urgency=low
 
   * Allow writing CREATE TABLE and the INSERT clauses separately.
