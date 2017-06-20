@@ -61,13 +61,17 @@ void tablator::Table::write_csv_tsv (std::ostream &os,
       os << (i == num_members - 1 ? '\n' : separator);
     }
 
-  for (size_t j = 0; j < data.size (); j += row_size ())
+  for (size_t row_offset = 0; row_offset < data.size ();
+       row_offset += row_size ())
     for (int i = 1; i < num_members; ++i)
       {
-        size_t offset = offsets[i] + j;
+        size_t offset = offsets[i] + row_offset;
         std::stringstream ss;
-        write_type_as_ascii (ss, columns[i].type, columns[i].array_size,
-                             data.data () + offset, output_precision);
+        if (!is_null (row_offset, i))
+          {
+            write_type_as_ascii (ss, columns[i].type, columns[i].array_size,
+                                 data.data () + offset, output_precision);
+          }
         write_escaped_string (os, ss.str (), separator);
         os << (i == num_members - 1 ? '\n' : separator);
       }

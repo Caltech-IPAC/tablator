@@ -87,3 +87,23 @@ else
     echo "FAIL: SQLite output"
 fi
 
+./build/tablator --output-format=text test/empty_ipac_table - 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: Empty IPAC Table"
+else
+    echo "PASS: Empty IPAC Table"
+fi
+
+./build/tablator --output-format=text --input-format=csv test/empty - 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: Empty IPAC Table"
+else
+    echo "PASS: Empty IPAC Table"
+fi
+
+./build/tablator --output-format=text --input-format=votable test/empty_votable - 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: Empty VOTable"
+else
+    echo "PASS: Empty VOTable"
+fi
