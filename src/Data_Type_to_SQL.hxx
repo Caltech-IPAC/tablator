@@ -8,14 +8,15 @@
 namespace tablator
 {
 inline std::string Data_Type_to_SQL (const Data_Type &data_type,
+                                     const size_t &array_size,
                                      const Format::Enums &output_type)
 {
   switch (output_type)
     {
     case Format::Enums::ORACLE_SQL:
-      return Data_Type_to_Oracle (data_type);
+      return Data_Type_to_Oracle (data_type, array_size);
     case Format::Enums::POSTGRES_SQL:
-      return Data_Type_to_Postgres (data_type);
+      return Data_Type_to_Postgres (data_type, array_size);
     case Format::Enums::SQLITE_SQL:
       return Data_Type_to_SQLite (data_type);
     default:

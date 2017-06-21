@@ -7,7 +7,8 @@
 
 namespace tablator
 {
-inline std::string Data_Type_to_Postgres (const Data_Type &type)
+inline std::string Data_Type_to_Postgres (const Data_Type &type,
+                                          const size_t &array_size)
 {
   switch (type)
     {
@@ -28,7 +29,7 @@ inline std::string Data_Type_to_Postgres (const Data_Type &type)
     case Data_Type::FLOAT64_LE:
       return "DOUBLE PRECISION";
     case Data_Type::CHAR:
-      return "TEXT";
+      return "VARCHAR(" + std::to_string (array_size) + ")";
     default:
       throw std::runtime_error ("Unknown Data_Type: "
                                 + std::to_string (static_cast<int>(type)));
