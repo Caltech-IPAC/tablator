@@ -2,6 +2,22 @@
 
 #include "../../Table.hxx"
 
+namespace
+{
+std::string convert_newlines (const std::string &input)
+{
+  std::string result (input);
+  for (auto &c: result)
+    {
+      if (c=='\n')
+        {
+          c = ' ';
+        }
+    }
+  return result;
+}
+}
+
 void tablator::Table::write_ipac_table_header (std::ostream &os) const
 {
   os << "\\fixlen = T\n";
@@ -10,30 +26,31 @@ void tablator::Table::write_ipac_table_header (std::ostream &os) const
 
   os << "\\RowsRetrieved= " << num_rows () << "\n";
 
-  // FIXME: need to escape the key and value and handle embedded newlines
   const size_t keyword_alignment (8);
   for (auto &property : properties)
     {
       auto &p = property.second;
       if (!p.value.empty ())
         {
-          os << "\\" << std::setw (keyword_alignment) << property.first << "= "
-             << "'" << p.value << "'\n";
+          os << "\\" << std::setw (keyword_alignment)
+             << convert_newlines (property.first) << "= "
+             << "'" << convert_newlines (p.value) << "'\n";
         }
       auto &a = p.attributes;
       auto name (a.find ("name")), value (a.find ("value"));
       if (a.size () == 2 && name != a.end () && value != a.end ())
         {
-          os << "\\" << std::setw (keyword_alignment) << name->second << "= "
-             << "'" << value->second << "'\n";
+          os << "\\" << std::setw (keyword_alignment)
+             << convert_newlines (name->second) << "= "
+             << "'" << convert_newlines (value->second) << "'\n";
         }
       else
         {
           for (auto &attr : a)
             {
               os << "\\" << std::setw (keyword_alignment)
-                 << (property.first + "." + attr.first) << "= "
-                 << "'" << attr.second << "'\n";
+                 << convert_newlines (property.first + "." + attr.first) << "= "
+                 << "'" << convert_newlines (attr.second) << "'\n";
             }
         }
     }
