@@ -162,6 +162,7 @@ public:
                   const Format::Enums &sql_type) const
   {
     write_create_table_sql (os, table_name, sql_type);
+    os << ";\n";
     write_insert_sql (os, table_name);
   }
   void write_sqlite_db (const boost::filesystem::path &path) const;

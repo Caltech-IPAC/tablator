@@ -19,5 +19,5 @@ tablator::Table::write_create_table_sql (std::ostream &os,
         }
       os << "\n";
     }
-  os << ");\n";
+  os << ")\n";
 }
