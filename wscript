@@ -3,7 +3,7 @@ def options(opt):
 
 def configure(conf):
     conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
-    conf.check_boost(lib='filesystem system program_options')
+    conf.check_boost(lib='filesystem system program_options regex')
 
 def build(bld):
     default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']

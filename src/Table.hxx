@@ -155,13 +155,7 @@ public:
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_create_table_sql (std::ostream &os, const std::string &table_name,
-                               const Format::Enums &sql_type,
-                               const bool &append_numbers_to_columns) const;
-  void write_create_table_sql (std::ostream &os, const std::string &table_name,
-                               const Format::Enums &sql_type) const
-  {
-    write_create_table_sql (os, table_name, sql_type, false);
-  }
+                               const Format::Enums &sql_type) const;
   void write_insert_sql (std::ostream &os,
                          const std::string &table_name) const;
   void write_sql (std::ostream &os, const std::string &table_name,
