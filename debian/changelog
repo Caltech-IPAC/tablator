@@ -1,3 +1,9 @@
+tablator (2.3.5+dfsg-1) unstable; urgency=low
+
+  * Properly escape newlines when writing ipac headers
+
+ -- Walter Landry <wlandry@caltech.edu>  Wed, 21 Jun 2017 16:16:40 -0700
+
 tablator (2.3.4+dfsg-1) unstable; urgency=low
 
   * Properly write out varchar's size for Oracle and Postgres
