@@ -6,7 +6,8 @@
 
 namespace tablator
 {
-inline std::string Data_Type_to_Oracle (const Data_Type &type)
+inline std::string Data_Type_to_Oracle (const Data_Type &type,
+                                        const size_t &array_size)
 {
   switch (type)
     {
@@ -27,7 +28,7 @@ inline std::string Data_Type_to_Oracle (const Data_Type &type)
     case Data_Type::FLOAT64_LE:
       return "BINARY_DOUBLE";
     case Data_Type::CHAR:
-      return "VARCHAR2";
+      return "VARCHAR2(" + std::to_string (array_size) + ")";
     default:
       throw std::runtime_error ("Unknown Data_Type: "
                                 + std::to_string (static_cast<int>(type)));

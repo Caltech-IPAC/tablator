@@ -12,7 +12,8 @@ tablator::Table::write_create_table_sql (std::ostream &os,
   for (size_t i = 1; i < columns.size (); ++i)
     {
       os << quote_sql_string (boost::to_upper_copy (columns[i].name), '"')
-         << " " << Data_Type_to_SQL (columns[i].type, sql_type);
+         << " " << Data_Type_to_SQL (columns[i].type, columns[i].array_size,
+                                     sql_type);
       if (i + 1 != columns.size ())
         {
           os << ",";
