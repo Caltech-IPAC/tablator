@@ -74,6 +74,16 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 }
             }
         }
+      std::size_t bad_char (line.find_first_not_of (" \t",
+                                                    ipac_column_offsets[ipac_columns[0].size () - 1]));
+      if (bad_char != std::string::npos)
+        throw std::runtime_error (
+                "Non-whitespace found at the end of line "
+                + std::to_string (current_line) + ", column "
+                + std::to_string (bad_char)
+                + ": '" + line.substr (bad_char)
+                + "'.\n\t  Is the header not wide enough?");
+
       append_row (row_string);
       ++current_line;
       std::getline (ipac_file, line);
