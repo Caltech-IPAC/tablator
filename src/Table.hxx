@@ -129,7 +129,6 @@ public:
   std::vector<std::pair<std::string, std::string> >
   flatten_properties () const;
 
-  const int output_precision = std::numeric_limits<double>::max_digits10;
   void write_output (std::ostream &os, const std::string &table_name,
                      const Format &format) const;
   void write_output (const boost::filesystem::path &path,
@@ -156,6 +155,14 @@ public:
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_create_table_sql (std::ostream &os, const std::string &table_name,
                                const Format::Enums &sql_type) const;
+  // {
+  //   using namespace std::string::literals;
+  //   write_create_table_sql (os, table_name, sql_type, ""s, ""s);
+  // }
+  // void write_create_table_sql (std::ostream &os, const std::string &table_name,
+  //                              const Format::Enums &sql_type,
+  //                              const std::string &point_column_name,
+  //                              const std::string &polygon_column_name) const;
   void write_insert_sql (std::ostream &os,
                          const std::string &table_name) const;
   void write_sql (std::ostream &os, const std::string &table_name,

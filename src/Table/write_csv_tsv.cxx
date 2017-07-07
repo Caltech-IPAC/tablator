@@ -70,7 +70,7 @@ void tablator::Table::write_csv_tsv (std::ostream &os,
         if (!is_null (row_offset, i))
           {
             write_type_as_ascii (ss, columns[i].type, columns[i].array_size,
-                                 data.data () + offset, output_precision);
+                                 data.data () + offset);
           }
         write_escaped_string (os, ss.str (), separator);
         os << (i == num_members - 1 ? '\n' : separator);

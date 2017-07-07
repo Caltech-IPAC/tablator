@@ -14,7 +14,7 @@ void tablator::Table::read_json5 (const boost::filesystem::path &path)
   /// FIXME: This is rather inefficient.  It reads the file as json5,
   /// writes into a stringstream as json, then reads it again as json.
   std::stringstream ss;
-  json5_parser::write (parse_tree, ss, json5_parser::none, output_precision);
+  json5_parser::write (parse_tree, ss, json5_parser::none);
   boost::property_tree::ptree tree;
   boost::property_tree::read_json (ss, tree);
   read_property_tree_as_votable (tree);
