@@ -154,17 +154,25 @@ public:
 
   void write_csv_tsv (std::ostream &os, const char &separator) const;
   void write_create_table_sql (std::ostream &os, const std::string &table_name,
-                               const Format::Enums &sql_type) const;
-  // {
-  //   using namespace std::string::literals;
-  //   write_create_table_sql (os, table_name, sql_type, ""s, ""s);
-  // }
-  // void write_create_table_sql (std::ostream &os, const std::string &table_name,
-  //                              const Format::Enums &sql_type,
-  //                              const std::string &point_column_name,
-  //                              const std::string &polygon_column_name) const;
+                               const Format::Enums &sql_type) const
+  {
+    using namespace std::string_literals;
+    write_create_table_sql (os, table_name, sql_type, ""s, ""s);
+  }
+  void write_create_table_sql (std::ostream &os, const std::string &table_name,
+                               const Format::Enums &sql_type,
+                               const std::string &point_column_name,
+                               const std::string &polygon_column_name) const;
   void write_insert_sql (std::ostream &os,
-                         const std::string &table_name) const;
+                         const std::string &table_name) const
+  {
+    write_insert_sql (os, table_name, std::pair<std::string,std::string> (),
+                      std::vector<std::pair<std::string,std::string>> ());
+  }
+  void write_insert_sql (std::ostream &os,
+                         const std::string &table_name,
+                         const std::pair<std::string,std::string> &point_input_names,
+                         const std::vector<std::pair<std::string,std::string>> &polygon_input_names) const;
   void write_sql (std::ostream &os, const std::string &table_name,
                   const Format::Enums &sql_type) const
   {
