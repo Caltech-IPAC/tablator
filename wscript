@@ -78,7 +78,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='2.3.5'
+              vnum='3.0.0'
               )
 
     bld.stlib(source=sources,
