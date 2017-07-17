@@ -1,21 +1,20 @@
+#include "data_size.hxx"
+
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-
-#include "data_size.hxx"
+#include <limits>
 
 namespace tablator
 {
 void write_type_as_ascii (std::ostream &os, const Data_Type &type,
-                          const size_t &array_size, const uint8_t *data,
-                          const int &output_precision)
+                          const size_t &array_size, const uint8_t *data)
 {
   if (array_size != 1 && type != Data_Type::CHAR)
     {
       for (size_t n = 0; n < array_size; ++n)
         {
-          write_type_as_ascii (os, type, 1, data + n * data_size (type),
-                               output_precision);
+          write_type_as_ascii (os, type, 1, data + n * data_size (type));
           if (n != array_size - 1)
             os << ' ';
         }
@@ -57,11 +56,11 @@ void write_type_as_ascii (std::ostream &os, const Data_Type &type,
           os << *reinterpret_cast<const uint64_t *>(data);
           break;
         case Data_Type::FLOAT32_LE:
-          os << std::setprecision (output_precision)
+          os << std::setprecision (std::numeric_limits<float>::max_digits10)
              << *reinterpret_cast<const float *>(data);
           break;
         case Data_Type::FLOAT64_LE:
-          os << std::setprecision (output_precision)
+          os << std::setprecision (std::numeric_limits<double>::max_digits10)
              << *reinterpret_cast<const double *>(data);
           break;
         case Data_Type::CHAR:

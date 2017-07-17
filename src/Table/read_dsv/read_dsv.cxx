@@ -3,13 +3,12 @@
 namespace tablator
 {
 std::list<std::vector<std::string> >
-parse_dsv (const boost::filesystem::path &path, const char &delimiter);
+parse_dsv (std::istream &input_stream, const char &delimiter);
 
-void Table::read_dsv (const boost::filesystem::path &path,
-                      const Format &format)
+void Table::read_dsv (std::istream &input_stream, const Format &format)
 {
   std::list<std::vector<std::string> > dsv (
-      parse_dsv (path, format.is_csv () ? ',' : '\t'));
+      parse_dsv (input_stream, format.is_csv () ? ',' : '\t'));
   set_column_info (dsv);
   read_dsv_rows (dsv);
 }

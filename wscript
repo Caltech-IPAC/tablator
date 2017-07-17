@@ -20,6 +20,11 @@ def build(bld):
              'src/Table/append_column.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/insert_ascii_in_row.cxx',
+             'src/Table/read_unknown/read_unknown.cxx',
+             'src/Table/read_unknown/is_fits.cxx',
+             'src/Table/read_unknown/is_ipac_table.cxx',
+             'src/Table/read_unknown/is_json5.cxx',
+             'src/Table/read_unknown/is_votable.cxx',
              'src/Table/read_fits.cxx',
              'src/Table/read_hdf5/read_hdf5.cxx',
              'src/Table/read_hdf5/read_metadata.cxx',
@@ -51,8 +56,8 @@ def build(bld):
              'src/Table/read_dsv/read_dsv_rows.cxx',
              'src/Table/read_dsv/set_column_info/set_column_info.cxx',
              'src/Table/read_dsv/set_column_info/get_best_data_type.cxx',
-             'src/Table/write_output.cxx',
-             'src/Table/write_csv_tsv.cxx',
+             'src/Table/write.cxx',
+             'src/Table/write_dsv.cxx',
              'src/Table/write_create_table_sql.cxx',
              'src/Table/write_insert_sql.cxx',
              'src/Table/write_sqlite_db.cxx',
@@ -67,9 +72,9 @@ def build(bld):
              'src/Table/write_ipac_table/to_ipac_string.cxx',
              'src/Table/write_ipac_table/get_column_width.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',
-             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_to_file.cxx',
-             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_attributes.cxx',
-             'src/Table/write_hdf5/write_hdf5_to_file/write_hdf5_columns.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_to_H5File.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_attributes.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_columns.cxx',
              'src/write_type_as_ascii.cxx']
 
     bld.shlib(source=sources,
@@ -78,7 +83,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='2.3.5'
+              vnum='3.0.0'
               )
 
     bld.stlib(source=sources,

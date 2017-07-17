@@ -5,12 +5,14 @@
 namespace tablator
 {
 std::list<std::vector<std::string> >
-parse_dsv (const boost::filesystem::path &path, const char &delimiter)
+parse_dsv (std::istream &input_stream, const char &delimiter)
 {
   std::list<std::vector<std::string> > result;
-  DSV_Parser parser (result, path.string (), delimiter);
+  DSV_Parser parser (result, input_stream, delimiter);
   if (result.empty ())
-    throw std::runtime_error ("This CSV/TSV file is empty: " + path.string ());
+    {
+      throw std::runtime_error ("The CSV/TSV stream is empty");
+    }
   return result;
 }
 }

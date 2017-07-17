@@ -50,7 +50,7 @@ public:
                { Enums::ORACLE_SQL, { "oracle", { "oracle" } } },
                { Enums::SQLITE_SQL, { "sqlite", { "sqlite" } } },
                { Enums::SQLITE_DB, { "db", { "db" } } },
-               { Enums::UNKNOWN, { "", {} } } };
+               { Enums::UNKNOWN, { "unknown", {} } } };
 
   Enums enum_format = Enums::UNKNOWN;
 

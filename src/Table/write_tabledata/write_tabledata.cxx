@@ -56,8 +56,7 @@ void Table::write_tabledata (std::ostream &os,
             {
               write_type_as_ascii (td, columns[column].type,
                                    columns[column].array_size,
-                                   data.data () + row_offset + offsets[column],
-                                   output_precision);
+                                   data.data () + row_offset + offsets[column]);
             }
           os << td_prefix;
           switch (output_format)

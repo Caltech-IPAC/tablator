@@ -1,5 +1,4 @@
 #include "../Table.hxx"
-#include "../data_size.hxx"
 
 const std::string tablator::Table::null_bitfield_flags_name
     = "null_bitfield_flags";
@@ -32,132 +31,88 @@ tablator::Table::Table (const std::vector<Column> &Columns,
 tablator::Table::Table (const boost::filesystem::path &input_path,
                         const Format &format)
 {
-  // FIXME: This has too many if(){} else {} clauses
-  if (format.is_hdf5 ())
+  switch (format.enum_format)
     {
+    case Format::Enums::HDF5:
       H5::Exception::dontPrint ();
       read_hdf5 (input_path);
-    }
-  else if (format.is_fits ())
-    {
+      break;
+    case Format::Enums::FITS:
       read_fits (input_path);
-    }
-  else if (format.is_ipac_table ())
-    {
+      break;
+    case Format::Enums::IPAC_TABLE:
+    case Format::Enums::TEXT:
       read_ipac_table (input_path);
-    }
-  else if (format.is_json5 ())
-    {
+      break;
+    case Format::Enums::JSON5:
       read_json5 (input_path);
-    }
-  else if (format.is_votable ())
-    {
+      break;
+    case Format::Enums::VOTABLE:
       read_votable (input_path);
-    }
-  else if (format.is_json ())
-    {
+      break;
+    case Format::Enums::JSON:
       read_json (input_path);
-    }
-  else if (format.is_csv () || format.is_tsv ())
-    {
+      break;
+    case Format::Enums::CSV:
+    case Format::Enums::TSV:
       read_dsv (input_path, format);
-    }
-  else
-    {
-      bool is_read_successful (false);
-      try
-        {
-          H5::Exception::dontPrint ();
-          read_hdf5 (input_path);
-          is_read_successful = true;
-        }
-      catch (...)
-        {
-        }
-      if (!is_read_successful)
-        {
-          try
-            {
-              read_fits (input_path);
-              is_read_successful = true;
-            }
-          catch (...)
-            {
-            }
-        }
-      if (!is_read_successful)
-        {
-          try
-            {
-              read_ipac_table (input_path);
-              is_read_successful = true;
-            }
-          catch (...)
-            {
-            }
-        }
-      if (!is_read_successful)
-        {
-          try
-            {
-              read_json5 (input_path);
-              is_read_successful = true;
-            }
-          catch (...)
-            {
-            }
-        }
-      if (!is_read_successful)
-        {
-          try
-            {
-              read_votable (input_path);
-              is_read_successful = true;
-            }
-          catch (...)
-            {
-            }
-        }
-      if (!is_read_successful)
-        {
-          try
-            {
-              read_json (input_path);
-              is_read_successful = true;
-            }
-          catch (...)
-            {
-            }
-        }
-      if (!is_read_successful)
-        {
-          try
-            {
-              read_dsv (input_path, Format ("csv"));
-              is_read_successful = true;
-            }
-          catch (...)
-            {
-            }
-        }
-      if (!is_read_successful)
-        {
-          try
-            {
-              read_dsv (input_path, Format ("tsv"));
-              is_read_successful = true;
-            }
-          catch (...)
-            {
-            }
-        }
-      if (!is_read_successful)
-        throw std::runtime_error ("Unsupported input: " + input_path.string ()
-                                  + ". Tried all formats.");
+      break;
+    case Format::Enums::UNKNOWN:
+      read_unknown (input_path);
+      break;
+    default:
+      throw std::runtime_error ("Unsupported input format: '"
+                                + format.string ()
+                                + "' for input file: " + input_path.string ());
+      break;
     }
   if (columns.size () < 2)
     {
-      throw std::runtime_error ("This file : " + input_path.string ()
-                                + " has no columns");
+      throw std::runtime_error ("This file has no columns: "
+                                + input_path.string ());
     }
-}
+}  
+
+tablator::Table::Table (std::istream &input_stream,
+                        const Format &format)
+{
+  switch (format.enum_format)
+    {
+      // FIXME: Implement streaming for HDF5 and FITS
+    // case Format::Enums::HDF5:
+    //   H5::Exception::dontPrint ();
+    //   read_hdf5 (input_stream);
+    //   break;
+    // case Format::Enums::FITS:
+    //   read_fits (input_stream);
+    //   break;
+    case Format::Enums::IPAC_TABLE:
+    case Format::Enums::TEXT:
+      read_ipac_table (input_stream);
+      break;
+    case Format::Enums::JSON5:
+      read_json5 (input_stream);
+      break;
+    case Format::Enums::VOTABLE:
+      read_votable (input_stream);
+      break;
+    case Format::Enums::JSON:
+      read_json (input_stream);
+      break;
+    case Format::Enums::CSV:
+    case Format::Enums::TSV:
+      read_dsv (input_stream, format);
+      break;
+    case Format::Enums::UNKNOWN:
+      read_unknown (input_stream);
+      break;
+    default:
+      throw std::runtime_error ("Unsupported input format for streaming: "
+                                + format.string ());
+      break;
+    }
+  if (columns.size () < 2)
+    {
+      throw std::runtime_error ("This stream has no columns");
+    }
+}  

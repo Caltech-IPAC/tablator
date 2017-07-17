@@ -13,10 +13,10 @@ void tablator::Table::write_hdf5 (std::ostream &os) const
   H5::FileAccPropList fapl;
   /// Set the version to at least 1.8 to make the files more compact.
   H5Pset_libver_bounds (fapl.getId (), H5F_LIBVER_18, H5F_LIBVER_LATEST);
-  fapl.setCore ((size_t)1, backing_store);
+  fapl.setCore (size_t (1), backing_store);
   H5::H5File memory_file ("nosuch.h5", H5F_ACC_TRUNC,
                           H5::FileCreatPropList::DEFAULT, fapl);
-  write_hdf5_to_file (memory_file);
+  write_hdf5_to_H5File (memory_file);
   memory_file.flush (H5F_SCOPE_GLOBAL);
 
   hid_t fileid = memory_file.getId ();
@@ -33,5 +33,5 @@ void tablator::Table::write_hdf5 (const boost::filesystem::path &p) const
   H5Pset_libver_bounds (fapl.getId (), H5F_LIBVER_18, H5F_LIBVER_LATEST);
   H5::H5File outfile{ p.string (), H5F_ACC_TRUNC,
                       H5::FileCreatPropList::DEFAULT, fapl };
-  write_hdf5_to_file (outfile);
+  write_hdf5_to_H5File (outfile);
 }
