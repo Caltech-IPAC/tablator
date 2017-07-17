@@ -10,7 +10,7 @@ void write_hdf5_columns (const std::vector<Column> &columns,
                          H5::H5Location &table);
 }
 
-void tablator::Table::write_hdf5_to_file (H5::H5File &outfile) const
+void tablator::Table::write_hdf5_to_H5File (H5::H5File &outfile) const
 {
   /// We map IVOA RESOURCE's to H5::Group's.  Group's must have names
   /// and they must be unique, so we can not use RESOURCE's name

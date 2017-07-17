@@ -48,8 +48,8 @@ std::ostream &write_escaped_string (std::ostream &os, const std::string &s,
 }
 }
 
-void tablator::Table::write_csv_tsv (std::ostream &os,
-                                     const char &separator) const
+void tablator::Table::write_dsv (std::ostream &os,
+                                 const char &separator) const
 {
   const int num_members = columns.size ();
   if (num_members == 0)

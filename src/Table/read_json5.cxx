@@ -3,13 +3,10 @@
 
 #include "../Table.hxx"
 
-void tablator::Table::read_json5 (const boost::filesystem::path &path)
+void tablator::Table::read_json5 (std::istream &input_stream)
 {
   json5_parser::Value parse_tree;
-  {
-    boost::filesystem::ifstream input_stream (path);
-    json5_parser::read_or_throw (input_stream, parse_tree);
-  }
+  json5_parser::read_or_throw (input_stream, parse_tree);
 
   /// FIXME: This is rather inefficient.  It reads the file as json5,
   /// writes into a stringstream as json, then reads it again as json.

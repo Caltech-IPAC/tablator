@@ -9,15 +9,22 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
     fi
 done
 
+STREAM_INTERMEDIATE=""
 for table in test/multi test/multi.csv test/multi.tsv test/fits_medium.fits test/*.tbl test/*.json5 test/*.xml test/upload_table.vo test/*.unk; do
+    STREAM_INTERMEDIATE=""
+    if [ $table != "test/fits_medium.fits" ] && [ $table != "test/multi_h5.unk" ] && [ $table != "test/multi_tsv.unk" ]; then
+        STREAM_INTERMEDIATE="--stream-intermediate=yes"
+    fi
     for ending in tbl hdf5 xml csv tsv fits html json json5 postgres sqlite oracle db; do
-        if [ $ending == "fits" ]; then
-            build/tablator --stream-intermediate=yes $table test.$ending
-        else
+        if [ $ending == "db" ]; then
             build/tablator $table test.$ending
+        else
+            build/tablator $STREAM_INTERMEDIATE $table test.$ending
         fi
-        if [ $ending == "hdf5" ] || [ $ending == "xml" ] || [ $ending == "fits" ] || [ $ending == "json" ] || [ $ending == "tbl" ]; then
+        if [ $ending == "hdf5" ] || [ $ending == "fits" ]; then
             build/tablator test.$ending temp.tbl
+        elif [ $ending == "xml" ] || [ $ending == "json" ] || [ $ending == "tbl" ]; then
+            build/tablator $STREAM_INTERMEDIATE test.$ending temp.tbl
         fi
         if [ $? -eq 0 ]; then
             echo "PASS: $table <-> $ending"

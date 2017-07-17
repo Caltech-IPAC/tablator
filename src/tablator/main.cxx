@@ -97,17 +97,19 @@ int main (int argc, char *argv[])
           return 1;
         }
 
-      tablator::Table table (input_path, input_format);
 
       if (stream_intermediate)
         {
-          boost::filesystem::ofstream outfile (output_path);
-          table.write_output (outfile, output_path.stem ().native (),
-                              output_format);
+          boost::filesystem::ifstream input_stream (input_path);
+          tablator::Table table (input_stream, input_format);
+          boost::filesystem::ofstream output_stream (output_path);
+          table.write (output_stream, output_path.stem ().native (),
+                       output_format);
         }
       else
         {
-          table.write_output (output_path, output_format);
+          tablator::Table table (input_path, input_format);
+          table.write (output_path, output_format);
         }
     }
   catch (boost::program_options::error &exception)

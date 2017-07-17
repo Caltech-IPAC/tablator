@@ -21,14 +21,14 @@
 #include <stdexcept>
 namespace tablator
 {
-DSV_Parser::DSV_Parser (DSV_Document &p_doc, const std::string &file_path,
+DSV_Parser::DSV_Parser (DSV_Document &p_doc, std::istream &input_stream,
                         const char &Delimiter)
-    : document (p_doc), delimiter (Delimiter)
+  : document (p_doc), dsv_stream (input_stream), delimiter (Delimiter)
 {
   idx = field_beg = field_end = 0;
   row_count = col_count = 0;
   state = LineEnd;
-  _initialize (file_path);
+  _initialize ();
   for (; state != ParseCompleted; _next ())
     {
       // I know design pattern, but I don't want to make things more
@@ -183,22 +183,13 @@ void DSV_Parser::_post_line_end ()
     }
 }
 
-void DSV_Parser::_open_dsv_file (const std::string &file_path)
+bool DSV_Parser::_get_line_from_file ()
 {
-  dsv_file.open (file_path.c_str ());
-  if (dsv_file.fail ())
-    {
-      throw std::runtime_error ("Failed to open file " + file_path + ".");
-    }
-}
-
-std::ifstream &DSV_Parser::_get_line_from_file ()
-{
-  if (std::getline (dsv_file, read_str))
+  if (std::getline (dsv_stream, read_str))
     {
       read_str += '\n';
     }
-  else if (dsv_file.eof ())
+  else if (dsv_stream.eof ())
     {
       state = ParseCompleted;
     }
@@ -208,7 +199,7 @@ std::ifstream &DSV_Parser::_get_line_from_file ()
           "Internal error: failed to read more data from file.");
     }
 
-  return dsv_file;
+  return dsv_stream.good ();
 }
 
 void DSV_Parser::_append_another_line_from_file ()
@@ -220,16 +211,15 @@ void DSV_Parser::_append_another_line_from_file ()
       idx -= field_beg;
       field_beg = field_end = 0;
     }
-  else if (dsv_file.eof ())
+  else if (dsv_stream.eof ())
     {
       throw std::runtime_error (
           "No more data in file. Parsing is not completed.");
     }
 }
 
-void DSV_Parser::_initialize (const std::string &file_path)
+void DSV_Parser::_initialize ()
 {
-  _open_dsv_file (file_path);
   _line_end ();
 }
 
