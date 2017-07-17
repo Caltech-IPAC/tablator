@@ -33,7 +33,7 @@ void check_bar_position (std::vector<size_t> &bar_offsets, std::string &line,
 }
 
 size_t tablator::Table::read_ipac_header (
-    boost::filesystem::ifstream &ipac_file,
+    std::istream &ipac_file,
     std::array<std::vector<std::string>, 4> &columns,
     std::vector<size_t> &ipac_column_offsets)
 {

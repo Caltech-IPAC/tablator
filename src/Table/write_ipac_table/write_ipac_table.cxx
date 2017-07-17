@@ -158,7 +158,7 @@ void tablator::Table::write_ipac_table (std::ostream &os) const
                           ss_temp, data_type,
                           (data_type == Data_Type::CHAR ? columns[i].array_size
                                                         : 1),
-                          data.data () + offset, output_precision);
+                          data.data () + offset);
                       std::string s (ss_temp.str ());
                       /// Turn newlines into spaces
                       auto newline_location (s.find ('\n'));

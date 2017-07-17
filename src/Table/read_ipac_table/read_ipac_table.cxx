@@ -6,27 +6,22 @@
 #include "../../to_string.hxx"
 #include "../insert_ascii_in_row.hxx"
 
-void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
+void tablator::Table::read_ipac_table (std::istream &input_stream)
 {
-  if (!exists (path))
-    throw std::runtime_error ("File " + path.string () + " does not exist.");
-
-  boost::filesystem::ifstream ipac_file (path, std::ios::in);
-
   size_t current_line;
   std::array<std::vector<std::string>, 4> ipac_columns;
   std::vector<size_t> ipac_column_offsets, ipac_column_widths;
 
   current_line
-      = read_ipac_header (ipac_file, ipac_columns, ipac_column_offsets);
+      = read_ipac_header (input_stream, ipac_columns, ipac_column_offsets);
   create_types_from_ipac_headers (ipac_columns, ipac_column_offsets,
                                   ipac_column_widths);
 
   std::vector<size_t> minimum_column_widths (ipac_columns[0].size (), 1);
   std::string line;
-  std::getline (ipac_file, line);
+  std::getline (input_stream, line);
   Row row_string (row_size ());
-  while (ipac_file)
+  while (input_stream)
     {
       row_string.set_zero ();
       for (size_t column = 1; column < ipac_columns[0].size (); ++column)
@@ -74,9 +69,19 @@ void tablator::Table::read_ipac_table (const boost::filesystem::path &path)
                 }
             }
         }
+      std::size_t bad_char (line.find_first_not_of (" \t",
+                                                    ipac_column_offsets[ipac_columns[0].size () - 1]));
+      if (bad_char != std::string::npos)
+        throw std::runtime_error (
+                "Non-whitespace found at the end of line "
+                + std::to_string (current_line) + ", column "
+                + std::to_string (bad_char)
+                + ": '" + line.substr (bad_char)
+                + "'.\n\t  Is the header not wide enough?");
+
       append_row (row_string);
       ++current_line;
-      std::getline (ipac_file, line);
+      std::getline (input_stream, line);
     }
   shrink_ipac_string_columns_to_fit (minimum_column_widths);
 }
