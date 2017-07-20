@@ -29,11 +29,11 @@ std::ostream &write_escaped_string (std::ostream &os, const std::string &s,
       os << "\"";
       while (quote_location != std::string::npos)
         {
-          os << s.substr (start, quote_location - start) << "\"";
+          os << s.substr (start, quote_location - start) << "\"\"";
           start = quote_location + 1;
           quote_location = s.find ("\"", start);
         }
-      os << "\"";
+      os << s.substr (start, quote_location - start) << "\"";
     }
   else if (s.find (separator) != std::string::npos
            || s.find ("\n") != std::string::npos)
