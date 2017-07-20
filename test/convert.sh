@@ -94,6 +94,13 @@ else
     echo "FAIL: SQLite output"
 fi
 
+./build/tablator --output-format=csv test/multi.tbl - | diff -w - test/multi.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: CSV output"
+else
+    echo "FAIL: CSV output"
+fi
+
 ./build/tablator --output-format=text test/empty_ipac_table - 2> /dev/null
 if [ $? -eq 0 ]; then
     echo "FAIL: Empty IPAC Table"
