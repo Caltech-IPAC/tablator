@@ -69,7 +69,7 @@ void tablator::Table::read_ipac_table (std::istream &input_stream)
                 }
             }
         }
-      std::size_t bad_char (line.find_first_not_of (" \t",
+      std::size_t bad_char (line.find_first_not_of (" \t\r",
                                                     ipac_column_offsets[ipac_columns[0].size () - 1]));
       if (bad_char != std::string::npos)
         throw std::runtime_error (
