@@ -1,3 +1,9 @@
+tablator (3.0.2+dfsg-1) unstable; urgency=low
+
+  * Allow DOS line ending in IPAC tables
+
+ -- Walter Landry <wlandry@caltech.edu>  Sat, 29 Jul 2017 13:09:31 -0700
+
 tablator (3.0.1+dfsg-1) unstable; urgency=low
 
   * Fix escaping when writing CSV or TSV
