@@ -1,3 +1,9 @@
+tablator (3.0.2+dfsg-2) unstable; urgency=low
+
+  * Incorporate multithreading fix from json5_parser
+
+ -- Walter Landry <wlandry@caltech.edu>  Mon, 14 Aug 2017 14:59:20 -0700
+
 tablator (3.0.2+dfsg-1) unstable; urgency=low
 
   * Allow DOS line ending in IPAC tables
