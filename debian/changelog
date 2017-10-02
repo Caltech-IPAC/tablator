@@ -1,3 +1,9 @@
+tablator (3.0.3+dfsg-1) unstable; urgency=low
+
+  * Add JSON and JSON5 to content_type()
+
+ -- Walter Landry <wlandry@caltech.edu>  Mon, 2 Oct 2017 11:15:29 -0700
+
 tablator (3.0.2+dfsg-2) unstable; urgency=low
 
   * Incorporate multithreading fix from json5_parser
