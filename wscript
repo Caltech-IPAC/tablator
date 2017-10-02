@@ -13,6 +13,7 @@ def build(bld):
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
+             'src/Format/content_type.cxx',
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
              'src/quote_sql_string.cxx',
