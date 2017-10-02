@@ -13,6 +13,7 @@ def build(bld):
 
     sources=['src/fits_keyword_mapping.cxx',
              'src/Format/set_from_extension.cxx',
+             'src/Format/content_type.cxx',
              'src/Row/set_null.cxx',
              'src/H5_to_Data_Type.cxx',
              'src/quote_sql_string.cxx',
@@ -83,7 +84,7 @@ def build(bld):
               cxxflags=default_flags,
               install_path=bld.env.LIBDIR,
               use=use_packages,
-              vnum='3.0.2'
+              vnum='3.0.3'
               )
 
     bld.stlib(source=sources,
