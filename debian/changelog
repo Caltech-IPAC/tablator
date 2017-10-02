@@ -1,4 +1,4 @@
-tablator (3.0.3+dfsg-1) unstable; urgency=low
+tablator (3.1.0+dfsg-1) unstable; urgency=low
 
   * Add JSON and JSON5 to content_type()
 
