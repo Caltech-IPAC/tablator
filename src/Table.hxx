@@ -158,34 +158,53 @@ public:
   std::string to_ipac_string (const Data_Type &type) const;
 
   void write_dsv (std::ostream &os, const char &separator) const;
-  void write_create_table_sql (std::ostream &os, const std::string &table_name,
+  void write_sql_create_table (std::ostream &os, const std::string &table_name,
                                const Format::Enums &sql_type) const
   {
     using namespace std::string_literals;
-    write_create_table_sql (os, table_name, sql_type, ""s, ""s);
+    write_sql_create_table (os, table_name, sql_type, ""s, ""s);
   }
-  void write_create_table_sql (std::ostream &os, const std::string &table_name,
+  void write_sql_create_table (std::ostream &os, const std::string &table_name,
                                const Format::Enums &sql_type,
                                const std::string &point_column_name,
                                const std::string &polygon_column_name) const;
-  void write_insert_sql (std::ostream &os,
-                         const std::string &table_name) const
+  void write_sql_inserts (std::ostream &os,
+                          const std::string &table_name) const
   {
-    write_insert_sql (os, table_name, std::pair<std::string,std::string> (),
-                      std::vector<std::pair<std::string,std::string>> ());
+    write_sql_inserts (os, table_name, std::pair<std::string,std::string> (),
+                       std::vector<std::pair<std::string,std::string>> ());
   }
-  void write_insert_sql
+  void write_sql_inserts
   (std::ostream &os,
    const std::string &table_name,
    const std::pair<std::string,std::string> &point_input_names,
    const std::vector<std::pair<std::string,std::string>> &polygon_input_names)
     const;
+  void write_sql_insert
+  (std::ostream &os, const std::string &quoted_table_name,
+   const size_t &row_offset,
+   const bool &has_point,
+   const std::pair<std::pair<size_t, Data_Type>,
+   std::pair<size_t, Data_Type> > &point_input,
+   const std::vector<std::pair<std::pair<size_t, Data_Type>,
+   std::pair<size_t, Data_Type> > > & polygon_input) const;
+  void write_sql_insert
+  (std::ostream &os, const std::string &quoted_table_name,
+   const size_t &row_offset) const
+  {
+    write_sql_insert (os, quoted_table_name, row_offset,
+                      false,
+                      std::pair<std::pair<size_t, Data_Type>,
+                      std::pair<size_t, Data_Type> >(),
+                      std::vector<std::pair<std::pair<size_t, Data_Type>,
+                      std::pair<size_t, Data_Type> > >());
+  }
   void write_sql (std::ostream &os, const std::string &table_name,
                   const Format::Enums &sql_type) const
   {
-    write_create_table_sql (os, table_name, sql_type);
+    write_sql_create_table (os, table_name, sql_type);
     os << ";\n";
-    write_insert_sql (os, table_name);
+    write_sql_inserts (os, table_name);
   }
   void write_sqlite_db (const boost::filesystem::path &path) const;
   void write_fits (std::ostream &os) const;
