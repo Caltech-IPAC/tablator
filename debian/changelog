@@ -1,8 +1,11 @@
-tablator (3.1.0+dfsg-1) unstable; urgency=low
+tablator (4.0.0+dfsg-1) unstable; urgency=low
 
   * Add JSON and JSON5 to content_type()
+  * Fix quoting of strings for sql output
+  * Fix arrays for sql output
+  * Rename write_*_sql to write_sql_* and add write_sql_insert
 
- -- Walter Landry <wlandry@caltech.edu>  Mon, 2 Oct 2017 11:15:29 -0700
+ -- Walter Landry <wlandry@caltech.edu>  Tue, 3 Oct 2017 16:14:08 -0700
 
 tablator (3.0.2+dfsg-2) unstable; urgency=low
 
