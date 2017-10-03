@@ -3,7 +3,7 @@
 #include "../Data_Type_to_SQL.hxx"
 
 void
-tablator::Table::write_create_table_sql (std::ostream &os,
+tablator::Table::write_sql_create_table (std::ostream &os,
                                          const std::string &table_name,
                                          const Format::Enums &sql_type,
                                          const std::string &point_column_name,
