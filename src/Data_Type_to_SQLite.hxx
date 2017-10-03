@@ -7,8 +7,13 @@
 
 namespace tablator
 {
-inline std::string Data_Type_to_SQLite (const Data_Type &type)
+inline std::string Data_Type_to_SQLite (const Data_Type &type,
+                                        const size_t &array_size)
 {
+  if (type != Data_Type::CHAR && array_size != 1)
+    {
+      throw std::runtime_error ("Arrays not supported in SQLite");
+    }
   switch (type)
     {
     case Data_Type::INT8_LE:
