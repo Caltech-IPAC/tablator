@@ -59,7 +59,8 @@ void tablator::Table::write_insert_sql
  const std::pair<std::string,std::string> &point_input_names,
  const std::vector<std::pair<std::string,std::string>> &polygon_input_names) const
 {
-  std::string quoted_table_name (quote_sql_string (table_name, '"'));
+  std::string quoted_table_name (quote_sql_string (table_name, '"',
+                                                   Quote_SQL::IF_NEEDED));
   std::pair<std::pair<size_t,Data_Type>,std::pair<size_t,Data_Type>> point_input;
   if (!point_input_names.first.empty ())
     {
