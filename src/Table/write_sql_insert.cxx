@@ -60,9 +60,17 @@ void tablator::Table::write_sql_insert (
             }
           else
             {
+              if (columns[column].array_size != 1)
+                {
+                  os << "'{";
+                }
               write_type_as_ascii (
                   os, columns[column].type, columns[column].array_size,
-                  data.data () + row_offset + offsets[column]);
+                  data.data () + row_offset + offsets[column], ',');
+              if (columns[column].array_size != 1)
+                {
+                  os << "}'";
+                }
             }
         }
       if (column + 1 != columns.size ())

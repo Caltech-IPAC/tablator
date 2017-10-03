@@ -10,29 +10,43 @@ namespace tablator
 inline std::string Data_Type_to_Postgres (const Data_Type &type,
                                           const size_t &array_size)
 {
+  std::string result;
   switch (type)
     {
     case Data_Type::INT8_LE:
     case Data_Type::UINT8_LE:
     case Data_Type::INT16_LE:
-      return "SMALLINT";
+      result = "SMALLINT";
+      break;
     case Data_Type::UINT16_LE:
     case Data_Type::INT32_LE:
-      return "INTEGER";
+      result = "INTEGER";
+      break;
     case Data_Type::UINT32_LE:
     case Data_Type::INT64_LE:
-      return "BIGINT";
+      result = "BIGINT";
+      break;
     case Data_Type::UINT64_LE:
-      return "NUMERIC(19)";
+      result = "NUMERIC(19)";
+      break;
     case Data_Type::FLOAT32_LE:
-      return "REAL";
+      result = "REAL";
+      break;
     case Data_Type::FLOAT64_LE:
-      return "DOUBLE PRECISION";
+      result = "DOUBLE PRECISION";
+      break;
     case Data_Type::CHAR:
-      return "VARCHAR(" + std::to_string (array_size) + ")";
+      result = "VARCHAR(" + std::to_string (array_size) + ")";
+      break;
     default:
       throw std::runtime_error ("Unknown Data_Type: "
                                 + std::to_string (static_cast<int>(type)));
+      break;
     }
+  if (type != Data_Type::CHAR && array_size != 1)
+    {
+      result += " ARRAY[" + std::to_string (array_size) + "]";
+    }
+  return result;
 }
 }

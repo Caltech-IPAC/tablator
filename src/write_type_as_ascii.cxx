@@ -8,15 +8,17 @@
 namespace tablator
 {
 void write_type_as_ascii (std::ostream &os, const Data_Type &type,
-                          const size_t &array_size, const uint8_t *data)
+                          const size_t &array_size, const uint8_t *data,
+                          const char &separator)
 {
   if (array_size != 1 && type != Data_Type::CHAR)
     {
       for (size_t n = 0; n < array_size; ++n)
         {
-          write_type_as_ascii (os, type, 1, data + n * data_size (type));
+          write_type_as_ascii (os, type, 1, data + n * data_size (type),
+                               separator);
           if (n != array_size - 1)
-            os << ' ';
+            os << separator;
         }
     }
   else
