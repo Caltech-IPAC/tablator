@@ -277,8 +277,15 @@ public:
   void read_dsv (std::istream &input_stream, const Format &format);
   void read_dsv (const boost::filesystem::path &path, const Format &format)
   {
-    boost::filesystem::ifstream input_stream (path);
-    read_dsv (input_stream, format);
+    if (path == "-")
+      {
+        read_dsv (std::cin, format);
+      }
+    else
+      {
+        boost::filesystem::ifstream input_stream (path);
+        read_dsv (input_stream, format);
+      }
   }
   void read_dsv_rows (const std::list<std::vector<std::string> > &dsv);
   void set_column_info (std::list<std::vector<std::string> > &dsv);

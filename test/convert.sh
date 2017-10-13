@@ -121,3 +121,10 @@ if [ $? -eq 0 ]; then
 else
     echo "PASS: Empty VOTable"
 fi
+
+cat test/multi.csv | ./build/tablator --input-format=csv --output-format=csv - - | diff -w - test/multi.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: Read CSV From STDIN"
+else
+    echo "FAIL: Read CSV From STDIN"
+fi
