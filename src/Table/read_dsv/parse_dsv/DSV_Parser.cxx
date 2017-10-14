@@ -187,6 +187,10 @@ bool DSV_Parser::_get_line_from_file ()
 {
   if (std::getline (dsv_stream, read_str))
     {
+      if (read_str.size () > 0 && *read_str.rbegin ()=='\r')
+        {
+          read_str=read_str.substr (0, read_str.size () -1);
+        }
       read_str += '\n';
     }
   else if (dsv_stream.eof ())
@@ -281,7 +285,7 @@ void DSV_Parser::_line_end ()
         {
           std::ostringstream str_stream;
           str_stream << "Syntax error: too "
-                     << (row.size () > col_count ? "much" : "few")
+                     << (row.size () > col_count ? "many" : "few")
                      << " fields in line " << row_count << ".";
           throw std::runtime_error (str_stream.str ());
         }

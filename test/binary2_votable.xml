@@ -175,8 +175,11 @@
 <FIELD datatype="double" name="ecl_lat" ucd="pos.ecliptic.lat" unit="Angle[deg]">
 <DESCRIPTION>ecl_lat</DESCRIPTION>
 </FIELD>
+    <!-- A comment !-->
 <DATA>
+    <!-- A comment !-->
 <BINARY2>
+    <!-- A comment !-->
 <STREAM encoding='base64'>
 AP3/AggAAAAWsggAAAAAAEoxKGgAMlgAAAAAACN8C29An3wAAAAAAEBlQz19i28m
 P9IRO/W2qMXAS/83nczRaj/QkjbSip2/f/gAAAAAAAB/+AAAAAAAAH/4AAAAAAAA
@@ -249,8 +252,13 @@ AAIADEY/LAINPpJUMz9dwUQ/cxZKwtY1asJxmstCWhArQVX96wAAADdAWKJiMJwE
 y0AAcIheBdNQQDSKb9cYgjgAAAANTk9UX0FWQUlMQUJMRUByMxCdZVaEQBdil42l
 cPpAaYYtalKnNMBJzqChQFnR
 </STREAM>
+    <!-- A comment !-->
 </BINARY2>
+    <!-- A comment !-->
 </DATA>
+    <!-- A comment !-->
 </TABLE>
+    <!-- A comment !-->
 </RESOURCE>
+    <!-- A comment !-->
 </VOTABLE>

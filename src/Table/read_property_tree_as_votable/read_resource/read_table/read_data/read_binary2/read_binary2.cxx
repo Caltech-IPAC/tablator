@@ -18,6 +18,10 @@ void Table::read_binary2 (const boost::property_tree::ptree &binary2,
   std::vector<std::vector<uint8_t> > streams;
   for (auto &stream : binary2)
     {
+      if (stream.first == "<xmlcomment>")
+        {
+          continue;
+        }
       if (stream.first != "STREAM")
         throw std::runtime_error ("Unknown element in BINARY2.  Expected "
                                   "STREAM, but found: " + stream.first);
