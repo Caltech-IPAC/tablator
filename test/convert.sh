@@ -10,7 +10,7 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
 done
 
 STREAM_INTERMEDIATE=""
-for table in test/multi test/multi.csv test/multi.tsv test/fits_medium.fits test/*.tbl test/*.json5 test/*.xml test/upload_table.vo test/*.unk; do
+for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/fits_medium.fits test/*.tbl test/*.json5 test/*.xml test/upload_table.vo test/*.unk; do
     STREAM_INTERMEDIATE=""
     if [ $table != "test/fits_medium.fits" ] && [ $table != "test/multi_h5.unk" ] && [ $table != "test/multi_tsv.unk" ]; then
         STREAM_INTERMEDIATE="--stream-intermediate=yes"
