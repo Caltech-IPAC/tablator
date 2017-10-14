@@ -1,3 +1,4 @@
+#include "../../../../skip_xml_comments.hxx"
 #include "../../../../../../Table.hxx"
 #include "../../../../../../to_string.hxx"
 #include "../../../../../insert_ascii_in_row.hxx"
@@ -25,8 +26,12 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
           /// Add something for the null_bitfields_flag
           rows.push_back ({});
           auto td = tr.second.begin ();
-          if (td != tr.second.end () && td->first == "<xmlattr>.ID")
-            ++td;
+          td = skip_xml_comments (td, tr.second.end ());
+          while (td != tr.second.end () && td->first == "<xmlattr>.ID")
+            {
+              ++td;
+              td = skip_xml_comments (td, tr.second.end ());
+            }
           for (std::size_t c = 1; c < fields.size (); ++c)
             {
               if (td == tr.second.end ())
@@ -53,14 +58,17 @@ tablator::Table::read_tabledata (const boost::property_tree::ptree &tabledata,
                 }
               // FIXME: Check encoding
               ++td;
+              td = skip_xml_comments (td, tr.second.end ());
             }
           if (td != tr.second.end ())
-            throw std::runtime_error (
-                "Too many elements in row " + std::to_string (rows.size ())
-                + ".  Only expected " + std::to_string (fields.size () - 1)
-                + ".");
+            {
+              throw std::runtime_error (
+                  "Too many elements in row " + std::to_string (rows.size ())
+                  + ".  Only expected " + std::to_string (fields.size () - 1)
+                  + ".");
+            }
         }
-      else if (tr.first != "<xmlattr>.encoding")
+      else if (tr.first != "<xmlattr>.encoding" && tr.first != "<xmlcomment>")
         {
           throw std::runtime_error (
               "Expected TR inside RESOURCE.TABLE.DATA.TABLEDATA, but found: "

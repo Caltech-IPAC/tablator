@@ -1,3 +1,4 @@
+#include "../skip_xml_comments.hxx"
 #include "../../../Table.hxx"
 #include "VOTable_Field.hxx"
 
@@ -8,19 +9,26 @@ tablator::Table::read_resource (const boost::property_tree::ptree &resource)
   auto end = resource.end ();
 
   read_node_and_attributes ("RESOURCE", resource);
+  child=skip_xml_comments(child, end);
   while (child != end && child->first == "<xmlattr>")
-    ++child;
+    {
+      ++child;
+      child=skip_xml_comments(child, end);
+    }
   if (child != end && child->first == "DESCRIPTION")
     {
       properties.emplace_back ("RESOURCE.DESCRIPTION",
                                child->second.get_value<std::string>());
       ++child;
     }
-  for (; child != end && child->first == "INFO"; ++child)
+  child=skip_xml_comments(child, end);
+  while (child != end && child->first == "INFO")
     {
       read_node_and_attributes ("RESOURCE.INFO", child->second);
+      ++child;
+      child=skip_xml_comments(child, end);
     }
-  for (; child != end; ++child)
+  while (child != end)
     {
       if (child->first == "COOSYS")
         {
@@ -38,6 +46,8 @@ tablator::Table::read_resource (const boost::property_tree::ptree &resource)
         {
           break;
         }
+      ++child;
+      child=skip_xml_comments(child, end);
     }
   /// We only allow one TABLE per RESOURCE
   for (; child != end; ++child)
@@ -57,6 +67,6 @@ tablator::Table::read_resource (const boost::property_tree::ptree &resource)
         {
           read_node_and_attributes ("RESOURCE.INFO", child->second);
         }
-      /// skip <xmlattr>
+      /// skip <xmlattr> and <xmlcomment>
     }
 }

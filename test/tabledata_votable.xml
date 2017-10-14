@@ -393,141 +393,278 @@ ___ Position Angle in degree.
       <FIELD name="jdate" datatype="double" unit="jdate"/>
       <FIELD name="dist" datatype="double" unit="arcsec"/>
       <FIELD name="angle" datatype="double" unit="deg"/>
+    <!-- A comment !-->
       <DATA>
+    <!-- A comment !-->
         <TABLEDATA>
+    <!-- A comment !-->
           <TR>
+    <!-- A comment !-->
             <TD>1000917353</TD>
+    <!-- A comment !-->
             <TD>s</TD>
+    <!-- A comment !-->
             <TD>2000-08-08</TD>
+    <!-- A comment !-->
             <TD>141</TD>
+    <!-- A comment !-->
             <TD>1442</TD>
+    <!-- A comment !-->
             <TD>1.056716</TD>
+    <!-- A comment !-->
             <TD>1.01136</TD>
+    <!-- A comment !-->
             <TD>99.054000000000002</TD>
+    <!-- A comment !-->
             <TD>-59.654000000000003</TD>
+    <!-- A comment !-->
             <TD>0.99967417121700008</TD>
+    <!-- A comment !-->
             <TD>0.0184392548973</TD>
+    <!-- A comment !-->
             <TD>0.017650645298599998</TD>
+    <!-- A comment !-->
             <TD>0.070000000000000007</TD>
+    <!-- A comment !-->
             <TD>0.059999999999999998</TD>
+    <!-- A comment !-->
             <TD>90</TD>
+    <!-- A comment !-->
             <TD>-59</TD>
+    <!-- A comment !-->
             <TD>-18652.630000000001</TD>
+    <!-- A comment !-->
             <TD>111111</TD>
+    <!-- A comment !-->
             <TD>13.391</TD>
+    <!-- A comment !-->
             <TD>13.039999999999999</TD>
+    <!-- A comment !-->
             <TD>13.009</TD>
+    <!-- A comment !-->
             <TD>0.042000000000000003</TD>
+    <!-- A comment !-->
             <TD>0.050999999999999997</TD>
+    <!-- A comment !-->
             <TD>0.041000000000000002</TD>
+    <!-- A comment !-->
             <TD>0.028000000000000001</TD>
+    <!-- A comment !-->
             <TD>0.021999999999999999</TD>
+    <!-- A comment !-->
             <TD>0.028000000000000001</TD>
+    <!-- A comment !-->
             <TD>0.029999999999999999</TD>
+    <!-- A comment !-->
             <TD>0.023</TD>
+    <!-- A comment !-->
             <TD>0.029000000000000001</TD>
+    <!-- A comment !-->
             <TD>13.391</TD>
+    <!-- A comment !-->
             <TD>13.039999999999999</TD>
+    <!-- A comment !-->
             <TD>13.009</TD>
+    <!-- A comment !-->
             <TD>0.042000000000000003</TD>
+    <!-- A comment !-->
             <TD>0.050999999999999997</TD>
+    <!-- A comment !-->
             <TD>0.041000000000000002</TD>
+    <!-- A comment !-->
             <TD>158.90000000000001</TD>
+    <!-- A comment !-->
             <TD>87.700000000000003</TD>
+    <!-- A comment !-->
             <TD>51</TD>
+    <!-- A comment !-->
             <TD>0.94999999999999996</TD>
+    <!-- A comment !-->
             <TD>0.70999999999999996</TD>
+    <!-- A comment !-->
             <TD>0.90000000000000002</TD>
+    <!-- A comment !-->
             <TD>9315</TD>
+    <!-- A comment !-->
             <TD>9325</TD>
+    <!-- A comment !-->
             <TD>9545</TD>
+    <!-- A comment !-->
             <TD>504.48000000000002</TD>
+    <!-- A comment !-->
             <TD>2104.3200000000002</TD>
+    <!-- A comment !-->
             <TD>2153.8800000000001</TD>
+    <!-- A comment !-->
             <TD>9.6699999999999999</TD>
+    <!-- A comment !-->
             <TD>17.73</TD>
+    <!-- A comment !-->
             <TD>17.16</TD>
+    <!-- A comment !-->
             <TD>1</TD>
+    <!-- A comment !-->
             <TD>1</TD>
+    <!-- A comment !-->
             <TD>1</TD>
+    <!-- A comment !-->
             <TD>870.55999999999995</TD>
+    <!-- A comment !-->
             <TD>837.08000000000004</TD>
+    <!-- A comment !-->
             <TD>447.83999999999997</TD>
+    <!-- A comment !-->
             <TD>13.374000000000001</TD>
+    <!-- A comment !-->
             <TD>13.08</TD>
+    <!-- A comment !-->
             <TD>13.111000000000001</TD>
+    <!-- A comment !-->
             <TD>0.0070000000000000001</TD>
+    <!-- A comment !-->
             <TD>0.058000000000000003</TD>
+    <!-- A comment !-->
             <TD>0.042000000000000003</TD>
+    <!-- A comment !-->
             <TD>13.369999999999999</TD>
+    <!-- A comment !-->
             <TD>13.154999999999999</TD>
+    <!-- A comment !-->
             <TD>13.071999999999999</TD>
+    <!-- A comment !-->
             <TD>0.041000000000000002</TD>
+    <!-- A comment !-->
             <TD>0.10100000000000001</TD>
+    <!-- A comment !-->
             <TD>0.112</TD>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD>000000</TD>
+    <!-- A comment !-->
             <TD>000000</TD>
+    <!-- A comment !-->
             <TD>000000</TD>
+    <!-- A comment !-->
             <TD>0066</TD>
+    <!-- A comment !-->
             <TD>0066</TD>
+    <!-- A comment !-->
             <TD>0066</TD>
+    <!-- A comment !-->
             <TD>000</TD>
+    <!-- A comment !-->
             <TD>000</TD>
+    <!-- A comment !-->
             <TD>000</TD>
+    <!-- A comment !-->
             <TD>0.057000000000000002</TD>
+    <!-- A comment !-->
             <TD>0.066000000000000003</TD>
+    <!-- A comment !-->
             <TD>0.072999999999999995</TD>
+    <!-- A comment !-->
             <TD>3661</TD>
+    <!-- A comment !-->
             <TD>193</TD>
+    <!-- A comment !-->
             <TD>se</TD>
+    <!-- A comment !-->
             <TD>U</TD>
+    <!-- A comment !-->
             <TD>U090000017182</TD>
+    <!-- A comment !-->
             <TD>0.90000000000000002</TD>
+    <!-- A comment !-->
             <TD>221</TD>
+    <!-- A comment !-->
             <TD>15.6</TD>
+    <!-- A comment !-->
             <TD>14.4</TD>
+    <!-- A comment !-->
             <TD>1</TD>
+    <!-- A comment !-->
             <TD>222</TD>
+    <!-- A comment !-->
             <TD>111</TD>
+    <!-- A comment !-->
             <TD>000</TD>
+    <!-- A comment !-->
             <TD>000</TD>
+    <!-- A comment !-->
             <TD>AAA</TD>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
             <TD>666666</TD>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD/>
+    <!-- A comment !-->
             <TD>1031</TD>
+    <!-- A comment !-->
             <TD>53432</TD>
+    <!-- A comment !-->
             <TD>17043457900970</TD>
+    <!-- A comment !-->
             <TD>1228933</TD>
+    <!-- A comment !-->
             <TD>233</TD>
+    <!-- A comment !-->
             <TD>00041361+0100408</TD>
+    <!-- A comment !-->
             <TD>1</TD>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
             <TD>1</TD>
+    <!-- A comment !-->
             <TD>1</TD>
+    <!-- A comment !-->
             <TD>33.799999999999997</TD>
+    <!-- A comment !-->
             <TD>23</TD>
+    <!-- A comment !-->
             <TD>1000917335</TD>
+    <!-- A comment !-->
             <TD>2451764.8947999999</TD>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
             <TD>0</TD>
+    <!-- A comment !-->
           </TR>
+    <!-- A comment !-->
         </TABLEDATA>
+    <!-- A comment !-->
       </DATA>
+    <!-- A comment !-->
     </TABLE>
+    <!-- A comment !-->
   </RESOURCE>
 </VOTABLE>

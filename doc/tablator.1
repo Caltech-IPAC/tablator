@@ -1,4 +1,4 @@
-.TH TABLATOR "1" "November 2016" "tablator 1.0.0" "User Commands"
+.TH TABLATOR "1" "October 2017" "tablator 4.0.1" "User Commands"
 .SH NAME
 tablator - The Universal Table Translator for Astronomy
 .SH SYNOPSIS
@@ -118,7 +118,18 @@ To convert a VOTable file named mystery.table to a JSON file named mystery_json.
 .RS
 .B mystery.table mystery_json.table
 .RE
+.TP
+To convert a VOTable to an SQLite database, select only ra, dec, and object, sort by object, and write a JSON file
+.PP
+.br
+.B tablator mytable.xml mytable.db
+.br
+.B sqlite3 -csv -header mytable.db """select ra,dec,object from mytable order by object;""" \e
+.br
+.RS
+.B | tablator --input-format=csv - result.json
+.RE
 
 .SH COPYRIGHT
-2014-2016 California Institute of Technology
+2014-2017 California Institute of Technology
 

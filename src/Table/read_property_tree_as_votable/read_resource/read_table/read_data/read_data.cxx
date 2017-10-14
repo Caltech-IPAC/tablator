@@ -1,3 +1,4 @@
+#include "../../../skip_xml_comments.hxx"
 #include "../../../../../Table.hxx"
 #include "../../VOTable_Field.hxx"
 
@@ -12,6 +13,7 @@ void tablator::Table::read_data (const boost::property_tree::ptree &data,
   if (child == end)
     throw std::runtime_error ("RESOURCE.TABLE.DATA must not be empty");
 
+  child = skip_xml_comments (child, end);
   if (child->first == "TABLEDATA")
     {
       read_tabledata (child->second, fields);
@@ -39,13 +41,20 @@ void tablator::Table::read_data (const boost::property_tree::ptree &data,
                                 "or FITS, but got: " + child->first);
     }
 
-  for (; child != end; ++child)
+  child = skip_xml_comments (child, end);
+  while (child != end)
     {
       if (child->first == "INFO")
-        read_node_and_attributes ("RESOURCE.TABLE.DATA.INFO", child->second);
+        {
+          read_node_and_attributes ("RESOURCE.TABLE.DATA.INFO", child->second);
+        }
       else
-        throw std::runtime_error (
-            "Invalid element inside RESOURCE.TABLE.DATA.  "
-            "Expected INFO but got: " + child->first);
+        {
+          throw std::runtime_error (
+              "Invalid element inside RESOURCE.TABLE.DATA.  "
+              "Expected INFO but got: " + child->first);
+        }
+      ++child;
+      child = skip_xml_comments (child, end);
     }
 }

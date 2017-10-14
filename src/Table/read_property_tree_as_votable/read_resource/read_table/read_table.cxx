@@ -1,3 +1,4 @@
+#include "../../skip_xml_comments.hxx"
 #include "../../../../Table.hxx"
 #include "../VOTable_Field.hxx"
 
@@ -7,23 +8,30 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
   auto end = table.end ();
 
   read_node_and_attributes ("RESOURCE.TABLE", table);
+  child=skip_xml_comments(child, end);
   while (child != end && child->first == "<xmlattr>")
-    ++child;
+    {
+      ++child;
+      child=skip_xml_comments(child, end);
+    }
   if (child != end && child->first == "DESCRIPTION")
     {
       properties.emplace_back ("RESOURCE.TABLE.DESCRIPTION",
                                child->second.get_value<std::string>());
       ++child;
     }
-  for (; child != end && child->first == "INFO"; ++child)
+  child=skip_xml_comments(child, end);
+  while (child != end && child->first == "INFO")
     {
       read_node_and_attributes ("RESOURCE.TABLE.INFO", child->second);
+      ++child;
+      child=skip_xml_comments(child, end);
     }
 
   std::vector<VOTable_Field> fields;
   fields.emplace_back (null_bitfield_flags_name, Data_Type::UINT8_LE, true,
                        Field_Properties (null_bitfield_flags_description, {}));
-  for (; child != end; ++child)
+  while (child != end)
     {
       if (child->first == "FIELD")
         {
@@ -41,6 +49,8 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
         {
           break;
         }
+      ++child;
+      child=skip_xml_comments(child, end);
     }
   if (fields.size () < 2)
     {
@@ -49,9 +59,13 @@ void tablator::Table::read_table (const boost::property_tree::ptree &table)
   if (child != end && child->first == "DATA")
     {
       read_data (child->second, fields);
+      ++child;
+      child=skip_xml_comments(child, end);
     }
-  for (; child != end && child->first == "INFO"; ++child)
+  while(child != end && child->first == "INFO")
     {
       read_node_and_attributes ("RESOURCE.TABLE.INFO", child->second);
+      ++child;
+      child=skip_xml_comments(child, end);
     }
 }
