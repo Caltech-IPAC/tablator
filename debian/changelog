@@ -1,3 +1,10 @@
+tablator (4.0.1+dfsg-1) unstable; urgency=low
+
+  * Make CSV/TSV input handle dos-style line endings
+  * Add a filtering example in the manpage
+
+ -- Walter Landry <wlandry@caltech.edu>  Fri, 13 Oct 2017 17:47:41 -0700
+
 tablator (4.0.0+dfsg-1) unstable; urgency=low
 
   * Add JSON and JSON5 to content_type()
