@@ -128,3 +128,10 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: Read CSV From STDIN"
 fi
+
+./build/tablator --input-format=tsv --output-format=text test/no_trailing_newline.tsv - > /dev/null
+if [ $? -eq 0 ]; then
+    echo "PASS: Read TSV with no trailing newline"
+else
+    echo "FAIL: Read TSV with no trailing newline"
+fi

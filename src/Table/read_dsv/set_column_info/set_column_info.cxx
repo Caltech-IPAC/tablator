@@ -15,7 +15,14 @@ tablator::Table::set_column_info (std::list<std::vector<std::string> > &dsv)
   std::vector<std::string> names;
   for (auto &name : *row)
     {
-      names.push_back (boost::trim_copy (name));
+      auto trimmed_name (boost::trim_copy (name));
+      if (trimmed_name.find ('\t') != std::string::npos)
+        {
+          throw std::runtime_error ("Invalid character in the name for column '"
+                                    + boost::trim_copy (trimmed_name)
+                                    + "'.  Tabs are not allowed.");
+        }
+      names.push_back (trimmed_name);
     }
 
   append_column (null_bitfield_flags_name, Data_Type::UINT8_LE,

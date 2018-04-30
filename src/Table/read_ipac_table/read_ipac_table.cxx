@@ -23,63 +23,66 @@ void tablator::Table::read_ipac_table (std::istream &input_stream)
   Row row_string (row_size ());
   while (input_stream)
     {
-      row_string.set_zero ();
-      for (size_t column = 1; column < ipac_columns[0].size (); ++column)
+      if (line.find_first_not_of (" \t") != std::string::npos)
         {
-          if (line[ipac_column_offsets[column - 1]] != ' ')
-            throw std::runtime_error (
-                "Non-space found at a delimiter location on line "
-                + std::to_string (current_line) + ", column "
-                + std::to_string (ipac_column_offsets[column - 1])
-                + " between the fields '" + columns[column - 1].name
-                + "' and '" + columns[column].name
-                + "'.  Is a field not wide enough?");
+          row_string.set_zero ();
+          for (size_t column = 1; column < ipac_columns[0].size (); ++column)
+            {
+              if (line[ipac_column_offsets[column - 1]] != ' ')
+                throw std::runtime_error (
+                    "Non-space found at a delimiter location on line "
+                    + std::to_string (current_line) + ", column "
+                    + std::to_string (ipac_column_offsets[column - 1])
+                    + " between the fields '" + columns[column - 1].name
+                    + "' and '" + columns[column].name
+                    + "'.  Is a field not wide enough?");
 
-          std::string element = line.substr (
-              ipac_column_offsets[column - 1] + 1, ipac_column_widths[column]);
-          boost::algorithm::trim (element);
-          minimum_column_widths[column]
-              = std::max (minimum_column_widths[column], element.size ());
-          if ((!ipac_columns[3][column].empty ()
-               && element == ipac_columns[3][column])
-              || (ipac_columns[3][column].empty ()
-                  && columns[column].type != Data_Type::CHAR
-                  && element.empty ()))
-            {
-              row_string.set_null (columns[column].type,
-                                   columns[column].array_size, column,
-                                   offsets[column], offsets[column + 1]);
-            }
-          else
-            {
-              try
+              std::string element
+                  = line.substr (ipac_column_offsets[column - 1] + 1,
+                                 ipac_column_widths[column]);
+              boost::algorithm::trim (element);
+              minimum_column_widths[column]
+                  = std::max (minimum_column_widths[column], element.size ());
+              if ((!ipac_columns[3][column].empty ()
+                   && element == ipac_columns[3][column])
+                  || (ipac_columns[3][column].empty ()
+                      && columns[column].type != Data_Type::CHAR
+                      && element.empty ()))
                 {
-                  insert_ascii_in_row (columns[column].type,
+                  row_string.set_null (columns[column].type,
                                        columns[column].array_size, column,
-                                       element, offsets[column],
-                                       offsets[column + 1], row_string);
+                                       offsets[column], offsets[column + 1]);
                 }
-              catch (std::exception &error)
+              else
                 {
-                  throw std::runtime_error (
-                      "Invalid " + to_string (columns[column].type)
-                      + " for field '" + columns[column].name + "' in line "
-                      + std::to_string (current_line + 1) + ".  Found '"
-                      + element + "'");
+                  try
+                    {
+                      insert_ascii_in_row (columns[column].type,
+                                           columns[column].array_size, column,
+                                           element, offsets[column],
+                                           offsets[column + 1], row_string);
+                    }
+                  catch (std::exception &error)
+                    {
+                      throw std::runtime_error (
+                          "Invalid " + to_string (columns[column].type)
+                          + " for field '" + columns[column].name
+                          + "' in line " + std::to_string (current_line + 1)
+                          + ".  Found '" + element + "'");
+                    }
                 }
             }
-        }
-      std::size_t bad_char (line.find_first_not_of (" \t\r",
-                                                    ipac_column_offsets[ipac_columns[0].size () - 1]));
-      if (bad_char != std::string::npos)
-        throw std::runtime_error (
+          std::size_t bad_char (line.find_first_not_of (
+              " \t\r", ipac_column_offsets[ipac_columns[0].size () - 1]));
+          if (bad_char != std::string::npos)
+            throw std::runtime_error (
                 "Non-whitespace found at the end of line "
                 + std::to_string (current_line) + ", column "
-                + std::to_string (bad_char)
-                + ": '" + line.substr (bad_char)
+                + std::to_string (bad_char) + ": '" + line.substr (bad_char)
                 + "'.\n\t  Is the header not wide enough?");
 
-      append_row (row_string);
+          append_row (row_string);
+        }
       ++current_line;
       std::getline (input_stream, line);
     }

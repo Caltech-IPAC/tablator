@@ -192,6 +192,7 @@ bool DSV_Parser::_get_line_from_file ()
           read_str=read_str.substr (0, read_str.size () -1);
         }
       read_str += '\n';
+      return true;
     }
   else if (dsv_stream.eof ())
     {
