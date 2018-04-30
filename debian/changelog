@@ -1,3 +1,11 @@
+tablator (4.0.3+dfsg-1) unstable; urgency=low
+
+  * Fix crash on DSV input without a trailing newline
+  * Disallow tab characters in CSV column names
+  * Skip whitespace only IPAC table lines
+
+ -- Serge Monkewitz <smm@ipac.caltech.edu>  Mon, 30 Apr 2018 15:29:00 -0700
+
 tablator (4.0.1+dfsg-1) unstable; urgency=low
 
   * Make CSV/TSV input handle dos-style line endings
