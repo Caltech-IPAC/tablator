@@ -1,6 +1,6 @@
 Source: tablator
 Priority: optional
-Maintainer: Walter Landry <wlandry@caltech.edu>
+Maintainer: Serge Monkewitz <smm@ipac.caltech.edu>
 Build-Depends: waf, libboost-dev, libhdf5-dev, libccfits-dev, libcfitsio3-dev, libjson5-parser-dev, libsqlite3-dev, libvsqlitepp-dev, debhelper (>= 9)
 Standards-Version: 3.9.6
 Section: libs
