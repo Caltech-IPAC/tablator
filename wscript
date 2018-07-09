@@ -1,13 +1,20 @@
 def options(opt):
     opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
+    opt.add_option('--debug', help='Include debug symbols and turn ' +
+                                   'compiler optimizations off',
+                   action='store_true', default=False, dest='debug')
 
 def configure(conf):
     conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
     conf.check_boost(lib='filesystem system program_options regex')
 
 def build(bld):
-    default_flags=['-Wall', '-Wextra', '-Ofast', '-DNDEBUG']
-    # default_flags=['-Wall', '-Wextra', '-g']
+
+    if bld.options.debug:
+        default_flags=['-Wall', '-Wextra', '-g']
+    else:
+        default_flags=['-Wall', '-Wextra', '-g', '-Ofast', '-DNDEBUG']
+
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser', 'sqlite3', 'vsqlitepp']
 
