@@ -15,7 +15,8 @@ void tablator::Table::read_property_tree_as_votable (
     {
       for (auto &attribute : child->second)
         if (!(attribute.first == "version" || attribute.first == "xmlns:xsi"
-              || attribute.first == "xmlns" || attribute.first == "xmlns:stc"))
+              || attribute.first == "xmlns" || attribute.first == "xmlns:stc"
+              || attribute.first == "xsi:schemaLocation"))
           votable_property.attributes.insert (std::make_pair (
               attribute.first, attribute.second.get_value<std::string>()));
       ++child;
