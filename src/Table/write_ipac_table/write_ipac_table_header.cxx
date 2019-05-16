@@ -2,89 +2,69 @@
 
 #include "../../Table.hxx"
 
-namespace
-{
-std::string convert_newlines (const std::string &input)
-{
-  std::string result (input);
-  for (auto &c: result)
-    {
-      if (c=='\n')
-        {
-          c = ' ';
+namespace {
+std::string convert_newlines(const std::string &input) {
+    std::string result(input);
+    for (auto &c : result) {
+        if (c == '\n') {
+            c = ' ';
         }
     }
-  return result;
+    return result;
 }
-}
+}  // namespace
 
-void tablator::Table::write_ipac_table_header (std::ostream &os) const
-{
-  os << "\\fixlen = T\n";
+void tablator::Table::write_ipac_table_header(std::ostream &os) const {
+    os << "\\fixlen = T\n";
 
-  os << std::left;
+    os << std::left;
 
-  os << "\\RowsRetrieved= " << num_rows () << "\n";
+    os << "\\RowsRetrieved= " << num_rows() << "\n";
 
-  const size_t keyword_alignment (8);
-  for (auto &property : properties)
-    {
-      auto &p = property.second;
-      if (!p.value.empty ())
-        {
-          os << "\\" << std::setw (keyword_alignment)
-             << convert_newlines (property.first) << "= "
-             << "'" << convert_newlines (p.value) << "'\n";
+    const size_t keyword_alignment(8);
+    for (auto &property : properties) {
+        auto &p = property.second;
+        if (!p.value.empty()) {
+            os << "\\" << std::setw(keyword_alignment)
+               << convert_newlines(property.first) << "= "
+               << "'" << convert_newlines(p.value) << "'\n";
         }
-      auto &a = p.attributes;
-      auto name (a.find ("name")), value (a.find ("value"));
-      if (a.size () == 2 && name != a.end () && value != a.end ())
-        {
-          os << "\\" << std::setw (keyword_alignment)
-             << convert_newlines (name->second) << "= "
-             << "'" << convert_newlines (value->second) << "'\n";
-        }
-      else
-        {
-          for (auto &attr : a)
-            {
-              os << "\\" << std::setw (keyword_alignment)
-                 << convert_newlines (property.first + "." + attr.first) << "= "
-                 << "'" << convert_newlines (attr.second) << "'\n";
+        auto &a = p.attributes;
+        auto name(a.find("name")), value(a.find("value"));
+        if (a.size() == 2 && name != a.end() && value != a.end()) {
+            os << "\\" << std::setw(keyword_alignment) << convert_newlines(name->second)
+               << "= "
+               << "'" << convert_newlines(value->second) << "'\n";
+        } else {
+            for (auto &attr : a) {
+                os << "\\" << std::setw(keyword_alignment)
+                   << convert_newlines(property.first + "." + attr.first) << "= "
+                   << "'" << convert_newlines(attr.second) << "'\n";
             }
         }
     }
 
-  if (comments.empty ())
-    {
-      for (size_t i = 1; i < columns.size (); ++i)
-        {
-          if (!columns[i].field_properties.attributes.empty ()
-              || !columns[i].field_properties.description.empty ())
-            {
-              os << "\\ " << columns[i].name;
-              auto unit = columns[i].field_properties.attributes.find ("unit");
-              if (unit != columns[i].field_properties.attributes.end ()
-                  && !unit->second.empty ())
-                {
-                  os << " (" << unit->second << ")";
+    if (comments.empty()) {
+        for (size_t i = 1; i < columns.size(); ++i) {
+            if (!columns[i].field_properties.attributes.empty() ||
+                !columns[i].field_properties.description.empty()) {
+                os << "\\ " << columns[i].name;
+                auto unit = columns[i].field_properties.attributes.find("unit");
+                if (unit != columns[i].field_properties.attributes.end() &&
+                    !unit->second.empty()) {
+                    os << " (" << unit->second << ")";
                 }
-              os << "\n";
-              if (!columns[i].field_properties.description.empty ())
-                os << "\\ ___ " << columns[i].field_properties.description
-                   << "\n";
-              // FIXME: Write out description attributes
+                os << "\n";
+                if (!columns[i].field_properties.description.empty())
+                    os << "\\ ___ " << columns[i].field_properties.description << "\n";
+                // FIXME: Write out description attributes
             }
         }
-    }
-  else
-    {
-      for (auto &c : comments)
-        {
-          std::stringstream ss (c);
-          std::string line;
-          while (std::getline (ss, line))
-            os << "\\ " << line << "\n";
+    } else {
+        for (auto &c : comments) {
+            std::stringstream ss(c);
+            std::string line;
+            while (std::getline(ss, line)) os << "\\ " << line << "\n";
         }
     }
 }

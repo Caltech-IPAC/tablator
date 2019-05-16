@@ -19,68 +19,64 @@
 
 #include <fstream>
 #include <list>
-#include <vector>
 #include <string>
-namespace tablator
-{
+#include <vector>
+namespace tablator {
 typedef std::list<std::vector<std::string> > DSV_Document;
-class DSV_Parser
-{
+class DSV_Parser {
 public:
-  enum ParseState
-  {
-    LineStart,
-    FieldStart,
-    FrontQuote,
-    BackQuote,
-    EscapeOn,
-    EscapeOff,
-    FieldEnd,
-    LineEnd,
-    ParseCompleted
-  };
-  DSV_Parser () = delete;
-  DSV_Parser (DSV_Document &p_doc, std::istream &input_stream,
-              const char &delimiter);
+    enum ParseState {
+        LineStart,
+        FieldStart,
+        FrontQuote,
+        BackQuote,
+        EscapeOn,
+        EscapeOff,
+        FieldEnd,
+        LineEnd,
+        ParseCompleted
+    };
+    DSV_Parser() = delete;
+    DSV_Parser(DSV_Document &p_doc, std::istream &input_stream, const char &delimiter);
 
 private:
-  inline char _curr_char () const;
-  inline void _next ();
+    inline char _curr_char() const;
+    inline void _next();
 
-  void _line_start ();
-  void _field_start ();
-  void _field_end ();
-  void _escape_on ();
-  void _escape_off ();
-  void _front_quote ();
-  void _back_quote ();
-  void _line_end ();
+    void _line_start();
+    void _field_start();
+    void _field_end();
+    void _escape_on();
+    void _escape_off();
+    void _front_quote();
+    void _back_quote();
+    void _line_end();
 
-  void _post_line_start ();
-  void _post_field_start ();
-  void _post_front_quote ();
-  void _post_escape_on ();
-  void _post_escape_off ();
-  void _post_back_quote ();
-  void _post_field_end ();
-  void _post_line_end ();
+    void _post_line_start();
+    void _post_field_start();
+    void _post_front_quote();
+    void _post_escape_on();
+    void _post_escape_off();
+    void _post_back_quote();
+    void _post_field_end();
+    void _post_line_end();
 
-  bool _get_line_from_file ();
-  void _append_another_line_from_file ();
-  void _initialize ();
+    bool _get_line_from_file();
+    void _append_another_line_from_file();
+    void _initialize();
 
-  std::string read_str;
-  std::string row_str;
-  size_t row_count;
-  size_t col_count;
-  std::string::size_type idx;
-  std::string::size_type field_beg;
-  std::string::size_type field_end;
-  std::string elem;
-  std::vector<std::string> row;
-  ParseState state;
-  DSV_Document &document;
-  std::istream &dsv_stream;
-  const char delimiter;
+    std::string read_str;
+    std::string row_str;
+    size_t row_count;
+    size_t col_count;
+    std::string::size_type idx;
+    std::string::size_type field_beg;
+    std::string::size_type field_end;
+    std::string elem;
+    std::vector<std::string> row;
+    ParseState state;
+    DSV_Document &document;
+    std::istream &dsv_stream;
+    const char delimiter;
 };
-}
+}  // namespace tablator

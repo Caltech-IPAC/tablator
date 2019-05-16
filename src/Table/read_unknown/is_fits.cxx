@@ -1,19 +1,14 @@
-#include <boost/filesystem.hpp>
 #include <CCfits/CCfits>
+#include <boost/filesystem.hpp>
 
-namespace tablator
-{
-bool is_fits (const boost::filesystem::path &path)
-{
-  bool result (true);
-  try
-    {
-      CCfits::FITS fits (path.string (), CCfits::Read, false);
+namespace tablator {
+bool is_fits(const boost::filesystem::path &path) {
+    bool result(true);
+    try {
+        CCfits::FITS fits(path.string(), CCfits::Read, false);
+    } catch (...) {
+        result = false;
     }
-  catch (...)
-    {
-      result=false;
-    }
-  return result;
+    return result;
 }
-}
+}  // namespace tablator
