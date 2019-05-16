@@ -22,7 +22,7 @@ boost::property_tree::ptree tablator::Table::generate_property_tree (
   votable.add ("<xmlattr>.xmlns:stc", "http://www.ivoa.net/xml/STC/v1.30");
   votable.add ("<xmlattr>.xsi:schemaLocation",
                "http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 "
-               "http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30")
+               "http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30");
 
   bool overflow = false;
   const std::string resource_literal ("RESOURCE"), table_literal ("TABLE");
