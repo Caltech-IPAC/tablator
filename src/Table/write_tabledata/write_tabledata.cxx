@@ -2,15 +2,24 @@
 #include <iomanip>
 #include <limits>
 
+#include "../../Data_Type_Adjuster.hxx"
 #include "../../Table.hxx"
 #include "../../to_string.hxx"
 #include "../../write_type_as_ascii.hxx"
+
 
 namespace tablator {
 std::string decode_links(const std::string &encoded);
 
 void Table::write_tabledata(std::ostream &os,
                             const Format::Enums &output_format) const {
+    write_tabledata(os, output_format,
+                    Data_Type_Adjuster(*this).get_datatypes_for_writing(output_format));
+}
+
+
+void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format,
+                            const std::vector<Data_Type> &datatypes_for_writing) const {
     std::string tr_prefix, tr_suffix, td_prefix, td_suffix;
     std::string tabledata_indent = "                    ";
     const bool is_json(output_format == Format::Enums::JSON ||
@@ -42,12 +51,15 @@ void Table::write_tabledata(std::ostream &os,
         os << tr_prefix;
 
         /// Skip the null bitfield flag
-        for (size_t column = 1; column < columns.size(); ++column) {
+        for (size_t i = 1; i < columns.size(); ++i) {
             std::stringstream td;
-            if (!is_null(row_offset, column)) {
-                write_type_as_ascii(td, columns[column].type,
-                                    columns[column].array_size,
-                                    data.data() + row_offset + offsets[column]);
+            if (!is_null(row_offset, i)) {
+                Data_Type alt_datatype =
+                        Data_Type_Adjuster(*this).get_datatype_for_writing(
+                                datatypes_for_writing, i);
+                write_type_as_ascii(td, columns[i].type, columns[i].array_size,
+                                    data.data() + row_offset + offsets[i], ' ',
+                                    alt_datatype);
             }
             os << td_prefix;
             switch (output_format) {
@@ -67,7 +79,7 @@ void Table::write_tabledata(std::ostream &os,
                     break;
             }
             os << td_suffix;
-            if (is_json && column < columns.size() - 1) {
+            if (is_json && i < columns.size() - 1) {
                 os << ',';
             }
             os << '\n';

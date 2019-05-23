@@ -43,7 +43,7 @@ void tablator::Table::write_sql_insert(
                 std::stringstream ss;
                 write_type_as_ascii(ss, columns[column].type,
                                     columns[column].array_size,
-                                    data.data() + row_offset + offsets[column]);
+                                    data.data() + row_offset + offsets[column], ' ');
                 os << quote_sql_string(ss.str(), '\'');
             } else {
                 if (columns[column].array_size != 1) {

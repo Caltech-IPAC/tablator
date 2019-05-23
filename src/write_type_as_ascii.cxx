@@ -1,17 +1,18 @@
-#include "data_size.hxx"
-
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <sstream>
 
+#include "data_size.hxx"
+
 namespace tablator {
 void write_type_as_ascii(std::ostream &os, const Data_Type &type,
                          const size_t &array_size, const uint8_t *data,
-                         const char &separator) {
-    if (array_size != 1 && type != Data_Type::CHAR) {
+                         const char &separator, const Data_Type &alt_datatype) {
+    if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
-            write_type_as_ascii(os, type, 1, data + n * data_size(type), separator);
+            write_type_as_ascii(os, type, 1, data + n * data_size(type), separator,
+                                alt_datatype);
             if (n != array_size - 1) os << separator;
         }
     } else {
@@ -44,9 +45,15 @@ void write_type_as_ascii(std::ostream &os, const Data_Type &type,
             case Data_Type::INT64_LE:
                 os << *reinterpret_cast<const int64_t *>(data);
                 break;
-            case Data_Type::UINT64_LE:
-                os << *reinterpret_cast<const uint64_t *>(data);
-                break;
+            case Data_Type::UINT64_LE: {
+                if (alt_datatype == Data_Type::CHAR) {
+                    os << std::to_string(*reinterpret_cast<const uint64_t *>(data));
+                } else if (alt_datatype == Data_Type::INT64_LE) {
+                    os << *reinterpret_cast<const int64_t *>(data);
+                } else {
+                    os << *reinterpret_cast<const uint64_t *>(data);
+                }
+            } break;
             case Data_Type::FLOAT32_LE:
                 os << std::setprecision(std::numeric_limits<float>::max_digits10)
                    << *reinterpret_cast<const float *>(data);

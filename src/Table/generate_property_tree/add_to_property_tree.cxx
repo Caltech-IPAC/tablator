@@ -28,14 +28,16 @@ void Option_to_xml(boost::property_tree::ptree &tree, const tablator::Option &op
 
 namespace tablator {
 void add_to_property_tree(const Column &column, const std::string &tree_name,
-                          boost::property_tree::ptree &tree) {
+                          boost::property_tree::ptree &tree,
+                          const Data_Type &active_datatype) {
     boost::property_tree::ptree &field = tree.add(tree_name, "");
     field.add("<xmlattr>.name", column.name);
-    std::string datatype = to_xml_string(column.type);
+    std::string datatype = to_xml_string(active_datatype);
     field.add("<xmlattr>.datatype", datatype);
-    if (column.type == Data_Type::CHAR || column.array_size != 1)
-        field.add("<xmlattr>.arraysize", "*");
 
+    if (active_datatype == Data_Type::CHAR || column.array_size != 1) {
+        field.add("<xmlattr>.arraysize", "*");
+    }
     for (auto &a : column.field_properties.attributes) {
         /// Empty attributes cause field.add to crash :(, so make sure
         /// that does not happen.

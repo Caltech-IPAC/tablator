@@ -7,4 +7,5 @@ AccessModifierOffset: -4
 SortIncludes: true
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
+MaxEmptyLinesToKeep: 2
 ...

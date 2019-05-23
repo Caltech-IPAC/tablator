@@ -83,9 +83,11 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
                             element, offsets[column], offsets[column + 1], row_string);
                 } catch (std::exception &error) {
                     throw std::runtime_error(
-                            "Invalid " + to_string(fields[column].type) + " in row " +
-                            std::to_string(current_row + 1) + ", field " +
-                            std::to_string(column) + ".  Found '" + element + "'");
+                            "Invalid " + to_string(fields[column].type) + " value " +
+                            element + " in row " + std::to_string(current_row + 1) +
+                            ", field " + std::to_string(column) + ", array_size: " +
+                            std::to_string(columns[column].array_size) +
+                            ". Error message: " + error.what());
                 }
         }
         append_row(row_string);
