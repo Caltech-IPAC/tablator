@@ -17,7 +17,7 @@
                 {
                     "<xmlattr>":
                     {
-                        "name": "ulongs",
+                        "name": "ulong1",
                         "datatype": "long",
                         "arraysize": "*"
                     }

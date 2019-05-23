@@ -1,27 +1,25 @@
 #pragma once
 
-#include "Field_Properties.hxx"
-#include "Format.hxx"
-#include "Property.hxx"
-
-#include "Column.hxx"
-#include "Row.hxx"
-
 #include <H5Cpp.h>
 #include <CCfits/CCfits>
+#include <array>
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <stdexcept>
+#include <tuple>
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include <array>
-#include <set>
-#include <stdexcept>
-#include <tuple>
-
-#include <fstream>
-#include <iostream>
+#include "Column.hxx"
+#include "Field_Properties.hxx"
+#include "Format.hxx"
+#include "Property.hxx"
+#include "Row.hxx"
 
 namespace tablator {
 class VOTable_Field;
@@ -117,12 +115,9 @@ public:
     void write_hdf5_to_H5File(H5::H5File &outfile) const;
     void write_hdf5_attributes(H5::DataSet &table) const;
 
-    void write_ipac_table(std::ostream &os) const;
-    void write_ipac_table(const boost::filesystem::path &p) {
-        boost::filesystem::ofstream outfile(p);
-        write_ipac_table(outfile);
-    }
-    std::vector<size_t> get_column_width() const;
+    void write_ipac_table(const boost::filesystem::path &p);
+
+    std::vector<size_t> get_column_widths() const;
     void write_ipac_table_header(std::ostream &os) const;
     std::string to_ipac_string(const Data_Type &type) const;
 
@@ -166,11 +161,18 @@ public:
         write_sql_inserts(os, table_name);
     }
     void write_sqlite_db(const boost::filesystem::path &path) const;
+
     void write_fits(std::ostream &os) const;
+
     void write_fits(const boost::filesystem::path &filename) const;
+
     void write_fits(fitsfile *fits_file) const;
+
     void write_tabledata(std::ostream &os, const Format::Enums &output_format) const;
+
     void write_html(std::ostream &os) const;
+
+
     boost::property_tree::ptree generate_property_tree(
             const std::string &tabledata_string) const;
 
@@ -250,5 +252,33 @@ public:
                                  const size_t &size);
 
     void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths);
+
+private:
+    std::vector<Data_Type> get_original_datatypes() const {
+        std::vector<Data_Type> orig_datatypes;
+        for (size_t col = 0; col <= columns.size(); ++col) {
+            orig_datatypes.emplace_back(columns[col].type);
+        }
+        return orig_datatypes;
+    }
+
+    void write_ipac_table(std::ostream &os,
+                          const std::vector<Data_Type> &datatypes) const;
+
+    void write_fits(std::ostream &os,
+                    const std::vector<Data_Type> &datatypes_for_writing) const;
+    void write_fits(const boost::filesystem::path &filename,
+                    const std::vector<Data_Type> &datatypes_for_writing) const;
+    void write_fits(fitsfile *fits_file,
+                    const std::vector<Data_Type> &datatypes_for_writing) const;
+
+    void write_tabledata(std::ostream &os, const Format::Enums &output_format,
+                         const std::vector<Data_Type> &datatypes) const;
+    void write_html(std::ostream &os,
+                    const std::vector<Data_Type> &datatypes_for_writing) const;
+
+    boost::property_tree::ptree generate_property_tree(
+            const std::string &tabledata_string,
+            const std::vector<Data_Type> &datatypes_for_writing) const;
 };
 }  // namespace tablator

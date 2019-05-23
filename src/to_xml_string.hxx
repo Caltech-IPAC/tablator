@@ -49,4 +49,5 @@ inline std::string to_xml_string(const Data_Type &type) {
             break;
     }
 }
+
 }  // namespace tablator

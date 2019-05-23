@@ -3,11 +3,22 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include "../Data_Type_Adjuster.hxx"
 #include "../Table.hxx"
 
-void tablator::Table::write_html(std::ostream &os) const {
-    boost::property_tree::ptree tree;
 
+/**********************************************************/
+
+void tablator::Table::write_html(std::ostream &os) const {
+    write_html(os, Data_Type_Adjuster(*this).get_datatypes_for_writing(
+                           Format::Enums::HTML));
+}
+
+/**********************************************************/
+
+void tablator::Table::write_html(
+        std::ostream &os, const std::vector<Data_Type> &datatypes_for_writing) const {
+    boost::property_tree::ptree tree;
     boost::property_tree::ptree &html = tree.add("html", "");
     boost::property_tree::ptree &style =
             html.add("style",
@@ -75,6 +86,6 @@ void tablator::Table::write_html(std::ostream &os) const {
     std::string s(ss.str());
     size_t tabledata_offset(s.find(tabledata_string));
     os << s.substr(0, tabledata_offset - 4);
-    write_tabledata(os, Format::Enums::HTML);
+    write_tabledata(os, Format::Enums::HTML, datatypes_for_writing);
     os << s.substr(tabledata_offset + tabledata_string.size() + 5);
 }

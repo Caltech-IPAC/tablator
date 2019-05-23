@@ -16,7 +16,7 @@ void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,
         if (elements.size() != array_size)
             throw std::runtime_error(
                     "Expected " + std::to_string(array_size) + " elements, but found " +
-                    std::to_string(elements.size()) + " in the cell '" + element + "'");
+                    std::to_string(elements.size()) + ": '" + element + "'");
         auto element_offset = offset;
         auto element_size = data_size(data_type);
         for (auto &e : elements) {
@@ -90,8 +90,9 @@ void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,
                 row.insert(element, offset, offset_end);
                 break;
             default:
-                throw std::runtime_error("Unknown data type in insert_ascii_in_row: " +
-                                         to_string(data_type));
+                throw std::runtime_error(
+                        "Unknown data type in insert_ascii_in_row(): " +
+                        to_string(data_type));
         }
     }
 }

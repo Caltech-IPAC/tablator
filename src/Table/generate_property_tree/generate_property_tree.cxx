@@ -1,15 +1,34 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#include "../../Data_Type_Adjuster.hxx"
 #include "../../Table.hxx"
 
 namespace tablator {
 void add_to_property_tree(const Column &column, const std::string &tree_name,
-                          boost::property_tree::ptree &tree);
-}
+                          boost::property_tree::ptree &tree,
+                          const Data_Type &active_datatype);
 
+void add_to_property_tree(const Column &column, const std::string &tree_name,
+                          boost::property_tree::ptree &tree) {
+    add_to_property_tree(column, tree_name, tree, column.type);
+}
+}  // namespace tablator
+
+
+// JTODO Called for JSON, JSON5, VOTABLE.  Pick a default format and
+// call get_datatypes_for_writing() instead of using original
+// datatypes?  Who outside this repo actually calls this function?
 boost::property_tree::ptree tablator::Table::generate_property_tree(
         const std::string &tabledata_string) const {
+    return generate_property_tree(tabledata_string, get_original_datatypes());
+}
+
+/**********************************************************/
+
+boost::property_tree::ptree tablator::Table::generate_property_tree(
+        const std::string &tabledata_string,
+        const std::vector<Data_Type> &datatypes_for_writing) const {
     boost::property_tree::ptree tree;
     std::string votable_literal("VOTABLE");
     auto &votable = tree.add(votable_literal, "");
@@ -62,27 +81,29 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
         add_to_property_tree(param, "PARAM", resource);
     }
 
-    boost::property_tree::ptree &table = resource.add(table_literal, "");
+    boost::property_tree::ptree &table_tree = resource.add(table_literal, "");
 
     for (auto &p : properties) {
         if (boost::starts_with(p.first, resource_literal + "." + table_literal)) {
             for (auto &a : p.second.attributes)
-                table.add("<xmlattr>." + a.first, a.second);
+                table_tree.add("<xmlattr>." + a.first, a.second);
         }
     }
     // VOTable only allows a single DESCRIPTION element, so we have to
     // cram all of the comments into a single line
     if (!comments.empty()) {
-        table.add("DESCRIPTION", boost::join(comments, "\n"));
+        table_tree.add("DESCRIPTION", boost::join(comments, "\n"));
     }
     for (auto &param : table_params) {
-        add_to_property_tree(param, "PARAM", table);
+        add_to_property_tree(param, "PARAM", table_tree);
     }
     /// Skip null_bitfield_flag
     for (size_t i = 1; i < columns.size(); ++i) {
-        add_to_property_tree(columns[i], "FIELD", table);
+        Data_Type active_datatype = Data_Type_Adjuster(*this).get_datatype_for_writing(
+                datatypes_for_writing, i);
+        add_to_property_tree(columns[i], "FIELD", table_tree, active_datatype);
     }
-    table.add("DATA.TABLEDATA", tabledata_string);
+    table_tree.add("DATA.TABLEDATA", tabledata_string);
     if (overflow) {
         auto &info = tree.add("VOTABLE.RESOURCE.INFO", "");
         info.add("<xmlattr>.name", "QUERY_STATUS");

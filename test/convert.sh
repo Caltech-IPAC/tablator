@@ -50,6 +50,19 @@ for table in test/bad_ipac_tables/* test/bad_votables/*; do
     fi
 done
 
+###########################################################
+# Expected errors
+
+./build/tablator --input-format=json5 --output-format=ipac test/back_and_forth_tables/integer_type_arrays.json5 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: Shouldn't be able to convert Json5 Table with array of large uint64 vals to IPAC format"
+else
+    echo "PASS: Attempt to convert Json5 Table with array of large uint64 vals to IPAC format correctly resulted in error"
+fi
+
+
+###########################################################
+
 STREAM_INTERMEDIATE=""
 for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/fits_medium.fits test/*.tbl test/*.json5 test/*.xml test/upload_table.vo test/*.unk; do
     STREAM_INTERMEDIATE=""
@@ -177,6 +190,34 @@ else
     echo "FAIL: Read TSV with no trailing newline"
 fi
 
+./build/tablator --input-format=ipac_table --output-format=votable test/int_types.tbl - | diff -w - test/int_types.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert IPAC Table with large uint64 vals to VOTable"
+else
+    echo "FAIL: Convert IPAC Table with large uint64 vals to VOTable"
+fi
+
+./build/tablator --input-format=ipac_table --output-format=json5 test/int_types.tbl - | diff -w - test/int_types.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert IPAC Table with large uint64 vals to JSON5"
+else
+    echo "FAIL: Convert IPAC Table with large uint64 vals to JSON5"
+fi
+
+./build/tablator --input-format=json5 --output-format=votable test/back_and_forth_tables/two_row_large_ulong_array.json5 - | diff -w - test/back_and_forth_tables/two_row_large_ulong_array_from_json5.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert Json5 Table with large uint64 vals array col to VOTable"
+else
+    echo "FAIL: Convert Json5 Table with large uint64 vals array col to VOTable"
+fi
+
+# JTODO: DESCRIPTION section would not survive the round trip.
+./build/tablator --input-format=json5 --output-format=votable test/back_and_forth_tables/integer_type_arrays.json5 - | diff -w - test/back_and_forth_tables/integer_type_arrays_from_json5.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert Json5 Table with assorted array cols to VOTable"
+else
+    echo "FAIL: Convert Json5 Table with assorted array cols to VOTable"
+fi
 
 # JTODO: INFO section still does not survive the round trip.
 ${tablator_bin} --output-format=fits  test/back_and_forth_tables/one_row_int_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w  test/back_and_forth_tables/one_row_int_array.json5 temp.json5
@@ -230,6 +271,39 @@ else
     echo "FAIL: Convert Json5 Table with single two-row array col of type ulong to FITS and back"
 fi
 
+${tablator_bin} --output-format=fits  test/back_and_forth_tables/two_row_large_ulong_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w  test/back_and_forth_tables/two_row_large_ulong_array_via_fits.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert Json5 Table with single two-row array col of type ulong with large values to FITS and back"
+    rm -f temp.json5
+else
+    echo "FAIL: Convert Json5 Table with single two-row array col of type ulong with large values to FITS and back"
+fi
+
+
+${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array.json5 temp.vot && ${tablator_bin}  temp.vot temp.json5 && diff -w  test/back_and_forth_tables/two_row_large_ulong_array_via_fits.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert Json5 Table with single two-row array col of type ulong with large values to VOTABLE and back"
+    rm -f temp.json5
+else
+    echo "FAIL: Convert Json5 Table with single two-row array col of type ulong with large values to VOTABLE and back"
+fi
+
+${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array.vot temp.json5 && ${tablator_bin}  temp.json5 temp.vot && diff -w  test/back_and_forth_tables/two_row_large_ulong_array.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with single two-row array col of type ulong with large values to Json5 and back"
+    rm -f temp.json5
+else
+    echo "FAIL: Convert VOTable with single two-row array col of type ulong with large values to Json5 and back"
+fi
+
+${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array.vot temp.fits && ${tablator_bin}  temp.fits temp.vot && diff -w  test/back_and_forth_tables/two_row_large_ulong_array.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with single two-row array col of type ulong with large values to FITS and back"
+    rm -f temp.fits
+else
+    echo "FAIL: Convert VOTable with single two-row array col of type ulong with large values to FITS and back"
+fi
+
 
 ${tablator_bin} --output-format=fits  test/back_and_forth_tables/one_row_bool_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w  test/back_and_forth_tables/one_row_bool_array.json5 temp.json5
 if [ $? -eq 0 ]; then
@@ -253,4 +327,22 @@ if [ $? -eq 0 ]; then
     rm -f temp.json5
 else
     echo "FAIL: Convert Json5 Table with single multi-row non-array col of type bool to FITS and back"
+fi
+
+# JTODO: INFO section still does not survive the round trip.
+./build/tablator --output-format=fits  test/back_and_forth_tables/small_integer_type_arrays.json5 - | ./build/tablator --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/small_integer_type_arrays.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert Json5 Table with assorted small-valued int-type array cols to FITS and back"
+    rm -f temp.json5
+else
+    echo "FAIL: Convert Json5 Table with assorted small-valued int-type array cols to FITS and back"
+fi
+
+# # JTODO: INFO section still does not survive the round trip.
+./build/tablator --output-format=fits  test/back_and_forth_tables/small_fits_unsupported_integer_type_arrays.json5 - | ./build/tablator --input-format=fits - temp.json5 && diff -w  test/back_and_forth_tables/small_fits_unsupported_integer_type_arrays_via_fits.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert Json5 Table with assorted small-valued array cols of types not supported by FITS to FITS and back"
+    rm -f temp.json5
+else
+    echo "FAIL: Convert Json5 Table with assorted small-valued array cols of types not supported by FITS to FITS and back"
 fi
