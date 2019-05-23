@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE>
+    <INFO name="ORIGIN" value="IPAC Infrared Science Archive (IRSA), Caltech/JPL"/>
+    <INFO name="DATETIME" value="2018-07-19 10:44:39"/>
+    <INFO name="DataTag" value="ADS/IRSA.Gator#2018/0719/104439_19323"/>
+    <INFO name="DATABASE" value="2MASS All-Sky Point Source Catalog (PSC) (fp_psc)"/>
+    <INFO name="EQUINOX" value="J2000"/>
+    <INFO name="SKYAREA" value="within 10 arcsec of  ra=10.68479 dec=+41.26906 Eq J2000 "/>
+    <INFO name="StatusFile" value="/workspace/TMP_BxOEy6_18113/Gator/irsa/19323/log.19323.html"/>
+    <INFO name="SQL" value="WHERE (no constraints)"/>
+    <INFO name="SQL" value="SELECT (27 column names follow in next row.)"/>
+    <TABLE>
+      <DESCRIPTION>ra (deg)
+___ right ascension (J2000 decimal deg)
+dec (deg)
+___ declination (J2000 decimal deg)
+any_uint16
+___ big, small, whatever
+big_uint64
+___ a uint64 too big for int64
+little_uint64
+___ a uint64 that fits in an int64
+big_uint64_2
+___ another uint64 too big for int64
+any_uint32
+___ big, small, whatever</DESCRIPTION>
+      <FIELD name="ra" datatype="double" unit="deg"/>
+      <FIELD name="dec" datatype="double" unit="deg"/>
+      <FIELD name="any_uint16" datatype="int" unit="arcsec"/>
+      <FIELD name="big_uint64" datatype="char" arraysize="*"/>
+      <FIELD name="little_uint64" datatype="long"/>
+      <FIELD name="big_uint64_2" datatype="char" arraysize="*"/>
+      <FIELD name="any_uint32" datatype="long"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>10.684737</TD>
+            <TD>41.269035000000002</TD>
+            <TD>8</TD>
+            <TD>17876521098765432109</TD>
+            <TD>109</TD>
+            <TD>17876521098765342109</TD>
+            <TD>8</TD>
+          </TR>
+          <TR>
+            <TD>10.685657000000001</TD>
+            <TD>41.269550000000002</TD>
+            <TD>65413</TD>
+            <TD>18210987654321098765</TD>
+            <TD>13</TD>
+            <TD>18210987653421098765</TD>
+            <TD>65413</TD>
+          </TR>
+          <TR>
+            <TD>10.686026</TD>
+            <TD>41.269226000000003</TD>
+            <TD>1324</TD>
+            <TD>4321098765432109876</TD>
+            <TD>13</TD>
+            <TD>4321098765432109876</TD>
+            <TD>1324</TD>
+          </TR>
+          <TR>
+            <TD>10.686014999999999</TD>
+            <TD>41.269629999999999</TD>
+            <TD>1342</TD>
+            <TD>2109876543210987654</TD>
+            <TD>787652109876534213</TD>
+            <TD>2109876534210987654</TD>
+            <TD>1342</TD>
+          </TR>
+          <TR>
+            <TD>10.683469000000001</TD>
+            <TD>41.268585000000002</TD>
+            <TD>13</TD>
+            <TD>9432109876543210987</TD>
+            <TD>13</TD>
+            <TD>9342109876534210987</TD>
+            <TD>4294967295</TD>
+          </TR>
+          <TR>
+            <TD>10.683465</TD>
+            <TD>41.269675999999997</TD>
+            <TD>13</TD>
+            <TD>13210987654321098765</TD>
+            <TD>13</TD>
+            <TD>13210987653421098765</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.685836999999999</TD>
+            <TD>41.270598999999997</TD>
+            <TD>13</TD>
+            <TD>2109876543210987654</TD>
+            <TD>13</TD>
+            <TD>2109876534210987654</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.682777</TD>
+            <TD>41.270111</TD>
+            <TD>10</TD>
+            <TD>123</TD>
+            <TD>10</TD>
+            <TD>123</TD>
+            <TD>10</TD>
+          </TR>
+          <TR>
+            <TD>10.684029000000001</TD>
+            <TD>41.270901000000002</TD>
+            <TD>13</TD>
+            <TD>3210987654321098765</TD>
+            <TD>13</TD>
+            <TD>3210987653421098765</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.685269999999999</TD>
+            <TD>41.267124000000003</TD>
+            <TD>13</TD>
+            <TD>2109876543210987654</TD>
+            <TD>13</TD>
+            <TD>2109876534210987654</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.683263</TD>
+            <TD>41.267456000000003</TD>
+            <TD>13</TD>
+            <TD>2345</TD>
+            <TD>13</TD>
+            <TD>2345</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.682383</TD>
+            <TD>41.267924999999998</TD>
+            <TD>10</TD>
+            <TD>345678</TD>
+            <TD>10</TD>
+            <TD>345678</TD>
+            <TD>4294967294</TD>
+          </TR>
+          <TR>
+            <TD>10.68418</TD>
+            <TD>41.266941000000003</TD>
+            <TD>13</TD>
+            <TD>2109876543210987654</TD>
+            <TD>13</TD>
+            <TD>2109876534210987654</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.686845999999999</TD>
+            <TD>41.270713999999998</TD>
+            <TD>13</TD>
+            <TD>3210987654321098765</TD>
+            <TD>13</TD>
+            <TD>3210987653421098765</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.687414</TD>
+            <TD>41.267631999999999</TD>
+            <TD>13</TD>
+            <TD>567890123</TD>
+            <TD>13</TD>
+            <TD>567890123</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.687611</TD>
+            <TD>41.270302000000001</TD>
+            <TD>18</TD>
+            <TD>2109876543210987654</TD>
+            <TD>18</TD>
+            <TD>2109876534210987654</TD>
+            <TD>18</TD>
+          </TR>
+          <TR>
+            <TD>10.683944</TD>
+            <TD>41.266682000000003</TD>
+            <TD>13</TD>
+            <TD>67890123456789012</TD>
+            <TD>13</TD>
+            <TD>67890123456789012</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.682713</TD>
+            <TD>41.267055999999997</TD>
+            <TD>13</TD>
+            <TD>567890123</TD>
+            <TD>13</TD>
+            <TD>567890123</TD>
+            <TD>13</TD>
+          </TR>
+          <TR>
+            <TD>10.686963</TD>
+            <TD>41.266826999999999</TD>
+            <TD>65535</TD>
+            <TD>18321098765432109876</TD>
+            <TD>10</TD>
+            <TD>18321098765342109876</TD>
+            <TD>65535</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

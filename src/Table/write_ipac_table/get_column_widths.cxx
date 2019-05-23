@@ -1,10 +1,17 @@
 #include "../../Table.hxx"
 
-std::vector<size_t> tablator::Table::get_column_width() const {
+// The IPAC table format does not support array-valued non-char columns.
+// A array column of fixed size n named "col" of non-char type is formatted
+// as single-valued columns named "col_0", "col_1", ... "col_{n-1}".
+
+// This function does the right thing for columns of type UINT64_LE even if
+// their active_datatype is CHAR.
+
+std::vector<size_t> tablator::Table::get_column_widths() const {
     std::vector<size_t> widths;
     auto column(std::next(columns.begin()));
-    /// First column is the null bitfield flags, which are not written
-    /// out in ipac_tables.
+    // First column is the null bitfield flags, which are not written
+    // out in ipac_tables.
     widths.push_back(0);
     for (; column != columns.end(); ++column) {
         size_t header_size(
@@ -17,13 +24,15 @@ std::vector<size_t> tablator::Table::get_column_width() const {
             header_size = std::max(header_size, unit->second.size());
         }
         if (column->type == Data_Type::CHAR) {
-            /// The minimum of 4 is to accomodate the length of the
-            /// literals 'char' and 'null'.
+            // The minimum of 4 is to accomodate the length of the
+            // literals 'char' and 'null'.
             widths.push_back(
                     std::max((size_t)4, std::max(header_size, column->array_size)));
         } else {
-            /// buffer_size = 1 (sign) + 1 (leading digit) + 1 (decimal)
-            /// + 1 (exponent sign) + 3 (exponent)
+            // buffer_size = 1 (sign) + 1 (leading digit) + 1
+            // (decimal) + 1 (exponent sign) + 3 (exponent) (value
+            // could be e.g. uint64 as well as double, but double's
+            // buffer_size is generous enough).
             const size_t buffer_size(7);
             widths.push_back(
                     std::max(header_size,

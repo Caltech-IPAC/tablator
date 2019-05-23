@@ -1,7 +1,6 @@
 #include "../Data_Type_to_SQL.hxx"
 #include "../Table.hxx"
 #include "../quote_sql_string.hxx"
-#include "../write_type_as_ascii.hxx"
 
 namespace {
 std::pair<size_t, tablator::Data_Type> get_offsets_and_types(

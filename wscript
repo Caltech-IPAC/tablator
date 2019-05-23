@@ -19,6 +19,7 @@ def build(bld):
                   'json5_parser', 'sqlite3', 'vsqlitepp']
 
     sources=['src/fits_keyword_mapping.cxx',
+             'src/Data_Type_Adjuster.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Format/content_type.cxx',
              'src/Row/set_null.cxx',
@@ -79,7 +80,7 @@ def build(bld):
              'src/Table/write_ipac_table/write_ipac_table.cxx',
              'src/Table/write_ipac_table/write_ipac_table_header.cxx',
              'src/Table/write_ipac_table/to_ipac_string.cxx',
-             'src/Table/write_ipac_table/get_column_width.cxx',
+             'src/Table/write_ipac_table/get_column_widths.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_to_H5File.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_attributes.cxx',

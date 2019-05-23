@@ -1,0 +1,118 @@
+{
+    "VOTABLE":
+    {
+        "<xmlattr>":
+        {
+            "version": "1.3",
+            "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
+            "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
+            "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
+            "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
+        },
+        "RESOURCE":
+        {
+            "TABLE":
+            {
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "bools",
+                        "datatype": "boolean",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "ubools",
+                        "datatype": "unsignedByte",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "small_shorts",
+                        "datatype": "short",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "small_ushorts",
+                        "datatype": "ushort",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "small_int32s",
+                        "datatype": "int",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "small_uint32s",
+                        "datatype": "uint",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "small_longs",
+                        "datatype": "long",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "small_ulongs",
+                        "datatype": "ulong",
+                        "arraysize": "*"
+                    }
+                },
+                "DATA":
+                {
+                    "TABLEDATA":
+                    [
+                        [
+                            "1 1 0 1",
+                            "0x4 0x0 0x1 0x2",
+                            "88 77 65 44",
+                            "88 77 65 44",
+                            "88 77 65 44",
+                            "88 77 65 44",
+                            "88 77 65 44",
+                            "88 77 65 44"
+                        ],
+                        [
+                            "0 1 1 1",
+                            "0x1 0x2 0x0 0x4",
+                            "11 22 43 56",
+                            "11 22 43 56",
+                            "11 22 43 56",
+                            "11 22 43 56",
+                            "11 22 43 56",
+                            "11 22 43 56"
+                        ]
+
+                    ]
+                }
+            }
+        }
+    }
+}
