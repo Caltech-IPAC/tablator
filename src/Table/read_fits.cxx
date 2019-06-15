@@ -29,12 +29,15 @@ void read_vector_column (fitsfile *fits_file, uint8_t *position,
   int status (0), anynul (0);
   std::vector<T> temp_array (c.repeat ());
 
+  auto get_matched_datatype = CCfits::FITSUtil::MatchType<T>();
   uint8_t *current = position;
   for (size_t row = 0; row < rows; ++row)
     {
       uint8_t *element_start = current;
-      fits_read_col (fits_file, c.type (), c.index (), row + 1, 1, c.repeat (),
-                     NULL, temp_array.data (), &anynul, &status);
+
+      fits_read_col (fits_file, get_matched_datatype (), c.index (), row + 1, 1,
+                     c.repeat (), NULL, temp_array.data (), &anynul, &status);
+
       for (size_t offset = 0; offset < c.repeat (); ++offset)
         {
           *reinterpret_cast<T *>(current) = temp_array[offset];
@@ -70,6 +73,7 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
 
   auto keyword_mapping = fits_keyword_mapping (false);
   table_extension.readAllKeys ();
+
   for (auto &k : table_extension.keyWord ())
     {
       std::string name (k.first), value;
@@ -77,9 +81,9 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
                      fits_ignored_keywords.end (), name)
           != fits_ignored_keywords.end ())
         continue;
-
       /// Annoyingly, CCfits does not have a way to just return the
       /// value.  You have to give it something to put it in.
+
       Property p (k.second->value (value));
       auto i = keyword_mapping.find (name);
       if (i != keyword_mapping.end ())
@@ -131,10 +135,11 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
           append_column (c.name (), Data_Type::UINT32_LE, array_size);
           break;
         case CCfits::Tlong:
-          /// Tlong and Tulong have indeterminate sizes.  We guess 32 bit.
+          // The Tlong type code is used for 32-bit integer columns when reading.
           append_column (c.name (), Data_Type::INT32_LE, array_size);
           break;
         case CCfits::Tulong:
+          // The Tulong type code is used for 32-bit unsigned integer columns when reading.
           append_column (c.name (), Data_Type::UINT32_LE, array_size);
           break;
         case CCfits::Tlonglong:
@@ -199,7 +204,7 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
                 size_t element_offset = offset;
                 for (auto &element : v)
                   {
-                    data[offset] = element;
+                    data[element_offset] = element;
                     element_offset += row_size ();
                   }
               }
@@ -209,15 +214,16 @@ void tablator::Table::read_fits (const boost::filesystem::path &path)
                 // horrendously slow.
                 std::vector<std::valarray<int> > v;
                 c.readArrays (v, 1, table->rows ());
-                size_t element_offset = offset;
+                size_t start_offset_for_row = offset;
                 for (auto &array : v)
                   {
+                    auto element_offset = start_offset_for_row;
                     for (auto &element : array)
                       {
-                        data[offset] = element;
+                        data[element_offset] = element;
                         ++element_offset;
                       }
-                    element_offset += row_size ();
+                    start_offset_for_row += row_size ();
                   }
               }
           }
