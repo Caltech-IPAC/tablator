@@ -1,0 +1,73 @@
+{
+    "VOTABLE":
+    {
+        "<xmlattr>":
+        {
+            "version": "1.3",
+            "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
+            "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
+            "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
+            "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
+        },
+        "RESOURCE":
+        {
+            "TABLE":
+            {
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "bools",
+                        "datatype": "boolean",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "ints",
+                        "datatype": "int",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "uints",
+                        "datatype": "uint",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "longs",
+                        "datatype": "long",
+                        "arraysize": "*"
+                    }
+                },
+                "DATA":
+                {
+                    "TABLEDATA":
+                    [
+                        [
+                            "1 1 0 1 0 1 0 1 1 1 0 1 1 0 1 1 1 0 1",
+                            "16383 -16383 4986 -4986 255 72",
+                            "65535 16384 1022 47 11 1234 5678 0 2",
+                            "65535 16384 1022 47 11 1234 5678 0 2 0 23456"
+                        ],
+                        [
+                            "0 1 1 0 1 0 1 0 1 1 1 0 1 1 0 1 1 1 0",
+                            "10000 1000 100 -10000 -1000 -100",
+                            "3 4 567 8901 12345 6789 9876 0 0",
+                            "3 4 567 8901 12345 6789 9876 0 0 65535 0"
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}

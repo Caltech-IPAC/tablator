@@ -122,8 +122,9 @@ void tablator::Table::write_fits (fitsfile *fits_file) const
           break;
         case Data_Type::INT64_LE:
         case Data_Type::UINT64_LE:
-          /// Fits does not know what an unsigned long is.  So we write it
-          /// as a long and hope for the best.
+          /// Fits does not know what an unsigned long is.  We write
+          /// both it and signed long as longlong [sic] and hope for
+          /// the best.
           fits_type = 'K';
           break;
         case Data_Type::FLOAT32_LE:
@@ -229,8 +230,9 @@ void tablator::Table::write_fits (fitsfile *fits_file) const
               break;
             case Data_Type::INT64_LE:
             case Data_Type::UINT64_LE:
-              /// Fits does not know what an unsigned long is.  So we write it
-              /// as a long and hope for the best.
+              /// Fits does not know what an unsigned long is.  We write
+              /// both it and signed long as longlong [sic] and hope for
+              /// the best.
               write_column<int64_t>(fits_file, TLONGLONG, i, offset_data,
                                     columns[i].array_size, row);
               break;
