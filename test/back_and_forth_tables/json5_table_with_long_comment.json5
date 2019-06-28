@@ -1,0 +1,106 @@
+{
+    "VOTABLE":
+    {
+        "<xmlattr>":
+        {
+            "version": "1.3",
+            "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
+            "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
+            "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
+            "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
+        },
+        "RESOURCE":
+        {
+            "TABLE":
+            {
+                "DESCRIPTION": "created 2014-01-24T19:11:10\nra_int (deg)\ndec_int (deg)\nReally cool file with a long history.  A modification of a \nreal-life table, its float-valued elements were replaced by \nintegers so as to avoid white noise due to round-off error in \nbefore-and-after comparisons. It was originally intended as an \nexample of a strange bug involving tabs and misleading error \nmessages but turned onto a test for the conversion of long \ncomments.",
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "TARGET",
+                        "datatype": "char",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "ra_int",
+                        "datatype": "int",
+                        "unit": "deg"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "dec_int",
+                        "datatype": "int",
+                        "unit": "deg"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "TYPE",
+                        "datatype": "char",
+                        "arraysize": "*"
+                    }
+                },
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "Preview",
+                        "datatype": "char",
+                        "arraysize": "*"
+                    }
+                },
+                "DATA":
+                {
+                    "TABLEDATA":
+                    [
+                        [
+                            "AFGL2591",
+                            "307",
+                            "40",
+                            "Single LO",
+                            "<a href=\"\/data\/Herschel\/HOP\/spectra\/ssb_hipe\/1342199079-1342199086_1_ssb_a.jpg\">Preview<\/a>"
+                        ],
+                        [
+                            "AFGL2591",
+                            "307",
+                            "40",
+                            "Single LO",
+                            "<a href=\"\/data\/Herschel\/HOP\/spectra\/ssb_hipe\/1342199079-1342199086_1_ssb_h.jpg\">Preview<\/a>"
+                        ],
+                        [
+                            "AFGL2591",
+                            "307",
+                            "40",
+                            "Single LO",
+                            "<a href=\"\/data\/Herschel\/HOP\/spectra\/ssb_hipe\/1342199079-1342199086_1_ssb_v.jpg\">Preview<\/a>"
+                        ],
+                        [
+                            "AFGL2591",
+                            "307",
+                            "40",
+                            "Single LO",
+                            "<a href=\"\/data\/Herschel\/HOP\/spectra\/ssb_hipe\/1342210155-1342210162_1_ssb_a.jpg\">Preview<\/a>"
+                        ],
+                        [
+                            "AFGL2591",
+                            "307",
+                            "40",
+                            "Single LO",
+                            "<a href=\"\/data\/Herschel\/HOP\/spectra\/ssb_hipe\/1342210155-1342210162_1_ssb_h.jpg\">Preview<\/a>"
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}

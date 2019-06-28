@@ -26,6 +26,9 @@ class VOTable_Field;
 
 class Table {
 public:
+    static constexpr char const *FIXLEN_KEYWORD = "fixlen";
+    static constexpr char const *ROWS_RETRIEVED_KEYWORD = "RowsRetrieved";
+
     std::vector<std::pair<std::string, Property>> properties;
     std::vector<uint8_t> data;
     std::vector<std::string> comments;
@@ -118,6 +121,11 @@ public:
     void write_ipac_table(const boost::filesystem::path &p);
 
     std::vector<size_t> get_column_widths() const;
+    // G2P calls this function, so can't simply rename it.  :-(
+    [[deprecated]] std::vector<size_t> get_column_width() const {
+        return get_column_widths();
+    }
+
     void write_ipac_table_header(std::ostream &os) const;
     std::string to_ipac_string(const Data_Type &type) const;
 

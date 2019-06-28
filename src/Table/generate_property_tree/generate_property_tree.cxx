@@ -42,7 +42,11 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
             "http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30");
 
     bool overflow = false;
-    const std::string resource_literal("RESOURCE"), table_literal("TABLE");
+
+    const std::string resource_literal("RESOURCE");
+    const std::string table_literal("TABLE");
+    const std::string description_literal("DESCRIPTION");
+
     auto &resource = votable.add(resource_literal, "");
     for (auto &p : properties) {
         if (p.first == votable_literal) continue;
@@ -83,17 +87,34 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
 
     boost::property_tree::ptree &table_tree = resource.add(table_literal, "");
 
+    // VOTable only allows a single DESCRIPTION element, so we combine
+    // RESOURCE.TABLE.DESCRIPTION and comments in a single string.
+    std::string description;
     for (auto &p : properties) {
         if (boost::starts_with(p.first, resource_literal + "." + table_literal)) {
-            for (auto &a : p.second.attributes)
+            for (auto &a : p.second.attributes) {
                 table_tree.add("<xmlattr>." + a.first, a.second);
+            }
+            if (boost::starts_with(p.first, resource_literal + "." + table_literal +
+                                                    "." + description_literal)) {
+                if (!description.empty()) {
+                    description.append("\n");
+                }
+                description.append(p.second.value);
+            }
         }
     }
-    // VOTable only allows a single DESCRIPTION element, so we have to
-    // cram all of the comments into a single line
     if (!comments.empty()) {
-        table_tree.add("DESCRIPTION", boost::join(comments, "\n"));
+        if (!description.empty()) {
+            description.append("\n");
+        }
+        description.append(boost::join(comments, "\n"));
     }
+
+    if (!description.empty()) {
+        table_tree.add("DESCRIPTION", description);
+    }
+
     for (auto &param : table_params) {
         add_to_property_tree(param, "PARAM", table_tree);
     }

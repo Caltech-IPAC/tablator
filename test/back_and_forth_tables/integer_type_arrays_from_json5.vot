@@ -4,6 +4,12 @@
     <INFO name="ORIGIN" value="TEST TABLE"/>
     <INFO name="DATETIME" value="2018-07-19 10:44:39"/>
     <TABLE>
+      <DESCRIPTION>big_uint64s (ulong)
+___ array of uint64s of which one is too big for int64
+little_uint64s (ulong)
+ ___ array of uint64s each of which fits in an int64
+any_uint32s (uint)
+___ array of uint32s</DESCRIPTION>
       <FIELD name="big_uint64s" datatype="char" arraysize="*"/>
       <FIELD name="little_uint64s" datatype="long" arraysize="*"/>
       <FIELD name="any_uint32s" datatype="long" arraysize="*"/>
