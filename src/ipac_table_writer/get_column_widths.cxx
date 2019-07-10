@@ -1,4 +1,4 @@
-#include "../../Table.hxx"
+#include "../Table.hxx"
 
 // The IPAC table format does not support array-valued non-char columns.
 // A array column of fixed size n named "col" of non-char type is formatted

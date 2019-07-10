@@ -3,9 +3,9 @@
 #include <iomanip>
 #include <limits>
 
-#include "../../Data_Type_Adjuster.hxx"
-#include "../../Table.hxx"
-#include "../../write_type_as_ascii.hxx"
+#include "../Data_Type_Adjuster.hxx"
+#include "../Table.hxx"
+#include "../write_type_as_ascii.hxx"
 
 
 /**********************************************************/

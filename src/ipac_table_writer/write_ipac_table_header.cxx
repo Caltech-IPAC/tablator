@@ -1,6 +1,6 @@
 #include <iomanip>
 
-#include "../../Table.hxx"
+#include "../Table.hxx"
 
 namespace {
 std::string convert_newlines(const std::string &input) {

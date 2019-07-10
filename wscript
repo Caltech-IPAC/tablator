@@ -77,14 +77,14 @@ def build(bld):
              'src/Table/write_tabledata/decode_links.cxx',
              'src/Table/generate_property_tree/generate_property_tree.cxx',
              'src/Table/generate_property_tree/add_to_property_tree.cxx',
-             'src/Table/write_ipac_table/write_ipac_table.cxx',
-             'src/Table/write_ipac_table/write_ipac_table_header.cxx',
-             'src/Table/write_ipac_table/to_ipac_string.cxx',
-             'src/Table/write_ipac_table/get_column_widths.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_to_H5File.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_attributes.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_columns.cxx',
+             'src/ipac_table_writer/write_ipac_table.cxx',
+             'src/ipac_table_writer/write_ipac_table_header.cxx',
+             'src/ipac_table_writer/to_ipac_string.cxx',
+             'src/ipac_table_writer/get_column_widths.cxx',
              'src/write_type_as_ascii.cxx']
 
     bld.shlib(source=sources,

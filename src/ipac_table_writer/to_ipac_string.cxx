@@ -1,4 +1,4 @@
-#include "../../Table.hxx"
+#include "../Table.hxx"
 
 std::string tablator::Table::to_ipac_string(const Data_Type &type) const {
     /// Write out unsigned integers as integers for backwards compatibility
