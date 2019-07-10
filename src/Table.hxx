@@ -118,7 +118,11 @@ public:
     void write_hdf5_to_H5File(H5::H5File &outfile) const;
     void write_hdf5_attributes(H5::DataSet &table) const;
 
-    void write_ipac_table(const boost::filesystem::path &p);
+    void write_ipac_table(std::ostream &os) const;
+    void write_ipac_table(const boost::filesystem::path &p) const {
+        boost::filesystem::ofstream os(p);
+        write_ipac_table(os);
+    }
 
     std::vector<size_t> get_column_widths() const;
     // G2P calls this function, so can't simply rename it.  :-(

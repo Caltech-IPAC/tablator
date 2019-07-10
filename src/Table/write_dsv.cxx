@@ -54,6 +54,7 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator) const {
             size_t offset = offsets[i] + row_offset;
             std::stringstream ss;
             if (!is_null(row_offset, i)) {
+                // Leave null entries blank, unlike in IPAC_TABLE format.
                 write_type_as_ascii(ss, columns[i].type, columns[i].array_size,
                                     data.data() + offset);
             }

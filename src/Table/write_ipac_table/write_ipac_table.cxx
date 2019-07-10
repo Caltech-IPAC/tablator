@@ -12,35 +12,27 @@
 /* helper function */
 /**********************************************************/
 
-
-std::vector<size_t> get_effective_array_sizes(
-        const tablator::Data_Type_Adjuster &data_type_adjuster,
-        const std::vector<tablator::Data_Type> &datatypes_for_writing,
-        const std::vector<tablator::Column> &columns) {
-    std::vector<size_t> array_sizes;
-    array_sizes.reserve(columns.size());
-    array_sizes.emplace_back(1);  // null column
-    for (size_t i = 1; i < columns.size(); ++i) {
-        tablator::Data_Type active_datatype =
-                data_type_adjuster.get_datatype_for_writing(datatypes_for_writing, i);
-        auto column = columns[i];
-        size_t effective_array_size =
-                (active_datatype == tablator::Data_Type::CHAR) ? 1 : column.array_size;
-        array_sizes.emplace_back(effective_array_size);
-    }
-    return array_sizes;
+size_t get_effective_array_size(tablator::Data_Type active_datatype, size_t orig_size) {
+    return (active_datatype == tablator::Data_Type::CHAR) ? 1 : orig_size;
 }
 
+size_t get_effective_array_size(
+        const tablator::Table &table,
+        const std::vector<tablator::Data_Type> &datatypes_for_writing, size_t col_id) {
+    tablator::Data_Type active_datatype =
+            tablator::Data_Type_Adjuster::get_datatype_for_writing(
+                    table, datatypes_for_writing, col_id);
+    return get_effective_array_size(active_datatype, table.columns[col_id].array_size);
+}
 
 /**********************************************************/
 /* class member functions */
 /**********************************************************/
 
 
-void tablator::Table::write_ipac_table(const boost::filesystem::path &p) {
-    boost::filesystem::ofstream outfile(p);
-    write_ipac_table(outfile, Data_Type_Adjuster(*this).get_datatypes_for_writing(
-                                      Format::Enums::IPAC_TABLE));
+void tablator::Table::write_ipac_table(std::ostream &os) const {
+    write_ipac_table(os, Data_Type_Adjuster(*this).get_datatypes_for_writing(
+                                 Format::Enums::IPAC_TABLE));
 }
 
 /**********************************************************/
@@ -50,12 +42,8 @@ void tablator::Table::write_ipac_table(
     std::vector<size_t> ipac_column_widths = get_column_widths();
     write_ipac_table_header(os);
 
-    Data_Type_Adjuster data_type_adjuster = Data_Type_Adjuster(*this);
     // non-CHAR arrays are handled by a hack for whose benefit we pretend
     // that arrays being written as CHAR have size 1.
-    std::vector<size_t> effective_array_sizes = get_effective_array_sizes(
-            data_type_adjuster, datatypes_for_writing, columns);
-
     int total_record_width = 0;
 
     // Write column names
@@ -64,7 +52,7 @@ void tablator::Table::write_ipac_table(
     auto width_iter = std::next(ipac_column_widths.begin());
     for (size_t i = 1; i < columns.size(); ++i, ++width_iter) {
         auto &column = columns[i];
-        if (effective_array_sizes[i] == 1) {
+        if (get_effective_array_size(*this, datatypes_for_writing, i) == 1) {
             total_record_width += (*width_iter + 1);
             os << std::setw(*width_iter) << column.name << "|";
         } else {
@@ -82,10 +70,12 @@ void tablator::Table::write_ipac_table(
     width_iter = std::next(ipac_column_widths.begin());
     for (size_t i = 1; i < columns.size(); ++i, ++width_iter) {
         auto &column = columns[i];
-        Data_Type active_datatype =
-                data_type_adjuster.get_datatype_for_writing(datatypes_for_writing, i);
+        Data_Type active_datatype = Data_Type_Adjuster::get_datatype_for_writing(
+                *this, datatypes_for_writing, i);
 
-        for (size_t element = 0; element < effective_array_sizes[i]; ++element) {
+        for (size_t element = 0;
+             element < get_effective_array_size(active_datatype, column.array_size);
+             ++element) {
             os << std::setw(*width_iter) << to_ipac_string(active_datatype) << "|";
         }
     }
@@ -101,7 +91,9 @@ void tablator::Table::write_ipac_table(
         std::string unit_str =
                 (unit == column.field_properties.attributes.end()) ? " " : unit->second;
 
-        for (size_t element = 0; element < effective_array_sizes[i]; ++element) {
+        for (size_t element = 0;
+             element < get_effective_array_size(*this, datatypes_for_writing, i);
+             ++element) {
             os << std::setw(*width_iter) << unit_str << "|";
         }
     }
@@ -115,7 +107,9 @@ void tablator::Table::write_ipac_table(
         auto null = column.field_properties.values.null;
         std::string null_str = (null.empty()) ? "null" : null;
 
-        for (size_t element = 0; element < effective_array_sizes[i]; ++element) {
+        for (size_t element = 0;
+             element < get_effective_array_size(*this, datatypes_for_writing, i);
+             ++element) {
             os << std::setw(*width_iter) << null_str << "|";
         }
     }
@@ -127,10 +121,13 @@ void tablator::Table::write_ipac_table(
         /// Skip the null bitfield flag
         for (size_t i = 1; i < columns.size(); ++i) {
             auto &column = columns[i];
-            Data_Type active_datatype = data_type_adjuster.get_datatype_for_writing(
-                    datatypes_for_writing, i);
 
-            for (size_t element = 0; element < effective_array_sizes[i]; ++element) {
+            Data_Type active_datatype = Data_Type_Adjuster::get_datatype_for_writing(
+                    *this, datatypes_for_writing, i);
+
+            for (size_t element = 0;
+                 element < get_effective_array_size(active_datatype, column.array_size);
+                 ++element) {
                 ss << " " << std::setw(ipac_column_widths[i]);
                 size_t offset =
                         element * data_size(active_datatype) + offsets[i] + row_offset;
@@ -153,7 +150,7 @@ void tablator::Table::write_ipac_table(
                                 ss_temp, column.type,
                                 (active_datatype == Data_Type::CHAR ? column.array_size
                                                                     : 1),
-                                data.data() + offset, ' ', active_datatype);
+                                data.data() + offset, ' ');
                         std::string s(ss_temp.str());
                         /// Turn newlines into spaces
                         auto newline_location(s.find('\n'));

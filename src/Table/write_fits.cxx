@@ -115,8 +115,8 @@ void tablator::Table::write_fits(
         ttype.push_back(column.name.c_str());
         std::string array_size_str(std::to_string(column.array_size));
         char fits_type;
-        Data_Type active_datatype = Data_Type_Adjuster(*this).get_datatype_for_writing(
-                datatypes_for_writing, i);
+        Data_Type active_datatype = Data_Type_Adjuster::get_datatype_for_writing(
+                *this, datatypes_for_writing, i);
 
         switch (active_datatype) {
             case Data_Type::INT8_LE:
@@ -217,9 +217,8 @@ void tablator::Table::write_fits(
         for (size_t i = 0; i < columns.size(); ++i) {
             auto &column = columns[i];
             const uint8_t *offset_data = row_pointer + offsets[i];
-            Data_Type active_datatype =
-                    Data_Type_Adjuster(*this).get_datatype_for_writing(
-                            datatypes_for_writing, i);
+            Data_Type active_datatype = Data_Type_Adjuster::get_datatype_for_writing(
+                    *this, datatypes_for_writing, i);
 
             switch (active_datatype) {
                 case Data_Type::INT8_LE:

@@ -18,7 +18,6 @@ tablator::Data_Type_Adjuster::get_datatypes_for_writing(
     bool format_votable = (enum_format == Format::Enums::VOTABLE);
     bool format_fits = (enum_format == Format::Enums::FITS);
     bool adjust_uint64 = (format_ipac || format_votable || format_fits);
-
     for (size_t col = 0; col <= columns.size(); ++col) {
         auto orig_datatype = columns[col].type;
         auto adjusted_datatype = orig_datatype;  // set default and adjust
@@ -52,9 +51,9 @@ tablator::Data_Type_Adjuster::get_datatypes_for_writing(
 
 
 tablator::Data_Type tablator::Data_Type_Adjuster::get_datatype_for_writing(
-        const std::vector<tablator::Data_Type> &datatypes_for_writing,
-        size_t col) const {
-    auto orig_datatype = table_.columns[col].type;
+        const Table &table,
+        const std::vector<tablator::Data_Type> &datatypes_for_writing, size_t col) {
+    auto orig_datatype = table.columns[col].type;
     auto writing_datatype = datatypes_for_writing[col];
     if (sanity_check(orig_datatype, writing_datatype)) {
         return writing_datatype;
