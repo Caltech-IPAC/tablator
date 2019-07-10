@@ -81,7 +81,7 @@ def build(bld):
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_to_H5File.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_attributes.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_columns.cxx',
-             'src/ipac_table_writer/write_ipac_table.cxx',
+             'src/ipac_table_writer/ipac_table_writer.cxx',
              'src/ipac_table_writer/write_ipac_table_header.cxx',
              'src/ipac_table_writer/to_ipac_string.cxx',
              'src/ipac_table_writer/get_column_widths.cxx',
