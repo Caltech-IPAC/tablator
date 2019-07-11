@@ -62,6 +62,14 @@ public:
         return data[row_offset + (column - 1) / 8] & (128 >> ((column - 1) % 8));
     }
 
+    size_t column_offset(size_t column) const {
+        if (column >= columns.size()) {
+            throw std::runtime_error("Invalid column ID " + std::to_string(column) +
+                                     " in table.");
+        }
+        return offsets[column];
+    }
+
     size_t column_offset(const std::string &name) const {
         auto column = find_column(name);
         if (column == columns.end()) {
@@ -126,6 +134,26 @@ public:
         boost::filesystem::ofstream os(p);
         write_ipac_table(os);
     }
+    void write_ipac_subtable_by_row(std::ostream &os,
+                                    std::vector<size_t> requested_row_ids) const {
+        Ipac_Table_Writer::write_ipac_subtable_by_row(*this, os, requested_row_ids);
+    }
+    void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
+                                    size_t row_count) const {
+        Ipac_Table_Writer::write_ipac_subtable_by_row(*this, os, start_row, row_count);
+    }
+    void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
+        Ipac_Table_Writer::write_single_ipac_record(*this, os, row_idx);
+    }
+    void write_consecutive_ipac_records(std::ostream &os, size_t start_row,
+                                        size_t row_count) const {
+        Ipac_Table_Writer::write_consecutive_ipac_records(*this, os, start_row,
+                                                          row_count);
+    }
+    void write_selected_ipac_records(
+            std::ostream &os, std::vector<size_t> const &requested_row_ids) const {
+        Ipac_Table_Writer::write_selected_ipac_records(*this, os, requested_row_ids);
+    }
 
     std::vector<size_t> get_column_widths() const {
         return Ipac_Table_Writer::get_column_widths(*this);
@@ -137,6 +165,10 @@ public:
 
     void write_ipac_table_header(std::ostream &os) const {
         Ipac_Table_Writer::write_ipac_table_header(*this, os);
+    }
+
+    void write_ipac_column_headers(std::ostream &os) const {
+        Ipac_Table_Writer::write_ipac_column_headers(*this, os);
     }
 
     std::string to_ipac_string(const Data_Type &type) const {
@@ -287,9 +319,6 @@ private:
         return orig_datatypes;
     }
 
-    void write_ipac_table(std::ostream &os,
-                          const std::vector<Data_Type> &datatypes) const;
-
     void write_fits(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
     void write_fits(const boost::filesystem::path &filename,
@@ -297,8 +326,6 @@ private:
     void write_fits(fitsfile *fits_file,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 
-    void write_tabledata(std::ostream &os, const Format::Enums &output_format,
-                         const std::vector<Data_Type> &datatypes) const;
     void write_html(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 

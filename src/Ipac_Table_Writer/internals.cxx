@@ -1,30 +1,15 @@
 #include "../Ipac_Table_Writer.hxx"
 
-#include <boost/algorithm/string.hpp>
-
 #include "../Data_Type_Adjuster.hxx"
 #include "../Table.hxx"
 #include "../write_type_as_ascii.hxx"
 
 
-/**********************************************************/
-/* Utility functions */
-/**********************************************************/
-
-void tablator::Ipac_Table_Writer::convert_newlines(std::string& input) {
-    boost::replace_all(input, "\n", "  ");
-}
-
-const std::string tablator::Ipac_Table_Writer::convert_newlines(
-        const std::string& input) {
-    std::string temp_str(input);
-    convert_newlines(temp_str);
-    return temp_str;
-}
+// This file implements private functions of the Ipac_Table_Writer class.
 
 namespace {
-size_t get_effective_array_size(tablator::Data_Type active_datatype,
-                                       size_t orig_size) {
+
+size_t get_effective_array_size(tablator::Data_Type active_datatype, size_t orig_size) {
     return (active_datatype == tablator::Data_Type::CHAR) ? 1 : orig_size;
 }
 
@@ -41,23 +26,108 @@ size_t get_effective_array_size(
 
 
 /**********************************************************/
-/* private class member functions */
+/* Top-level functions that write tables */
 /**********************************************************/
 
-void tablator::Ipac_Table_Writer::write_ipac_table(
-        const tablator::Table& table, std::ostream& os,
+/**********************************************************/
+// JTODO row_count will be off if not all requested rows are valid.
+void tablator::Ipac_Table_Writer::write_ipac_subtable_by_row(
+        const Table& table, std::ostream& os, std::vector<size_t> requested_row_ids,
         const std::vector<Data_Type>& datatypes_for_writing) {
-    tablator::Ipac_Table_Writer::write_ipac_table_header(table, os);
+    // Write table-level header.
+    tablator::Ipac_Table_Writer::write_ipac_table_header(table, os,
+                                                         requested_row_ids.size());
 
     // Write column names, types, units, etc.
-    write_ipac_column_headers(table, os, datatypes_for_writing);
+    tablator::Ipac_Table_Writer::write_ipac_column_headers(table, os,
+                                                           datatypes_for_writing);
 
-    // Write column values
-    write_consecutive_ipac_records(table, os, 0, table.num_rows(),
-                                   datatypes_for_writing);
+    // Write data.
+    tablator::Ipac_Table_Writer::write_selected_ipac_records(
+            table, os, requested_row_ids, datatypes_for_writing);
 }
 
 /**********************************************************/
+
+void tablator::Ipac_Table_Writer::write_ipac_subtable_by_row(
+        const Table& table, std::ostream& os, size_t start_row, size_t row_count,
+        const std::vector<Data_Type>& datatypes_for_writing) {
+    // Write table-level header.
+    size_t true_row_count = std::min(table.num_rows() - start_row, row_count);
+    tablator::Ipac_Table_Writer::write_ipac_table_header(table, os, true_row_count);
+
+
+    // Write column names, types, units, etc.
+    tablator::Ipac_Table_Writer::write_ipac_column_headers(table, os,
+                                                           datatypes_for_writing);
+
+    // Write data.
+    tablator::Ipac_Table_Writer::write_consecutive_ipac_records(
+            table, os, start_row, true_row_count, datatypes_for_writing);
+}
+
+/**********************************************************/
+/* Mid-level functions that extract and write records */
+/**********************************************************/
+
+// JTODO error if row_count is too big?
+void tablator::Ipac_Table_Writer::write_consecutive_ipac_records(
+        const Table& table, std::ostream& os, size_t start_row, size_t row_count,
+        const std::vector<Data_Type>& datatypes_for_writing) {
+    size_t num_table_rows = table.num_rows();
+    if (start_row > num_table_rows) {
+        std::string msg = "Invalid start_row ";
+        msg.append(std::to_string(start_row))
+                .append("; only")
+                .append(std::to_string(num_table_rows))
+                .append(" rows in table.");
+        throw std::runtime_error(msg);
+    }
+    size_t end_row = std::min(num_table_rows, start_row + row_count);
+    size_t row_size = table.row_size();
+    size_t curr_row_offset = start_row * row_size;
+    for (size_t row = start_row; row < end_row; ++row) {
+        write_single_ipac_record_by_offset(table, os, curr_row_offset,
+                                           datatypes_for_writing);
+        curr_row_offset += row_size;
+    }
+}
+
+/**********************************************************/
+
+void tablator::Ipac_Table_Writer::write_selected_ipac_records(
+        const Table& table, std::ostream& os,
+        std::vector<size_t> const& requested_row_ids,
+        const std::vector<Data_Type>& datatypes_for_writing) {
+    size_t num_table_rows = table.num_rows();
+    size_t row_size = table.row_size();
+    for (size_t row : requested_row_ids) {
+        if (row < num_table_rows) {
+            write_single_ipac_record_by_offset(table, os, row * row_size,
+                                               datatypes_for_writing);
+        }
+    }
+}
+
+/**********************************************************/
+
+// This function writes any column of array-size n as n columns of array-size 1.
+void tablator::Ipac_Table_Writer::write_single_ipac_record(
+        const Table& table, std::ostream& os, size_t row_id,
+        const std::vector<Data_Type>& datatypes_for_writing) {
+    size_t curr_row_offset = row_id * table.row_size();
+    write_single_ipac_record_by_offset(table, os, curr_row_offset,
+                                       datatypes_for_writing);
+}
+
+
+/**********************************************************/
+/* Functions that do the work */
+/**********************************************************/
+
+// The IPAC table format does not support array-valued non-char columns.
+// A array column of fixed size n named "col" of non-char type is formatted
+// as single-valued columns named "col_0", "col_1", ... "col_{n-1}".
 
 void tablator::Ipac_Table_Writer::write_ipac_column_headers(
         const Table& table, std::ostream& os,
@@ -139,33 +209,7 @@ void tablator::Ipac_Table_Writer::write_ipac_column_headers(
 
 /**********************************************************/
 
-// JTODO error if num_requested is too big?
-void tablator::Ipac_Table_Writer::write_consecutive_ipac_records(
-        const Table& table, std::ostream& os, size_t start_row, size_t num_requested,
-        const std::vector<Data_Type>& datatypes_for_writing) {
-    size_t num_table_rows = table.num_rows();
-    if (start_row > num_table_rows) {
-        std::string msg = "Invalid start_row ";
-        msg.append(std::to_string(start_row))
-                .append("; only")
-                .append(std::to_string(num_table_rows))
-                .append(" rows in table.");
-        throw std::runtime_error(msg);
-    }
-    size_t end_row = std::min(num_table_rows, start_row + num_requested);
-    size_t row_size = table.row_size();
-    size_t curr_row_offset = start_row * row_size;
-    for (size_t row = start_row; row < end_row; ++row) {
-        write_single_ipac_record_by_offset(table, os, curr_row_offset,
-                                           datatypes_for_writing);
-        curr_row_offset += row_size;
-    }
-}
-
-/**********************************************************/
-
 // JTODO validate?  quietly exit?
-// This function writes any column of array-size n as n columns of array-size 1.
 void tablator::Ipac_Table_Writer::write_single_ipac_record_by_offset(
         const Table& table, std::ostream& os, size_t curr_row_offset,
         const std::vector<Data_Type>& datatypes_for_writing) {

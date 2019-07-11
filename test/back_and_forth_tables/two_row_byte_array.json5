@@ -1,0 +1,40 @@
+{
+    "VOTABLE":
+    {
+        "<xmlattr>":
+        {
+            "version": "1.3",
+            "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
+            "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
+            "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
+            "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
+        },
+        "RESOURCE":
+        {
+            "TABLE":
+            {
+                "FIELD":
+                {
+                    "<xmlattr>":
+                    {
+                        "name": "bytes",
+                        "datatype": "unsignedByte",
+                        "arraysize": "*"
+                    }
+                },
+                "DATA":
+                {
+                    "TABLEDATA":
+                    [
+                        [
+                            "0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8"
+                        ],
+                        [
+                            "0xa1 0xb2 0xc3 0xd4 0x0 0x12 0x23 0x34"
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}
