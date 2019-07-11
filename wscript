@@ -28,6 +28,7 @@ def build(bld):
              'src/Table/Table.cxx',
              'src/Table/append_column.cxx',
              'src/Table/flatten_properties.cxx',
+             'src/Table/extract_column_values_as_strings.cxx',
              'src/Table/insert_ascii_in_row.cxx',
              'src/Table/read_unknown/read_unknown.cxx',
              'src/Table/read_unknown/is_fits.cxx',
@@ -82,8 +83,6 @@ def build(bld):
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_attributes.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_columns.cxx',
              'src/Ipac_Table_Writer/write_ipac_table_header.cxx',
-             'src/Ipac_Table_Writer/to_ipac_string.cxx',
-             'src/Ipac_Table_Writer/get_column_widths.cxx',
              'src/Ipac_Table_Writer/internals.cxx',
              'src/Ipac_Table_Writer/Ipac_Table_Writer.cxx',
              'src/write_type_as_ascii.cxx']

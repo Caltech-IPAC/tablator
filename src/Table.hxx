@@ -275,6 +275,9 @@ public:
 
     void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths);
 
+    std::vector<std::string> extract_column_values_as_strings(
+            const std::string &colname) const;
+
 private:
     std::vector<Data_Type> get_original_datatypes() const {
         std::vector<Data_Type> orig_datatypes;
