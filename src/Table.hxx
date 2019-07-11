@@ -18,6 +18,7 @@
 #include "Column.hxx"
 #include "Field_Properties.hxx"
 #include "Format.hxx"
+#include "Ipac_Table_Writer.hxx"
 #include "Property.hxx"
 #include "Row.hxx"
 
@@ -118,20 +119,29 @@ public:
     void write_hdf5_to_H5File(H5::H5File &outfile) const;
     void write_hdf5_attributes(H5::DataSet &table) const;
 
-    void write_ipac_table(std::ostream &os) const;
+    void write_ipac_table(std::ostream &os) const {
+        Ipac_Table_Writer::write_ipac_table(*this, os);
+    }
     void write_ipac_table(const boost::filesystem::path &p) const {
         boost::filesystem::ofstream os(p);
         write_ipac_table(os);
     }
 
-    std::vector<size_t> get_column_widths() const;
+    std::vector<size_t> get_column_widths() const {
+        return Ipac_Table_Writer::get_column_widths(*this);
+    }
     // G2P calls this function, so can't simply rename it.  :-(
     [[deprecated]] std::vector<size_t> get_column_width() const {
         return get_column_widths();
     }
 
-    void write_ipac_table_header(std::ostream &os) const;
-    std::string to_ipac_string(const Data_Type &type) const;
+    void write_ipac_table_header(std::ostream &os) const {
+        Ipac_Table_Writer::write_ipac_table_header(*this, os);
+    }
+
+    std::string to_ipac_string(const Data_Type &type) const {
+        return Ipac_Table_Writer::to_ipac_string(type);
+    }
 
     void write_dsv(std::ostream &os, const char &separator) const;
     void write_sql_create_table(std::ostream &os, const std::string &table_name,

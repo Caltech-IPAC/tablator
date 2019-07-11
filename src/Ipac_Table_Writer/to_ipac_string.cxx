@@ -1,6 +1,7 @@
+#include "../Ipac_Table_Writer.hxx"
 #include "../Table.hxx"
 
-std::string tablator::Table::to_ipac_string(const Data_Type &type) const {
+std::string tablator::Ipac_Table_Writer::to_ipac_string(const Data_Type &type) {
     /// Write out unsigned integers as integers for backwards compatibility
     switch (type) {
         case Data_Type::INT8_LE:
