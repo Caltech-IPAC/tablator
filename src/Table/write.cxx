@@ -35,10 +35,12 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                             const Format &format) const {
     // List of cols whose types must be adjusted for writing due
     // to restrictions from <format>.
-    std::vector<Data_Type> datatypes_for_writing =
-            Data_Type_Adjuster(*this).get_datatypes_for_writing(format.enum_format);
+    std::vector<Data_Type> datatypes_for_writing;
+
     switch (format.enum_format) {
         case Format::Enums::FITS:
+            datatypes_for_writing = Data_Type_Adjuster(*this).get_datatypes_for_writing(
+                    format.enum_format);
             write_fits(os, datatypes_for_writing);
             break;
         case Format::Enums::HDF5:
@@ -47,6 +49,8 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
         case Format::Enums::JSON:
         case Format::Enums::JSON5:
         case Format::Enums::VOTABLE: {
+            datatypes_for_writing = Data_Type_Adjuster(*this).get_datatypes_for_writing(
+                    format.enum_format);
             std::string tabledata_string(
                     boost::uuids::to_string(boost::uuids::random_generator()()));
             boost::property_tree::ptree tree(
@@ -63,7 +67,7 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
             std::string s(ss.str());
             size_t tabledata_offset(s.find(tabledata_string));
             os << s.substr(0, tabledata_offset - (is_json ? 2 : 0));
-            write_tabledata(os, format.enum_format, datatypes_for_writing);
+            write_tabledata(os, format.enum_format);
             os << s.substr(tabledata_offset + tabledata_string.size() +
                            (is_json ? 2 : 0));
         } break;
@@ -75,10 +79,10 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
             break;
         case Format::Enums::IPAC_TABLE:
         case Format::Enums::TEXT:
-            write_ipac_table(os, datatypes_for_writing);
+            write_ipac_table(os);
             break;
         case Format::Enums::HTML:
-            write_html(os, datatypes_for_writing);
+            write_html(os);
             break;
         case Format::Enums::POSTGRES_SQL:
         case Format::Enums::ORACLE_SQL:

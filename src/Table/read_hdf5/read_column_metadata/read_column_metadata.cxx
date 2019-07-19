@@ -9,7 +9,7 @@ bool is_columns_valid(H5::VarLenType &columns);
 
 std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                                          const std::string &section) {
-    /// Returns an empty result of the types do not match exactly.
+    /// Returns an empty result if the types do not match exactly.
     std::vector<Column> result;
     if (!dataset.attrExists(section)) {
         return result;

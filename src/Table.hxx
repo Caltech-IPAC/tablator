@@ -18,6 +18,7 @@
 #include "Column.hxx"
 #include "Field_Properties.hxx"
 #include "Format.hxx"
+#include "Ipac_Table_Writer.hxx"
 #include "Property.hxx"
 #include "Row.hxx"
 
@@ -59,6 +60,14 @@ public:
     // first column.  This uses the least significant bit.
     bool is_null(size_t row_offset, size_t column) const {
         return data[row_offset + (column - 1) / 8] & (128 >> ((column - 1) % 8));
+    }
+
+    size_t column_offset(size_t column) const {
+        if (column >= columns.size()) {
+            throw std::runtime_error("Invalid column ID " + std::to_string(column) +
+                                     " in table.");
+        }
+        return offsets[column];
     }
 
     size_t column_offset(const std::string &name) const {
@@ -118,16 +127,52 @@ public:
     void write_hdf5_to_H5File(H5::H5File &outfile) const;
     void write_hdf5_attributes(H5::DataSet &table) const;
 
-    void write_ipac_table(const boost::filesystem::path &p);
+    void write_ipac_table(std::ostream &os) const {
+        Ipac_Table_Writer::write(*this, os);
+    }
+    void write_ipac_table(const boost::filesystem::path &p) const {
+        boost::filesystem::ofstream os(p);
+        write_ipac_table(os);
+    }
+    void write_ipac_subtable_by_row(std::ostream &os,
+                                    std::vector<size_t> requested_row_ids) const {
+        Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids);
+    }
+    void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
+                                    size_t row_count) const {
+        Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count);
+    }
+    void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
+        Ipac_Table_Writer::write_single_record(*this, os, row_idx);
+    }
+    void write_consecutive_ipac_records(std::ostream &os, size_t start_row,
+                                        size_t row_count) const {
+        Ipac_Table_Writer::write_consecutive_records(*this, os, start_row, row_count);
+    }
+    void write_selected_ipac_records(
+            std::ostream &os, std::vector<size_t> const &requested_row_ids) const {
+        Ipac_Table_Writer::write_selected_records(*this, os, requested_row_ids);
+    }
 
-    std::vector<size_t> get_column_widths() const;
+    std::vector<size_t> get_column_widths() const {
+        return Ipac_Table_Writer::get_column_widths(*this);
+    }
     // G2P calls this function, so can't simply rename it.  :-(
     [[deprecated]] std::vector<size_t> get_column_width() const {
         return get_column_widths();
     }
 
-    void write_ipac_table_header(std::ostream &os) const;
-    std::string to_ipac_string(const Data_Type &type) const;
+    void write_ipac_table_header(std::ostream &os) const {
+        Ipac_Table_Writer::write_header(*this, os);
+    }
+
+    void write_ipac_column_headers(std::ostream &os) const {
+        Ipac_Table_Writer::write_column_headers(*this, os);
+    }
+
+    std::string to_ipac_string(const Data_Type &type) const {
+        return Ipac_Table_Writer::to_ipac_string(type);
+    }
 
     void write_dsv(std::ostream &os, const char &separator) const;
     void write_sql_create_table(std::ostream &os, const std::string &table_name,
@@ -261,6 +306,9 @@ public:
 
     void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths);
 
+    std::vector<std::string> extract_column_values_as_strings(
+            const std::string &colname) const;
+
 private:
     std::vector<Data_Type> get_original_datatypes() const {
         std::vector<Data_Type> orig_datatypes;
@@ -270,9 +318,6 @@ private:
         return orig_datatypes;
     }
 
-    void write_ipac_table(std::ostream &os,
-                          const std::vector<Data_Type> &datatypes) const;
-
     void write_fits(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
     void write_fits(const boost::filesystem::path &filename,
@@ -280,8 +325,6 @@ private:
     void write_fits(fitsfile *fits_file,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 
-    void write_tabledata(std::ostream &os, const Format::Enums &output_format,
-                         const std::vector<Data_Type> &datatypes) const;
     void write_html(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 

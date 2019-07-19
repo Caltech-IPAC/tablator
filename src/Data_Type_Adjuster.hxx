@@ -10,9 +10,6 @@ public:
     std::vector<tablator::Data_Type> get_datatypes_for_writing(
             const Format::Enums &enum_format) const;
 
-    Data_Type get_datatype_for_writing(
-            const std::vector<Data_Type> &datatypes_for_writing, size_t col) const;
-
     static size_t get_char_array_size_for_uint64_col(size_t uint64_array_size) {
         // allow for spaces in between elements
         return uint64_array_size * (std::numeric_limits<uint64_t>::digits10 + 1) - 1;
