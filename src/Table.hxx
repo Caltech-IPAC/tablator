@@ -128,7 +128,7 @@ public:
     void write_hdf5_attributes(H5::DataSet &table) const;
 
     void write_ipac_table(std::ostream &os) const {
-        Ipac_Table_Writer::write_ipac_table(*this, os);
+        Ipac_Table_Writer::write(*this, os);
     }
     void write_ipac_table(const boost::filesystem::path &p) const {
         boost::filesystem::ofstream os(p);
@@ -136,23 +136,22 @@ public:
     }
     void write_ipac_subtable_by_row(std::ostream &os,
                                     std::vector<size_t> requested_row_ids) const {
-        Ipac_Table_Writer::write_ipac_subtable_by_row(*this, os, requested_row_ids);
+        Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids);
     }
     void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
                                     size_t row_count) const {
-        Ipac_Table_Writer::write_ipac_subtable_by_row(*this, os, start_row, row_count);
+        Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count);
     }
     void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
-        Ipac_Table_Writer::write_single_ipac_record(*this, os, row_idx);
+        Ipac_Table_Writer::write_single_record(*this, os, row_idx);
     }
     void write_consecutive_ipac_records(std::ostream &os, size_t start_row,
                                         size_t row_count) const {
-        Ipac_Table_Writer::write_consecutive_ipac_records(*this, os, start_row,
-                                                          row_count);
+        Ipac_Table_Writer::write_consecutive_records(*this, os, start_row, row_count);
     }
     void write_selected_ipac_records(
             std::ostream &os, std::vector<size_t> const &requested_row_ids) const {
-        Ipac_Table_Writer::write_selected_ipac_records(*this, os, requested_row_ids);
+        Ipac_Table_Writer::write_selected_records(*this, os, requested_row_ids);
     }
 
     std::vector<size_t> get_column_widths() const {
@@ -164,11 +163,11 @@ public:
     }
 
     void write_ipac_table_header(std::ostream &os) const {
-        Ipac_Table_Writer::write_ipac_table_header(*this, os);
+        Ipac_Table_Writer::write_header(*this, os);
     }
 
     void write_ipac_column_headers(std::ostream &os) const {
-        Ipac_Table_Writer::write_ipac_column_headers(*this, os);
+        Ipac_Table_Writer::write_column_headers(*this, os);
     }
 
     std::string to_ipac_string(const Data_Type &type) const {

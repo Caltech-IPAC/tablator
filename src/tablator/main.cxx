@@ -44,7 +44,8 @@ int main(int argc, char *argv[]) {
             "number of consecutive rows to write (output-format ipac_table only)")(
             "row-list", boost::program_options::value<std::string>(&row_string),
             "list of rows to write (output-format ipac_table only)")(
-            "static", "call static function, not Table class member")(
+            "static", boost::program_options::value<bool>(&call_static),
+            "call static function, not Table class member")(
             "col-name", boost::program_options::value<std::string>(&col_name),
             "name of column whose values to extract into vector");
 
@@ -75,12 +76,20 @@ int main(int argc, char *argv[]) {
         if (option_variables.count("input-format")) input_format.init(input_format_str);
         if (option_variables.count("output-format"))
             output_format.init(output_format_str);
-        if (option_variables.count("start-row")) {
-            if (!option_variables.count("row-count")) {
-                row_count = 1;
-            }
+        if (option_variables.count("start-row") &&
+            !option_variables.count("row-count")) {
+            row_count = 1;
+        }
+        if (!option_variables.count("start-row") &&
+            option_variables.count("row-count")) {
+            std::cerr << "The parameter 'row-count' is valid only if 'start-row' is "
+                         "present.\n";
         }
         if (option_variables.count("row-list")) {
+            if (option_variables.count("start-row")) {
+                std::cerr << "The parameters 'row-list' and 'start-row' are mutually "
+                             "incompatible.\n";
+            }
             std::stringstream row_stream(row_string);
             std::vector<size_t> temp_list((std::istream_iterator<size_t>(row_stream)),
                                           std::istream_iterator<size_t>());
@@ -116,9 +125,9 @@ int main(int argc, char *argv[]) {
 
         if (do_subtable &&
             (output_format.enum_format != tablator::Format::Enums::IPAC_TABLE)) {
-            std::cerr << "Subtable feature requested via 'start-row' and 'row-list' "
-                         "options "
-                      << "is supported only when output-format is ipac_table.\n";
+            std::cerr
+                    << "Subtable feature requested via 'start-row' or 'row-list' "
+                       "options is supported only when output-format is ipac_table.\n";
             return 1;
         }
 
@@ -144,7 +153,7 @@ int main(int argc, char *argv[]) {
             boost::filesystem::ofstream output_stream(output_path);
             if (option_variables.count("start-row")) {
                 if (call_static) {
-                    tablator::Ipac_Table_Writer::write_ipac_subtable_by_row(
+                    tablator::Ipac_Table_Writer::write_subtable_by_row(
                             table, output_stream, start_row, row_count);
                 } else {
                     table.write_ipac_subtable_by_row(output_stream, start_row,
@@ -152,7 +161,7 @@ int main(int argc, char *argv[]) {
                 }
             } else {
                 if (call_static) {
-                    tablator::Ipac_Table_Writer::write_ipac_subtable_by_row(
+                    tablator::Ipac_Table_Writer::write_subtable_by_row(
                             table, output_stream, row_list);
                 } else {
                     table.write_ipac_subtable_by_row(output_stream, row_list);

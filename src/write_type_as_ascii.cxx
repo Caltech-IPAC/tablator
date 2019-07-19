@@ -28,7 +28,7 @@ void write_type_as_ascii(std::ostream &os, const Data_Type &type,
     }
 }
 
-// Called by write_single_ipac_record() as it expands column of array
+// Called by write_single_ipac_record() as it expands a column of array
 // type to multiple columns.
 void write_type_as_ascii(std::ostream &os, const Data_Type &type,
                          const size_t &array_size, const uint8_t *data,

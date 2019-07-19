@@ -61,6 +61,7 @@ else
 fi
 
 
+
 ###########################################################
 
 STREAM_INTERMEDIATE=""
@@ -491,12 +492,20 @@ else
 fi
 
 
-${tablator_bin} --static --row-list="0 2 3" test/multi temp.tbl && diff -w test/multi_row_023.tbl temp.tbl
+${tablator_bin} --static=1 --row-list="0 2 3" test/multi temp.tbl && diff -w test/multi_row_023.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected rows in IPAC Table format"
     rm -f temp_file
 else
     echo "FAIL: Write subtable with selected rows in IPAC Table format"
+fi
+
+${tablator_bin} --static=1 --row-list="0 2 3 29 47" test/multi temp.tbl && diff -w test/multi_row_023.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with selected rows in IPAC Table format, some invalid"
+    rm -f temp_file
+else
+    echo "FAIL: Write subtable with selected rows in IPAC Table format, some invalid"
 fi
 
 ${tablator_bin}  --row-count=3 --start-row 1 test/multi temp.tbl && diff -w test/multi_row_123.tbl temp.tbl
@@ -505,4 +514,12 @@ if [ $? -eq 0 ]; then
     rm -f temp_file
 else
     echo "FAIL: Write subtable with consecutive rows in IPAC Table format"
+fi
+
+${tablator_bin}  --row-count=30 --start-row 1 test/multi temp.tbl && diff -w test/multi_row_123.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with reduced number of consecutive rows in IPAC Table format"
+    rm -f temp_file
+else
+    echo "FAIL: Write subtable with reduced number of consecutive rows in IPAC Table format"
 fi

@@ -7,19 +7,11 @@
 
 // This file implements private functions of the Ipac_Table_Writer class.
 
+
 namespace {
 
 size_t get_effective_array_size(tablator::Data_Type active_datatype, size_t orig_size) {
     return (active_datatype == tablator::Data_Type::CHAR) ? 1 : orig_size;
-}
-
-size_t get_effective_array_size(
-        const tablator::Table& table,
-        const std::vector<tablator::Data_Type>& datatypes_for_writing, size_t col_id) {
-    tablator::Data_Type active_datatype =
-            tablator::Data_Type_Adjuster::get_datatype_for_writing(
-                    table, datatypes_for_writing, col_id);
-    return get_effective_array_size(active_datatype, table.columns[col_id].array_size);
 }
 
 };  // namespace
@@ -29,40 +21,45 @@ size_t get_effective_array_size(
 /* Top-level functions that write tables */
 /**********************************************************/
 
+static constexpr const char* DEFAULT_NULL_VALUE = "null";
+
+
 /**********************************************************/
-// JTODO row_count will be off if not all requested rows are valid.
-void tablator::Ipac_Table_Writer::write_ipac_subtable_by_row(
+
+void tablator::Ipac_Table_Writer::write_subtable_by_row(
         const Table& table, std::ostream& os, std::vector<size_t> requested_row_ids,
         const std::vector<Data_Type>& datatypes_for_writing) {
+    size_t num_table_rows = table.num_rows();
+    size_t num_valid_row_ids =
+            std::count_if(requested_row_ids.begin(), requested_row_ids.end(),
+                          [num_table_rows](size_t i) { return i < num_table_rows; });
+
     // Write table-level header.
-    tablator::Ipac_Table_Writer::write_ipac_table_header(table, os,
-                                                         requested_row_ids.size());
+    tablator::Ipac_Table_Writer::write_header(table, os, num_valid_row_ids);
 
     // Write column names, types, units, etc.
-    tablator::Ipac_Table_Writer::write_ipac_column_headers(table, os,
-                                                           datatypes_for_writing);
+    tablator::Ipac_Table_Writer::write_column_headers(table, os, datatypes_for_writing);
 
     // Write data.
-    tablator::Ipac_Table_Writer::write_selected_ipac_records(
-            table, os, requested_row_ids, datatypes_for_writing);
+    tablator::Ipac_Table_Writer::write_selected_records(table, os, requested_row_ids,
+                                                        datatypes_for_writing);
 }
 
 /**********************************************************/
 
-void tablator::Ipac_Table_Writer::write_ipac_subtable_by_row(
+void tablator::Ipac_Table_Writer::write_subtable_by_row(
         const Table& table, std::ostream& os, size_t start_row, size_t row_count,
         const std::vector<Data_Type>& datatypes_for_writing) {
-    // Write table-level header.
     size_t true_row_count = std::min(table.num_rows() - start_row, row_count);
-    tablator::Ipac_Table_Writer::write_ipac_table_header(table, os, true_row_count);
 
+    // Write table-level header.
+    tablator::Ipac_Table_Writer::write_header(table, os, true_row_count);
 
     // Write column names, types, units, etc.
-    tablator::Ipac_Table_Writer::write_ipac_column_headers(table, os,
-                                                           datatypes_for_writing);
+    tablator::Ipac_Table_Writer::write_column_headers(table, os, datatypes_for_writing);
 
     // Write data.
-    tablator::Ipac_Table_Writer::write_consecutive_ipac_records(
+    tablator::Ipac_Table_Writer::write_consecutive_records(
             table, os, start_row, true_row_count, datatypes_for_writing);
 }
 
@@ -71,7 +68,7 @@ void tablator::Ipac_Table_Writer::write_ipac_subtable_by_row(
 /**********************************************************/
 
 // JTODO error if row_count is too big?
-void tablator::Ipac_Table_Writer::write_consecutive_ipac_records(
+void tablator::Ipac_Table_Writer::write_consecutive_records(
         const Table& table, std::ostream& os, size_t start_row, size_t row_count,
         const std::vector<Data_Type>& datatypes_for_writing) {
     size_t num_table_rows = table.num_rows();
@@ -87,15 +84,15 @@ void tablator::Ipac_Table_Writer::write_consecutive_ipac_records(
     size_t row_size = table.row_size();
     size_t curr_row_offset = start_row * row_size;
     for (size_t row = start_row; row < end_row; ++row) {
-        write_single_ipac_record_by_offset(table, os, curr_row_offset,
-                                           datatypes_for_writing);
+        write_single_record_by_offset(table, os, curr_row_offset,
+                                      datatypes_for_writing);
         curr_row_offset += row_size;
     }
 }
 
 /**********************************************************/
 
-void tablator::Ipac_Table_Writer::write_selected_ipac_records(
+void tablator::Ipac_Table_Writer::write_selected_records(
         const Table& table, std::ostream& os,
         std::vector<size_t> const& requested_row_ids,
         const std::vector<Data_Type>& datatypes_for_writing) {
@@ -103,8 +100,8 @@ void tablator::Ipac_Table_Writer::write_selected_ipac_records(
     size_t row_size = table.row_size();
     for (size_t row : requested_row_ids) {
         if (row < num_table_rows) {
-            write_single_ipac_record_by_offset(table, os, row * row_size,
-                                               datatypes_for_writing);
+            write_single_record_by_offset(table, os, row * row_size,
+                                          datatypes_for_writing);
         }
     }
 }
@@ -112,12 +109,11 @@ void tablator::Ipac_Table_Writer::write_selected_ipac_records(
 /**********************************************************/
 
 // This function writes any column of array-size n as n columns of array-size 1.
-void tablator::Ipac_Table_Writer::write_single_ipac_record(
+void tablator::Ipac_Table_Writer::write_single_record(
         const Table& table, std::ostream& os, size_t row_id,
         const std::vector<Data_Type>& datatypes_for_writing) {
     size_t curr_row_offset = row_id * table.row_size();
-    write_single_ipac_record_by_offset(table, os, curr_row_offset,
-                                       datatypes_for_writing);
+    write_single_record_by_offset(table, os, curr_row_offset, datatypes_for_writing);
 }
 
 
@@ -129,7 +125,7 @@ void tablator::Ipac_Table_Writer::write_single_ipac_record(
 // A array column of fixed size n named "col" of non-char type is formatted
 // as single-valued columns named "col_0", "col_1", ... "col_{n-1}".
 
-void tablator::Ipac_Table_Writer::write_ipac_column_headers(
+void tablator::Ipac_Table_Writer::write_column_headers(
         const Table& table, std::ostream& os,
         const std::vector<Data_Type>& datatypes_for_writing) {
     const std::vector<size_t> ipac_column_widths = table.get_column_widths();
@@ -139,17 +135,18 @@ void tablator::Ipac_Table_Writer::write_ipac_column_headers(
     os << "|";
     os << std::right;
     const auto& columns = table.columns;
-    auto width_iter = std::next(ipac_column_widths.begin());
-    for (size_t i = 1; i < columns.size(); ++i, ++width_iter) {
+    for (size_t i = 1; i < columns.size(); ++i) {
         auto column = columns[i];
-        if (get_effective_array_size(table, datatypes_for_writing, i) == 1) {
-            total_record_width += (*width_iter + 1);
-            os << std::setw(*width_iter) << column.name << "|";
+        auto width = ipac_column_widths[i];
+        if (get_effective_array_size(datatypes_for_writing[i], column.array_size) ==
+            1) {
+            total_record_width += (width + 1);
+            os << std::setw(width) << column.name << "|";
         } else {
             for (size_t element = 0; element < column.array_size; ++element) {
-                total_record_width += (*width_iter + 1);
-                os << std::setw(*width_iter)
-                   << (column.name + "_" + std::to_string(element)) << "|";
+                total_record_width += (width + 1);
+                os << std::setw(width) << (column.name + "_" + std::to_string(element))
+                   << "|";
             }
         }
     }
@@ -157,16 +154,14 @@ void tablator::Ipac_Table_Writer::write_ipac_column_headers(
 
 
     // Write column types
-    width_iter = std::next(ipac_column_widths.begin());
-    for (size_t i = 1; i < columns.size(); ++i, ++width_iter) {
+    for (size_t i = 1; i < columns.size(); ++i) {
         auto column = columns[i];
-        Data_Type active_datatype = Data_Type_Adjuster::get_datatype_for_writing(
-                table, datatypes_for_writing, i);
+        Data_Type active_datatype = datatypes_for_writing[i];
         size_t effective_array_size =
                 get_effective_array_size(active_datatype, column.array_size);
 
         for (size_t element = 0; element < effective_array_size; ++element) {
-            os << std::setw(*width_iter)
+            os << std::setw(ipac_column_widths[i])
                << tablator::Ipac_Table_Writer::to_ipac_string(active_datatype) << "|";
         }
     }
@@ -174,34 +169,30 @@ void tablator::Ipac_Table_Writer::write_ipac_column_headers(
     os << "\n|";
 
     // Write column units
-    width_iter = std::next(ipac_column_widths.begin());
-    for (size_t i = 1; i < columns.size(); ++i, ++width_iter) {
+    for (size_t i = 1; i < columns.size(); ++i) {
         auto column = columns[i];
         size_t effective_array_size =
-                get_effective_array_size(table, datatypes_for_writing, i);
-
+                get_effective_array_size(datatypes_for_writing[i], column.array_size);
         auto unit = column.field_properties.attributes.find("unit");
         std::string unit_str =
                 (unit == column.field_properties.attributes.end()) ? " " : unit->second;
 
         for (size_t element = 0; element < effective_array_size; ++element) {
-            os << std::setw(*width_iter) << unit_str << "|";
+            os << std::setw(ipac_column_widths[i]) << unit_str << "|";
         }
     }
     os << "\n|";
 
     // Write column null property
-    width_iter = std::next(ipac_column_widths.begin());
-    for (size_t i = 1; i < columns.size(); ++i, ++width_iter) {
+    for (size_t i = 1; i < columns.size(); ++i) {
         auto column = columns[i];
         size_t effective_array_size =
-                get_effective_array_size(table, datatypes_for_writing, i);
-
+                get_effective_array_size(datatypes_for_writing[i], column.array_size);
         auto null = column.field_properties.values.null;
-        std::string null_str = (null.empty()) ? "null" : null;
+        std::string null_str = (null.empty()) ? DEFAULT_NULL_VALUE : null;
 
         for (size_t element = 0; element < effective_array_size; ++element) {
-            os << std::setw(*width_iter) << null_str << "|";
+            os << std::setw(ipac_column_widths[i]) << null_str << "|";
         }
     }
     os << "\n";
@@ -209,8 +200,7 @@ void tablator::Ipac_Table_Writer::write_ipac_column_headers(
 
 /**********************************************************/
 
-// JTODO validate?  quietly exit?
-void tablator::Ipac_Table_Writer::write_single_ipac_record_by_offset(
+void tablator::Ipac_Table_Writer::write_single_record_by_offset(
         const Table& table, std::ostream& os, size_t curr_row_offset,
         const std::vector<Data_Type>& datatypes_for_writing) {
     size_t final_row_offset = table.data.size() - table.row_size();
@@ -223,17 +213,15 @@ void tablator::Ipac_Table_Writer::write_single_ipac_record_by_offset(
         throw std::runtime_error(msg);
     }
 
-    static constexpr const char* DEFAULT_NULL_VALUE = "null";
-    const std::vector<size_t> ipac_column_widths = table.get_column_widths();
+    const std::vector<size_t> ipac_column_widths = get_column_widths(table);
 
     const std::vector<Column>& columns = table.columns;
 
     // Skip the null bitfield flag
     for (size_t i = 1; i < columns.size(); ++i) {
         auto column = columns[i];
-        Data_Type active_datatype = Data_Type_Adjuster::get_datatype_for_writing(
-                table, datatypes_for_writing, i);
-
+        auto width = ipac_column_widths[i];
+        Data_Type active_datatype = datatypes_for_writing[i];
         if (table.is_null(curr_row_offset, i)) {
             auto null_value = column.field_properties.values.null;
 
@@ -241,7 +229,7 @@ void tablator::Ipac_Table_Writer::write_single_ipac_record_by_offset(
                     get_effective_array_size(active_datatype, column.array_size);
 
             for (size_t element = 0; element < effective_array_size; ++element) {
-                os << IPAC_COLUMN_SEPARATOR << std::setw(ipac_column_widths[i]);
+                os << IPAC_COLUMN_SEPARATOR << std::setw(width);
                 os << (null_value.empty() ? DEFAULT_NULL_VALUE : null_value);
             }
         } else if (active_datatype == tablator::Data_Type::UINT8_LE) {
@@ -253,7 +241,7 @@ void tablator::Ipac_Table_Writer::write_single_ipac_record_by_offset(
             size_t element_size = data_size(active_datatype);
 
             for (size_t element = 0; element < column.array_size; ++element) {
-                os << IPAC_COLUMN_SEPARATOR << std::setw(ipac_column_widths[i]);
+                os << IPAC_COLUMN_SEPARATOR << std::setw(width);
                 os << static_cast<const uint16_t>(*curr_data);
                 curr_data += element_size;
             }
@@ -261,13 +249,12 @@ void tablator::Ipac_Table_Writer::write_single_ipac_record_by_offset(
             size_t base_offset = curr_row_offset + table.offsets[i];
             uint8_t const* curr_data = table.data.data() + base_offset;
 
-            os << IPAC_COLUMN_SEPARATOR << std::setw(ipac_column_widths[i]);
+            os << IPAC_COLUMN_SEPARATOR << std::setw(width);
             std::stringstream ss_temp;
             write_type_as_ascii(ss_temp, active_datatype, column.array_size, curr_data,
-                                ipac_column_widths[i]);
+                                width);
             std::string s(ss_temp.str());
-            convert_newlines(s);
-            os << s;
+            os << boost::replace_all_copy(s, "\n", " ");
         }
     }
     os << " \n";

@@ -120,9 +120,7 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     }
     /// Skip null_bitfield_flag
     for (size_t i = 1; i < columns.size(); ++i) {
-        Data_Type active_datatype = Data_Type_Adjuster::get_datatype_for_writing(
-                *this, datatypes_for_writing, i);
-        add_to_property_tree(columns[i], "FIELD", table_tree, active_datatype);
+        add_to_property_tree(columns[i], "FIELD", table_tree, datatypes_for_writing[i]);
     }
     table_tree.add("DATA.TABLEDATA", tabledata_string);
     if (overflow) {

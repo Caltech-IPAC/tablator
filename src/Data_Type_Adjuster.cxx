@@ -49,19 +49,6 @@ tablator::Data_Type_Adjuster::get_datatypes_for_writing(
     return adjusted_datatypes;
 }
 
-
-tablator::Data_Type tablator::Data_Type_Adjuster::get_datatype_for_writing(
-        const Table &table,
-        const std::vector<tablator::Data_Type> &datatypes_for_writing, size_t col) {
-    auto orig_datatype = table.columns[col].type;
-    auto writing_datatype = datatypes_for_writing[col];
-    if (sanity_check(orig_datatype, writing_datatype)) {
-        return writing_datatype;
-    }
-    return orig_datatype;  // JTODO or report abuse
-}
-
-
 bool tablator::Data_Type_Adjuster::contains_large_uint64_val(size_t col) const {
     for (size_t table_row_offset(0), row(0); table_row_offset < table_.data.size();
          table_row_offset += table_.row_size(), ++row) {
