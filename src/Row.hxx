@@ -37,5 +37,15 @@ public:
         element_copy.resize(offset_end - offset_begin, '\0');
         std::copy(element_copy.begin(), element_copy.end(), data.data() + offset_begin);
     }
+
+    template <typename T>
+    void insert_null(const size_t &offset) {
+        insert(tablator::get_null<T>(), offset);
+    }
+
+private:
+    void set_null_internal(const Data_Type &data_type, const size_t &offset);
 };
+
+
 }  // namespace tablator

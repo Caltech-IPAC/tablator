@@ -49,7 +49,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
         }
     }
     // FIXME: This needs to be generalized for multiple tables
-    H5::DataSet table{group.createDataSet("TABLE_0", compound_type, dataspace)};
+    H5::DataSet h5_table{group.createDataSet("TABLE_0", compound_type, dataspace)};
     if (!comments.empty()) {
         std::string description;
         for (auto &c : comments) description += c + '\n';
@@ -58,12 +58,12 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
             H5::StrType str_type(0, description.size());
             H5::DataSpace attribute_space(H5S_SCALAR);
             H5::Attribute attribute =
-                    table.createAttribute("DESCRIPTION", str_type, attribute_space);
+                    h5_table.createAttribute("DESCRIPTION", str_type, attribute_space);
             attribute.write(str_type, description.c_str());
         }
     }
-    write_hdf5_attributes(table);
-    write_hdf5_columns(columns, "FIELD", table);
-    write_hdf5_columns(table_params, "PARAM", table);
-    table.write(data.data(), compound_type);
+    write_hdf5_attributes(h5_table);
+    write_hdf5_columns(columns, "FIELD", h5_table);
+    write_hdf5_columns(table_params, "PARAM", h5_table);
+    h5_table.write(data.data(), compound_type);
 }

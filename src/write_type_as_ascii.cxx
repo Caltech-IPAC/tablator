@@ -8,6 +8,10 @@
 
 namespace tablator {
 
+/*********************************************************************
+TODO This function doesn't check for nulls, and calling functions
+check only is_null(), which is column-level (not column/array-element-level).
+***********************************************************************/
 
 // The usual way to write a column value in ascii.  If the value is an
 // array, individual elements are delimited by the single char
@@ -82,6 +86,7 @@ void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
             os << *reinterpret_cast<const uint64_t *>(data);
         } break;
         case Data_Type::FLOAT32_LE:
+            // JNOTE: This might yield more digits than are warranted.
             os << std::setprecision(std::numeric_limits<float>::max_digits10)
                << *reinterpret_cast<const float *>(data);
             break;

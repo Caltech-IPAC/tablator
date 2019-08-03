@@ -1,74 +1,49 @@
 #include "../Table.hxx"
+#include "../write_type_as_ascii.hxx"
+
+
+std::string tablator::Table::extract_value_as_string(const std::string &col_name,
+                                                     size_t row_id) const {
+    size_t col_id = column_index(col_name);  // throws if col_name is invalid
+    return extract_value_as_string(col_id, row_id);
+}
+
+
+std::string tablator::Table::extract_value_as_string(size_t col_id,
+                                                     size_t row_id) const {
+    if ((col_id == 0) || (col_id >= columns.size())) {
+        throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
+    }
+    if (row_id >= num_rows()) {
+        throw std::runtime_error("Invalid row index: " + std::to_string(row_id));
+    }
+
+    size_t curr_row_offset = row_id * row_size();
+    auto &column = columns[col_id];
+    if (is_null(curr_row_offset, col_id)) {
+        // JTODO Or leave blank?  Or use values from get_null() (if they aren't already
+        // there)?
+        auto &null_value = column.field_properties.values.null;
+        return (null_value.empty() ? tablator::Table::DEFAULT_NULL_VALUE : null_value);
+    } else {
+        std::stringstream ss;
+        // JTODO Or write UINT8_LE values the way Ipac_Table_Writer does?
+        write_type_as_ascii(ss, column.type, column.array_size,
+                            data.data() + curr_row_offset + offsets[col_id]);
+        return ss.str();
+    }
+}
+
+//==================================================================
 
 std::vector<std::string> tablator::Table::extract_column_values_as_strings(
-        const std::string &colname) const {
-    std::vector<std::string> vals;
+        const std::string &col_name) const {
+    size_t col_id = column_index(col_name);  // throws if col_name is invalid
 
-    auto column_iter = find_column(colname);
-    if (column_iter == columns.end()) {
-        throw std::runtime_error("Table does not contain a column named " + colname +
-                                 ".");
+    std::vector<std::string> col_vals;
+
+    for (size_t curr_row_id = 0; curr_row_id < num_rows(); ++curr_row_id) {
+        col_vals.emplace_back(extract_value_as_string(col_id, curr_row_id));
     }
-
-    const size_t offset(column_offset(colname));
-
-    for (size_t element_offset = offset; element_offset < data.size();
-         element_offset += row_size()) {
-        auto curr_ptr = data.data() + element_offset;
-        switch (column_iter->type) {
-            case Data_Type::INT8_LE:
-                vals.emplace_back(std::to_string(static_cast<int>(*curr_ptr)));
-                break;
-            case Data_Type::UINT8_LE: {
-                std::stringstream ss;
-                ss << "0x" << std::hex << static_cast<const uint16_t>(*curr_ptr)
-                   << std::dec;
-                vals.emplace_back(ss.str());
-            } break;
-            case Data_Type::INT16_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const int16_t *>(curr_ptr)));
-                break;
-            case Data_Type::UINT16_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const uint16_t *>(curr_ptr)));
-                break;
-            case Data_Type::INT32_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const int32_t *>(curr_ptr)));
-                break;
-            case Data_Type::UINT32_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const uint32_t *>(curr_ptr)));
-                break;
-            case Data_Type::INT64_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const int64_t *>(curr_ptr)));
-                break;
-            case Data_Type::UINT64_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const uint64_t *>(curr_ptr)));
-                break;
-            case Data_Type::FLOAT32_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const float *>(curr_ptr)));
-                break;
-            case Data_Type::FLOAT64_LE:
-                vals.emplace_back(
-                        std::to_string(*reinterpret_cast<const double *>(curr_ptr)));
-                break;
-            case Data_Type::CHAR: {
-                /// The characters in the type can be shorter than the
-                /// number of allowed bytes, so add a .c_str() that
-                /// will terminate the string at the first null.
-                std::string element(reinterpret_cast<const char *>(curr_ptr),
-                                    column_iter->array_size);
-                vals.emplace_back(element.c_str());
-            } break;
-            default:
-                throw std::runtime_error("Column " + colname +
-                                         " has unsupported datatype.");
-        }
-    }
-    return vals;
+    return col_vals;
 }

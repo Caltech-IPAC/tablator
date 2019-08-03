@@ -5,7 +5,6 @@
 #include <array>
 #include <fstream>
 #include <iostream>
-#include <set>
 #include <stdexcept>
 #include <tuple>
 
@@ -29,6 +28,7 @@ class Table {
 public:
     static constexpr char const *FIXLEN_KEYWORD = "fixlen";
     static constexpr char const *ROWS_RETRIEVED_KEYWORD = "RowsRetrieved";
+    static constexpr const char *DEFAULT_NULL_VALUE = "null";
 
     std::vector<std::pair<std::string, Property>> properties;
     std::vector<uint8_t> data;
@@ -62,26 +62,59 @@ public:
         return data[row_offset + (column - 1) / 8] & (128 >> ((column - 1) % 8));
     }
 
-    size_t column_offset(size_t column) const {
-        if (column >= columns.size()) {
-            throw std::runtime_error("Invalid column ID " + std::to_string(column) +
-                                     " in table.");
-        }
-        return offsets[column];
-    }
-
-    size_t column_offset(const std::string &name) const {
-        auto column = find_column(name);
-        if (column == columns.end()) {
-            throw std::runtime_error("Unable to find column '" + name + "' in table.");
-        }
-        return offsets[std::distance(columns.begin(), column)];
-    }
-
     std::vector<Column>::const_iterator find_column(const std::string &name) const {
         return std::find_if(columns.begin(), columns.end(),
                             [&](const Column &c) { return c.name == name; });
     }
+
+    size_t column_index(const std::string &name) const {
+        auto column_iter = find_column(name);
+        if (column_iter == columns.end()) {
+            throw std::runtime_error("Unable to find column '" + name + "' in table.");
+        }
+        return std::distance(columns.begin(), column_iter);
+    }
+
+    size_t column_offset(size_t col_id) const {
+        if (col_id >= columns.size()) {
+            throw std::runtime_error("Invalid column ID " + std::to_string(col_id) +
+                                     " in table.");
+        }
+        return offsets[col_id];
+    }
+
+    size_t column_offset(const std::string &name) const {
+        auto col_id = column_index(name);
+        return offsets[col_id];
+    }
+
+
+    std::vector<size_t> find_column_ids(
+            const std::vector<std::string> &col_names) const {
+        std::vector<size_t> col_ids;
+
+        for (const std::string &col_name : col_names) {
+            size_t col_id = column_index(col_name);
+            col_ids.emplace_back(col_id);
+        }
+        return col_ids;
+    }
+
+    std::vector<size_t> find_omitted_column_ids(
+            const std::vector<std::string> &col_names) const {
+        std::vector<size_t> col_ids = find_column_ids(col_names);
+        sort(col_ids.begin(), col_ids.end());
+
+        std::vector<size_t> all_col_ids(columns.size() - 1);
+        std::iota(all_col_ids.begin(), all_col_ids.end(), 1);
+
+        std::vector<size_t> diff_vec;
+        diff_vec.reserve(columns.size());
+        std::set_difference(all_col_ids.begin(), all_col_ids.end(), col_ids.begin(),
+                            col_ids.end(), std::back_inserter(diff_vec));
+        return diff_vec;
+    }
+
 
     /// WARNING: append_column routines do not increase the size of the
     /// null column.  The expectation is that the number of columns is
@@ -138,20 +171,59 @@ public:
                                     std::vector<size_t> requested_row_ids) const {
         Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids);
     }
+
+    void write_ipac_subtable_by_column_and_row(
+            std::ostream &os, const std::vector<size_t> &column_ids,
+            std::vector<size_t> requested_row_ids) const {
+        Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids,
+                                                            requested_row_ids);
+    }
+
     void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
                                     size_t row_count) const {
         Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count);
     }
+
+    void write_ipac_subtable_by_column_and_row(std::ostream &os,
+                                               const std::vector<size_t> &column_ids,
+                                               size_t start_row,
+                                               size_t row_count) const {
+        Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids,
+                                                            start_row, row_count);
+    }
+
     void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
         Ipac_Table_Writer::write_single_record(*this, os, row_idx);
     }
+
+    void write_single_ipac_record(std::ostream &os,
+                                  const std::vector<size_t> &included_column_ids,
+                                  size_t row_idx) const {
+        Ipac_Table_Writer::write_single_record(*this, os, included_column_ids, row_idx);
+    }
+
     void write_consecutive_ipac_records(std::ostream &os, size_t start_row,
                                         size_t row_count) const {
         Ipac_Table_Writer::write_consecutive_records(*this, os, start_row, row_count);
     }
+
+    void write_consecutive_ipac_records(std::ostream &os,
+                                        const std::vector<size_t> &included_column_ids,
+                                        size_t start_row, size_t row_count) const {
+        Ipac_Table_Writer::write_consecutive_records(*this, os, included_column_ids,
+                                                     start_row, row_count);
+    }
+
     void write_selected_ipac_records(
             std::ostream &os, std::vector<size_t> const &requested_row_ids) const {
         Ipac_Table_Writer::write_selected_records(*this, os, requested_row_ids);
+    }
+
+    void write_selected_ipac_records(
+            std::ostream &os, const std::vector<size_t> &included_column_ids,
+            std::vector<size_t> const &requested_row_ids) const {
+        Ipac_Table_Writer::write_selected_records(*this, os, included_column_ids,
+                                                  requested_row_ids);
     }
 
     std::vector<size_t> get_column_widths() const {
@@ -306,8 +378,83 @@ public:
 
     void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths);
 
+    std::string extract_value_as_string(const std::string &col_name,
+                                        size_t row_id) const;
+    std::string extract_value_as_string(size_t col_id, size_t row_id) const;
+
     std::vector<std::string> extract_column_values_as_strings(
             const std::string &colname) const;
+
+    template <typename T>
+    std::vector<T> extract_value(const std::string &col_name, size_t row_id) {
+        auto col_id = column_index(col_name);
+        return extract_value<T>(col_id, row_id);
+    }
+
+    template <typename T>
+    std::vector<T> extract_value(size_t col_id, size_t row_id) {
+        std::vector<T> val_array;
+        extract_value(val_array, col_id, row_id);
+        return val_array;
+    }
+
+    template <typename T>
+    void extract_value(std::vector<T> &val_array, size_t col_id, size_t row_id) {
+        static_assert(!std::is_same<T, char>::value,
+                      "extract_value() is not supported for columns of type char; "
+                      "please use extract_values_as_string().");
+        if (col_id >= columns.size()) {
+            throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
+        }
+        if (row_id >= num_rows()) {
+            throw std::runtime_error("Invalid row index: " + std::to_string(row_id));
+        }
+
+        auto &column = columns[col_id];
+        auto array_size = column.array_size;
+        size_t row_offset = row_id * row_size();
+        if (is_null(row_offset, col_id)) {
+            for (size_t i = 0; i < array_size; ++i) {
+                val_array.emplace_back(get_null<T>());
+            }
+        } else {
+            // JTODO what if an element is null?  Assume already has get_null() value?
+            size_t base_offset = row_offset + offsets[col_id];
+            uint8_t const *curr_data = data.data() + base_offset;
+            size_t element_size = data_size(column.type);
+
+            for (size_t i = 0; i < array_size; ++i) {
+                val_array.emplace_back(*(reinterpret_cast<const T *>(curr_data)));
+                curr_data += element_size;
+            }
+        }
+    }
+
+    template <typename T>
+    std::vector<T> extract_column(const std::string &col_name) {
+        auto col_id = column_index(col_name);
+        return extract_column<T>(col_id);
+    }
+
+    template <typename T>
+    std::vector<T> extract_column(size_t col_id) {
+        static_assert(!std::is_same<T, char>::value,
+                      "extract_column() is not supported for columns of type char; "
+                      "please use extract_column_values_as_strings().");
+        if (col_id >= columns.size()) {
+            throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
+        }
+        auto &column = columns[col_id];
+
+        size_t row_count = num_rows();
+        std::vector<T> col_vec;
+        col_vec.reserve(row_count * column.array_size);
+        for (size_t curr_row_id = 0; curr_row_id < row_count; ++curr_row_id) {
+            extract_value<T>(col_vec, col_id, curr_row_id);
+        }
+        return col_vec;
+    }
+
 
 private:
     std::vector<Data_Type> get_original_datatypes() const {
