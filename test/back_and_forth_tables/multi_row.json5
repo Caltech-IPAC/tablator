@@ -17,36 +17,9 @@
                 {
                     "<xmlattr>":
                     {
-                        "name": "bools",
-                        "datatype": "boolean",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
                         "name": "ubools",
                         "datatype": "unsignedByte",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "small_shorts",
-                        "datatype": "short",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "small_ushorts",
-                        "datatype": "ushort",
-                        "arraysize": "*"
+                        "arraysize": "2"
                     }
                 },
                 "FIELD":
@@ -76,38 +49,33 @@
                         "arraysize": "*"
                     }
                 },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "small_ulongs",
-                        "datatype": "long",
-                        "arraysize": "*"
-                    }
-                },
                 "DATA":
                 {
                     "TABLEDATA":
                     [
                         [
-                            "1 1 0 1 0 1 0 1 1 1 0 1 1 0 1 1 1 0 1",
-                            "0x4 0x0 0x1 0x2",
-                            "88 77 65 44",
-                            "77 65 44 32",
-                            "65 44 32 11",
-                            "44 32 11 9",
-                            "32 11 9 88",
-                            "11 9 88 76"
+                            "0x4",
+                            "88",
+                            "65",
+                            "32",
                         ],
                         [
-                            "0 1 1 0 1 0 1 0 1 1 1 0 1 1 0 1 1 1 0",
-                            "0x1 0x2 0x0 0x4",
-                            "11 22 43 56",
-                            "22 43 56 77",
-                            "43 56 77 98",
-                            "56 77 98 1",
-                            "77 98 1 22",
-                            "98 1 22 43"
+                            "0x2",
+                            "44",
+                            "55",
+                            "68"
+                        ],
+                        [
+                            "0x1",
+                            "22",
+                            "45",
+                            "98"
+                        ],
+                        [
+                            "0x0",
+                            "11",
+                            "35",
+                            "128"
                         ]
                     ]
                 }

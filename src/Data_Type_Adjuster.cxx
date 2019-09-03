@@ -11,7 +11,7 @@
 std::vector<tablator::Data_Type>
 tablator::Data_Type_Adjuster::get_datatypes_for_writing(
         const Format::Enums &enum_format) const {
-    auto columns = table_.columns;
+    auto &columns = table_.columns;
     std::vector<tablator::Data_Type> adjusted_datatypes;
     adjusted_datatypes.reserve(columns.size());
     bool format_ipac = (enum_format == Format::Enums::IPAC_TABLE);

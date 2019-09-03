@@ -1,0 +1,11 @@
+\fixlen = T
+\RowsRetrieved = 5
+|                  ubools|            small_int32s|           small_uint32s|             small_longs|
+|                     int|                     int|                    long|                    long|
+|                        |                        |                        |                        |
+|                    null|                    null|                    null|                    null|
+                        4                       88                       65                       32 
+                        1                       22                       45                       98 
+                        2                       44                       55                       68 
+                        1                       22                       45                       98 
+                        4                       88                       65                       32 

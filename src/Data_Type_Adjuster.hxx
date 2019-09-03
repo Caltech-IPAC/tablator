@@ -18,29 +18,6 @@ public:
 private:
     bool contains_large_uint64_val(size_t col) const;
 
-    static bool sanity_check(Data_Type old_datatype, Data_Type new_datatype) {
-        static std::multimap<Data_Type, Data_Type> legal_adjustments = {
-                {Data_Type::UINT64_LE, Data_Type::CHAR},
-                {Data_Type::UINT64_LE, Data_Type::INT64_LE},
-                {Data_Type::UINT32_LE, Data_Type::INT64_LE},
-                {Data_Type::UINT16_LE, Data_Type::INT32_LE},
-        };
-        if (old_datatype == new_datatype) {
-            return true;
-        }
-        auto lower = legal_adjustments.lower_bound(old_datatype);
-        if (lower == legal_adjustments.end() || lower->first != old_datatype) {
-            return false;
-        }
-        auto upper = legal_adjustments.upper_bound(old_datatype);
-        for (auto iter = lower; iter != upper; ++iter) {
-            if (iter->second == new_datatype) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     const Table &table_;
 };
 }  // namespace tablator
