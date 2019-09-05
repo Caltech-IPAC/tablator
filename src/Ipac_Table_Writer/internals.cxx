@@ -393,14 +393,15 @@ size_t tablator::Ipac_Table_Writer::write_column_name(const Table& table,
                                                       size_t effective_array_size) {
     auto& column = table.columns[col_id];
     size_t total_width;
+    auto single_line_name = boost::replace_all_copy(column.name, "\n", " ");
     if (effective_array_size == 1) {
         total_width = (col_width + 1);
-        os << std::setw(col_width) << column.name << "|";
+        os << std::setw(col_width) << single_line_name << "|";
     } else {
         total_width = (col_width + 1) * column.array_size;
         for (size_t element = 0; element < column.array_size; ++element) {
-            os << std::setw(col_width) << (column.name + "_" + std::to_string(element))
-               << "|";
+            os << std::setw(col_width)
+               << (single_line_name + "_" + std::to_string(element)) << "|";
         }
     }
     return total_width;

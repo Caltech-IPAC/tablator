@@ -274,6 +274,7 @@ void generate_and_write_default_comments(
             auto unit = props.attributes.find("unit");
             if (unit != props.attributes.end() && !unit->second.empty()) {
                 col_comment.append(" (").append(unit->second).append(")");
+                boost::replace_all(col_comment, "\n", " ");
             }
 
             if (find(comments.begin(), comments.end(), col_comment) != comments.end() ||
@@ -284,7 +285,8 @@ void generate_and_write_default_comments(
 
             os << "\\ " << col_comment << "\n";
             if (!props.description.empty())
-                os << "\\ ___ " << props.description << "\n";
+                os << "\\ ___ " << boost::replace_all_copy(props.description, "\n", " ")
+                   << "\n";
             // FIXME: Write out description attributes
         }
     }
