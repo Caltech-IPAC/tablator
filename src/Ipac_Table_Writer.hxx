@@ -7,6 +7,9 @@
 
 #include "Data_Type.hxx"
 
+static constexpr char const *WHITESPACE = " \n\r\t\f\v";
+static constexpr char const *NEWLINES = " \n\r";
+
 namespace tablator {
 class Table;
 
