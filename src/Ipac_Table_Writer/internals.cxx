@@ -452,7 +452,7 @@ void tablator::Ipac_Table_Writer::write_column_unit(const Table& table,
         }
         unit_str.clear();
         boost::replace_copy_if(unit->second, std::back_inserter(unit_str),
-                               boost::is_any_of(NEWLINES), ' ');
+                               boost::is_any_of(tablator::NEWLINES), ' ');
     }
 
     for (size_t element = 0; element < effective_array_size; ++element) {
@@ -528,7 +528,7 @@ void tablator::Ipac_Table_Writer::write_single_value(
         write_type_as_ascii(ss_temp, column.type, column.array_size, curr_data, width);
         std::string s;
         boost::replace_copy_if(ss_temp.str(), std::back_inserter(s),
-                               boost::is_any_of(NEWLINES), ' ');
+                               boost::is_any_of(tablator::NEWLINES), ' ');
         os << s;
     }
 }
