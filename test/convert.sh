@@ -63,9 +63,9 @@ fi
 ${tablator_bin} --row-id=1 --col-name chars2 --type char test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt 2> /dev/null
 if [ $? -eq 0 ]; then
     echo "FAIL: extract_value() is not supported for columns of type char"
-    rm -f temp_file
 else
     echo "PASS: extract_value() is not supported for columns of type char"
+    rm -f temp.txt
 fi
 
 ${tablator_bin} --col-name chars --type char test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt 2> /dev/null
@@ -73,7 +73,7 @@ if [ $? -eq 0 ]; then
     echo "FAIL: Extract_column() is not supported for columns of type char"
 else
     echo "PASS: Extract_column() is not supported for columns of type char"
-    rm -f temp_file
+    rm -f temp.txt
 
 fi
 
@@ -81,10 +81,39 @@ fi
 ${tablator_bin} --static=1 --row-list="0 2 3 29 47" test/multi temp.tbl 2> /dev/null
 if [ $? -eq 0 ]; then
     echo "FAIL: invalid row_id"
-    rm -f temp_file
 else
     echo "PASS: invalid row_id"
+    rm -f temp_tbl
 fi
+
+${tablator_bin}  test/back_and_forth_tables/bad_column_name1.vot out.tbl 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: attempt to write IPAC table with invalid column name correctly resulted in error"
+else
+    echo "PASS: attempt to write IPAC table with invalid column name correctly resulted in error"
+    rm -f temp_file
+
+fi
+
+${tablator_bin}  test/back_and_forth_tables/bad_column_name2.vot out.tbl 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: attempt to write IPAC table with invalid column name correctly resulted in error"
+else
+    echo "PASS: attempt to write IPAC table with invalid column name correctly resulted in error"
+    rm -f temp_file
+
+fi
+
+${tablator_bin}  test/back_and_forth_tables/bad_unit_name.xml out.tbl 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: attempt to write IPAC table with invalid unit name correctly resulted in error"
+else
+    echo "PASS: attempt to write IPAC table with invalid unit name correctly resulted in error"
+    rm -f temp_file
+
+fi
+
+
 
 
 ###########################################################
@@ -490,6 +519,16 @@ if [ $? -eq 0 ]; then
     rm -f temp.json5
 else
     echo "FAIL: Convert IPAC Table with newlines to VOTable and back"
+fi
+
+${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/col_descriptions_with_newlines.xml temp.out &&
+${tablator_bin} --input-format=ipac_table temp.out temp.vot && diff -w test/back_and_forth_tables/col_descriptions_with_newlines.round_trip.xml temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with newlines in column descriptions to IPAC Table and back"
+    rm -f temp.out
+    rm -f temp.tbl
+else
+    echo "FAIL: Convert VOTable with newlines in column descriptions to IPAC Table and back"
 fi
 
 

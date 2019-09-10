@@ -7,8 +7,12 @@
 
 #include "Data_Type.hxx"
 
+
 namespace tablator {
 class Table;
+
+static constexpr char const *WHITESPACE = " \n\r\t\f\v";
+static constexpr char const *NEWLINES = "\n\r";
 
 class Ipac_Table_Writer {
 public:

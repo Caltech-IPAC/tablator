@@ -1,3 +1,6 @@
+#include <boost/range/algorithm/replace_copy_if.hpp>
+#include <boost/range/algorithm/replace_if.hpp>
+
 #include "../Ipac_Table_Writer.hxx"
 
 #include "../Data_Type_Adjuster.hxx"
@@ -393,6 +396,13 @@ size_t tablator::Ipac_Table_Writer::write_column_name(const Table& table,
                                                       size_t effective_array_size) {
     auto& column = table.columns[col_id];
     size_t total_width;
+
+    std::size_t first = column.name.find_first_of("\n\r|");
+    if (first != std::string::npos) {
+        std::string msg("column name contains illegal character (\\n, \\r, or |): ");
+        throw(std::runtime_error(msg + column.name));
+    }
+
     if (effective_array_size == 1) {
         total_width = (col_width + 1);
         os << std::setw(col_width) << column.name << "|";
@@ -430,9 +440,20 @@ void tablator::Ipac_Table_Writer::write_column_unit(const Table& table,
                                                     size_t col_width,
                                                     size_t effective_array_size) {
     auto& column = table.columns[col_id];
+
+    // Set default and adjust
+    std::string unit_str = " ";
     auto unit = column.field_properties.attributes.find("unit");
-    std::string unit_str =
-            (unit == column.field_properties.attributes.end()) ? " " : unit->second;
+    if (unit != column.field_properties.attributes.end()) {
+        std::size_t first = unit->second.find_first_of("|");
+        if (first != std::string::npos) {
+            std::string msg("unit name contains illegal character '|': ");
+            throw(std::runtime_error(msg + unit->second));
+        }
+        unit_str.clear();
+        boost::replace_copy_if(unit->second, std::back_inserter(unit_str),
+                               boost::is_any_of(tablator::NEWLINES), ' ');
+    }
 
     for (size_t element = 0; element < effective_array_size; ++element) {
         os << std::setw(col_width) << unit_str << "|";
@@ -505,8 +526,9 @@ void tablator::Ipac_Table_Writer::write_single_value(
         os << IPAC_COLUMN_SEPARATOR << std::setw(width);
         std::stringstream ss_temp;
         write_type_as_ascii(ss_temp, column.type, column.array_size, curr_data, width);
-        std::string s(ss_temp.str());
-        boost::replace_all(s, "\n", " ");
+        std::string s;
+        boost::replace_copy_if(ss_temp.str(), std::back_inserter(s),
+                               boost::is_any_of(tablator::NEWLINES), ' ');
         os << s;
     }
 }

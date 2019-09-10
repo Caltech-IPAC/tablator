@@ -1,3 +1,6 @@
+#include <boost/range/algorithm/replace_copy_if.hpp>
+#include <boost/range/algorithm/replace_if.hpp>
+
 #include "../Ipac_Table_Writer.hxx"
 
 #include "../Data_Type_Adjuster.hxx"
@@ -5,7 +8,6 @@
 
 // This file contains (high-level) implementations of public functions of the
 // Ipac_Table_Writer class.
-
 
 /**********************************************************/
 /* Auxiliary functions exposed through Table */
@@ -227,9 +229,12 @@ static constexpr size_t KEYWORD_ALIGNMENT = 8;
 
 void write_keyword_header_line(std::ostream &os, const std::string &name,
                                const std::string &value) {
-    os << "\\" << std::setw(KEYWORD_ALIGNMENT)
-       << boost::replace_all_copy(name, "\n", " ") << " = "
-       << "'" << boost::replace_all_copy(value, "\n", " ") << "'\n";
+    os << "\\" << std::setw(KEYWORD_ALIGNMENT);
+    std::ostreambuf_iterator<char> out_iter(os);
+    boost::replace_copy_if(name, out_iter, boost::is_any_of(tablator::NEWLINES), ' ');
+    os << std::setw(0) << " = '";
+    boost::replace_copy_if(value, out_iter, boost::is_any_of(tablator::NEWLINES), ' ');
+    os << "'\n";
 }
 
 /*******************************************************/
@@ -274,6 +279,8 @@ void generate_and_write_default_comments(
             auto unit = props.attributes.find("unit");
             if (unit != props.attributes.end() && !unit->second.empty()) {
                 col_comment.append(" (").append(unit->second).append(")");
+                boost::replace_if(col_comment, boost::is_any_of(tablator::NEWLINES),
+                                  ' ');
             }
 
             if (find(comments.begin(), comments.end(), col_comment) != comments.end() ||
@@ -283,8 +290,17 @@ void generate_and_write_default_comments(
             }
 
             os << "\\ " << col_comment << "\n";
-            if (!props.description.empty())
-                os << "\\ ___ " << props.description << "\n";
+            if (!props.description.empty()) {
+                size_t start =
+                        props.description.find_first_not_of(tablator::WHITESPACE);
+                if (start != std::string::npos) {
+                    std::ostream_iterator<char> out_iter(os);
+                    os << "\\ ___ ";
+                    boost::replace_copy_if(props.description.substr(start), out_iter,
+                                           boost::is_any_of(tablator::NEWLINES), ' ');
+                    os << "\n";
+                }
+            }
             // FIXME: Write out description attributes
         }
     }
