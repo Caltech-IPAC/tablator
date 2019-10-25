@@ -605,6 +605,31 @@ else
     echo "FAIL: Write subtable with selected columns out of order and reduced number of consecutive rows in IPAC Table format"
 fi
 
+${tablator_bin}   --column-list "0 5 3 0 27 1 0" test/multi temp.tbl && diff -w test/multi_row_0123_col_531.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with selected columns out of order and no row restriction in IPAC Table format"
+    rm -f temp_file
+else
+    echo "FAIL: Write subtable with selected columns out of order and no row restriction in IPAC Table format"
+fi
+
+
+${tablator_bin}   --lookup-col-names "htm7 dec object" test/multi temp.tbl && diff -w test/multi_row_0123_col_531.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with named columns out of order and no row restriction in IPAC Table format"
+    rm -f temp_file
+else
+    echo "FAIL: Write subtable with named columns out of order and no row restriction in IPAC Table format"
+fi
+
+${tablator_bin} --ids-only 0  --lookup-col-names "htm7 dec object" test/multi temp.tbl && diff -w test/multi_row_0123_col_531.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with named columns out of order and no row restriction in IPAC Table format and explicit !ids_only"
+    rm -f temp_file
+else
+    echo "FAIL: Write subtable with named columns out of order and no row restriction in IPAC Table format and explicit !ids_only"
+fi
+
 # extract single value
 ${tablator_bin}  --row-id=1 --col-name big_uint64s --type UINT64_LE test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint64_val.txt temp.txt
 if [ $? -eq 0 ]; then
@@ -796,7 +821,7 @@ else
     echo "FAIL: Extract double column as strings"
 fi
 
-${tablator_bin} --lookup-col-names "ra dec SSO" test/multi temp.txt && diff test/back_and_forth_tables/multi_include_col_ids.txt temp.txt
+${tablator_bin} --lookup-col-names "ra dec SSO" --ids-only 1 test/multi temp.txt && diff test/back_and_forth_tables/multi_include_col_ids.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Lookup column names for inclusion"
     rm -f temp_file
@@ -804,7 +829,7 @@ else
     echo "FAIL: Lookup column names for inclusion"
 fi
 
-${tablator_bin} --lookup-col-names "ra dec SSO" --exclude-cols 1  test/multi temp.txt && diff test/back_and_forth_tables/multi_exclude_col_ids.txt temp.txt
+${tablator_bin} --lookup-col-names "ra dec SSO" --exclude-cols 1 --ids-only 1 test/multi temp.txt && diff test/back_and_forth_tables/multi_exclude_col_ids.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Lookup column names for exclusion"
     rm -f temp_file

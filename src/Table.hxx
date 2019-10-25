@@ -192,6 +192,12 @@ public:
                                                             start_row, row_count);
     }
 
+    void write_ipac_subtable_by_column_and_row(
+            std::ostream &os, const std::vector<size_t> &column_ids) const {
+        Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids, 0,
+                                                            num_rows());
+    }
+
     void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
         Ipac_Table_Writer::write_single_record(*this, os, row_idx);
     }
