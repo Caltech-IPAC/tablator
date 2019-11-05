@@ -1,0 +1,10 @@
+\fixlen = T
+\RowsRetrieved = 4
+|                    htm7|                     dec|                                  object|
+|                    long|                  double|                                    char|
+|                        |                        |                                        |
+|                    null|                    null|                                    null|
+               3294967296      50.832569999999997  118289arstratraetratratsrastratsrastrats
+               294967296       -29.622250000000001                                   113368 
+               294967296       -29.622250000000001                                   113368 
+               294967296       -29.622250000000001                                   113368 
