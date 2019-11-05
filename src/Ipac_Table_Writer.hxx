@@ -37,6 +37,9 @@ public:
                                                  const std::vector<size_t> &column_ids,
                                                  size_t start_row, size_t row_count);
 
+    static void write_subtable_by_column_and_row(const Table &table, std::ostream &os,
+                                                 const std::vector<size_t> &column_ids);
+
     static void write_single_record(const Table &table, std::ostream &os,
                                     size_t row_idx);
     static void write_single_record(const Table &table, std::ostream &os,

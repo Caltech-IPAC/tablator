@@ -152,6 +152,13 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
 
 /**********************************************************/
 
+void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
+        const Table &table, std::ostream &os, const std::vector<size_t> &column_ids) {
+    write_subtable_by_column_and_row(table, os, column_ids, 0, table.num_rows());
+}
+
+/**********************************************************/
+
 void tablator::Ipac_Table_Writer::write_single_record(const Table &table,
                                                       std::ostream &os, size_t row_id) {
     size_t curr_row_offset = row_id * table.row_size();

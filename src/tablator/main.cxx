@@ -14,7 +14,6 @@ std::string usage(const boost::program_options::options_description &visible_opt
     return ss.str();
 }
 
-// JNOTE These handle_XXX() functions are useful only for testing.
 
 void handle_extract_single_value(const boost::filesystem::path &input_path,
                                  const tablator::Format &input_format,
@@ -109,31 +108,31 @@ void handle_extract_column(const boost::filesystem::path &input_path,
         auto val_array_vec = table.extract_column<int8_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "UINT8_LE")) {
-        auto val_array_vec = table.extract_column<uint8_t>(column_name);
+        auto val_array_vec = table.extract_column<uint8_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "INT16_LE")) {
-        auto val_array_vec = table.extract_column<int16_t>(column_name);
+        auto val_array_vec = table.extract_column<int16_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "UINT16_LE")) {
-        auto val_array_vec = table.extract_column<uint16_t>(column_name);
+        auto val_array_vec = table.extract_column<uint16_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "INT32_LE")) {
-        auto val_array_vec = table.extract_column<int32_t>(column_name);
+        auto val_array_vec = table.extract_column<int32_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "UINT32_LE")) {
-        auto val_array_vec = table.extract_column<uint32_t>(column_name);
+        auto val_array_vec = table.extract_column<uint32_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "INT64_LE")) {
-        auto val_array_vec = table.extract_column<int64_t>(column_name);
+        auto val_array_vec = table.extract_column<int64_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "UINT64_LE")) {
-        auto val_array_vec = table.extract_column<uint64_t>(column_name);
+        auto val_array_vec = table.extract_column<uint64_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "FLOAT32_LE")) {
-        auto val_array_vec = table.extract_column<float>(column_name);
+        auto val_array_vec = table.extract_column<float>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "FLOAT64_LE")) {
-        auto val_array_vec = table.extract_column<double>(column_name);
+        auto val_array_vec = table.extract_column<double>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "char")) {
         std::string msg("extract_column() is not supported for columns of type char; ");
@@ -146,25 +145,72 @@ void handle_extract_column(const boost::filesystem::path &input_path,
     }
 }
 
+
+void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
+                                const tablator::Table &table,
+                                const std::vector<size_t> &column_id_list,
+                                const std::vector<size_t> &row_id_list, size_t row_id,
+                                size_t start_row, size_t row_count,
+                                bool call_static_f) {
+    static size_t MAX_SIZE_T = std::numeric_limits<size_t>::max();
+
+    const std::vector<size_t> *active_column_id_ptr = &column_id_list;
+    std::vector<size_t> modified_column_id_list;
+    if (column_id_list.empty()) {
+        modified_column_id_list.resize(table.columns.size() - 1);
+        std::iota(modified_column_id_list.begin(), modified_column_id_list.end(), 1);
+        active_column_id_ptr = &modified_column_id_list;
+    }
+
+    const std::vector<size_t> *active_row_id_ptr = &row_id_list;
+    std::vector<size_t> modified_row_id_list;
+    if (row_id_list.empty()) {
+        if (row_id != MAX_SIZE_T) {
+            modified_row_id_list.emplace_back(row_id);
+        } else if (start_row != MAX_SIZE_T) {
+            size_t active_row_count = std::max(
+                    size_t(0), std::min(row_count, table.num_rows() - start_row));
+            modified_row_id_list.resize(active_row_count);
+            std::iota(modified_row_id_list.begin(), modified_row_id_list.end(),
+                      start_row);
+        } else {
+            modified_row_id_list.resize(table.num_rows());
+            std::iota(modified_row_id_list.begin(), modified_row_id_list.end(), 0);
+        }
+        active_row_id_ptr = &modified_row_id_list;
+    }
+
+    if (call_static_f) {
+        tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
+                table, output_stream, *active_column_id_ptr, *active_row_id_ptr);
+    } else {
+        table.write_ipac_subtable_by_column_and_row(
+                output_stream, *active_column_id_ptr, *active_row_id_ptr);
+    }
+}
+
 /////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[]) {
     bool stream_intermediate(false);
     tablator::Format input_format, output_format;
-    std::vector<size_t> column_list;
-    std::string column_string;
-    std::vector<std::string> column_names_list;
-    std::string column_names_string;
-    size_t row_id = 0;
-    size_t start_row = 0;
-    size_t row_count = 0;
+    std::vector<size_t> column_id_list;
+    std::string column_id_string;
+    std::vector<std::string> column_name_list;
+    std::string column_name_string;
+    size_t row_id = std::numeric_limits<size_t>::max();
+    size_t start_row = std::numeric_limits<size_t>::max();
+    size_t row_count = std::numeric_limits<size_t>::max();
     std::vector<size_t> row_list;
     std::string row_string;
     bool call_static_f = false;
     bool exclude_cols_f = false;
     bool as_string_f = false;
-    std::string input_format_str, output_format_str, column_name;
+    std::string input_format_str;
+    std::string output_format_str;
+    std::string column_to_extract;
     std::string type_str;
+    bool idx_lookup = false;
 
     // Declare the supported options.
     boost::program_options::options_description visible_options("Options");
@@ -180,8 +226,14 @@ int main(int argc, char *argv[]) {
             boost::program_options::value<std::string>(&output_format_str),
             "Output file format (json,json5,votable,csv,tsv,fits,ipac_table,"
             "text,html,hdf5)")(
-            "column-list", boost::program_options::value<std::string>(&column_string),
-            "list of columns to write (output-format ipac_table only)")(
+            "column-ids", boost::program_options::value<std::string>(&column_id_string),
+            "list of ids of columns to write (output-format ipac_table only)")(
+            "column-names",
+            boost::program_options::value<std::string>(&column_name_string),
+            "list names of columns to write (output-format ipac_table only) "
+            "or (via idx-lookup) look up indices for")(
+            "idx-lookup", boost::program_options::value<bool>(&idx_lookup),
+            "return list of column indices rather than subtable (default is 'false')")(
             "type", boost::program_options::value<std::string>(&type_str),
             "Extracted value type (int8_t, uint8_t, int16_t, uint16_t, int32_t, "
             "uint32_t, int64_t, uint64_t, float, double, char)")(
@@ -194,15 +246,13 @@ int main(int argc, char *argv[]) {
             "list of rows to write (output-format ipac_table only)")(
             "static", boost::program_options::value<bool>(&call_static_f),
             "call static function, not Table class member")(
+            "column-to-extract",
+            boost::program_options::value<std::string>(&column_to_extract),
+            "name of single column whose value(s) to extract")(
             "as-string", boost::program_options::value<bool>(&as_string_f),
             "return values as strings")(
-            "col-name", boost::program_options::value<std::string>(&column_name),
-            "name of column whose values to extract into vector")(
-            "lookup-col-names",
-            boost::program_options::value<std::string>(&column_names_string),
-            "names of columns to translate to IDs")(
             "exclude-cols", boost::program_options::value<bool>(&exclude_cols_f),
-            "listed columns are to be excluded (flag is true) or included (false, "
+            "named columns are to be excluded (flag is true) or included (false, "
             "default)");
 
     boost::program_options::options_description hidden_options("Hidden options");
@@ -229,6 +279,11 @@ int main(int argc, char *argv[]) {
             std::cout << usage(visible_options) << "\n";
             return 1;
         }
+
+        /***************************/
+        /*** Validate and adjust ***/
+        /***************************/
+
         if (option_variables.count("input-format")) input_format.init(input_format_str);
         if (option_variables.count("output-format"))
             output_format.init(output_format_str);
@@ -255,14 +310,14 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
             std::stringstream row_stream(row_string);
-            std::vector<size_t> temp_list((std::istream_iterator<size_t>(row_stream)),
-                                          std::istream_iterator<size_t>());
-            row_list.swap(temp_list);
+            std::copy(std::istream_iterator<size_t>(row_stream),
+                      std::istream_iterator<size_t>(), std::back_inserter(row_list));
         }
 
-        if (!option_variables.count("col-name") &&
+        if (!option_variables.count("column-to-extract") &&
             option_variables.count("as-string")) {
-            std::cerr << "The parameter 'as-string' is valid only if 'col-name' is "
+            std::cerr << "The parameter 'as-string' is valid only if "
+                         "'column-to-extract' is "
                          "present.\n";
             return 1;
         }
@@ -273,32 +328,32 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        if (option_variables.count("column-list")) {
-            if (option_variables.count("column-name")) {
-                std::cerr << "The parameters 'column-list' and 'column-name' are "
+        if (option_variables.count("column-ids")) {
+            if (option_variables.count("column-to-extract")) {
+                std::cerr << "The parameters 'column-ids' and 'column-to-extract' are "
                              "mutually "
                              "incompatible.\n";
                 return 1;
             }
-            std::stringstream column_stream(column_string);
-            std::vector<size_t> temp_list(
-                    (std::istream_iterator<size_t>(column_stream)),
-                    std::istream_iterator<size_t>());
-            column_list.swap(temp_list);
+            std::stringstream column_id_stream(column_id_string);
+            std::copy(std::istream_iterator<size_t>(column_id_stream),
+                      std::istream_iterator<size_t>(),
+                      std::back_inserter(column_id_list));
         }
 
-        if (option_variables.count("lookup-col-names")) {
-            // JTODO incompatible with everything
-            // JTODO complement
-            std::stringstream column_names_stream(column_names_string);
-            std::vector<std::string> temp_list(
-                    (std::istream_iterator<std::string>(column_names_stream)),
-                    std::istream_iterator<std::string>());
-
-            column_names_list.swap(temp_list);
+        if (option_variables.count("column-names")) {
+            if (option_variables.count("column-to-extract") ||
+                (option_variables.count("column-ids"))) {
+                std::cerr << "The parameter 'column-names' is incompatible with both "
+                             "'column-ids'"
+                          << " and 'column-to-extract'.\n";
+            }
+            std::stringstream column_name_stream(column_name_string);
+            std::copy(std::istream_iterator<std::string>(column_name_stream),
+                      std::istream_iterator<std::string>(),
+                      std::back_inserter(column_name_list));
         }
 
-        // Validation
         boost::filesystem::path input_path, output_path;
         if (option_variables.count("files")) {
             std::vector<std::string> paths(
@@ -322,12 +377,16 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
+        /********************************/
+        /*** Identify type of request ***/
+        /********************************/
+
         bool extract_single_value = false;
         bool extract_single_value_as_string = false;
         bool extract_column = false;
         bool extract_column_as_string = false;
 
-        if (option_variables.count("col-name")) {
+        if (option_variables.count("column-to-extract")) {
             if (option_variables.count("row-id")) {
                 if (as_string_f) {
                     extract_single_value_as_string = true;
@@ -343,100 +402,82 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        bool do_subtable = (option_variables.count("start-row") ||
-                            option_variables.count("row-list"));
+        bool do_subtable_by_row = (option_variables.count("start-row") ||
+                                   option_variables.count("row-list"));
 
-        bool do_subtable_by_column_and_row =
-                do_subtable && (option_variables.count("column-list"));
+
+        if (do_subtable_by_row && !column_to_extract.empty()) {
+            std::cerr << "Subtable-by-row feature is incompatible with "
+                         "column-to-extract feature.\n";
+            return 1;
+        }
+
+        bool do_subtable = option_variables.count("column-ids") ||
+                           (option_variables.count("column-names") && !idx_lookup) ||
+                           do_subtable_by_row;
+        //        std::cout << "do_subtable; " << do_subtable << std::endl;
 
         if (do_subtable &&
             (output_format.enum_format != tablator::Format::Enums::IPAC_TABLE)) {
-            std::cerr
-                    << "Subtable feature requested via 'start-row' or 'row-list' "
-                       "options is supported only when output-format is ipac_table.\n";
+            std::cerr << "Subtable feature requested via 'start-row', 'row-list', "
+                      << "'column-ids', or 'column-names' options is supported only "
+                      << "when output-format is ipac_table.\n";
             return 1;
         }
 
-        if (do_subtable && !column_name.empty()) {
-            std::cerr << "Subtable feature is incompatible with extract-column-values "
-                         "feature.\n";
-            return 1;
-        }
 
-        // Do it!
+        /**************/
+        /*** Do it! ***/
+        /**************/
+
         if (extract_single_value) {
             handle_extract_single_value(input_path, input_format, output_path,
-                                        column_name, type_str, row_id);
+                                        column_to_extract, type_str, row_id);
         } else if (extract_column) {
-            handle_extract_column(input_path, input_format, output_path, column_name,
-                                  type_str);
+            handle_extract_column(input_path, input_format, output_path,
+                                  column_to_extract, type_str);
         } else if (extract_single_value_as_string) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
-            std::string value = table.extract_value_as_string(column_name, row_id);
+            std::string value =
+                    table.extract_value_as_string(column_to_extract, row_id);
             boost::filesystem::ofstream output_stream(output_path);
             output_stream << value;
         } else if (extract_column_as_string) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
             std::vector<std::string> col_values =
-                    table.extract_column_values_as_strings(column_name);
+                    table.extract_column_values_as_strings(column_to_extract);
             boost::filesystem::ofstream output_stream(output_path);
             std::copy(col_values.begin(), col_values.end(),
                       std::ostream_iterator<std::string>(output_stream, "\n"));
-        } else if (do_subtable_by_column_and_row) {
+        } else if (option_variables.count("column-names")) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
-            boost::filesystem::ofstream output_stream(output_path);
-            if (option_variables.count("start-row")) {
-                if (call_static_f) {
-                    tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
-                            table, output_stream, column_list, start_row, row_count);
-                } else {
-                    table.write_ipac_subtable_by_column_and_row(
-                            output_stream, column_list, start_row, row_count);
-                }
+            std::vector<size_t> col_ids;
+            if (exclude_cols_f) {
+                col_ids = table.find_omitted_column_ids(column_name_list);
             } else {
-                if (call_static_f) {
-                    tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
-                            table, output_stream, column_list, row_list);
-                } else {
-                    table.write_ipac_subtable_by_column_and_row(output_stream,
-                                                                column_list, row_list);
-                }
+                col_ids = table.find_column_ids(column_name_list);
+            }
+
+            boost::filesystem::ofstream output_stream(output_path);
+            if (idx_lookup) {
+                std::copy(col_ids.begin(), col_ids.end(),
+                          std::ostream_iterator<size_t>(output_stream, " "));
+            } else if (col_ids.empty()) {
+                std::string msg("Error: subtable must contain at least one column.\n");
+                throw(std::runtime_error(msg));
+            } else {
+                handle_write_ipac_subtable(output_stream, table, col_ids, row_list,
+                                           row_id, start_row, row_count, call_static_f);
             }
         } else if (do_subtable) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
             boost::filesystem::ofstream output_stream(output_path);
-            if (option_variables.count("start-row")) {
-                if (call_static_f) {
-                    tablator::Ipac_Table_Writer::write_subtable_by_row(
-                            table, output_stream, start_row, row_count);
-                } else {
-                    table.write_ipac_subtable_by_row(output_stream, start_row,
-                                                     row_count);
-                }
-            } else {
-                if (call_static_f) {
-                    tablator::Ipac_Table_Writer::write_subtable_by_row(
-                            table, output_stream, row_list);
-                } else {
-                    table.write_ipac_subtable_by_row(output_stream, row_list);
-                }
-            }
-        } else if (option_variables.count("lookup-col-names")) {
-            boost::filesystem::ifstream input_stream(input_path);
-            tablator::Table table(input_stream, input_format);
-            std::vector<size_t> col_ids;
-            if (exclude_cols_f) {
-                col_ids = table.find_omitted_column_ids(column_names_list);
-            } else {
-                col_ids = table.find_column_ids(column_names_list);
-            }
-            boost::filesystem::ofstream output_stream(output_path);
-            std::copy(col_ids.begin(), col_ids.end(),
-                      std::ostream_iterator<size_t>(output_stream, " "));
+            handle_write_ipac_subtable(output_stream, table, column_id_list, row_list,
+                                       row_id, start_row, row_count, call_static_f);
         } else if (stream_intermediate) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
