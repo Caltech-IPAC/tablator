@@ -462,6 +462,68 @@ public:
     }
 
 
+    // getters
+
+    inline std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
+        return properties;
+    }
+    inline const std::vector<std::pair<std::string, Property>> &get_labeled_properties()
+            const {
+        return properties;
+    }
+
+    inline std::vector<uint8_t> &get_data() { return data; }
+    inline const std::vector<uint8_t> &get_data() const { return data; }
+
+    inline std::vector<std::string> &get_comments() { return comments; }
+    inline const std::vector<std::string> &get_comments() const { return comments; }
+
+    inline std::vector<Column> &get_resource_params() { return resource_params; }
+    inline const std::vector<Column> &get_resource_params() const {
+        return resource_params;
+    }
+
+    inline std::vector<Column> &get_table_params() { return table_params; }
+    inline const std::vector<Column> &get_table_params() const { return table_params; }
+
+    inline std::vector<Column> &get_columns() { return columns; }
+    inline const std::vector<Column> &get_columns() const { return columns; }
+
+    inline std::vector<size_t> &get_offsets() { return offsets; }
+    inline const std::vector<size_t> &get_offsets() const { return offsets; }
+
+    // setters
+
+    inline void set_properties(
+            const std::vector<std::pair<std::string, Property>> &props) {
+        properties = props;
+    }
+    inline void set_data(const std::vector<uint8_t> &d) { data = d; }
+    inline void set_comments(const std::vector<std::string> &comms) {
+        comments = comms;
+    }
+    inline void set_resource_element_params(const std::vector<Column> &params) {
+        resource_params = params;
+    }
+    inline void set_table_element_params(const std::vector<Column> &params) {
+        table_params = params;
+    }
+    inline void set_columns(const std::vector<Column> &cols) { columns = cols; }
+    inline void set_offsets(const std::vector<size_t> &offs) { offsets = offs; }
+
+
+    inline void add_labeled_property(
+            const std::pair<std::string, Property> &label_and_prop) {
+        properties.emplace_back(label_and_prop);
+    }
+
+    // This function does something more interesting in refactored tablator.
+    // Adding it now eases the transition.
+    inline void add_resource_element_labeled_property(
+            const std::pair<std::string, Property> &label_and_prop) {
+        add_labeled_property(label_and_prop);
+    }
+
 private:
     std::vector<Data_Type> get_original_datatypes() const {
         std::vector<Data_Type> orig_datatypes;

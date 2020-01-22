@@ -35,18 +35,23 @@ void add_to_property_tree(const Column &column, const std::string &tree_name,
     std::string datatype = to_xml_string(active_datatype);
     field.add("<xmlattr>.datatype", datatype);
 
-    if (active_datatype == Data_Type::CHAR || column.array_size != 1) {
+    bool added_arraysize =
+            (active_datatype == Data_Type::CHAR || column.array_size != 1);
+    if (added_arraysize) {
         field.add("<xmlattr>.arraysize", "*");
     }
     for (auto &a : column.field_properties.attributes) {
-        /// Empty attributes cause field.add to crash :(, so make sure
-        /// that does not happen.
-
+        // Empty attributes cause field.add to crash :(, so make sure
+        // that does not happen.
         // FIXME: This error is thrown a bit too late to be useful.
-
         if (a.first.empty())
             throw std::runtime_error("Empty attribute in field " + column.name +
                                      " which has type " + to_string(column.type));
+
+        if (added_arraysize && boost::equals(a.first, "arraysize")) {
+            continue;
+        }
+
         field.add("<xmlattr>." + a.first, a.second);
     }
 
