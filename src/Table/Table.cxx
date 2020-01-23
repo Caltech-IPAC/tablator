@@ -18,7 +18,7 @@ tablator::Table::Table(const std::vector<Column> &Columns,
     }
 
     for (auto &p : property_map) {
-        properties.emplace_back(p.first, Property(p.second));
+        add_labeled_property(std::make_pair(p.first, Property(p.second)));
     }
 }
 
@@ -57,7 +57,7 @@ tablator::Table::Table(const boost::filesystem::path &input_path,
                                      "' for input file: " + input_path.string());
             break;
     }
-    if (columns.size() < 2) {
+    if (get_columns().size() < 2) {
         throw std::runtime_error("This file has no columns: " + input_path.string());
     }
 }
@@ -97,7 +97,7 @@ tablator::Table::Table(std::istream &input_stream, const Format &format) {
                                      format.string());
             break;
     }
-    if (columns.size() < 2) {
+    if (get_columns().size() < 2) {
         throw std::runtime_error("This stream has no columns");
     }
 }

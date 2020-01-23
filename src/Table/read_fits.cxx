@@ -74,11 +74,11 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         auto i = keyword_mapping.find(name);
         if (i != keyword_mapping.end()) {
             name = i->second;
-            p.attributes.insert(std::make_pair("ucd", name));
+            p.add_attribute("ucd", name);
         }
         if (!k.second->comment().empty())
-            p.attributes.insert(std::make_pair("comment", k.second->comment()));
-        properties.emplace_back(name, p);
+            p.add_attribute("comment", k.second->comment());
+        add_labeled_property(std::make_pair(name, p));
     }
 
     /// CCfits is 1 based, not 0 based.
@@ -129,13 +129,13 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 break;
             case CCfits::Tfloat: {
                 Field_Properties nan_nulls;
-                nan_nulls.values.null =
+                nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<float>::quiet_NaN());
                 append_column(c.name(), Data_Type::FLOAT32_LE, array_size, nan_nulls);
             } break;
             case CCfits::Tdouble: {
                 Field_Properties nan_nulls;
-                nan_nulls.values.null =
+                nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<double>::quiet_NaN());
                 append_column(c.name(), Data_Type::FLOAT64_LE, array_size, nan_nulls);
             } break;
@@ -152,6 +152,10 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     /// table->rows () returns an int, so there may be issues with more
     /// than 2^32 rows
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+    auto &data = get_data();
+
     data.resize(table->rows() * row_size());
 
     /// Exit early if there is no data in the table.  Otherwise CCfits
@@ -249,8 +253,8 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         // FIXME: This should get the comment, but the comment()
         // function is protected???
         if (!c.unit().empty()) {
-            columns[i + column_data_offset].field_properties.attributes = {
-                    {"unit", c.unit()}};
+            columns[i + column_data_offset].get_field_properties().set_attributes(
+                    {{"unit", c.unit()}});
         }
     }
 }

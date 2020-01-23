@@ -83,11 +83,11 @@ void write_hdf5_columns(const std::vector<Column> &columns,
                                            /// invalidating iterators
     std::deque<std::vector<HDF5_Attribute> > option_arrays;
     for (auto &field : columns) {
-        const Field_Properties &field_properties(field.field_properties);
+        const Field_Properties &field_properties(field.get_field_properties());
 
         strings.emplace_back();
         std::vector<const char *> &attributes_vector = *strings.rbegin();
-        for (auto &a : field_properties.attributes) {
+        for (auto &a : field_properties.get_attributes()) {
             attributes_vector.push_back(a.first.c_str());
             attributes_vector.push_back(a.second.c_str());
         }
@@ -96,13 +96,13 @@ void write_hdf5_columns(const std::vector<Column> &columns,
 
         strings.emplace_back();
         std::vector<const char *> &links_vector = *strings.rbegin();
-        for (auto &a : field_properties.links) {
+        for (auto &a : field_properties.get_links()) {
             links_vector.push_back(a.first.c_str());
             links_vector.push_back(a.second.c_str());
         }
         hvl_t hdf5_links = {links_vector.size() / 2, links_vector.data()};
 
-        const Values &values(field_properties.values);
+        const Values &values(field_properties.get_values());
 
         HDF5_Min_Max hdf5_min = {values.min.value.c_str(), values.min.inclusive},
                      hdf5_max = {values.max.value.c_str(), values.max.inclusive};
@@ -123,11 +123,12 @@ void write_hdf5_columns(const std::vector<Column> &columns,
                                    hdf5_options};
 
         HDF5_Field_Properties hdf5_field_properties = {
-                field_properties.description.c_str(), hdf5_attributes, hdf5_links,
+                field_properties.get_description().c_str(), hdf5_attributes, hdf5_links,
                 hdf5_values};
-        type_strings.push_back(to_string(field.type));
-        hdf5_columns.emplace_back(field.name.c_str(), type_strings.rbegin()->c_str(),
-                                  field.array_size, hdf5_field_properties);
+        type_strings.push_back(to_string(field.get_type()));
+        hdf5_columns.emplace_back(field.get_name().c_str(),
+                                  type_strings.rbegin()->c_str(),
+                                  field.get_array_size(), hdf5_field_properties);
     }
 
     hvl_t H5_columns = {hdf5_columns.size(), hdf5_columns.data()};

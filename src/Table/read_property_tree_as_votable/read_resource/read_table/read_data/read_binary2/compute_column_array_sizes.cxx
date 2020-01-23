@@ -22,7 +22,8 @@ void compute_column_array_sizes(const std::vector<uint8_t> &stream,
         for (size_t field = 1; field < fields.size() && position <= stream.size();
              ++field) {
             if (!fields[field].is_array_dynamic) {
-                position += data_size(fields[field].type) * fields[field].array_size;
+                position += data_size(fields[field].get_type()) *
+                            fields[field].get_array_size();
             } else {
                 if (is_null_MSb(stream, row_offset, field)) {
                     position += sizeof(uint32_t);
@@ -50,7 +51,7 @@ void compute_column_array_sizes(const std::vector<uint8_t> &stream,
                         column_array_sizes[field] =
                                 std::max(column_array_sizes[field],
                                          static_cast<size_t>(array_size));
-                        position += array_size * data_size(fields[field].type);
+                        position += array_size * data_size(fields[field].get_type());
                     }
                 }
             }

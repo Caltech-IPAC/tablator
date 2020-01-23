@@ -19,22 +19,26 @@ void tablator::Table::write_sql_create_table(
                                Quote_SQL::IF_NEEDED)
            << " geography(POLYGON,0),\n";
     }
+    const auto &columns = get_columns();
     for (size_t i = 1; i < columns.size(); ++i) {
         // FIXME: This is a bit special-casey.  Postgres has real
         // arrays, but the other backends do not.
-        if (columns[i].type != Data_Type::CHAR && columns[i].array_size != 1 &&
+        if (columns[i].get_type() != Data_Type::CHAR &&
+            columns[i].get_array_size() != 1 &&
             sql_type != Format::Enums::POSTGRES_SQL) {
-            for (size_t column = 0; column < columns[i].array_size; ++column) {
-                os << quote_sql_string(boost::to_upper_copy(columns[i].name + "_" +
-                                                            std::to_string(column)),
-                                       '"', Quote_SQL::IF_NEEDED)
-                   << " " << Data_Type_to_SQL(columns[i].type, sql_type);
+            for (size_t column = 0; column < columns[i].get_array_size(); ++column) {
+                os << quote_sql_string(
+                              boost::to_upper_copy(columns[i].get_name() + "_" +
+                                                   std::to_string(column)),
+                              '"', Quote_SQL::IF_NEEDED)
+                   << " " << Data_Type_to_SQL(columns[i].get_type(), sql_type);
             }
         } else {
-            os << quote_sql_string(boost::to_upper_copy(columns[i].name), '"',
+            os << quote_sql_string(boost::to_upper_copy(columns[i].get_name()), '"',
                                    Quote_SQL::IF_NEEDED)
                << " "
-               << Data_Type_to_SQL(columns[i].type, columns[i].array_size, sql_type);
+               << Data_Type_to_SQL(columns[i].get_type(), columns[i].get_array_size(),
+                                   sql_type);
         }
         if (i + 1 != columns.size()) {
             os << ",";

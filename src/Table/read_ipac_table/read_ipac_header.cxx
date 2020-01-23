@@ -30,6 +30,8 @@ size_t tablator::Table::read_ipac_header(
         std::vector<size_t> &ipac_column_offsets) {
     size_t line_num = 0;
     char first_character = ipac_file.peek();
+    auto &comments = get_comments();
+
     for (; ipac_file && first_character == '\\'; first_character = ipac_file.peek()) {
         std::string line;
         std::getline(ipac_file, line);
@@ -61,7 +63,7 @@ size_t tablator::Table::read_ipac_header(
                         std::size_t last = value.find_last_not_of("\"'");
                         value_substr = value.substr(first, last - first + 1);
                     }
-                    properties.emplace_back(key, Property(value_substr));
+                    add_labeled_property(std::make_pair(key, Property(value_substr)));
                 }
             }
         }

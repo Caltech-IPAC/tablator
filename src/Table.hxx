@@ -30,14 +30,6 @@ public:
     static constexpr char const *ROWS_RETRIEVED_KEYWORD = "RowsRetrieved";
     static constexpr const char *DEFAULT_NULL_VALUE = "null";
 
-    std::vector<std::pair<std::string, Property>> properties;
-    std::vector<uint8_t> data;
-    std::vector<std::string> comments;
-
-    std::vector<Column> resource_params, table_params;
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
-
     static const std::string null_bitfield_flags_name;
     static const std::string null_bitfield_flags_description;
 
@@ -52,23 +44,26 @@ public:
     Table(std::istream &input_stream) { read_unknown(input_stream); }
     Table(std::istream &input_stream, const Format &format);
 
-    size_t row_size() const { return *offsets.rbegin(); }
-    size_t num_rows() const { return data.size() / row_size(); }
+    size_t row_size() const { return *get_offsets().rbegin(); }
+    size_t num_rows() const { return get_data().size() / row_size(); }
 
     // FIXME: Unfortunately, this is an opposite convention from
     // VOTable.  VOTable use the most significant bit for the
     // first column.  This uses the least significant bit.
     bool is_null(size_t row_offset, size_t column) const {
-        return data[row_offset + (column - 1) / 8] & (128 >> ((column - 1) % 8));
+        return get_data().at(row_offset + (column - 1) / 8) &
+               (128 >> ((column - 1) % 8));
     }
 
     std::vector<Column>::const_iterator find_column(const std::string &name) const {
+        const auto &columns = get_columns();
         return std::find_if(columns.begin(), columns.end(),
-                            [&](const Column &c) { return c.name == name; });
+                            [&](const Column &c) { return c.get_name() == name; });
     }
 
     size_t column_index(const std::string &name) const {
-        auto column_iter = find_column(name);
+        const auto column_iter = find_column(name);
+        const auto &columns = get_columns();
         if (column_iter == columns.end()) {
             throw std::runtime_error("Unable to find column '" + name + "' in table.");
         }
@@ -76,16 +71,17 @@ public:
     }
 
     size_t column_offset(size_t col_id) const {
+        const auto &columns = get_columns();
         if (col_id >= columns.size()) {
             throw std::runtime_error("Invalid column ID " + std::to_string(col_id) +
                                      " in table.");
         }
-        return offsets[col_id];
+        return get_offsets().at(col_id);
     }
 
     size_t column_offset(const std::string &name) const {
         auto col_id = column_index(name);
-        return offsets[col_id];
+        return get_offsets().at(col_id);
     }
 
 
@@ -102,6 +98,7 @@ public:
 
     std::vector<size_t> find_omitted_column_ids(
             const std::vector<std::string> &col_names) const {
+        const auto &columns = get_columns();
         std::vector<size_t> col_ids = find_column_ids(col_names);
         sort(col_ids.begin(), col_ids.end());
 
@@ -136,17 +133,17 @@ public:
 
     void append_row(const Row &row) {
         assert(row.data.size() == row_size());
-        data.insert(data.end(), row.data.begin(), row.data.end());
+        get_data().insert(get_data().end(), row.data.begin(), row.data.end());
     }
 
     void unsafe_append_row(const char *row) {
-        data.insert(data.end(), row, row + row_size());
+        get_data().insert(get_data().end(), row, row + row_size());
     }
 
-    void pop_row() { data.resize(data.size() - row_size()); }
+    void pop_row() { get_data().resize(get_data().size() - row_size()); }
 
     void resize_rows(const size_t &new_num_rows) {
-        data.resize(row_size() * new_num_rows);
+        get_data().resize(row_size() * new_num_rows);
     }
 
     std::vector<std::pair<std::string, std::string>> flatten_properties() const;
@@ -409,6 +406,7 @@ public:
         static_assert(!std::is_same<T, char>::value,
                       "extract_value() is not supported for columns of type char; "
                       "please use extract_values_as_string().");
+        const auto &columns = get_columns();
         if (col_id >= columns.size()) {
             throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
         }
@@ -417,7 +415,7 @@ public:
         }
 
         auto &column = columns[col_id];
-        auto array_size = column.array_size;
+        auto array_size = column.get_array_size();
         size_t row_offset = row_id * row_size();
         if (is_null(row_offset, col_id)) {
             for (size_t i = 0; i < array_size; ++i) {
@@ -425,9 +423,9 @@ public:
             }
         } else {
             // JTODO what if an element is null?  Assume already has get_null() value?
-            size_t base_offset = row_offset + offsets[col_id];
-            uint8_t const *curr_data = data.data() + base_offset;
-            size_t element_size = data_size(column.type);
+            size_t base_offset = row_offset + get_offsets().at(col_id);
+            uint8_t const *curr_data = get_data().data() + base_offset;
+            size_t element_size = data_size(column.get_type());
 
             for (size_t i = 0; i < array_size; ++i) {
                 val_array.emplace_back(*(reinterpret_cast<const T *>(curr_data)));
@@ -447,6 +445,7 @@ public:
         static_assert(!std::is_same<T, char>::value,
                       "extract_column() is not supported for columns of type char; "
                       "please use extract_column_values_as_strings().");
+        const auto &columns = get_columns();
         if (col_id >= columns.size()) {
             throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
         }
@@ -454,7 +453,7 @@ public:
 
         size_t row_count = num_rows();
         std::vector<T> col_vec;
-        col_vec.reserve(row_count * column.array_size);
+        col_vec.reserve(row_count * column.get_array_size());
         for (size_t curr_row_id = 0; curr_row_id < row_count; ++curr_row_id) {
             extract_value<T>(col_vec, col_id, curr_row_id);
         }
@@ -465,56 +464,64 @@ public:
     // getters
 
     inline std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
-        return properties;
+        return labeled_properties_;
     }
     inline const std::vector<std::pair<std::string, Property>> &get_labeled_properties()
             const {
-        return properties;
+        return labeled_properties_;
     }
 
-    inline std::vector<uint8_t> &get_data() { return data; }
-    inline const std::vector<uint8_t> &get_data() const { return data; }
+    inline std::vector<uint8_t> &get_data() { return data_; }
+    inline const std::vector<uint8_t> &get_data() const { return data_; }
 
-    inline std::vector<std::string> &get_comments() { return comments; }
-    inline const std::vector<std::string> &get_comments() const { return comments; }
+    inline std::vector<std::string> &get_comments() { return comments_; }
+    inline const std::vector<std::string> &get_comments() const { return comments_; }
 
-    inline std::vector<Column> &get_resource_params() { return resource_params; }
-    inline const std::vector<Column> &get_resource_params() const {
-        return resource_params;
+    inline std::vector<Column> &get_resource_element_params() {
+        return resource_element_params_;
+    }
+    inline const std::vector<Column> &get_resource_element_params() const {
+        return resource_element_params_;
     }
 
-    inline std::vector<Column> &get_table_params() { return table_params; }
-    inline const std::vector<Column> &get_table_params() const { return table_params; }
+    inline std::vector<Column> &get_table_element_params() {
+        return table_element_params_;
+    }
+    inline const std::vector<Column> &get_table_element_params() const {
+        return table_element_params_;
+    }
 
-    inline std::vector<Column> &get_columns() { return columns; }
-    inline const std::vector<Column> &get_columns() const { return columns; }
+    inline std::vector<Column> &get_columns() { return columns_; }
+    inline const std::vector<Column> &get_columns() const { return columns_; }
 
-    inline std::vector<size_t> &get_offsets() { return offsets; }
-    inline const std::vector<size_t> &get_offsets() const { return offsets; }
+    inline std::vector<size_t> &get_offsets() { return offsets_; }
+    inline const std::vector<size_t> &get_offsets() const { return offsets_; }
 
     // setters
 
-    inline void set_properties(
+    inline void set_labeled_properties(
             const std::vector<std::pair<std::string, Property>> &props) {
-        properties = props;
+        labeled_properties_ = props;
     }
-    inline void set_data(const std::vector<uint8_t> &d) { data = d; }
+    inline void set_data(const std::vector<uint8_t> &d) { data_ = d; }
     inline void set_comments(const std::vector<std::string> &comms) {
-        comments = comms;
+        comments_ = comms;
     }
     inline void set_resource_element_params(const std::vector<Column> &params) {
-        resource_params = params;
+        resource_element_params_ = params;
     }
     inline void set_table_element_params(const std::vector<Column> &params) {
-        table_params = params;
+        table_element_params_ = params;
     }
-    inline void set_columns(const std::vector<Column> &cols) { columns = cols; }
-    inline void set_offsets(const std::vector<size_t> &offs) { offsets = offs; }
+
+
+    inline void set_columns(const std::vector<Column> &cols) { columns_ = cols; }
+    inline void set_offsets(const std::vector<size_t> &offs) { offsets_ = offs; }
 
 
     inline void add_labeled_property(
             const std::pair<std::string, Property> &label_and_prop) {
-        properties.emplace_back(label_and_prop);
+        labeled_properties_.emplace_back(label_and_prop);
     }
 
     // This function does something more interesting in refactored tablator.
@@ -524,11 +531,28 @@ public:
         add_labeled_property(label_and_prop);
     }
 
+    inline void add_resource_element_param(const Column &param) {
+        resource_element_params_.emplace_back(param);
+    }
+    inline void add_table_element_param(const Column &param) {
+        table_element_params_.emplace_back(param);
+    }
+
 private:
+    std::vector<std::pair<std::string, Property>> labeled_properties_;
+    std::vector<uint8_t> data_;
+    std::vector<std::string> comments_;
+
+    std::vector<Column> resource_element_params_, table_element_params_;
+    std::vector<Column> columns_;
+    std::vector<size_t> offsets_ = {0};
+
+
     std::vector<Data_Type> get_original_datatypes() const {
         std::vector<Data_Type> orig_datatypes;
+        const auto &columns = get_columns();
         for (size_t col = 0; col <= columns.size(); ++col) {
-            orig_datatypes.emplace_back(columns[col].type);
+            orig_datatypes.emplace_back(columns[col].get_type());
         }
         return orig_datatypes;
     }

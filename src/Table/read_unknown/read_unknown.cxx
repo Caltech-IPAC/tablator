@@ -59,6 +59,7 @@ void tablator::Table::read_unknown(std::istream &input_stream) {
             }
         }
     }
+    const auto &columns = get_columns();
     if (columns.size() < 2) {
         throw std::runtime_error("This stream has no columns");
     }
@@ -87,6 +88,7 @@ void tablator::Table::read_unknown(const boost::filesystem::path &input_path) {
             }
         }
     }
+    const auto &columns = get_columns();
     if (columns.size() < 2) {
         throw std::runtime_error("This file has no columns: " + input_path.string());
     }

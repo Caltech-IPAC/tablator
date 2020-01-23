@@ -11,20 +11,20 @@
 std::vector<tablator::Data_Type>
 tablator::Data_Type_Adjuster::get_datatypes_for_writing(
         const Format::Enums &enum_format) const {
-    auto &columns = table_.columns;
+    const auto &table_columns = table_.get_columns();
     std::vector<tablator::Data_Type> adjusted_datatypes;
-    adjusted_datatypes.reserve(columns.size());
+    adjusted_datatypes.reserve(table_columns.size());
     bool format_ipac = (enum_format == Format::Enums::IPAC_TABLE);
     bool format_votable = (enum_format == Format::Enums::VOTABLE);
     bool format_fits = (enum_format == Format::Enums::FITS);
     bool adjust_uint64 = (format_ipac || format_votable || format_fits);
-    for (size_t col = 0; col <= columns.size(); ++col) {
-        auto orig_datatype = columns[col].type;
+    for (size_t col = 0; col <= table_columns.size(); ++col) {
+        auto orig_datatype = table_columns[col].get_type();
         auto adjusted_datatype = orig_datatype;  // set default and adjust
         if ((orig_datatype == tablator::Data_Type::UINT64_LE) && adjust_uint64) {
             if (contains_large_uint64_val(col)) {
                 if (format_ipac) {
-                    auto array_size = columns[col].array_size;
+                    auto array_size = table_columns[col].get_array_size();
                     if (array_size > 1) {
                         throw std::runtime_error(
                                 "Tables with array-valued columns of type uint64 "
@@ -50,10 +50,14 @@ tablator::Data_Type_Adjuster::get_datatypes_for_writing(
 }
 
 bool tablator::Data_Type_Adjuster::contains_large_uint64_val(size_t col) const {
-    for (size_t table_row_offset(0), row(0); table_row_offset < table_.data.size();
+    const auto &table_columns = table_.get_columns();
+    const auto &table_data = table_.get_data();
+    for (size_t table_row_offset(0), row(0);
+         table_row_offset < table_.get_data().size();
          table_row_offset += table_.row_size(), ++row) {
-        auto curr_ptr = table_.data.data() + table_row_offset + table_.offsets[col];
-        auto array_size = table_.columns[col].array_size;
+        auto curr_ptr =
+                table_data.data() + table_row_offset + table_.get_offsets().at(col);
+        auto array_size = table_columns[col].get_array_size();
         for (size_t j = 0; j < array_size; ++j) {
             uint64_t val = *reinterpret_cast<const uint64_t *>(curr_ptr);
             if (val > std::numeric_limits<int64_t>::max()) {

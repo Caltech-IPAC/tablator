@@ -39,9 +39,9 @@ std::vector<std::pair<std::string, Property> > read_metadata(
                                     HDF5_Attribute &hdf_attribute =
                                             reinterpret_cast<HDF5_Attribute *>(
                                                     hdf5_property.attributes.p)[i];
-                                    p.attributes.insert(std::make_pair(
+                                    p.add_attribute(
                                             std::string(hdf_attribute.name),
-                                            std::string(hdf_attribute.value)));
+                                            std::string(hdf_attribute.value));
                                 }
                                 result.push_back(std::make_pair(
                                         std::string(hdf5_property.name), p));

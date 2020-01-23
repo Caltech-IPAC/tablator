@@ -27,6 +27,9 @@ void tablator::Table::write_sql_insert(
         const std::vector<
                 std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type> > >
                 &polygon_input) const {
+    const auto &data = get_data();
+    const auto &columns = get_columns();
+    const auto &offsets = get_offsets();
     os << "INSERT INTO " << quoted_table_name << "\nVALUES (";
     if (has_point) {
         write_point(os, point_input, data.data() + row_offset);
@@ -39,20 +42,20 @@ void tablator::Table::write_sql_insert(
         if (is_null(row_offset, column)) {
             os << "NULL";
         } else {
-            if (columns[column].type == Data_Type::CHAR) {
+            if (columns[column].get_type() == Data_Type::CHAR) {
                 std::stringstream ss;
-                write_type_as_ascii(ss, columns[column].type,
-                                    columns[column].array_size,
+                write_type_as_ascii(ss, columns[column].get_type(),
+                                    columns[column].get_array_size(),
                                     data.data() + row_offset + offsets[column], ' ');
                 os << quote_sql_string(ss.str(), '\'');
             } else {
-                if (columns[column].array_size != 1) {
+                if (columns[column].get_array_size() != 1) {
                     os << "'{";
                 }
-                write_type_as_ascii(os, columns[column].type,
-                                    columns[column].array_size,
+                write_type_as_ascii(os, columns[column].get_type(),
+                                    columns[column].get_array_size(),
                                     data.data() + row_offset + offsets[column], ',');
-                if (columns[column].array_size != 1) {
+                if (columns[column].get_array_size() != 1) {
                     os << "}'";
                 }
             }

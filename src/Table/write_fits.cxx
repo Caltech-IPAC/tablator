@@ -110,10 +110,11 @@ void tablator::Table::write_fits(
 
     std::vector<string> fits_units;
     std::vector<const char *> ttype, tunit;
+    const auto &columns = get_columns();
     for (size_t i = 0; i < columns.size(); ++i) {
         auto &column = columns[i];
-        ttype.push_back(column.name.c_str());
-        std::string array_size_str(std::to_string(column.array_size));
+        ttype.push_back(column.get_name().c_str());
+        std::string array_size_str(std::to_string(column.get_array_size()));
         char fits_type;
 
         switch (datatypes_for_writing[i]) {
@@ -143,7 +144,7 @@ void tablator::Table::write_fits(
                         "Unsupported uint64 data type when writing fits "
                         "data: , column #" +
                         std::to_string(i) + ", original data type " +
-                        to_string(column.type));
+                        to_string(column.get_type()));
                 break;
             case Data_Type::FLOAT32_LE:
                 fits_type = 'E';
@@ -153,24 +154,24 @@ void tablator::Table::write_fits(
                 break;
             case Data_Type::CHAR:
                 fits_type = 'A';
-                if (column.type == Data_Type::UINT64_LE) {
+                if (column.get_type() == Data_Type::UINT64_LE) {
                     // Adjust array_size as well as data_type.
                     array_size_str.assign(std::to_string(
                             Data_Type_Adjuster::get_char_array_size_for_uint64_col(
-                                    column.array_size)));
+                                    column.get_array_size())));
                 }
                 break;
             default:
                 throw std::runtime_error(
-                        "In column '" + column.name +
+                        "In column '" + column.get_name() +
                         "': unknown data type when writing fits data: " +
-                        to_string(column.type));
+                        to_string(column.get_type()));
                 break;
         }
         fits_types.push_back(array_size_str + fits_type);
 
-        auto unit = column.field_properties.attributes.find("unit");
-        if (unit == column.field_properties.attributes.end()) {
+        auto unit = column.get_field_properties().get_attributes().find("unit");
+        if (unit == column.get_field_properties().get_attributes().end()) {
             tunit.push_back("");
         } else {
             tunit.push_back(unit->second.c_str());
@@ -191,14 +192,14 @@ void tablator::Table::write_fits(
     /// Write properties
     fits_write_key_longwarn(fits_file, &status);
     if (status != 0) throw CCfits::FitsError(status);
-    for (auto &p : properties) {
+    for (auto &p : get_labeled_properties()) {
         auto keyword_mapping = fits_keyword_mapping(true);
         std::string name = p.first;
         auto i = keyword_mapping.find(name);
         if (i != keyword_mapping.end()) name = i->second;
 
-        std::string comment, value(p.second.value);
-        for (auto &a : p.second.attributes) {
+        std::string comment, value(p.second.get_value());
+        for (auto &a : p.second.get_attributes()) {
             if (a.first == "comment")
                 comment = a.second;
             else if (a.first != "ucd")
@@ -209,7 +210,8 @@ void tablator::Table::write_fits(
         if (status != 0) throw CCfits::FitsError(status);
     }
 
-    const uint8_t *row_pointer(data.data());
+    const auto &offsets = get_offsets();
+    const uint8_t *row_pointer(get_data().data());
     const size_t number_of_rows(num_rows());
     for (size_t row = 1; row <= number_of_rows; ++row) {
         for (size_t i = 0; i < columns.size(); ++i) {
@@ -220,57 +222,57 @@ void tablator::Table::write_fits(
                 case Data_Type::INT8_LE:
 
                     write_column<bool>(fits_file, TLOGICAL, i, offset_data,
-                                       column.array_size, row);
+                                       column.get_array_size(), row);
                     break;
                 case Data_Type::UINT8_LE:
                     write_column<uint8_t>(fits_file, TBYTE, i, offset_data,
-                                          column.array_size, row);
+                                          column.get_array_size(), row);
                     break;
                 case Data_Type::INT16_LE:
                     write_column<int16_t>(fits_file, TSHORT, i, offset_data,
-                                          column.array_size, row);
+                                          column.get_array_size(), row);
                     break;
                 case Data_Type::UINT16_LE:
                     write_column<uint16_t>(fits_file, TUSHORT, i, offset_data,
-                                           column.array_size, row);
+                                           column.get_array_size(), row);
                     break;
                 case Data_Type::INT32_LE:
                     write_column<int32_t>(fits_file, TINT, i, offset_data,
-                                          column.array_size, row);
+                                          column.get_array_size(), row);
                     break;
                 case Data_Type::UINT32_LE:
                     write_column<uint32_t>(fits_file, TUINT, i, offset_data,
-                                           column.array_size, row);
+                                           column.get_array_size(), row);
                     break;
                 case Data_Type::INT64_LE:
                     write_column<int64_t>(fits_file, TLONGLONG, i, offset_data,
-                                          column.array_size, row);
+                                          column.get_array_size(), row);
                     break;
                 case Data_Type::UINT64_LE:
                     throw std::runtime_error(
                             "Unsupported uint64 data type when writing fits "
                             "data: , column #" +
                             std::to_string(i) + ", original data type " +
-                            to_string(column.type));
+                            to_string(column.get_type()));
                     break;
                 case Data_Type::FLOAT32_LE:
                     write_column<float>(fits_file, TFLOAT, i, offset_data,
-                                        column.array_size, row);
+                                        column.get_array_size(), row);
                     break;
                 case Data_Type::FLOAT64_LE:
                     write_column<double>(fits_file, TDOUBLE, i, offset_data,
-                                         column.array_size, row);
+                                         column.get_array_size(), row);
                     break;
                 case Data_Type::CHAR: {
                     std::string temp_string;
-                    if (column.type == Data_Type::CHAR) {
+                    if (column.get_type() == Data_Type::CHAR) {
                         // Really a CHAR column, not a rewritten UINT64_LE
                         temp_string.assign(reinterpret_cast<const char *>(offset_data),
                                            offsets[i + 1] - offsets[i]);
                     } else {
                         // Really UINT64_LE
                         auto curr_ptr = offset_data;
-                        auto array_size = column.array_size;
+                        auto array_size = column.get_array_size();
                         for (size_t j = 0; j < array_size; ++j) {
                             if (j > 0) {
                                 temp_string.append(" ");
@@ -289,7 +291,7 @@ void tablator::Table::write_fits(
                     throw std::runtime_error(
                             "Unknown data type when writing fits "
                             "data: " +
-                            to_string(column.type));
+                            to_string(column.get_type()));
                     break;
             }
         }

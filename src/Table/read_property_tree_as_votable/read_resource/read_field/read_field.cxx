@@ -36,40 +36,42 @@ tablator::VOTable_Field tablator::Table::read_field(
     if (child != end && child->first == "<xmlattr>") {
         for (auto &attribute : child->second) {
             if (attribute.first == "name") {
-                result.name = attribute.second.get_value<std::string>();
+                result.set_name(attribute.second.get_value<std::string>());
             } else if (attribute.first == "datatype") {
-                result.type = string_to_Type(attribute.second.get_value<std::string>());
+                result.set_type(
+                        string_to_Type(attribute.second.get_value<std::string>()));
             }
             // FIXME: We do not handle arrays correctly
             else if (attribute.first == "arraysize") {
                 std::string array_size = attribute.second.get_value<std::string>();
                 if (array_size == "*") {
-                    result.array_size = std::numeric_limits<size_t>::max();
+                    result.set_array_size(std::numeric_limits<size_t>::max());
                     result.is_array_dynamic = true;
                 } else {
-                    result.array_size = boost::lexical_cast<size_t>(array_size);
+                    result.set_array_size(boost::lexical_cast<size_t>(array_size));
                 }
             } else {
-                result.field_properties.attributes.insert(std::make_pair(
-                        attribute.first, attribute.second.get_value<std::string>()));
+                result.get_field_properties().add_attribute(
+                        attribute.first, attribute.second.get_value<std::string>());
             }
         }
         ++child;
     }
 
     if (child != end && child->first == "DESCRIPTION") {
-        result.field_properties.description = child->second.get_value<std::string>();
+        result.get_field_properties().set_description(
+                child->second.get_value<std::string>());
         ++child;
     }
     if (child != end && child->first == "VALUES") {
-        result.field_properties.values = read_values(child->second);
+        result.get_field_properties().set_values(read_values(child->second));
         ++child;
     }
     if (child != end && child->first == "LINK") {
         for (auto &link_child : child->second) {
             if (link_child.first == "<xmlattr>") {
                 for (auto &attribute : link_child.second) {
-                    result.field_properties.links.emplace_back(
+                    result.get_field_properties().add_link(
                             attribute.first, attribute.second.get_value<std::string>());
                 }
             } else {

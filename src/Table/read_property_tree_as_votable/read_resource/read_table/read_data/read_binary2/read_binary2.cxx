@@ -55,8 +55,8 @@ void Table::read_binary2(const boost::property_tree::ptree &binary2,
     }
 
     for (std::size_t c = 0; c < fields.size(); ++c)
-        append_column(fields.at(c).name, fields[c].type, column_array_sizes[c],
-                      fields.at(c).field_properties);
+        append_column(fields.at(c).get_name(), fields[c].get_type(),
+                      column_array_sizes[c], fields.at(c).get_field_properties());
 
     for (std::size_t stream = 0; stream < streams.size(); ++stream)
         append_data_from_stream(streams[stream], rows_per_stream[stream], fields);

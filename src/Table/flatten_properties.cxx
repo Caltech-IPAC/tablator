@@ -3,7 +3,7 @@
 std::vector<std::pair<std::string, std::string> > tablator::Table::flatten_properties()
         const {
     std::vector<std::pair<std::string, std::string> > result;
-    for (auto &p : properties) {
+    for (auto &p : get_labeled_properties()) {
         std::vector<std::pair<std::string, std::string> > flatten(
                 p.second.flatten(p.first));
         result.insert(result.end(), flatten.begin(), flatten.end());

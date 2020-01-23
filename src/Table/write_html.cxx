@@ -63,7 +63,9 @@ void tablator::Table::write_html(std::ostream &os) const {
 
     boost::property_tree::ptree &heading_tr = table.add("TR", "");
     /// skip null_bitfield_flag
-    for (size_t i = 1; i < columns.size(); ++i) heading_tr.add("TH", columns[i].name);
+    const auto &columns = get_columns();
+    for (size_t i = 1; i < columns.size(); ++i)
+        heading_tr.add("TH", columns[i].get_name());
 
     std::string tabledata_string(
             boost::uuids::to_string(boost::uuids::random_generator()()));

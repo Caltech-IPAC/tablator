@@ -35,10 +35,10 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
 
                 if (td->first == "TD" || td->first.empty()) {
                     std::string temp = td->second.get_value<std::string>();
-                    if (fields.at(c).array_size != 1)
+                    if (fields.at(c).get_array_size() != 1)
                         column_array_sizes[c] =
                                 std::max(column_array_sizes[c],
-                                         count_elements(temp, fields.at(c).type));
+                                         count_elements(temp, fields.at(c).get_type()));
                     rows.rbegin()->emplace_back(temp);
                 } else {
                     throw std::runtime_error(
@@ -63,30 +63,37 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
     }
 
     for (std::size_t c = 0; c < fields.size(); ++c) {
-        append_column(fields.at(c).name, fields[c].type, column_array_sizes[c],
-                      fields.at(c).field_properties);
+        append_column(fields.at(c).get_name(), fields[c].get_type(),
+                      column_array_sizes[c], fields.at(c).get_field_properties());
     }
 
     Row row_string(row_size());
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+    auto &data = get_data();
+
     for (size_t current_row = 0; current_row < rows.size(); ++current_row) {
         auto &row(rows[current_row]);
         row_string.set_zero();
         for (size_t column = 1; column < fields.size(); ++column) {
             auto &element(row[column - 1]);
             if (element.empty()) {
-                row_string.set_null(columns[column].type, columns[column].array_size,
-                                    column, offsets[column], offsets[column + 1]);
+                row_string.set_null(columns[column].get_type(),
+                                    columns[column].get_array_size(), column,
+                                    offsets[column], offsets[column + 1]);
             } else
                 try {
-                    insert_ascii_in_row(
-                            columns[column].type, columns[column].array_size, column,
-                            element, offsets[column], offsets[column + 1], row_string);
+                    insert_ascii_in_row(columns[column].get_type(),
+                                        columns[column].get_array_size(), column,
+                                        element, offsets[column], offsets[column + 1],
+                                        row_string);
                 } catch (std::exception &error) {
                     throw std::runtime_error(
-                            "Invalid " + to_string(fields[column].type) + " value " +
-                            element + " in row " + std::to_string(current_row + 1) +
-                            ", field " + std::to_string(column) + ", array_size: " +
-                            std::to_string(columns[column].array_size) +
+                            "Invalid " + to_string(fields[column].get_type()) +
+                            " value " + element + " in row " +
+                            std::to_string(current_row + 1) + ", field " +
+                            std::to_string(column) + ", array_size: " +
+                            std::to_string(columns[column].get_array_size()) +
                             ". Error message: " + error.what());
                 }
         }

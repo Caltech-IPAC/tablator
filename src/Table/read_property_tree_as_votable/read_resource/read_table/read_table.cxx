@@ -13,8 +13,8 @@ void tablator::Table::read_table(const boost::property_tree::ptree &table) {
         child = skip_xml_comments(child, end);
     }
     if (child != end && child->first == "DESCRIPTION") {
-        properties.emplace_back("RESOURCE.TABLE.DESCRIPTION",
-                                child->second.get_value<std::string>());
+        add_labeled_property(std::make_pair("RESOURCE.TABLE.DESCRIPTION",
+                                            child->second.get_value<std::string>()));
         ++child;
     }
     child = skip_xml_comments(child, end);
@@ -31,7 +31,7 @@ void tablator::Table::read_table(const boost::property_tree::ptree &table) {
         if (child->first == "FIELD") {
             fields.emplace_back(read_field(child->second));
         } else if (child->first == "PARAM") {
-            table_params.emplace_back(read_field(child->second));
+            add_table_element_param(read_field(child->second));
         } else if (child->first == "GROUP") {
             // FIXME: Implement groups
         } else {

@@ -32,12 +32,13 @@ void tablator::Table::create_types_from_ipac_headers(
     for (size_t column = 1; column < num_columns; ++column) {
         Field_Properties p({});
         if (!ipac_columns[2].at(column).empty()) {
-            p.attributes.insert(std::make_pair(
+            p.get_attributes().insert(std::make_pair(
                     "unit", boost::algorithm::trim_copy(ipac_columns[2].at(column))));
         }
         if (!ipac_columns[3].at(column).empty()) {
-            p.values.null = boost::algorithm::trim_copy(ipac_columns[3].at(column));
+            p.get_values().null =
+                    boost::algorithm::trim_copy(ipac_columns[3].at(column));
         }
-        columns[column].field_properties = p;
+        get_columns().at(column).set_field_properties(p);
     }
 }

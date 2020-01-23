@@ -41,6 +41,9 @@ void Table::write_tabledata(std::ostream &os,
         os << '\n';
     }
 
+    const auto &columns = get_columns();
+    const auto &offsets = get_offsets();
+    const auto &data = get_data();
     for (size_t row_offset = 0; row_offset < data.size(); row_offset += row_size()) {
         os << tr_prefix;
 
@@ -49,7 +52,8 @@ void Table::write_tabledata(std::ostream &os,
             std::stringstream td;
             // Leave null entries blank, unlike in IPAC_TABLE format.
             if (!is_null(row_offset, i)) {
-                write_type_as_ascii(td, columns[i].type, columns[i].array_size,
+                write_type_as_ascii(td, columns[i].get_type(),
+                                    columns[i].get_array_size(),
                                     data.data() + row_offset + offsets[i]);
             }
             os << td_prefix;

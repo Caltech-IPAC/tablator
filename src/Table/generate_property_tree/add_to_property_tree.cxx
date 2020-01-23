@@ -31,22 +31,22 @@ void add_to_property_tree(const Column &column, const std::string &tree_name,
                           boost::property_tree::ptree &tree,
                           const Data_Type &active_datatype) {
     boost::property_tree::ptree &field = tree.add(tree_name, "");
-    field.add("<xmlattr>.name", column.name);
+    field.add("<xmlattr>.name", column.get_name());
     std::string datatype = to_xml_string(active_datatype);
     field.add("<xmlattr>.datatype", datatype);
 
     bool added_arraysize =
-            (active_datatype == Data_Type::CHAR || column.array_size != 1);
+            (active_datatype == Data_Type::CHAR || column.get_array_size() != 1);
     if (added_arraysize) {
         field.add("<xmlattr>.arraysize", "*");
     }
-    for (auto &a : column.field_properties.attributes) {
+    for (auto &a : column.get_field_properties().get_attributes()) {
         // Empty attributes cause field.add to crash :(, so make sure
         // that does not happen.
         // FIXME: This error is thrown a bit too late to be useful.
         if (a.first.empty())
-            throw std::runtime_error("Empty attribute in field " + column.name +
-                                     " which has type " + to_string(column.type));
+            throw std::runtime_error("Empty attribute in field " + column.get_name() +
+                                     " which has type " + to_string(column.get_type()));
 
         if (added_arraysize && boost::equals(a.first, "arraysize")) {
             continue;
@@ -55,10 +55,10 @@ void add_to_property_tree(const Column &column, const std::string &tree_name,
         field.add("<xmlattr>." + a.first, a.second);
     }
 
-    if (!column.field_properties.description.empty())
-        field.add("DESCRIPTION", column.field_properties.description);
+    if (!column.get_field_properties().get_description().empty())
+        field.add("DESCRIPTION", column.get_field_properties().get_description());
 
-    auto &v(column.field_properties.values);
+    auto &v(column.get_field_properties().get_values());
     if (!v.empty_except_null()) {
         boost::property_tree::ptree &values = field.add("VALUES", "");
         if (!v.ID.empty()) values.add("<xmlattr>.ID", v.ID);
@@ -71,9 +71,9 @@ void add_to_property_tree(const Column &column, const std::string &tree_name,
         for (auto &o : v.options) Option_to_xml(values, o);
     }
 
-    if (!column.field_properties.links.empty()) {
+    if (!column.get_field_properties().get_links().empty()) {
         boost::property_tree::ptree &link = field.add("LINK", "");
-        for (auto &l : column.field_properties.links)
+        for (auto &l : column.get_field_properties().get_links())
             link.add("<xmlattr>." + l.first, l.second);
     }
 }

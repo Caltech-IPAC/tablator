@@ -101,7 +101,7 @@ void handle_extract_column(const boost::filesystem::path &input_path,
     tablator::Table table(input_stream, input_format);
     boost::filesystem::ofstream output_stream(output_path);
     auto column_id = table.column_index(column_name);
-    auto array_size = table.columns[column_id].array_size;
+    auto array_size = table.get_columns().at(column_id).get_array_size();
     auto num_rows = table.num_rows();
 
     if (boost::iequals(type_str, "INT8_LE")) {
@@ -157,7 +157,7 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
     const std::vector<size_t> *active_column_id_ptr = &column_id_list;
     std::vector<size_t> modified_column_id_list;
     if (column_id_list.empty()) {
-        modified_column_id_list.resize(table.columns.size() - 1);
+        modified_column_id_list.resize(table.get_columns().size() - 1);
         std::iota(modified_column_id_list.begin(), modified_column_id_list.end(), 1);
         active_column_id_ptr = &modified_column_id_list;
     }

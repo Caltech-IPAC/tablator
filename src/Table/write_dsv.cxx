@@ -41,11 +41,14 @@ std::ostream &write_escaped_string(std::ostream &os, const std::string &s,
 }  // namespace
 
 void tablator::Table::write_dsv(std::ostream &os, const char &separator) const {
+    const auto &columns = get_columns();
+    const auto &offsets = get_offsets();
+    const auto &data = get_data();
     const int num_members = columns.size();
     if (num_members == 0) return;
     /// Skip null_bitfield_flags
     for (int i = 1; i < num_members; ++i) {
-        write_escaped_string(os, columns[i].name, separator);
+        write_escaped_string(os, columns[i].get_name(), separator);
         os << (i == num_members - 1 ? '\n' : separator);
     }
 
@@ -55,8 +58,8 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator) const {
             std::stringstream ss;
             if (!is_null(row_offset, i)) {
                 // Leave null entries blank, unlike in IPAC_TABLE format.
-                write_type_as_ascii(ss, columns[i].type, columns[i].array_size,
-                                    data.data() + offset);
+                write_type_as_ascii(ss, columns[i].get_type(),
+                                    columns[i].get_array_size(), data.data() + offset);
             }
             write_escaped_string(os, ss.str(), separator);
             os << (i == num_members - 1 ? '\n' : separator);

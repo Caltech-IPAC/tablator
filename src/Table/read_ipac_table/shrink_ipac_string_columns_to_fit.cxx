@@ -5,13 +5,16 @@
 
 void tablator::Table::shrink_ipac_string_columns_to_fit(
         const std::vector<size_t> &column_widths) {
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+    auto &data = get_data();
     std::vector<size_t> new_offsets = {0};
     std::vector<Column> new_columns(columns);
 
     size_t new_row_size(0);
     for (size_t i = 0; i < columns.size(); ++i) {
-        if (columns[i].type == Data_Type::CHAR) {
-            new_columns[i].array_size = column_widths[i];
+        if (columns[i].get_type() == Data_Type::CHAR) {
+            new_columns[i].set_array_size(column_widths[i]);
         }
         new_row_size += new_columns[i].data_size();
         new_offsets.push_back(new_row_size);

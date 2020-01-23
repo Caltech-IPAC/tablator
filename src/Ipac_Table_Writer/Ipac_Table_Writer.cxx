@@ -48,26 +48,26 @@ std::string tablator::Ipac_Table_Writer::to_ipac_string(const Data_Type &type) {
 std::vector<size_t> tablator::Ipac_Table_Writer::get_column_widths(const Table &table) {
     std::vector<size_t> widths;
 
-    auto &columns = table.columns;
+    const auto &columns = table.get_columns();
     auto col_iter(std::next(columns.begin()));
     // First column is the null bitfield flags, which are not written
     // out in ipac_tables.
     widths.push_back(0);
     for (; col_iter != columns.end(); ++col_iter) {
         size_t header_size(
-                col_iter->name.size() +
-                (col_iter->array_size == 1
+                col_iter->get_name().size() +
+                (col_iter->get_array_size() == 1
                          ? 0
-                         : 1 + std::to_string(col_iter->array_size - 1).size()));
-        auto unit = col_iter->field_properties.attributes.find("unit");
-        if (unit != col_iter->field_properties.attributes.end()) {
+                         : 1 + std::to_string(col_iter->get_array_size() - 1).size()));
+        auto unit = col_iter->get_field_properties().get_attributes().find("unit");
+        if (unit != col_iter->get_field_properties().get_attributes().end()) {
             header_size = std::max(header_size, unit->second.size());
         }
-        if (col_iter->type == Data_Type::CHAR) {
+        if (col_iter->get_type() == Data_Type::CHAR) {
             // The minimum of 4 is to accomodate the length of the
             // literals 'char' and 'null'.
-            widths.push_back(
-                    std::max((size_t)4, std::max(header_size, col_iter->array_size)));
+            widths.push_back(std::max(
+                    (size_t)4, std::max(header_size, col_iter->get_array_size())));
         } else {
             // buffer_size = 1 (sign) + 1 (leading digit) + 1
             // (decimal) + 1 (exponent sign) + 3 (exponent) (value
@@ -277,14 +277,14 @@ void write_comment_lines(std::ostream &os, const std::vector<std::string> &comme
 void generate_and_write_default_comments(
         const tablator::Table &table, std::ostream &os,
         const std::vector<std::string> &json_comments) {
-    auto &columns = table.columns;
-    auto &comments = table.comments;
+    const auto &columns = table.get_columns();
+    const auto &comments = table.get_comments();
     for (size_t i = 1; i < columns.size(); ++i) {
-        auto props = columns[i].field_properties;
-        if (!props.attributes.empty() || !props.description.empty()) {
-            std::string col_comment(columns[i].name);
-            auto unit = props.attributes.find("unit");
-            if (unit != props.attributes.end() && !unit->second.empty()) {
+        auto props = columns[i].get_field_properties();
+        if (!props.get_attributes().empty() || !props.get_description().empty()) {
+            std::string col_comment(columns[i].get_name());
+            auto unit = props.get_attributes().find("unit");
+            if (unit != props.get_attributes().end() && !unit->second.empty()) {
                 col_comment.append(" (").append(unit->second).append(")");
                 boost::replace_if(col_comment, boost::is_any_of(tablator::NEWLINES),
                                   ' ');
@@ -297,13 +297,13 @@ void generate_and_write_default_comments(
             }
 
             os << "\\ " << col_comment << "\n";
-            if (!props.description.empty()) {
-                size_t start =
-                        props.description.find_first_not_of(tablator::WHITESPACE);
+            const auto &desc = props.get_description();
+            if (!desc.empty()) {
+                size_t start = desc.find_first_not_of(tablator::WHITESPACE);
                 if (start != std::string::npos) {
                     std::ostream_iterator<char> out_iter(os);
                     os << "\\ ___ ";
-                    boost::replace_copy_if(props.description.substr(start), out_iter,
+                    boost::replace_copy_if(desc.substr(start), out_iter,
                                            boost::is_any_of(tablator::NEWLINES), ' ');
                     os << "\n";
                 }
@@ -329,24 +329,25 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
     os << "\\" << tablator::Table::ROWS_RETRIEVED_KEYWORD << " = " << num_requested_rows
        << "\n";
 
-    auto &comments = table.comments;
+    const auto &comments = table.get_comments();
     std::vector<std::string> json_comments;
 
     // Iterate through properties, distinguishing between keywords and json5-ified
     // comments. Write keywords here and save json_comments for a later loop.
-    for (auto &name_and_property : table.properties) {
+    for (auto &name_and_property :
+         table.get_labeled_properties()) {  // JTODO which level
         auto &p = name_and_property.second;
-        if (!p.value.empty()) {
+        if (!p.get_value().empty()) {
             if (boost::equals(name_and_property.first, JSON_DESC_LABEL)) {
                 // This is a comment (or concatenated comments) from the Json5 format.
                 // Err on the side of respecting newlines rather than replacing with
                 // spaces.
-                store_json_comments(p.value, comments, json_comments);
+                store_json_comments(p.get_value(), comments, json_comments);
             } else {
-                write_keyword_header_line(os, name_and_property.first, p.value);
+                write_keyword_header_line(os, name_and_property.first, p.get_value());
             }
         }
-        auto &a = p.attributes;
+        auto &a = p.get_attributes();
         auto name(a.find("name")), value(a.find("value"));
         if (a.size() == 2 && name != a.end() && value != a.end()) {
             // We wrote these at the top of this function.

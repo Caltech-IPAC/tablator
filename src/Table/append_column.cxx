@@ -1,6 +1,8 @@
 #include "../Table.hxx"
 
 void tablator::Table::append_column(const Column &column) {
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
     auto new_columns(columns);
     new_columns.push_back(column);
     size_t new_row_size = row_size() + new_columns.rbegin()->data_size();

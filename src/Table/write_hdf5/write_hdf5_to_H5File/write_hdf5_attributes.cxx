@@ -27,13 +27,13 @@ void tablator::Table::write_hdf5_attributes(H5::DataSet &table) const {
     std::vector<std::vector<const char *> > strings;
     std::vector<HDF5_Property> hdf5_properties;
 
-    for (auto &property : properties) {
+    for (auto &property : get_labeled_properties()) {
         auto &p = property.second;
 
-        if (!p.value.empty() || !p.attributes.empty()) {
+        if (!p.empty()) {
             strings.emplace_back();
             std::vector<const char *> &sub_vector = *strings.rbegin();
-            for (auto &a : p.attributes) {
+            for (auto &a : p.get_attributes()) {
                 sub_vector.push_back(a.first.c_str());
                 sub_vector.push_back(a.second.c_str());
             }
@@ -41,7 +41,7 @@ void tablator::Table::write_hdf5_attributes(H5::DataSet &table) const {
             hvl_t atts;
             atts.len = sub_vector.size() / 2;
             atts.p = sub_vector.data();
-            hdf5_properties.emplace_back(property.first.c_str(), p.value.c_str(), atts);
+            hdf5_properties.emplace_back(property.first.c_str(), p.get_value().c_str(), atts);
         }
     }
 

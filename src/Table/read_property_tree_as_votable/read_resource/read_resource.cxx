@@ -13,8 +13,8 @@ void tablator::Table::read_resource(const boost::property_tree::ptree &resource)
         child = skip_xml_comments(child, end);
     }
     if (child != end && child->first == "DESCRIPTION") {
-        properties.emplace_back("RESOURCE.DESCRIPTION",
-                                child->second.get_value<std::string>());
+        add_labeled_property(std::make_pair("RESOURCE.DESCRIPTION",
+                                            child->second.get_value<std::string>()));
         ++child;
     }
     child = skip_xml_comments(child, end);
@@ -27,7 +27,7 @@ void tablator::Table::read_resource(const boost::property_tree::ptree &resource)
         if (child->first == "COOSYS") {
             read_node_and_attributes("RESOURCE." + child->first, child->second);
         } else if (child->first == "PARAM") {
-            resource_params.emplace_back(read_field(child->second));
+            add_resource_element_param(read_field(child->second));
         } else if (child->first == "GROUP") {
             // FIXME: Implement groups
         } else {
@@ -37,6 +37,7 @@ void tablator::Table::read_resource(const boost::property_tree::ptree &resource)
         child = skip_xml_comments(child, end);
     }
     /// We only allow one TABLE per RESOURCE
+    auto &columns = get_columns();
     for (; child != end; ++child) {
         if (child->first == "LINK") {
             read_node_and_attributes("RESOURCE.LINK", child->second);

@@ -5,21 +5,23 @@
 namespace {
 std::pair<size_t, tablator::Data_Type> get_offsets_and_types(
         const tablator::Table &table, const std::string &name) {
+    const auto &columns = table.get_columns();
     auto column(table.find_column(name));
-    if (column == table.columns.end()) {
+    if (column == columns.end()) {
         throw std::runtime_error("Unable to find the column '" + name +
                                  "' when creating geometries.");
-    } else if (column->type == tablator::Data_Type::CHAR) {
+    } else if (column->get_type() == tablator::Data_Type::CHAR) {
         throw std::runtime_error(
                 "Input columns to geography must be numeric.  The column '" + name +
                 "' is text");
-    } else if (column->array_size != 1) {
+    } else if (column->get_array_size() != 1) {
         throw std::runtime_error(
                 "Input columns to geography must not be arrays.  The column '" + name +
-                "' has array size=" + std::to_string(column->array_size));
+                "' has array size=" + std::to_string(column->get_array_size()));
     }
     return std::pair<size_t, tablator::Data_Type>(
-            table.offsets[std::distance(table.columns.begin(), column)], column->type);
+            table.get_offsets().at(std::distance(columns.begin(), column)),
+            column->get_type());
 }
 
 std::pair<std::pair<size_t, tablator::Data_Type>,
@@ -49,7 +51,8 @@ void tablator::Table::write_sql_inserts(
         polygon_input.emplace_back(get_offsets_and_types(*this, names));
     }
 
-    for (size_t row_offset = 0; row_offset < data.size(); row_offset += row_size()) {
+    for (size_t row_offset = 0; row_offset < get_data().size();
+         row_offset += row_size()) {
         write_sql_insert(os, quoted_table_name, row_offset,
                          !point_input_names.first.empty(), point_input, polygon_input);
     }

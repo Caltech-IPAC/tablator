@@ -11,7 +11,7 @@ void add_to_property_tree(const Column &column, const std::string &tree_name,
 
 void add_to_property_tree(const Column &column, const std::string &tree_name,
                           boost::property_tree::ptree &tree) {
-    add_to_property_tree(column, tree_name, tree, column.type);
+    add_to_property_tree(column, tree_name, tree, column.get_type());
 }
 }  // namespace tablator
 
@@ -48,40 +48,41 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     const std::string description_literal("DESCRIPTION");
 
     auto &resource = votable.add(resource_literal, "");
-    for (auto &p : properties) {
+    for (auto &p : get_labeled_properties()) {
+
         if (p.first == votable_literal) continue;
         if (boost::starts_with(p.first, votable_literal + ".")) {
-            votable.add(p.first.substr(votable_literal.size() + 1), p.second.value);
+            votable.add(p.first.substr(votable_literal.size() + 1), p.second.get_value());
         } else if (p.first == "COOSYS" || p.first == "GROUP" || p.first == "PARAM" ||
                    p.first == "INFO") {
-            auto &element = votable.add(p.first, p.second.value);
-            for (auto &a : p.second.attributes)
+            auto &element = votable.add(p.first, p.second.get_value());
+            for (auto &a : p.second.get_attributes())
                 element.add("<xmlattr>." + a.first, a.second);
         } else if (p.first == resource_literal) {
-            for (auto &a : p.second.attributes)
+            for (auto &a : p.second.get_attributes())
                 resource.add("<xmlattr>." + a.first, a.second);
         } else if (boost::starts_with(p.first,
                                       resource_literal + "." + table_literal)) {
             /// Skip TABLE for now.
         } else if (boost::starts_with(p.first, resource_literal + ".")) {
             auto &element = resource.add(p.first.substr(resource_literal.size() + 1),
-                                         p.second.value);
-            for (auto &a : p.second.attributes)
+                                         p.second.get_value());
+            for (auto &a : p.second.get_attributes())
                 element.add("<xmlattr>." + a.first, a.second);
         } else if (p.first == "OVERFLOW") {
             overflow = true;
         } else {
             auto &info = resource.add("INFO", "");
             info.add("<xmlattr>.name", p.first);
-            info.add("<xmlattr>.value", p.second.value);
-            for (auto &a : p.second.attributes) {
+            info.add("<xmlattr>.value", p.second.get_value());
+            for (auto &a : p.second.get_attributes()) {
                 auto &info_attribute = resource.add("INFO", "");
                 info_attribute.add("<xmlattr>.name", p.first + "." + a.first);
                 info_attribute.add("<xmlattr>.value", a.second);
             }
         }
     }
-    for (auto &param : resource_params) {
+    for (auto &param : get_resource_element_params()) {
         add_to_property_tree(param, "PARAM", resource);
     }
 
@@ -90,9 +91,9 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     // VOTable only allows a single DESCRIPTION element, so we combine
     // RESOURCE.TABLE.DESCRIPTION and comments in a single string.
     std::string description;
-    for (auto &p : properties) {
+    for (auto &p : get_labeled_properties()) {
         if (boost::starts_with(p.first, resource_literal + "." + table_literal)) {
-            for (auto &a : p.second.attributes) {
+            for (auto &a : p.second.get_attributes()) {
                 table_tree.add("<xmlattr>." + a.first, a.second);
             }
             if (boost::starts_with(p.first, resource_literal + "." + table_literal +
@@ -100,10 +101,11 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
                 if (!description.empty()) {
                     description.append("\n");
                 }
-                description.append(p.second.value);
+                description.append(p.second.get_value());
             }
         }
     }
+    const auto &comments = get_comments();
     if (!comments.empty()) {
         if (!description.empty()) {
             description.append("\n");
@@ -115,10 +117,11 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
         table_tree.add("DESCRIPTION", description);
     }
 
-    for (auto &param : table_params) {
+    for (auto &param : get_table_element_params()) {
         add_to_property_tree(param, "PARAM", table_tree);
     }
     /// Skip null_bitfield_flag
+    const auto &columns = get_columns();
     for (size_t i = 1; i < columns.size(); ++i) {
         add_to_property_tree(columns[i], "FIELD", table_tree, datatypes_for_writing[i]);
     }

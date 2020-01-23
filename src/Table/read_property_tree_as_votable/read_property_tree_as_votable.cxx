@@ -17,14 +17,16 @@ void tablator::Table::read_property_tree_as_votable(
                   attribute.first == "xmlns" || attribute.first == "xmlns:stc" ||
                   attribute.first == "xsi:schemaLocation" ||
                   attribute.first == "xsi:noNamespaceSchemaLocation"))
-                votable_property.attributes.insert(std::make_pair(
-                        attribute.first, attribute.second.get_value<std::string>()));
+                votable_property.add_attribute(
+                        attribute.first, attribute.second.get_value<std::string>());
         ++child;
     }
-    if (!votable_property.value.empty() || !votable_property.attributes.empty()) {
-        properties.emplace_back("VOTABLE", votable_property);
+
+    if (!votable_property.empty()) {
+        add_labeled_property(std::make_pair("VOTABLE", votable_property));
     }
 
+    auto &comments = get_comments();
     child = skip_xml_comments(child, end);
     if (child != end && child->first == "DESCRIPTION") {
         comments.emplace_back(child->second.get_value<std::string>());
