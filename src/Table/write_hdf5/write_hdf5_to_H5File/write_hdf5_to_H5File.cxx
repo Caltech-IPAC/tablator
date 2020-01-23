@@ -1,5 +1,6 @@
 #include <array>
 
+#include "../../../Common.hxx"
 #include "../../../Data_Type_to_H5.hxx"
 #include "../../../Table.hxx"
 
@@ -14,7 +15,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     /// attribute.
     // FIXME: This needs to be generalized for multiple resources
     H5::Group group(outfile.createGroup("RESOURCE_0"));
-    write_hdf5_columns(get_resource_element_params(), "PARAM", group);
+    write_hdf5_columns(get_resource_element_params(), PARAM, group);
 
     std::array<hsize_t, 1> dims = {{num_rows()}};
     H5::DataSpace dataspace(dims.size(), dims.data());
@@ -62,12 +63,12 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
             H5::StrType str_type(0, description.size());
             H5::DataSpace attribute_space(H5S_SCALAR);
             H5::Attribute attribute =
-                    h5_table.createAttribute("DESCRIPTION", str_type, attribute_space);
+                    h5_table.createAttribute(DESCRIPTION, str_type, attribute_space);
             attribute.write(str_type, description.c_str());
         }
     }
     write_hdf5_attributes(h5_table);
-    write_hdf5_columns(columns, "FIELD", h5_table);
-    write_hdf5_columns(get_table_element_params(), "PARAM", h5_table);
+    write_hdf5_columns(columns, FIELD, h5_table);
+    write_hdf5_columns(get_table_element_params(), PARAM, h5_table);
     h5_table.write(data.data(), compound_type);
 }

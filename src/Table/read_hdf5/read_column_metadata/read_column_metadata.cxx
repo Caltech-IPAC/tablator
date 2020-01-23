@@ -1,5 +1,6 @@
-#include "../../../H5_to_Data_Type.hxx"
 #include "../../../Table.hxx"
+
+#include "../../../H5_to_Data_Type.hxx"
 #include "../../../string_to_Data_Type.hxx"
 #include "../../HDF5_Attribute.hxx"
 #include "../../HDF5_Column.hxx"
@@ -29,7 +30,7 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
         HDF5_Column &hdf5_column =
                 reinterpret_cast<HDF5_Column *>(hdf5_columns.p)[column];
 
-        std::map<std::string, std::string> attributes;
+        ATTRIBUTES attributes;
         HDF5_Field_Properties &hdf5_field_properties(hdf5_column.field_properties);
         hvl_t &hdf5_attributes(hdf5_field_properties.attributes);
         for (size_t attribute = 0; attribute < hdf5_attributes.len; ++attribute) {

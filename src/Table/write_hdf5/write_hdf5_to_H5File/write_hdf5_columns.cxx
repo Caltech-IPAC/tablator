@@ -1,4 +1,5 @@
 #include "../../../Column.hxx"
+#include "../../../Common.hxx"
 #include "../../HDF5_Attribute.hxx"
 #include "../../HDF5_Column.hxx"
 #include "../../HDF5_Property.hxx"
@@ -30,8 +31,8 @@ void write_hdf5_columns(const std::vector<Column> &columns,
     H5::StrType hdf5_string(0, H5T_VARIABLE);
 
     H5::CompType hdf5_option(sizeof(HDF5_Attribute));
-    hdf5_option.insertMember("name", HOFFSET(HDF5_Attribute, name), hdf5_string);
-    hdf5_option.insertMember("value", HOFFSET(HDF5_Attribute, value), hdf5_string);
+    hdf5_option.insertMember(ATTR_NAME, HOFFSET(HDF5_Attribute, name), hdf5_string);
+    hdf5_option.insertMember(ATTR_VALUE, HOFFSET(HDF5_Attribute, value), hdf5_string);
 
     H5::VarLenType hdf5_option_array(&hdf5_option);
 
@@ -43,7 +44,7 @@ void write_hdf5_columns(const std::vector<Column> &columns,
     H5::CompType hdf5_values(sizeof(HDF5_Values));
     hdf5_values.insertMember("min", HOFFSET(HDF5_Values, min), hdf5_min_max);
     hdf5_values.insertMember("max", HOFFSET(HDF5_Values, max), hdf5_min_max);
-    hdf5_values.insertMember("ID", HOFFSET(HDF5_Values, ID), hdf5_string);
+    hdf5_values.insertMember("id", HOFFSET(HDF5_Values, ID), hdf5_string);
     hdf5_values.insertMember("type", HOFFSET(HDF5_Values, type), hdf5_string);
     hdf5_values.insertMember("null", HOFFSET(HDF5_Values, null), hdf5_string);
     hdf5_values.insertMember("ref", HOFFSET(HDF5_Values, ref), hdf5_string);
@@ -51,28 +52,32 @@ void write_hdf5_columns(const std::vector<Column> &columns,
                              hdf5_option_array);
 
     H5::CompType hdf5_attribute(2 * hdf5_string.getSize());
-    hdf5_attribute.insertMember("name", 0, hdf5_string);
-    hdf5_attribute.insertMember("value", hdf5_string.getSize(), hdf5_string);
+    hdf5_attribute.insertMember(ATTR_NAME, 0, hdf5_string);
+    hdf5_attribute.insertMember(ATTR_VALUE, hdf5_string.getSize(), hdf5_string);
 
     H5::VarLenType hdf5_attribute_array(&hdf5_attribute);
 
     H5::CompType hdf5_field_properties(sizeof(HDF5_Field_Properties));
-    hdf5_field_properties.insertMember(
-            "description", HOFFSET(HDF5_Field_Properties, description), hdf5_string);
-    hdf5_field_properties.insertMember("attributes",
+    hdf5_field_properties.insertMember(Field_Properties::FP_DESCRIPTION,
+                                       HOFFSET(HDF5_Field_Properties, description),
+                                       hdf5_string);
+    hdf5_field_properties.insertMember(Field_Properties::FP_ATTRIBUTES,
                                        HOFFSET(HDF5_Field_Properties, attributes),
                                        hdf5_attribute_array);
-    hdf5_field_properties.insertMember("links", HOFFSET(HDF5_Field_Properties, links),
+    hdf5_field_properties.insertMember(Field_Properties::FP_LINKS,
+                                       HOFFSET(HDF5_Field_Properties, links),
                                        hdf5_attribute_array);
-    hdf5_field_properties.insertMember("values", HOFFSET(HDF5_Field_Properties, values),
+    hdf5_field_properties.insertMember(Field_Properties::FP_VALUES,
+                                       HOFFSET(HDF5_Field_Properties, values),
                                        hdf5_values);
 
     H5::CompType hdf5_column(sizeof(HDF5_Column));
-    hdf5_column.insertMember("name", HOFFSET(HDF5_Column, name), hdf5_string);
-    hdf5_column.insertMember("type", HOFFSET(HDF5_Column, type), hdf5_string);
-    hdf5_column.insertMember("array_size", HOFFSET(HDF5_Column, array_size),
+    hdf5_column.insertMember(Column::COL_NAME, HOFFSET(HDF5_Column, name), hdf5_string);
+    hdf5_column.insertMember(Column::COL_TYPE, HOFFSET(HDF5_Column, type), hdf5_string);
+    hdf5_column.insertMember(Column::COL_ARRAY_SIZE, HOFFSET(HDF5_Column, array_size),
                              H5::PredType::STD_U64LE);
-    hdf5_column.insertMember("field_properties", HOFFSET(HDF5_Column, field_properties),
+    hdf5_column.insertMember(Column::COL_FIELD_PROPERTIES,
+                             HOFFSET(HDF5_Column, field_properties),
                              hdf5_field_properties);
 
     H5::VarLenType hdf5_columns_type(&hdf5_column);

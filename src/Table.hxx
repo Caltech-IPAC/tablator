@@ -524,6 +524,8 @@ public:
         labeled_properties_.emplace_back(label_and_prop);
     }
 
+    void add_comment(const std::string &c) { comments_.emplace_back(c); }
+
     // This function does something more interesting in refactored tablator.
     // Adding it now eases the transition.
     inline void add_resource_element_labeled_property(

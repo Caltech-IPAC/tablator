@@ -7,10 +7,8 @@
 #include "../../to_string.hxx"
 #include "../../write_type_as_ascii.hxx"
 
-
 namespace tablator {
 std::string decode_links(const std::string &encoded);
-
 
 void Table::write_tabledata(std::ostream &os,
                             const Format::Enums &output_format) const {

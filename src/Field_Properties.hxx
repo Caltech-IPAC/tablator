@@ -1,15 +1,22 @@
 #pragma once
 
-#include "Values.hxx"
-
 #include <map>
+#include <string>
+
+#include "Common.hxx"
+#include "Values.hxx"
 
 namespace tablator {
 class Field_Properties {
 public:
+    static constexpr char const *FP_ATTRIBUTES = "attributes";
+    static constexpr char const *FP_DESCRIPTION = "description";
+    static constexpr char const *FP_LINKS = "links";
+    static constexpr char const *FP_VALUES = "values";
+
     Field_Properties() = default;
 
-    Field_Properties(const std::map<std::string, std::string> &Attributes)
+    Field_Properties(const ATTRIBUTES &Attributes)
             : attributes_(Attributes) {}
 
     Field_Properties(
@@ -26,12 +33,11 @@ public:
             : description_(Description), attributes_(Attributes) {}
 
     Field_Properties(const std::string &Description,
-                     const std::map<std::string, std::string> &Attributes)
+                     const ATTRIBUTES &Attributes)
             : description_(Description), attributes_(Attributes) {}
 
     Field_Properties(const std::string &Description,
-                     const std::map<std::string, std::string> &Attributes,
-                     const Values &v,
+                     const ATTRIBUTES &Attributes, const Values &v,
                      const std::vector<std::pair<std::string, std::string> > &Links)
             : description_(Description),
               attributes_(Attributes),
@@ -40,10 +46,8 @@ public:
 
     inline const std::string &get_description() const { return description_; }
 
-    inline const std::map<std::string, std::string> &get_attributes() const {
-        return attributes_;
-    }
-    inline std::map<std::string, std::string> &get_attributes() { return attributes_; }
+    inline const ATTRIBUTES &get_attributes() const { return attributes_; }
+    inline ATTRIBUTES &get_attributes() { return attributes_; }
 
     inline const Values &get_values() const { return values_; }
     inline Values &get_values() { return values_; }
@@ -56,7 +60,7 @@ public:
     }
 
     inline void set_description(const std::string &desc) { description_.assign(desc); }
-    inline void set_attributes(const std::map<std::string, std::string> &attrs) {
+    inline void set_attributes(const ATTRIBUTES &attrs) {
         attributes_ = attrs;
     }
     inline void set_values(const Values &vals) { values_ = vals; }
@@ -83,7 +87,7 @@ public:
 
 private:
     std::string description_;
-    std::map<std::string, std::string> attributes_;
+    ATTRIBUTES attributes_;
     Values values_;
     std::vector<std::pair<std::string, std::string> > links_;
 };

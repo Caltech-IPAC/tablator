@@ -6,6 +6,11 @@
 namespace tablator {
 class Column {
 public:
+    static constexpr char const *COL_ARRAY_SIZE = "array_size";
+    static constexpr char const *COL_FIELD_PROPERTIES = "field_properties";
+    static constexpr char const *COL_NAME = "name";
+    static constexpr char const *COL_TYPE = "type";
+
     Column(const std::string &Name, const Data_Type &Type, const size_t &Array_size)
             : Column(Name, Type, Array_size, Field_Properties()) {}
 

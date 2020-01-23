@@ -1,4 +1,6 @@
+
 #include "../../../../Table.hxx"
+
 #include "../VOTable_Field.hxx"
 
 #include <boost/lexical_cast.hpp>
@@ -33,16 +35,16 @@ tablator::VOTable_Field tablator::Table::read_field(
     auto end = field.end();
 
     VOTable_Field result;
-    if (child != end && child->first == "<xmlattr>") {
+    if (child != end && child->first == XMLATTR) {
         for (auto &attribute : child->second) {
-            if (attribute.first == "name") {
+            if (attribute.first == ATTR_NAME) {
                 result.set_name(attribute.second.get_value<std::string>());
-            } else if (attribute.first == "datatype") {
+            } else if (attribute.first == DATATYPE) {
                 result.set_type(
                         string_to_Type(attribute.second.get_value<std::string>()));
             }
             // FIXME: We do not handle arrays correctly
-            else if (attribute.first == "arraysize") {
+            else if (attribute.first == ARRAYSIZE) {
                 std::string array_size = attribute.second.get_value<std::string>();
                 if (array_size == "*") {
                     result.set_array_size(std::numeric_limits<size_t>::max());
@@ -58,18 +60,18 @@ tablator::VOTable_Field tablator::Table::read_field(
         ++child;
     }
 
-    if (child != end && child->first == "DESCRIPTION") {
+    if (child != end && child->first == DESCRIPTION) {
         result.get_field_properties().set_description(
                 child->second.get_value<std::string>());
         ++child;
     }
-    if (child != end && child->first == "VALUES") {
+    if (child != end && child->first == VALUES) {
         result.get_field_properties().set_values(read_values(child->second));
         ++child;
     }
-    if (child != end && child->first == "LINK") {
+    if (child != end && child->first == LINK) {
         for (auto &link_child : child->second) {
-            if (link_child.first == "<xmlattr>") {
+            if (link_child.first == XMLATTR) {
                 for (auto &attribute : link_child.second) {
                     result.get_field_properties().add_link(
                             attribute.first, attribute.second.get_value<std::string>());

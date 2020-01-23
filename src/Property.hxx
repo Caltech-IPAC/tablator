@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "Common.hxx"
+
 /// A simple class to hold properties.  It gets a little complicated
 /// because XML can have attributes.
 namespace tablator {
@@ -17,7 +19,7 @@ public:
         result.push_back(std::make_pair(key, value_));
         for (auto &a : attributes_)
             result.push_back(
-                    std::make_pair(key + ".<xmlattr>." + a.first, a.second));
+                    std::make_pair(key + "." + XMLATTR_DOT + a.first, a.second));
         return result;
     }
 

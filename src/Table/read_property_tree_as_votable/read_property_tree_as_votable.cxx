@@ -1,4 +1,5 @@
 #include "../../Table.hxx"
+
 #include "skip_xml_comments.hxx"
 
 /// This only parses VOTable v1.3.
@@ -10,7 +11,7 @@ void tablator::Table::read_property_tree_as_votable(
     auto end = votable.end();
 
     Property votable_property("");
-    while (child != end && child->first == "<xmlattr>") {
+    while (child != end && child->first == XMLATTR) {
         // We'll re-create this section if/when we write the table in IPAC format.
         for (auto &attribute : child->second)
             if (!(attribute.first == "version" || attribute.first == "xmlns:xsi" ||
@@ -23,27 +24,26 @@ void tablator::Table::read_property_tree_as_votable(
     }
 
     if (!votable_property.empty()) {
-        add_labeled_property(std::make_pair("VOTABLE", votable_property));
+        add_labeled_property(std::make_pair(VOTABLE, votable_property));
     }
 
     auto &comments = get_comments();
     child = skip_xml_comments(child, end);
-    if (child != end && child->first == "DESCRIPTION") {
+    if (child != end && child->first == DESCRIPTION) {
         comments.emplace_back(child->second.get_value<std::string>());
         ++child;
     }
     child = skip_xml_comments(child, end);
-    if (child != end && child->first == "DEFINITIONS") {
+    if (child != end && child->first == DEFINITIONS) {
         /// Deliberately ignore DEFINITIONS.  They are duplicated by the
         /// information in RESOURCE and deprecated since version 1.1.
         ++child;
     }
     child = skip_xml_comments(child, end);
-    while (child != end && child->first != "RESOURCE") {
-        if (child->first == "COOSYS" || child->first == "PARAM" ||
-            child->first == "INFO") {
+    while (child != end && child->first != RESOURCE) {
+        if (child->first == COOSYS || child->first == PARAM || child->first == INFO) {
             read_node_and_attributes(child);
-        } else if (child->first == "GROUP") {
+        } else if (child->first == GROUP) {
             // FIXME: Implement groups
         } else {
             throw std::runtime_error(
@@ -61,7 +61,7 @@ void tablator::Table::read_property_tree_as_votable(
     }
     ++child;
     child = skip_xml_comments(child, end);
-    if (child != end && child->first == "INFO") {
+    if (child != end && child->first == INFO) {
         read_node_and_attributes(child);
         ++child;
     }

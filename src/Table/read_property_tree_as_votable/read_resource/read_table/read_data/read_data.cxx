@@ -1,4 +1,5 @@
 #include "../../../../../Table.hxx"
+
 #include "../../../skip_xml_comments.hxx"
 #include "../../VOTable_Field.hxx"
 
@@ -12,17 +13,17 @@ void tablator::Table::read_data(const boost::property_tree::ptree &data,
     if (child == end) throw std::runtime_error("RESOURCE.TABLE.DATA must not be empty");
 
     child = skip_xml_comments(child, end);
-    if (child->first == "TABLEDATA") {
+    if (child->first == TABLEDATA) {
         read_tabledata(child->second, fields);
         ++child;
-    } else if (child->first == "BINARY") {
+    } else if (child->first == BINARY) {
         throw std::runtime_error(
                 "BINARY serialization inside a VOTable not "
                 "supported.");
-    } else if (child->first == "BINARY2") {
+    } else if (child->first == BINARY2) {
         read_binary2(child->second, fields);
         ++child;
-    } else if (child->first == "FITS") {
+    } else if (child->first == FITS) {
         throw std::runtime_error(
                 "FITS serialization inside a VOTable not "
                 "supported.");
@@ -36,7 +37,7 @@ void tablator::Table::read_data(const boost::property_tree::ptree &data,
 
     child = skip_xml_comments(child, end);
     while (child != end) {
-        if (child->first == "INFO") {
+        if (child->first == INFO) {
             read_node_and_attributes("RESOURCE.TABLE.DATA.INFO", child->second);
         } else {
             throw std::runtime_error(

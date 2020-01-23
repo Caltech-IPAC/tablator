@@ -1,10 +1,11 @@
+#include "../Table.hxx"
+
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 #include "../Data_Type_Adjuster.hxx"
-#include "../Table.hxx"
 
 
 /**********************************************************/

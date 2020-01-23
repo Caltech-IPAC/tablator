@@ -1,5 +1,7 @@
-#include "../../H5_to_Data_Type.hxx"
 #include "../../Table.hxx"
+
+#include "../../Common.hxx"
+#include "../../H5_to_Data_Type.hxx"
 #include "../HDF5_Attribute.hxx"
 #include "../HDF5_Property.hxx"
 
@@ -16,22 +18,22 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
     // FIXME: This needs to be generalized for multiple resources and
     // multiple tables
     H5::Group resource = file.openGroup("/RESOURCE_0");
-    set_resource_element_params(read_column_metadata(resource, "PARAM"));
+    set_resource_element_params(read_column_metadata(resource, PARAM));
     H5::DataSet dataset = resource.openDataSet(resource.getObjnameByIdx(0).c_str());
 
     auto &comments = get_comments();
-    if (dataset.attrExists("DESCRIPTION")) {
-        auto description = dataset.openAttribute("DESCRIPTION");
+    if (dataset.attrExists(DESCRIPTION)) {
+        auto description = dataset.openAttribute(DESCRIPTION);
         if (description.getTypeClass() == H5T_STRING) {
             comments.resize(1);
             description.read(description.getDataType(), comments[0]);
         }
     }
-    set_table_element_params(read_column_metadata(dataset, "PARAM"));
+    set_table_element_params(read_column_metadata(dataset, PARAM));
     set_labeled_properties(read_metadata(dataset));
 
-    auto column_metadata(read_column_metadata(dataset, "FIELD"));
-    // FIXME: This does not handle fields_properties
+    auto column_metadata(read_column_metadata(dataset, FIELD));
+    // FIXME: This does not handle field_properties
     // FIXME: This assumes that the first column is null_bitfield_flags
     auto compound = dataset.getCompType();
     if (column_metadata.size() != static_cast<size_t>(compound.getNmembers())) {
