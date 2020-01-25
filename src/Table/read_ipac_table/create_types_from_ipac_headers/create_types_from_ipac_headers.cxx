@@ -21,7 +21,10 @@ void tablator::Table::create_types_from_ipac_headers(
     ipac_column_widths = get_ipac_column_widths(ipac_column_offsets);
     const size_t num_columns = ipac_columns[0].size();
 
-    append_column(ipac_columns.at(0).at(0), Data_Type::UINT8_LE,
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+
+    append_column(columns, offsets, ipac_columns.at(0).at(0), Data_Type::UINT8_LE,
                   ipac_column_widths.at(0),
                   Field_Properties(null_bitfield_flags_description));
     for (size_t i = 1; i < num_columns; ++i) {
@@ -39,6 +42,6 @@ void tablator::Table::create_types_from_ipac_headers(
             p.get_values().null =
                     boost::algorithm::trim_copy(ipac_columns[3].at(column));
         }
-        get_columns().at(column).set_field_properties(p);
+        columns.at(column).set_field_properties(p);
     }
 }

@@ -86,8 +86,13 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                                        table->column(1).name() ==
                                                null_bitfield_flags_name &&
                                        table->column(1).type() == CCfits::Tbyte);
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+    auto &data = get_data();
+
+
     if (!has_null_bitfield_flags) {
-        append_column(null_bitfield_flags_name, Data_Type::UINT8_LE,
+        append_column(columns, offsets, null_bitfield_flags_name, Data_Type::UINT8_LE,
                       (table->column().size() + 7) / 8,
                       Field_Properties(null_bitfield_flags_description, {}));
     }
@@ -98,49 +103,60 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         if (std::isdigit(c.format().at(0))) array_size = std::stoll(c.format());
         switch (c.type()) {
             case CCfits::Tlogical:
-                append_column(c.name(), Data_Type::INT8_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::INT8_LE,
+                              array_size);
                 break;
             case CCfits::Tbyte:
-                append_column(c.name(), Data_Type::UINT8_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::UINT8_LE,
+                              array_size);
                 break;
             case CCfits::Tshort:
-                append_column(c.name(), Data_Type::INT16_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::INT16_LE,
+                              array_size);
                 break;
             case CCfits::Tushort:
-                append_column(c.name(), Data_Type::UINT16_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::UINT16_LE,
+                              array_size);
                 break;
             case CCfits::Tint:
-                append_column(c.name(), Data_Type::INT32_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::INT32_LE,
+                              array_size);
                 break;
             case CCfits::Tuint:
-                append_column(c.name(), Data_Type::UINT32_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::UINT32_LE,
+                              array_size);
                 break;
             case CCfits::Tlong:
                 // The Tlong type code is used for 32-bit integer columns when reading.
-                append_column(c.name(), Data_Type::INT32_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::INT32_LE,
+                              array_size);
                 break;
             case CCfits::Tulong:
                 // The Tulong type code is used for 32-bit unsigned integer columns when
                 // reading.
-                append_column(c.name(), Data_Type::UINT32_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::UINT32_LE,
+                              array_size);
                 break;
             case CCfits::Tlonglong:
-                append_column(c.name(), Data_Type::INT64_LE, array_size);
+                append_column(columns, offsets, c.name(), Data_Type::INT64_LE,
+                              array_size);
                 break;
             case CCfits::Tfloat: {
                 Field_Properties nan_nulls;
                 nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<float>::quiet_NaN());
-                append_column(c.name(), Data_Type::FLOAT32_LE, array_size, nan_nulls);
+                append_column(columns, offsets, c.name(), Data_Type::FLOAT32_LE,
+                              array_size, nan_nulls);
             } break;
             case CCfits::Tdouble: {
                 Field_Properties nan_nulls;
                 nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<double>::quiet_NaN());
-                append_column(c.name(), Data_Type::FLOAT64_LE, array_size, nan_nulls);
+                append_column(columns, offsets, c.name(), Data_Type::FLOAT64_LE,
+                              array_size, nan_nulls);
             } break;
             case CCfits::Tstring:
-                append_column(c.name(), Data_Type::CHAR, c.width());
+                append_column(columns, offsets, c.name(), Data_Type::CHAR, c.width());
                 break;
             default:
                 throw std::runtime_error(
@@ -152,9 +168,6 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     /// table->rows () returns an int, so there may be issues with more
     /// than 2^32 rows
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
-    auto &data = get_data();
 
     data.resize(table->rows() * row_size());
 

@@ -42,11 +42,16 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                 std::to_string(column_metadata.size()) + " but the dataset has " +
                 std::to_string(compound.getNmembers()));
     }
+
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+    auto &data = get_data();
+
     for (int i = 0; i < compound.getNmembers(); ++i) {
         H5::DataType datatype(compound.getMemberDataType(i));
         std::string name(compound.getMemberName(i));
         if (datatype.getClass() == H5T_STRING) {
-            append_column(name, Data_Type::CHAR, datatype.getSize(),
+            append_column(columns, offsets, name, Data_Type::CHAR, datatype.getSize(),
                           column_metadata[i].get_field_properties());
         } else if (datatype.getClass() == H5T_ARRAY) {
             auto array_type = compound.getMemberArrayType(i);
@@ -59,13 +64,13 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                         std::to_string(ndims));
             }
             array_type.getArrayDims(&ndims);
-            append_column(name, H5_to_Data_Type(datatype), ndims,
+            append_column(columns, offsets, name, H5_to_Data_Type(datatype), ndims,
                           column_metadata[i].get_field_properties());
         } else {
-            append_column(name, H5_to_Data_Type(datatype), 1,
+            append_column(columns, offsets, name, H5_to_Data_Type(datatype), 1,
                           column_metadata[i].get_field_properties());
         }
     }
-    get_data().resize(row_size() * dataset.getSpace().getSimpleExtentNpoints());
-    dataset.read(get_data().data(), compound);
+    data.resize(row_size() * dataset.getSpace().getSimpleExtentNpoints());
+    dataset.read(data.data(), compound);
 }

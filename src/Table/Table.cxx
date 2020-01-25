@@ -10,11 +10,14 @@ tablator::Table::Table(const std::vector<Column> &Columns,
         throw std::runtime_error("This table has no columns");
     }
     const size_t null_flags_size = (Columns.size() + 7) / 8;
-    append_column(null_bitfield_flags_name, Data_Type::UINT8_LE, null_flags_size,
-                  Field_Properties(null_bitfield_flags_description));
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+
+    append_column(columns, offsets, null_bitfield_flags_name, Data_Type::UINT8_LE,
+                  null_flags_size, Field_Properties(null_bitfield_flags_description));
 
     for (auto &c : Columns) {
-        append_column(c);
+        append_column(columns, offsets, c);
     }
 
     for (auto &p : property_map) {

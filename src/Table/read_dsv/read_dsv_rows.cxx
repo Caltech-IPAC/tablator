@@ -1,17 +1,20 @@
 #include "../../Table.hxx"
+
 #include "../insert_ascii_in_row.hxx"
 
-void tablator::Table::read_dsv_rows(const std::list<std::vector<std::string> > &dsv) {
+std::vector<uint8_t> tablator::Table::read_dsv_rows(
+        std::vector<Column> &columns, std::vector<size_t> &offsets,
+        const std::list<std::vector<std::string> > &dsv) {
     bool skipped(false);
-    Row row_string(row_size());
+
+    Row row_string(row_size(offsets));
+    std::vector<uint8_t> data;
     for (auto &dsv_row : dsv) {
         if (!skipped) {
             skipped = true;
             continue;
         }
         row_string.set_zero();
-        auto &columns = get_columns();
-        auto &offsets = get_offsets();
         for (size_t column = 1; column < columns.size(); ++column) {
             const std::string &element(dsv_row[column - 1]);
             if (element.empty()) {
@@ -24,6 +27,7 @@ void tablator::Table::read_dsv_rows(const std::list<std::vector<std::string> > &
                                     offsets[column], offsets[column + 1], row_string);
             }
         }
-        append_row(row_string);
+        append_row(data, row_string);
     }
+    return data;
 }

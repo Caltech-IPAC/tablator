@@ -44,7 +44,7 @@ public:
     Table(std::istream &input_stream) { read_unknown(input_stream); }
     Table(std::istream &input_stream, const Format &format);
 
-    size_t row_size() const { return *get_offsets().rbegin(); }
+    inline size_t row_size() const { return row_size(get_offsets()); }
     size_t num_rows() const { return get_data().size() / row_size(); }
 
     // FIXME: Unfortunately, this is an opposite convention from
@@ -112,10 +112,9 @@ public:
         return diff_vec;
     }
 
-
-    /// WARNING: append_column routines do not increase the size of the
-    /// null column.  The expectation is that the number of columns is
-    /// known before adding columns.
+    // WARNING: append_column routines do not increase the size of the
+    // null column.  The expectation is that the number of columns is
+    // known before adding columns.
     void append_column(const std::string &name, const Data_Type &type) {
         append_column(name, type, 1);
     }
@@ -129,24 +128,28 @@ public:
         append_column(Column(name, type, size, field_properties));
     }
 
-    void append_column(const Column &column);
+    void append_column(const Column &column) {
+        append_column(get_columns(), get_offsets(), column);
+    }
 
     void append_row(const Row &row) {
         assert(row.data.size() == row_size());
-        get_data().insert(get_data().end(), row.data.begin(), row.data.end());
+        append_row(get_data(), row);
     }
 
     void unsafe_append_row(const char *row) {
-        get_data().insert(get_data().end(), row, row + row_size());
+        unsafe_append_row(get_data(), row, row_size());
     }
 
-    void pop_row() { get_data().resize(get_data().size() - row_size()); }
+    void pop_row() { pop_row(get_data(), row_size()); }
 
     void resize_rows(const size_t &new_num_rows) {
-        get_data().resize(row_size() * new_num_rows);
+        resize_rows(get_data(), new_num_rows, row_size());
     }
 
-    std::vector<std::pair<std::string, std::string>> flatten_properties() const;
+    std::vector<std::pair<std::string, std::string>> flatten_properties() const {
+        return flatten_properties(get_labeled_properties());
+    };
 
     void write(std::ostream &os, const std::string &table_name,
                const Format &format) const;
@@ -349,9 +352,14 @@ public:
                         const std::vector<VOTable_Field> &fields);
     void read_binary2(const boost::property_tree::ptree &tabledata,
                       const std::vector<VOTable_Field> &fields);
+
     void append_data_from_stream(const std::vector<uint8_t> &stream,
-                                 const size_t &num_rows,
-                                 const std::vector<VOTable_Field> &fields);
+                                 const std::vector<VOTable_Field> &fields,
+                                 size_t num_rows) {
+        append_data_from_stream(get_data(), get_columns(), get_offsets(), stream,
+                                fields, num_rows);
+    };
+
     void read_dsv(std::istream &input_stream, const Format &format);
     void read_dsv(const boost::filesystem::path &path, const Format &format) {
         if (path == "-") {
@@ -361,8 +369,14 @@ public:
             read_dsv(input_stream, format);
         }
     }
-    void read_dsv_rows(const std::list<std::vector<std::string>> &dsv);
-    void set_column_info(std::list<std::vector<std::string>> &dsv);
+
+    void read_dsv_rows(const std::list<std::vector<std::string>> &dsv) {
+        set_data(read_dsv_rows(get_columns(), get_offsets(), dsv));
+    }
+
+    void set_column_info(std::list<std::vector<std::string>> &dsv) {
+        set_column_info(get_columns(), get_offsets(), dsv);
+    };
 
     size_t read_ipac_header(std::istream &ipac_file,
                             std::array<std::vector<std::string>, 4> &Columns,
@@ -456,6 +470,81 @@ public:
         }
         return col_vec;
     }
+
+    // static functions
+    // JTODO Move them out of this class?
+    inline static size_t row_size(const std::vector<size_t> &offsets) {
+        if (offsets.empty()) {
+            throw std::runtime_error("<offsets> is empty");
+        }
+        return offsets.back();
+    }
+
+    static std::vector<uint8_t> read_dsv_rows(
+            std::vector<Column> &columns, std::vector<size_t> &offsets,
+            const std::list<std::vector<std::string>> &dsv);
+
+    static void set_column_info(std::vector<Column> &columns,
+                                std::vector<size_t> &offsets,
+                                std::list<std::vector<std::string>> &dsv);
+
+
+    // WARNING: append_column routines do not increase the size of the
+    // null column.  The expectation is that the number of columns is
+    // known before adding columns.
+
+    static void append_column(std::vector<Column> &columns,
+                              std::vector<size_t> &offsets, const Column &column);
+
+    static void append_column(std::vector<Column> &columns,
+                              std::vector<size_t> &offsets, const std::string &name,
+                              const Data_Type &type, const size_t &size,
+                              const Field_Properties &field_properties) {
+        append_column(columns, offsets, Column(name, type, size, field_properties));
+    }
+
+    static void append_column(std::vector<Column> &columns,
+                              std::vector<size_t> &offsets, const std::string &name,
+                              const Data_Type &type, const size_t &size) {
+        append_column(columns, offsets, Column(name, type, size, Field_Properties()));
+    }
+
+    static void append_column(std::vector<Column> &columns,
+                              std::vector<size_t> &offsets, const std::string &name,
+                              const Data_Type &type) {
+        append_column(columns, offsets, name, type, 1, Field_Properties());
+    }
+
+
+    static void append_row(std::vector<uint8_t> &data, const Row &row) {
+        data.insert(data.end(), row.data.begin(), row.data.end());
+    }
+
+    static void unsafe_append_row(std::vector<uint8_t> &data, const char *row,
+                                  uint row_size) {
+        data.insert(data.end(), row, row + row_size);
+    }
+
+    static void pop_row(std::vector<uint8_t> &data, uint row_size) {
+        data.resize(data.size() - row_size);
+    }
+
+    static void resize_rows(std::vector<uint8_t> &data, const size_t &new_num_rows,
+                            uint row_size) {
+        data.resize(new_num_rows * row_size);
+    }
+
+    static void append_data_from_stream(std::vector<uint8_t> &data,
+                                        const std::vector<Column> &columns,
+                                        const std::vector<size_t> &offsets,
+                                        const std::vector<uint8_t> &stream,
+                                        const std::vector<VOTable_Field> &fields,
+                                        size_t num_rows);
+
+
+    // This function is not used internally.
+    static std::vector<std::pair<std::string, std::string>> flatten_properties(
+            const std::vector<std::pair<std::string, Property>> &properties);
 
 
     // getters

@@ -54,12 +54,17 @@ void Table::read_binary2(const boost::property_tree::ptree &binary2,
         compute_column_array_sizes(stream, fields, column_array_sizes, num_rows);
         rows_per_stream.push_back(num_rows);
     }
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+    auto &data = get_data();
+
 
     for (std::size_t c = 0; c < fields.size(); ++c)
-        append_column(fields.at(c).get_name(), fields[c].get_type(),
+        append_column(columns, offsets, fields.at(c).get_name(), fields[c].get_type(),
                       column_array_sizes[c], fields.at(c).get_field_properties());
 
     for (std::size_t stream = 0; stream < streams.size(); ++stream)
-        append_data_from_stream(streams[stream], rows_per_stream[stream], fields);
+        append_data_from_stream(data, columns, offsets, streams[stream], fields,
+                                rows_per_stream[stream]);
 }
 }  // namespace tablator

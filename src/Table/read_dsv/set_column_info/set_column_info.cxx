@@ -6,7 +6,9 @@ Data_Type get_best_data_type(const Data_Type &current_type, const std::string &e
 
 // FIXME: A bit icky.  This modifies the dsv document (trims
 // whitespace) while extracting metadata.
-void tablator::Table::set_column_info(std::list<std::vector<std::string> > &dsv) {
+void tablator::Table::set_column_info(std::vector<Column> &columns,
+                                      std::vector<size_t> &offsets,
+                                      std::list<std::vector<std::string> > &dsv) {
     auto row(dsv.begin());
     std::vector<std::string> names;
     for (auto &name : *row) {
@@ -18,8 +20,8 @@ void tablator::Table::set_column_info(std::list<std::vector<std::string> > &dsv)
         }
         names.push_back(trimmed_name);
     }
-
-    append_column(null_bitfield_flags_name, Data_Type::UINT8_LE, (names.size() + 7) / 8,
+    append_column(columns, offsets, null_bitfield_flags_name, Data_Type::UINT8_LE,
+                  (names.size() + 7) / 8,
                   Field_Properties(null_bitfield_flags_description));
 
     /// Try to infer the types of the columns.  Supported are INT8_LE
@@ -31,6 +33,7 @@ void tablator::Table::set_column_info(std::list<std::vector<std::string> > &dsv)
 
     size_t line_number(1);
     ++row;
+
     for (; row != dsv.end(); ++row) {
         if (row->size() != names.size())
             throw std::runtime_error("In line " + std::to_string(line_number) +
@@ -47,6 +50,6 @@ void tablator::Table::set_column_info(std::list<std::vector<std::string> > &dsv)
     }
 
     for (size_t elem = 0; elem < names.size(); ++elem)
-        append_column(names[elem], types[elem],
+        append_column(columns, offsets, names[elem], types[elem],
                       types[elem] == Data_Type::CHAR ? sizes[elem] : 1);
 }

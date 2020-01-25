@@ -62,15 +62,16 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
         }
     }
 
+    auto &columns = get_columns();
+    auto &offsets = get_offsets();
+    auto &data = get_data();
+
     for (std::size_t c = 0; c < fields.size(); ++c) {
-        append_column(fields.at(c).get_name(), fields[c].get_type(),
+        append_column(columns, offsets, fields.at(c).get_name(), fields[c].get_type(),
                       column_array_sizes[c], fields.at(c).get_field_properties());
     }
 
     Row row_string(row_size());
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
-    auto &data = get_data();
 
     for (size_t current_row = 0; current_row < rows.size(); ++current_row) {
         auto &row(rows[current_row]);
@@ -97,6 +98,6 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
                             ". Error message: " + error.what());
                 }
         }
-        append_row(row_string);
+        append_row(data, row_string);
     }
 }

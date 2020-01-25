@@ -15,16 +15,15 @@ inline void insert_swapped(const size_t &column_offset, const Column &column,
                           stream, old_position, row);
 }
 
-void Table::append_data_from_stream(const std::vector<uint8_t> &stream,
-                                    const size_t &num_rows,
-                                    const std::vector<VOTable_Field> &fields) {
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
-    auto &data = get_data();
-
+void Table::append_data_from_stream(std::vector<uint8_t> &data,
+                                    const std::vector<Column> &columns,
+                                    const std::vector<size_t> &offsets,
+                                    const std::vector<uint8_t> &stream,
+                                    const std::vector<VOTable_Field> &fields,
+                                    size_t num_rows) {
     const size_t null_flags_size((columns.size() + 6) / 8);
     size_t position(0);
-    Row row(row_size());
+    Row row(row_size(offsets));
     for (size_t r = 0; r < num_rows; ++r) {
         row.set_zero();
         size_t row_offset(position);
@@ -61,7 +60,7 @@ void Table::append_data_from_stream(const std::vector<uint8_t> &stream,
                 }
             }
         }
-        if (position <= stream.size()) append_row(row);
+        if (position <= stream.size()) append_row(data, row);
     }
 }
 }  // namespace tablator
