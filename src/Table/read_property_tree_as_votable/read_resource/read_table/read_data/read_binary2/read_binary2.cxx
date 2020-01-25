@@ -16,7 +16,7 @@ void Table::read_binary2(const boost::property_tree::ptree &binary2,
     column_array_sizes.at(0) = null_flags_size;
     std::vector<std::vector<uint8_t> > streams;
     for (auto &stream : binary2) {
-        if (stream.first == "<xmlcomment>") {
+        if (stream.first == XMLCOMMENT) {
             continue;
         }
         if (stream.first != "STREAM")
@@ -26,7 +26,7 @@ void Table::read_binary2(const boost::property_tree::ptree &binary2,
                     stream.first);
         std::string encoding;
         for (auto &stream_child : stream.second) {
-            if (stream_child.first == "<xmlattr>") {
+            if (stream_child.first == XMLATTR) {
                 for (auto &attribute : stream_child.second) {
                     if (attribute.first != "encoding")
                         throw std::runtime_error(

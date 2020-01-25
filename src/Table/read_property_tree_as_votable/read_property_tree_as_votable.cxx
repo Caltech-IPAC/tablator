@@ -6,20 +6,21 @@
 
 void tablator::Table::read_property_tree_as_votable(
         const boost::property_tree::ptree &tree) {
-    const auto votable = tree.get_child("VOTABLE");
+    const auto votable = tree.get_child(VOTABLE);
     auto child = votable.begin();
     auto end = votable.end();
 
     Property votable_property("");
     while (child != end && child->first == XMLATTR) {
         // We'll re-create this section if/when we write the table in IPAC format.
-        for (auto &attribute : child->second)
+        for (auto &attribute : child->second) {
             if (!(attribute.first == "version" || attribute.first == "xmlns:xsi" ||
                   attribute.first == "xmlns" || attribute.first == "xmlns:stc" ||
                   attribute.first == "xsi:schemaLocation" ||
                   attribute.first == "xsi:noNamespaceSchemaLocation"))
                 votable_property.add_attribute(
                         attribute.first, attribute.second.get_value<std::string>());
+        }
         ++child;
     }
 
@@ -27,10 +28,9 @@ void tablator::Table::read_property_tree_as_votable(
         add_labeled_property(std::make_pair(VOTABLE, votable_property));
     }
 
-    auto &comments = get_comments();
     child = skip_xml_comments(child, end);
     if (child != end && child->first == DESCRIPTION) {
-        comments.emplace_back(child->second.get_value<std::string>());
+        add_comment(child->second.get_value<std::string>());
         ++child;
     }
     child = skip_xml_comments(child, end);

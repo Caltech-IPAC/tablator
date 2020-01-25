@@ -384,13 +384,20 @@ public:
 
     void create_types_from_ipac_headers(
             std::array<std::vector<std::string>, 4> &Columns,
-            const std::vector<size_t> &ipac_column_offsets,
-            std::vector<size_t> &ipac_column_widths);
+            const std::vector<size_t> &ipac_column_widths) {
+        create_types_from_ipac_headers(get_columns(), get_offsets(), Columns,
+                                       ipac_column_widths);
+    }
 
     void append_ipac_data_member(const std::string &name, const std::string &data_type,
-                                 const size_t &size);
+                                 const size_t &size) {
+        append_ipac_data_member(get_columns(), get_offsets(), name, data_type, size);
+    }
 
-    void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths);
+    void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths) {
+        shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(), get_data(),
+                                          column_widths);
+    };
 
     std::string extract_value_as_string(const std::string &col_name,
                                         size_t row_id) const;
@@ -540,6 +547,22 @@ public:
                                         const std::vector<uint8_t> &stream,
                                         const std::vector<VOTable_Field> &fields,
                                         size_t num_rows);
+
+
+    static void append_ipac_data_member(std::vector<Column> &columns,
+                                        std::vector<size_t> &offsets,
+                                        const std::string &name,
+                                        const std::string &data_type,
+                                        const size_t &size);
+
+    static void create_types_from_ipac_headers(
+            std::vector<Column> &columns, std::vector<size_t> &offsets,
+            const std::array<std::vector<std::string>, 4> &Columns,
+            const std::vector<size_t> &ipac_column_widths);
+
+    static void shrink_ipac_string_columns_to_fit(
+            std::vector<Column> &columns, std::vector<size_t> &offsets,
+            std::vector<uint8_t> &data, const std::vector<size_t> &column_widths);
 
 
     // This function is not used internally.

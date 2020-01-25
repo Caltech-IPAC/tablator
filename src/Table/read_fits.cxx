@@ -68,20 +68,24 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                       name) != fits_ignored_keywords.end())
             continue;
 
-        /// Annoyingly, CCfits does not have a way to just return the
-        /// value.  You have to give it something to put it in.
-        Property p(k.second->value(value));
+        // Annoyingly, CCfits does not have a way to just return the
+        // value.  You have to give it something to put it in.
+        Property prop(k.second->value(value));
+
+        // Turn names with keyword mappings into UCD attributes.
+        // JTODO huh?
         auto i = keyword_mapping.find(name);
         if (i != keyword_mapping.end()) {
             name = i->second;
-            p.add_attribute("ucd", name);
+            prop.add_attribute("ucd", name);
         }
         if (!k.second->comment().empty())
-            p.add_attribute("comment", k.second->comment());
-        add_labeled_property(std::make_pair(name, p));
+            prop.add_attribute("comment", k.second->comment());
+        // JTODO Label could also be UCD attribute!?
+        add_labeled_property(std::make_pair(name, prop));
     }
 
-    /// CCfits is 1 based, not 0 based.
+    // CCfits is 1 based, not 0 based.
     const bool has_null_bitfield_flags(table->column().size() > 0 &&
                                        table->column(1).name() ==
                                                null_bitfield_flags_name &&
@@ -89,7 +93,6 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     auto &columns = get_columns();
     auto &offsets = get_offsets();
     auto &data = get_data();
-
 
     if (!has_null_bitfield_flags) {
         append_column(columns, offsets, null_bitfield_flags_name, Data_Type::UINT8_LE,
@@ -166,13 +169,13 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         }
     }
 
-    /// table->rows () returns an int, so there may be issues with more
-    /// than 2^32 rows
+    // table->rows () returns an int, so there may be issues with more
+    // than 2^32 rows
 
     data.resize(table->rows() * row_size());
 
-    /// Exit early if there is no data in the table.  Otherwise CCfits
-    /// dies in read_column() :(
+    // Exit early if there is no data in the table.  Otherwise CCfits
+    // dies in read_column() :(
     if (data.empty()) {
         return;
     }

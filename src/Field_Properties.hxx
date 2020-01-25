@@ -14,10 +14,10 @@ public:
     static constexpr char const *FP_LINKS = "links";
     static constexpr char const *FP_VALUES = "values";
 
+    // JTODO Builder?
     Field_Properties() = default;
 
-    Field_Properties(const ATTRIBUTES &Attributes)
-            : attributes_(Attributes) {}
+    Field_Properties(const ATTRIBUTES &Attributes) : attributes_(Attributes) {}
 
     Field_Properties(
             const std::initializer_list<std::pair<const std::string, std::string> >
@@ -32,12 +32,11 @@ public:
                     &Attributes)
             : description_(Description), attributes_(Attributes) {}
 
-    Field_Properties(const std::string &Description,
-                     const ATTRIBUTES &Attributes)
+    Field_Properties(const std::string &Description, const ATTRIBUTES &Attributes)
             : description_(Description), attributes_(Attributes) {}
 
-    Field_Properties(const std::string &Description,
-                     const ATTRIBUTES &Attributes, const Values &v,
+    Field_Properties(const std::string &Description, const ATTRIBUTES &Attributes,
+                     const Values &v,
                      const std::vector<std::pair<std::string, std::string> > &Links)
             : description_(Description),
               attributes_(Attributes),
@@ -60,9 +59,7 @@ public:
     }
 
     inline void set_description(const std::string &desc) { description_.assign(desc); }
-    inline void set_attributes(const ATTRIBUTES &attrs) {
-        attributes_ = attrs;
-    }
+    inline void set_attributes(const ATTRIBUTES &attrs) { attributes_ = attrs; }
     inline void set_values(const Values &vals) { values_ = vals; }
     inline void set_links(const std::vector<std::pair<std::string, std::string> > &ls) {
         links_ = ls;

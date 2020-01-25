@@ -1,15 +1,14 @@
 #include "../../../Table.hxx"
 
-void tablator::Table::append_ipac_data_member(const std::string &name,
+void tablator::Table::append_ipac_data_member(std::vector<Column> &columns,
+                                              std::vector<size_t> &offsets,
+                                              const std::string &name,
                                               const std::string &data_type,
                                               const size_t &num_elements) {
     /// We use "string".compare (0,size,t) because it is valid to
     /// abbreviate the type name
     std::string t = boost::to_lower_copy(data_type);
     const size_t string_size(t.size());
-
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
 
     if (std::string("boolean").compare(0, string_size, t) == 0) {
         append_column(columns, offsets, name, Data_Type::INT8_LE);

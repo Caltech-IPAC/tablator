@@ -33,13 +33,13 @@ void Table::append_data_from_stream(std::vector<uint8_t> &data,
                 row.set_null(columns[column].get_type(),
                              columns[column].get_array_size(), column, offsets[column],
                              offsets[column + 1]);
-                if (fields[column].is_array_dynamic)
+                if (fields[column].get_is_array_dynamic())
                     position += sizeof(uint32_t);
                 else
                     position += data_size(columns[column].get_type()) *
                                 columns[column].get_array_size();
             } else {
-                if (fields[column].is_array_dynamic) {
+                if (fields[column].get_is_array_dynamic()) {
                     auto begin = stream.begin();
                     std::advance(begin, position);
                     auto end = stream.begin();

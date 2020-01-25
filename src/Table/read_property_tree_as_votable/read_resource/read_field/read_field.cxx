@@ -48,7 +48,7 @@ tablator::VOTable_Field tablator::Table::read_field(
                 std::string array_size = attribute.second.get_value<std::string>();
                 if (array_size == "*") {
                     result.set_array_size(std::numeric_limits<size_t>::max());
-                    result.is_array_dynamic = true;
+                    result.set_is_array_dynamic(true);
                 } else {
                     result.set_array_size(boost::lexical_cast<size_t>(array_size));
                 }

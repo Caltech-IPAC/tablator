@@ -33,18 +33,18 @@ std::vector<std::pair<std::string, Property> > read_metadata(
                                 HDF5_Property &hdf5_property =
                                         reinterpret_cast<HDF5_Property *>(
                                                 hdf5_props.p)[n];
-                                Property p(hdf5_property.value);
+                                Property prop(hdf5_property.value);
                                 for (size_t i = 0; i < hdf5_property.attributes.len;
                                      ++i) {
                                     HDF5_Attribute &hdf_attribute =
                                             reinterpret_cast<HDF5_Attribute *>(
                                                     hdf5_property.attributes.p)[i];
-                                    p.add_attribute(
+                                    prop.add_attribute(
                                             std::string(hdf_attribute.name),
                                             std::string(hdf_attribute.value));
                                 }
                                 result.push_back(std::make_pair(
-                                        std::string(hdf5_property.name), p));
+                                        std::string(hdf5_property.name), prop));
                             }
                         }
                     }

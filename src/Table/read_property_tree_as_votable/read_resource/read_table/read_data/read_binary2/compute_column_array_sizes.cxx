@@ -21,7 +21,7 @@ void compute_column_array_sizes(const std::vector<uint8_t> &stream,
         position += null_flags_size;
         for (size_t field = 1; field < fields.size() && position <= stream.size();
              ++field) {
-            if (!fields[field].is_array_dynamic) {
+            if (!fields[field].get_is_array_dynamic()) {
                 position += data_size(fields[field].get_type()) *
                             fields[field].get_array_size();
             } else {
