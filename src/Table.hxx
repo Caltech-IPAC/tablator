@@ -336,16 +336,13 @@ public:
         boost::filesystem::ifstream input_stream(path);
         read_votable(input_stream);
     }
+
+    ATTRIBUTES extract_attributes(const boost::property_tree::ptree &node);
     void read_property_tree_as_votable(const boost::property_tree::ptree &tree);
-    void read_node_and_attributes(const std::string &node_name,
-                                  const boost::property_tree::ptree &node);
-    void read_node_and_attributes(
-            const boost::property_tree::ptree::const_iterator &it) {
-        read_node_and_attributes(it->first, it->second);
-    }
     void read_resource(const boost::property_tree::ptree &resource);
     void read_table(const boost::property_tree::ptree &table);
     VOTable_Field read_field(const boost::property_tree::ptree &field);
+    Property read_property(const boost::property_tree::ptree &prop);
     void read_data(const boost::property_tree::ptree &data,
                    const std::vector<VOTable_Field> &fields);
     void read_tabledata(const boost::property_tree::ptree &tabledata,
@@ -523,6 +520,10 @@ public:
             const std::pair<std::string, Property> &label_and_prop) {
         labeled_properties_.emplace_back(label_and_prop);
     }
+    inline void add_labeled_property(const std::string &label, const Property &prop) {
+        add_labeled_property(std::make_pair(label, prop));
+    }
+
 
     void add_comment(const std::string &c) { comments_.emplace_back(c); }
 

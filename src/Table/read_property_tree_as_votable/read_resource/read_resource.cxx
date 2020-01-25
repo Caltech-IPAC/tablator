@@ -7,26 +7,26 @@ void tablator::Table::read_resource(const boost::property_tree::ptree &resource)
     auto child = resource.begin();
     auto end = resource.end();
 
-    read_node_and_attributes(RESOURCE, resource);
+    add_labeled_property(RESOURCE, Property(extract_attributes(resource)));
     child = skip_xml_comments(child, end);
     while (child != end && child->first == XMLATTR) {
         ++child;
         child = skip_xml_comments(child, end);
     }
     if (child != end && child->first == DESCRIPTION) {
-        add_labeled_property(std::make_pair("RESOURCE.DESCRIPTION",
-                                            child->second.get_value<std::string>()));
+        add_labeled_property("RESOURCE.DESCRIPTION",
+                             child->second.get_value<std::string>());
         ++child;
     }
     child = skip_xml_comments(child, end);
     while (child != end && child->first == INFO) {
-        read_node_and_attributes("RESOURCE.INFO", child->second);
+        add_labeled_property("RESOURCE.INFO", read_property(child->second));
         ++child;
         child = skip_xml_comments(child, end);
     }
     while (child != end) {
         if (child->first == COOSYS) {
-            read_node_and_attributes(RESOURCE + "." + child->first, child->second);
+            add_labeled_property("RESOURCE.COOSYS", read_property(child->second));
         } else if (child->first == PARAM) {
             add_resource_element_param(read_field(child->second));
         } else if (child->first == GROUP) {
@@ -41,14 +41,14 @@ void tablator::Table::read_resource(const boost::property_tree::ptree &resource)
     auto &columns = get_columns();
     for (; child != end; ++child) {
         if (child->first == LINK) {
-            read_node_and_attributes("RESOURCE.LINK", child->second);
+            add_labeled_property("RESOURCE.LINK", read_property(child->second));
         } else if (child->first == "TABLE") {
             if (!columns.empty())
                 throw std::runtime_error(
                         "Multiple TABLE elements are not implemented.");
             read_table(child->second);
         } else if (child->first == INFO) {
-            read_node_and_attributes("RESOURCE.INFO", child->second);
+            add_labeled_property("RESOURCE.INFO", read_property(child->second));
         }
         /// skip <xmlattr> and <xmlcomment>
     }

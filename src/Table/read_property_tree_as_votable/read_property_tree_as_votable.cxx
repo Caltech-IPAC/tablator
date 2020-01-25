@@ -42,7 +42,7 @@ void tablator::Table::read_property_tree_as_votable(
     child = skip_xml_comments(child, end);
     while (child != end && child->first != RESOURCE) {
         if (child->first == COOSYS || child->first == PARAM || child->first == INFO) {
-            read_node_and_attributes(child);
+            add_labeled_property(child->first, read_property(child->second));
         } else if (child->first == GROUP) {
             // FIXME: Implement groups
         } else {
@@ -62,7 +62,7 @@ void tablator::Table::read_property_tree_as_votable(
     ++child;
     child = skip_xml_comments(child, end);
     if (child != end && child->first == INFO) {
-        read_node_and_attributes(child);
+        add_labeled_property(child->first, read_property(child->second));
         ++child;
     }
     child = skip_xml_comments(child, end);

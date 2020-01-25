@@ -1,7 +1,7 @@
+#include "../Ipac_Table_Writer.hxx"
+
 #include <boost/range/algorithm/replace_copy_if.hpp>
 #include <boost/range/algorithm/replace_if.hpp>
-
-#include "../Ipac_Table_Writer.hxx"
 
 #include "../Data_Type_Adjuster.hxx"
 #include "../Table.hxx"
@@ -59,8 +59,10 @@ std::vector<size_t> tablator::Ipac_Table_Writer::get_column_widths(const Table &
                 (col_iter->get_array_size() == 1
                          ? 0
                          : 1 + std::to_string(col_iter->get_array_size() - 1).size()));
-        auto unit = col_iter->get_field_properties().get_attributes().find("unit");
-        if (unit != col_iter->get_field_properties().get_attributes().end()) {
+        const auto &field_prop_attributes =
+                col_iter->get_field_properties().get_attributes();
+        const auto unit = field_prop_attributes.find("unit");
+        if (unit != field_prop_attributes.end()) {
             header_size = std::max(header_size, unit->second.size());
         }
         if (col_iter->get_type() == Data_Type::CHAR) {
@@ -262,13 +264,19 @@ void store_json_comments(const std::string &value,
 
 /*******************************************************/
 
+void write_comment_line_with_newlines(std::ostream &os, const std::string &comment) {
+    std::stringstream ss(comment);
+    std::string line;
+    while (std::getline(ss, line)) {
+        os << "\\ " << line << "\n";
+    }
+}
+
+/*******************************************************/
+
 void write_comment_lines(std::ostream &os, const std::vector<std::string> &comments) {
     for (auto &c : comments) {
-        std::stringstream ss(c);
-        std::string line;
-        while (std::getline(ss, line)) {
-            os << "\\ " << line << "\n";
-        }
+        write_comment_line_with_newlines(os, c);
     }
 }
 
@@ -280,11 +288,12 @@ void generate_and_write_default_comments(
     const auto &columns = table.get_columns();
     const auto &comments = table.get_comments();
     for (size_t i = 1; i < columns.size(); ++i) {
-        auto props = columns[i].get_field_properties();
-        if (!props.get_attributes().empty() || !props.get_description().empty()) {
+        const auto &field_props = columns[i].get_field_properties();
+        const auto prop_attributes = field_props.get_attributes();
+        if (!prop_attributes.empty() || !field_props.get_description().empty()) {
             std::string col_comment(columns[i].get_name());
-            auto unit = props.get_attributes().find("unit");
-            if (unit != props.get_attributes().end() && !unit->second.empty()) {
+            const auto unit = field_props.get_attributes().find("unit");
+            if (unit != prop_attributes.end() && !unit->second.empty()) {
                 col_comment.append(" (").append(unit->second).append(")");
                 boost::replace_if(col_comment, boost::is_any_of(tablator::NEWLINES),
                                   ' ');
@@ -297,7 +306,7 @@ void generate_and_write_default_comments(
             }
 
             os << "\\ " << col_comment << "\n";
-            const auto &desc = props.get_description();
+            const auto &desc = field_props.get_description();
             if (!desc.empty()) {
                 size_t start = desc.find_first_not_of(tablator::WHITESPACE);
                 if (start != std::string::npos) {

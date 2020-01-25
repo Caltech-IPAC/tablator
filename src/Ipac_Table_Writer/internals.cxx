@@ -443,8 +443,9 @@ void tablator::Ipac_Table_Writer::write_column_unit(const Table& table,
 
     // Set default and adjust
     std::string unit_str = " ";
-    auto unit = column.get_field_properties().get_attributes().find("unit");
-    if (unit != column.get_field_properties().get_attributes().end()) {
+    const auto& field_prop_attributes = column.get_field_properties().get_attributes();
+    auto unit = field_prop_attributes.find("unit");
+    if (unit != field_prop_attributes.end()) {
         std::size_t first = unit->second.find_first_of("|");
         if (first != std::string::npos) {
             std::string msg("unit name contains illegal character '|': ");
@@ -482,17 +483,25 @@ void tablator::Ipac_Table_Writer::write_single_value(
         const tablator::Table& table, std::ostream& os, size_t column_id,
         size_t curr_row_offset, size_t width,
         const std::vector<tablator::Data_Type>& datatypes_for_writing) {
-    if (!is_valid_col_id(column_id, table.get_columns().size())) {
+    const auto& columns = table.get_columns();
+    if (!is_valid_col_id(column_id, columns.size())) {
         // shouldn't happen; internal caller should have validated
         return;
     }
-    size_t final_row_offset = table.get_data().size() - table.row_size();
+
+    const std::vector<uint8_t>& table_data = table.get_data();
+    if (table_data.size() < table.row_size()) {
+        throw std::runtime_error("table_data.size() less than table.row_size()");
+    }
+
+    size_t final_row_offset = table_data.size() - table.row_size();
     if (curr_row_offset > final_row_offset) {
         // shouldn't happen; internal caller should have validated
         return;
     }
 
-    const auto& column = table.get_columns().at(column_id);
+    const auto& offsets = table.get_offsets();
+    const auto& column = columns.at(column_id);
 
     tablator::Data_Type active_datatype = datatypes_for_writing[column_id];
     if (table.is_null(curr_row_offset, column_id)) {
@@ -510,7 +519,7 @@ void tablator::Ipac_Table_Writer::write_single_value(
         // Do this case manually because write_type_as_ascii()
         // isn't equipped to write bytes as ints, as IPAC_FORMAT
         // requires.
-        size_t base_offset = curr_row_offset + table.get_offsets().at(column_id);
+        size_t base_offset = curr_row_offset + offsets.at(column_id);
         uint8_t const* curr_data = table.get_data().data() + base_offset;
         size_t element_size = data_size(active_datatype);
 
@@ -520,7 +529,7 @@ void tablator::Ipac_Table_Writer::write_single_value(
             curr_data += element_size;
         }
     } else {
-        size_t base_offset = curr_row_offset + table.get_offsets().at(column_id);
+        size_t base_offset = curr_row_offset + offsets.at(column_id);
         uint8_t const* curr_data = table.get_data().data() + base_offset;
 
         os << IPAC_COLUMN_SEPARATOR << std::setw(width);
@@ -541,7 +550,8 @@ void tablator::Ipac_Table_Writer::write_single_record_by_offset(
         const Table& table, std::ostream& os, size_t curr_row_offset,
         const std::vector<size_t>& ipac_column_widths,
         const std::vector<Data_Type>& datatypes_for_writing) {
-    size_t final_row_offset = table.get_data().size() - table.row_size();
+    const std::vector<uint8_t>& table_data = table.get_data();
+    size_t final_row_offset = table_data.size() - table.row_size();
     if (curr_row_offset > final_row_offset) {
         // shouldn't happen; internal caller should have validated
         return;
@@ -564,7 +574,8 @@ void tablator::Ipac_Table_Writer::write_single_record_by_offset(
         const std::vector<size_t>& included_column_ids, size_t curr_row_offset,
         const std::vector<size_t>& ipac_column_widths,
         const std::vector<Data_Type>& datatypes_for_writing) {
-    size_t final_row_offset = table.get_data().size() - table.row_size();
+    const std::vector<uint8_t>& table_data = table.get_data();
+    size_t final_row_offset = table_data.size() - table.row_size();
     if (curr_row_offset > final_row_offset) {
         // shouldn't happen; internal caller should have validated
         return;

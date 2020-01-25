@@ -38,7 +38,8 @@ void tablator::Table::read_data(const boost::property_tree::ptree &data,
     child = skip_xml_comments(child, end);
     while (child != end) {
         if (child->first == INFO) {
-            read_node_and_attributes("RESOURCE.TABLE.DATA.INFO", child->second);
+            add_labeled_property("RESOURCE.TABLE.DATA.INFO",
+                                 Property(extract_attributes(child->second)));
         } else {
             throw std::runtime_error(
                     "Invalid element inside RESOURCE.TABLE.DATA.  "

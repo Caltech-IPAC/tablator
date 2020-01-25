@@ -7,7 +7,7 @@ void tablator::Table::read_table(const boost::property_tree::ptree &table) {
     auto child = table.begin();
     auto end = table.end();
 
-    read_node_and_attributes("RESOURCE.TABLE", table);
+    add_labeled_property("RESOURCE.TABLE", Property(extract_attributes(table)));
     child = skip_xml_comments(child, end);
     while (child != end && child->first == "<xmlattr>") {
         ++child;
@@ -20,7 +20,8 @@ void tablator::Table::read_table(const boost::property_tree::ptree &table) {
     }
     child = skip_xml_comments(child, end);
     while (child != end && child->first == INFO) {
-        read_node_and_attributes("RESOURCE.TABLE.INFO", child->second);
+        add_labeled_property("RESOURCE.TABLE.INFO",
+                             Property(extract_attributes(child->second)));
         ++child;
         child = skip_xml_comments(child, end);
     }
@@ -50,7 +51,8 @@ void tablator::Table::read_table(const boost::property_tree::ptree &table) {
         child = skip_xml_comments(child, end);
     }
     while (child != end && child->first == INFO) {
-        read_node_and_attributes("RESOURCE.TABLE.INFO", child->second);
+        add_labeled_property("RESOURCE.TABLE.INFO",
+                             Property(extract_attributes(child->second)));
         ++child;
         child = skip_xml_comments(child, end);
     }

@@ -11,8 +11,13 @@
 namespace tablator {
 class Property {
 public:
+    // JTODO Builder
     Property(const std::string &Value) : value_(Value) {}
+    Property(const ATTRIBUTES &Attributes) : attributes_(Attributes) {}
+    Property(const std::string &Value, const ATTRIBUTES &Attributes)
+            : value_(Value), attributes_(Attributes) {}
 
+    // Called internally, directly or otherwise, only by flatten_properties().
     std::vector<std::pair<std::string, std::string> > flatten(
             const std::string &key) const {
         std::vector<std::pair<std::string, std::string> > result;
@@ -23,7 +28,9 @@ public:
         return result;
     }
 
-    inline const std::map<std::string, std::string> &get_attributes() const { return attributes_; }
+    inline const std::map<std::string, std::string> &get_attributes() const {
+        return attributes_;
+    }
     inline std::map<std::string, std::string> &get_attributes() { return attributes_; }
 
     inline const std::string &get_value() const { return value_; }
@@ -42,14 +49,10 @@ public:
         add_attribute(std::make_pair(name, value));
     }
 
-    inline bool empty() const {
-        return (attributes_.empty() && value_.empty());
-    }
+    inline bool empty() const { return (attributes_.empty() && value_.empty()); }
 
 private:
-    std::map<std::string, std::string> attributes_;
     std::string value_;
-
-
+    std::map<std::string, std::string> attributes_;
 };
 }  // namespace tablator
