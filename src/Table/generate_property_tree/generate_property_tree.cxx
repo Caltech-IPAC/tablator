@@ -21,16 +21,14 @@ void add_to_property_tree(const Column &column, const std::string &tree_name,
 // JTODO Called for JSON, JSON5, VOTABLE.  Pick a default format and
 // call get_datatypes_for_writing() instead of using original
 // datatypes?  Who outside this repo actually calls this function?
-boost::property_tree::ptree tablator::Table::generate_property_tree(
-    const std::string &tabledata_string) const {
-    return generate_property_tree(tabledata_string, get_original_datatypes());
+boost::property_tree::ptree tablator::Table::generate_property_tree() const {
+    return generate_property_tree(get_original_datatypes());
 }
 
 /**********************************************************/
 
 boost::property_tree::ptree tablator::Table::generate_property_tree(
-    const std::string &tabledata_string,
-    const std::vector<Data_Type> &datatypes_for_writing) const {
+        const std::vector<Data_Type> &datatypes_for_writing) const {
     boost::property_tree::ptree tree;
     auto &votable = tree.add(VOTABLE, "");
     votable.add("<xmlattr>.version", "1.3");
@@ -59,8 +57,8 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
         } else if (boost::starts_with(p.first, RESOURCE + "." + TABLE)) {
             /// Skip TABLE for now.
         } else if (boost::starts_with(p.first, RESOURCE + ".")) {
-            auto &element =
-                    resource.add(p.first.substr(RESOURCE.size() + 1), p.second.get_value());
+            auto &element = resource.add(p.first.substr(RESOURCE.size() + 1),
+                                         p.second.get_value());
             for (auto &a : p.second.get_attributes())
                 element.add(XMLATTR_DOT + a.first, a.second);
         } else if (p.first == "OVERFLOW") {
@@ -120,7 +118,7 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
         add_to_property_tree(columns[i], FIELD, table_tree, datatypes_for_writing[i]);
     }
 
-    table_tree.add("DATA.TABLEDATA", tabledata_string);
+    table_tree.add("DATA.TABLEDATA", TABLEDATA_PLACEHOLDER);
     if (overflow) {
         auto &info = tree.add("VOTABLE.RESOURCE.INFO", "");
         info.add("<xmlattr>.name", QUERY_STATUS);

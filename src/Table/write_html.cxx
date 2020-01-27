@@ -68,9 +68,7 @@ void tablator::Table::write_html(std::ostream &os) const {
     for (size_t i = 1; i < columns.size(); ++i)
         heading_tr.add("TH", columns[i].get_name());
 
-    std::string tabledata_string(
-            boost::uuids::to_string(boost::uuids::random_generator()()));
-    table.add("TR", tabledata_string);
+    table.add("TR", TABLEDATA_PLACEHOLDER);
     os << "<!DOCTYPE HTML>\n";
     std::stringstream ss;
     // FIXME: This uses the undocumented function write_xml_element
@@ -78,9 +76,7 @@ void tablator::Table::write_html(std::ostream &os) const {
     boost::property_tree::xml_parser::write_xml_element(
             ss, std::string(), tree, -1,
             boost::property_tree::xml_writer_settings<char>(' ', 2));
-    std::string s(ss.str());
-    size_t tabledata_offset(s.find(tabledata_string));
-    os << s.substr(0, tabledata_offset - 4);
-    write_tabledata(os, Format::Enums::HTML);
-    os << s.substr(tabledata_offset + tabledata_string.size() + 5);
+
+    splice_tabledata_and_write(os, ss, Format::Enums::HTML, PLACEHOLDER_LEFT_MARGIN,
+                               PLACEHOLDER_RIGHT_MARGIN);
 }

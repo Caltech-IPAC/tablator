@@ -15,4 +15,3 @@ tablator::ATTRIBUTES tablator::Table::extract_attributes(
     }
     return attributes;
 }
-

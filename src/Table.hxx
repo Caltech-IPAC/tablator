@@ -304,8 +304,7 @@ public:
     void write_html(std::ostream &os) const;
 
 
-    boost::property_tree::ptree generate_property_tree(
-            const std::string &tabledata_string) const;
+    boost::property_tree::ptree generate_property_tree() const;
 
     void read_unknown(const boost::filesystem::path &path);
     void read_unknown(std::istream &input_stream);
@@ -682,8 +681,11 @@ private:
     void write_html(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 
+    void splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
+                                    Format::Enums enum_format, uint num_spaces_left,
+                                    uint num_spaces_right) const;
+
     boost::property_tree::ptree generate_property_tree(
-            const std::string &tabledata_string,
             const std::vector<Data_Type> &datatypes_for_writing) const;
 };
 }  // namespace tablator

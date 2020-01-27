@@ -51,10 +51,8 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
         case Format::Enums::VOTABLE: {
             datatypes_for_writing = Data_Type_Adjuster(*this).get_datatypes_for_writing(
                     format.enum_format);
-            std::string tabledata_string(
-                    boost::uuids::to_string(boost::uuids::random_generator()()));
             boost::property_tree::ptree tree(
-                    generate_property_tree(tabledata_string, datatypes_for_writing));
+                    generate_property_tree(datatypes_for_writing));
             std::stringstream ss;
             bool is_json(format.enum_format != Format::Enums::VOTABLE);
             if (is_json) {
@@ -64,12 +62,9 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                         ss, tree,
                         boost::property_tree::xml_writer_make_settings(' ', 2));
             }
-            std::string s(ss.str());
-            size_t tabledata_offset(s.find(tabledata_string));
-            os << s.substr(0, tabledata_offset - (is_json ? 2 : 0));
-            write_tabledata(os, format.enum_format);
-            os << s.substr(tabledata_offset + tabledata_string.size() +
-                           (is_json ? 2 : 0));
+            uint num_spaces = is_json ? 2 : 0;
+            splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,
+                                       num_spaces);
         } break;
         case Format::Enums::CSV:
             write_dsv(os, ',');

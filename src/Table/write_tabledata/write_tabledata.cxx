@@ -10,6 +10,17 @@
 namespace tablator {
 std::string decode_links(const std::string &encoded);
 
+void Table::splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
+                                       Format::Enums enum_format, uint num_spaces_left,
+                                       uint num_spaces_right) const {
+    std::string s(ss.str());
+    size_t tabledata_offset(s.find(TABLEDATA_PLACEHOLDER));
+    os << s.substr(0, tabledata_offset - num_spaces_left);
+
+    write_tabledata(os, enum_format);
+    os << s.substr(tabledata_offset + TABLEDATA_PLACEHOLDER.size() + num_spaces_right);
+}
+
 void Table::write_tabledata(std::ostream &os,
                             const Format::Enums &output_format) const {
     std::string tr_prefix, tr_suffix, td_prefix, td_suffix;

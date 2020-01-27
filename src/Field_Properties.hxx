@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <string>
 
 #include "Common.hxx"
 #include "Values.hxx"
@@ -14,7 +13,7 @@ public:
     static constexpr char const *FP_LINKS = "links";
     static constexpr char const *FP_VALUES = "values";
 
-    // JTODO Builder?
+    // JTODO Builder? query_server uses the existing constructors.
     Field_Properties() = default;
 
     Field_Properties(const ATTRIBUTES &Attributes) : attributes_(Attributes) {}

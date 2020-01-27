@@ -1,6 +1,6 @@
 #include "Data_Type_Adjuster.hxx"
-#include "Data_Type.hxx"
 
+#include "Data_Type.hxx"
 
 // The conversion of uint64-valued columns to char in IPAC table
 // format is not currently supported for columns whose values are arrays of size
