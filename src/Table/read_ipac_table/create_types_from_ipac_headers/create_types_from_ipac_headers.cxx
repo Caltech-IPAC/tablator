@@ -19,8 +19,8 @@ void tablator::Table::create_types_from_ipac_headers(
     for (size_t column = 1; column < num_columns; ++column) {
         Field_Properties field_props({});
         if (!ipac_columns[2].at(column).empty()) {
-            field_props.get_attributes().insert(std::make_pair(
-                    "unit", boost::algorithm::trim_copy(ipac_columns[2].at(column))));
+            field_props.add_attribute(
+                    "unit", boost::algorithm::trim_copy(ipac_columns[2].at(column)));
         }
         if (!ipac_columns[3].at(column).empty()) {
             field_props.get_values().null =

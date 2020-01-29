@@ -3,6 +3,8 @@
 #include "../Table.hxx"
 #include "../fits_keyword_mapping.hxx"
 
+// JTODO Descriptions and attributes get lost in conversion to and from fits.
+
 namespace {
 template <typename T>
 void read_scalar_column(uint8_t *position, CCfits::Column &c, const size_t &rows,
@@ -62,15 +64,24 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
     auto keyword_mapping = fits_keyword_mapping(false);
     table_extension.readAllKeys();
-    for (auto &k : table_extension.keyWord()) {
-        std::string name(k.first), value;
+
+    std::vector<Column> columns;
+    std::vector<size_t> offsets = {0};
+
+    // Retrieve labeled_properties/trailing_info_lists/attributes,
+    // which were all stored in a big mishmash as labeled_properties
+    // by write_fits().
+    std::vector<std::pair<std::string, Property>> combined_labeled_properties;
+    for (auto &kwd : table_extension.keyWord()) {
+        std::string name(kwd.first), value;
         if (std::find(fits_ignored_keywords.begin(), fits_ignored_keywords.end(),
-                      name) != fits_ignored_keywords.end())
+                      name) != fits_ignored_keywords.end()) {
             continue;
+        }
 
         // Annoyingly, CCfits does not have a way to just return the
         // value.  You have to give it something to put it in.
-        Property prop(k.second->value(value));
+        Property prop(kwd.second->value(value));
 
         // Turn names with keyword mappings into UCD attributes.
         // JTODO huh?
@@ -79,21 +90,31 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             name = i->second;
             prop.add_attribute("ucd", name);
         }
-        if (!k.second->comment().empty())
-            prop.add_attribute("comment", k.second->comment());
+        if (!kwd.second->comment().empty())
+            prop.add_attribute("comment", kwd.second->comment());
         // JTODO Label could also be UCD attribute!?
-        add_labeled_property(std::make_pair(name, prop));
+        combined_labeled_properties.emplace_back(std::make_pair(name, prop));
     }
+
+    // Distribute the labeled_properties between assorted class members at assorted
+    // levels. JTODO  Combine this step with previous loop.
+    std::vector<std::pair<std::string, Property>> resource_element_labeled_properties;
+    std::vector<Property> resource_element_trailing_infos;
+    ATTRIBUTES resource_element_attributes;
+    std::vector<Property> table_element_trailing_infos;
+    ATTRIBUTES table_element_attributes;
+
+    distribute_metadata(resource_element_labeled_properties,
+                        resource_element_trailing_infos, resource_element_attributes,
+                        table_element_trailing_infos, table_element_attributes,
+                        combined_labeled_properties);
+
 
     // CCfits is 1 based, not 0 based.
     const bool has_null_bitfield_flags(table->column().size() > 0 &&
                                        table->column(1).name() ==
                                                null_bitfield_flags_name &&
                                        table->column(1).type() == CCfits::Tbyte);
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
-    auto &data = get_data();
-
     if (!has_null_bitfield_flags) {
         append_column(columns, offsets, null_bitfield_flags_name, Data_Type::UINT8_LE,
                       (table->column().size() + 7) / 8,
@@ -172,13 +193,22 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     // table->rows () returns an int, so there may be issues with more
     // than 2^32 rows
 
-    data.resize(table->rows() * row_size());
+    std::vector<uint8_t> data;
+    size_t row_size = tablator::Table::row_size(offsets);
+    data.resize(table->rows() * row_size);
 
     // Exit early if there is no data in the table.  Otherwise CCfits
     // dies in read_column() :(
     if (data.empty()) {
+        std::vector<Table_Element> table_elements;
+        table_elements.emplace_back(
+                Table_Element::Builder(columns, offsets, data).build());
+
+        get_resource_elements().emplace_back(
+                Resource_Element::Builder(table_elements).build());
         return;
     }
+
 
     fitsfile *fits_pointer = fits.fitsPointer();
     const size_t column_data_offset(has_null_bitfield_flags ? 0 : 1);
@@ -196,12 +226,12 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                     size_t element_offset = offset;
                     for (auto &element : v) {
                         data[element_offset] = element;
-                        element_offset += row_size();
+                        element_offset += row_size;
                     }
                 } else {
                     // FIXME: Use the C api because Column::readArrays is
                     // horrendously slow.
-                    std::vector<std::valarray<int> > v;
+                    std::vector<std::valarray<int>> v;
                     c.readArrays(v, 1, table->rows());
                     size_t start_offset_for_row = offset;
                     for (auto &array : v) {
@@ -210,43 +240,43 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                             data[element_offset] = element;
                             ++element_offset;
                         }
-                        start_offset_for_row += row_size();
+                        start_offset_for_row += row_size;
                     }
                 }
             } break;
             case CCfits::Tbyte:
                 read_column<uint8_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size());
+                                     table->rows(), row_size);
                 break;
             case CCfits::Tshort:
                 read_column<int16_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size());
+                                     table->rows(), row_size);
                 break;
             case CCfits::Tushort:
                 read_column<uint16_t>(fits_pointer, data.data() + offset, c, is_array,
-                                      table->rows(), row_size());
+                                      table->rows(), row_size);
                 break;
             case CCfits::Tuint:
             case CCfits::Tulong:
                 read_column<uint32_t>(fits_pointer, data.data() + offset, c, is_array,
-                                      table->rows(), row_size());
+                                      table->rows(), row_size);
                 break;
             case CCfits::Tint:
             case CCfits::Tlong:
                 read_column<int32_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size());
+                                     table->rows(), row_size);
                 break;
             case CCfits::Tlonglong:
                 read_column<int64_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size());
+                                     table->rows(), row_size);
                 break;
             case CCfits::Tfloat:
                 read_column<float>(fits_pointer, data.data() + offset, c, is_array,
-                                   table->rows(), row_size());
+                                   table->rows(), row_size);
                 break;
             case CCfits::Tdouble:
                 read_column<double>(fits_pointer, data.data() + offset, c, is_array,
-                                    table->rows(), row_size());
+                                    table->rows(), row_size);
                 break;
             case CCfits::Tstring: {
                 std::vector<std::string> v;
@@ -257,7 +287,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         data[element_offset + j] = element[j];
                     for (int j = element.size(); j < c.width(); ++j)
                         data[element_offset + j] = '\0';
-                    element_offset += row_size();
+                    element_offset += row_size;
                 }
             } break;
             default:
@@ -273,4 +303,15 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                     {{"unit", c.unit()}});
         }
     }
+    const auto table_element =
+            Table_Element::Builder(columns, offsets, data)
+                    .add_trailing_info_list(table_element_trailing_infos)
+                    .add_attributes(table_element_attributes)
+                    .build();
+    add_resource_element(
+            Resource_Element::Builder(table_element)
+                    .add_labeled_properties(resource_element_labeled_properties)
+                    .add_trailing_info_list(resource_element_trailing_infos)
+                    .add_attributes(resource_element_attributes)
+                    .build());
 }

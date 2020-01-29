@@ -5,6 +5,7 @@
 
 #include "../Data_Type_Adjuster.hxx"
 #include "../Table.hxx"
+#include "../Utils/Vector_Utils.hxx"
 #include "../write_type_as_ascii.hxx"
 
 
@@ -444,7 +445,7 @@ void tablator::Ipac_Table_Writer::write_column_unit(const Table& table,
     // Set default and adjust
     std::string unit_str = " ";
     const auto& field_prop_attributes = column.get_field_properties().get_attributes();
-    auto unit = field_prop_attributes.find("unit");
+    auto unit = field_prop_attributes.find(UNIT);
     if (unit != field_prop_attributes.end()) {
         std::size_t first = unit->second.find_first_of("|");
         if (first != std::string::npos) {
@@ -520,7 +521,7 @@ void tablator::Ipac_Table_Writer::write_single_value(
         // isn't equipped to write bytes as ints, as IPAC_FORMAT
         // requires.
         size_t base_offset = curr_row_offset + offsets.at(column_id);
-        uint8_t const* curr_data = table.get_data().data() + base_offset;
+        uint8_t const* curr_data = table_data.data() + base_offset;
         size_t element_size = data_size(active_datatype);
 
         for (size_t element = 0; element < column.get_array_size(); ++element) {
@@ -530,7 +531,7 @@ void tablator::Ipac_Table_Writer::write_single_value(
         }
     } else {
         size_t base_offset = curr_row_offset + offsets.at(column_id);
-        uint8_t const* curr_data = table.get_data().data() + base_offset;
+        uint8_t const* curr_data = table_data.data() + base_offset;
 
         os << IPAC_COLUMN_SEPARATOR << std::setw(width);
         std::stringstream ss_temp;

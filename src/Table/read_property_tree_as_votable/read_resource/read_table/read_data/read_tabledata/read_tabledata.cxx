@@ -1,4 +1,7 @@
 #include "../../../../../../Table.hxx"
+
+#include "../../../../../../Common.hxx"
+#include "../../../../../../Data_Element.hxx"
 #include "../../../../../../to_string.hxx"
 #include "../../../../../insert_ascii_in_row.hxx"
 #include "../../../../skip_xml_comments.hxx"
@@ -8,8 +11,9 @@ namespace tablator {
 size_t count_elements(const std::string &entry, const Data_Type &type);
 }
 
-void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledata,
-                                     const std::vector<VOTable_Field> &fields) {
+tablator::Data_Element tablator::Table::read_tabledata(
+        const boost::property_tree::ptree &tabledata,
+        const std::vector<VOTable_Field> &fields) {
     std::vector<std::vector<std::string> > rows;
     /// Need to set the size to at least 1, because H5::StrType can not
     /// handle zero sized strings.
@@ -22,7 +26,7 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
             rows.push_back({});
             auto td = tr.second.begin();
             td = skip_xml_comments(td, tr.second.end());
-            while (td != tr.second.end() && td->first == "<xmlattr>.ID") {
+            while (td != tr.second.end() && td->first == XMLATTR_DOT + ID) {
                 ++td;
                 td = skip_xml_comments(td, tr.second.end());
             }
@@ -55,23 +59,23 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
                         "Too many elements in row " + std::to_string(rows.size()) +
                         ".  Only expected " + std::to_string(fields.size() - 1) + ".");
             }
-        } else if (tr.first != "<xmlattr>.encoding" && tr.first != "<xmlcomment>") {
+        } else if (tr.first != XMLATTR_DOT + "encoding" && tr.first != XMLCOMMENT) {
             throw std::runtime_error(
                     "Expected TR inside RESOURCE.TABLE.DATA.TABLEDATA, but found: " +
                     tr.first);
         }
     }
 
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
-    auto &data = get_data();
+    std::vector<Column> columns;
+    std::vector<size_t> offsets = {0};
+    std::vector<uint8_t> data;
 
     for (std::size_t c = 0; c < fields.size(); ++c) {
         append_column(columns, offsets, fields.at(c).get_name(), fields[c].get_type(),
                       column_array_sizes[c], fields.at(c).get_field_properties());
     }
 
-    Row row_string(row_size());
+    Row row_string(*offsets.rbegin());
 
     for (size_t current_row = 0; current_row < rows.size(); ++current_row) {
         auto &row(rows[current_row]);
@@ -98,6 +102,7 @@ void tablator::Table::read_tabledata(const boost::property_tree::ptree &tabledat
                             ". Error message: " + error.what());
                 }
         }
-        append_row(data, row_string);
+        Table::append_row(data, row_string);
     }
+    return Data_Element(columns, offsets, data);
 }

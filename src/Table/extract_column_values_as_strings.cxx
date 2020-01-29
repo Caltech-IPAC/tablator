@@ -28,13 +28,12 @@ std::string tablator::Table::extract_value_as_string(size_t col_id,
         // there)?
         auto &null_value = column.get_field_properties().get_values().null;
         return (null_value.empty() ? tablator::Table::DEFAULT_NULL_VALUE : null_value);
-    } else {
-        std::stringstream ss;
-        // JTODO Or write UINT8_LE values the way Ipac_Table_Writer does?
-        write_type_as_ascii(ss, column.get_type(), column.get_array_size(),
-                            data.data() + curr_row_offset + offsets[col_id]);
-        return ss.str();
     }
+    std::stringstream ss;
+    // JTODO Or write UINT8_LE values the way Ipac_Table_Writer does?
+    write_type_as_ascii(ss, column.get_type(), column.get_array_size(),
+                        data.data() + curr_row_offset + offsets[col_id]);
+    return ss.str();
 }
 
 //==================================================================

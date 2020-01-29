@@ -1,12 +1,15 @@
+#include "../Table.hxx"
+
 #include <longnam.h>
 #include <CCfits/CCfits>
 #include <algorithm>
 
 #include "../Data_Type_Adjuster.hxx"
-#include "../Table.hxx"
+#include "../Utils/Vector_Utils.hxx"
 #include "../fits_keyword_mapping.hxx"
 #include "../to_string.hxx"
 
+// JTODO Descriptions and attributes get lost in conversion to and from fits.
 
 template <typename data_type>
 void write_column(fitsfile *fits_file, int fits_type, int col_id, const uint8_t *data,
@@ -170,16 +173,17 @@ void tablator::Table::write_fits(
         }
         fits_types.push_back(array_size_str + fits_type);
 
-        auto unit = column.get_field_properties().get_attributes().find("unit");
-        if (unit == column.get_field_properties().get_attributes().end()) {
+        const auto col_atts = column.get_field_properties().get_attributes();
+        auto unit = col_atts.find(UNIT);
+        if (unit == col_atts.end()) {
             tunit.push_back("");
         } else {
             tunit.push_back(unit->second.c_str());
         }
     }
 
-    /// We have to store the fits_type in a string and then set the
-    /// c_str(), because otherwise the string will get deallocated.
+    // We have to store the fits_type in a string and then set the
+    // c_str(), because otherwise the string will get deallocated.
     std::vector<const char *> tform;
     for (auto &t : fits_types) tform.push_back(t.c_str());
 
@@ -189,25 +193,49 @@ void tablator::Table::write_fits(
                     const_cast<char **>(tunit.data()), "Table", &status);
     if (status != 0) throw CCfits::FitsError(status);
 
-    /// Write properties
     fits_write_key_longwarn(fits_file, &status);
     if (status != 0) throw CCfits::FitsError(status);
-    for (auto &p : get_labeled_properties()) {
-        auto keyword_mapping = fits_keyword_mapping(true);
-        std::string name = p.first;
-        auto i = keyword_mapping.find(name);
-        if (i != keyword_mapping.end()) name = i->second;
 
-        std::string comment, value(p.second.get_value());
-        for (auto &a : p.second.get_attributes()) {
-            if (a.first == "comment")
-                comment = a.second;
-            else if (a.first != "ucd")
-                value += ", " + a.first + ": " + a.second;
+    assert(get_resource_elements().size() > 0);
+
+    // Combine and write properties and trailing info for all levels at which they are
+    // defined.
+    auto combined_labeled_properties = combine_labeled_properties_all_levels();
+    const auto combined_labeled_trailing_info_lists =
+            combine_trailing_info_lists_all_levels();
+    combined_labeled_properties.insert(combined_labeled_properties.end(),
+                                       combined_labeled_trailing_info_lists.begin(),
+                                       combined_labeled_trailing_info_lists.end());
+
+
+    for (auto &label_and_prop : combined_labeled_properties) {
+        auto keyword_mapping = fits_keyword_mapping(true);
+        std::string name = label_and_prop.first;
+        const auto &prop = label_and_prop.second;
+        auto i = keyword_mapping.find(name);
+        if (i != keyword_mapping.end()) {
+            name = i->second;
+        }
+        std::string comment, value(prop.get_value());
+        for (auto &att : prop.get_attributes()) {
+            if (att.first == "comment") {
+                comment = att.second;
+            } else if (att.first != "ucd") {
+                if (!value.empty()) {
+                    value += ", ";
+                }
+                // JTODO Serge, are we allowed to change how we write
+                // attributes for fits?  We could make it easier to
+                // restore the originals when reading (right now we
+                // don't even try).
+                value += att.first + ": " + att.second;
+            }
         }
         fits_write_key_longstr(fits_file, name.c_str(), value.c_str(), comment.c_str(),
                                &status);
-        if (status != 0) throw CCfits::FitsError(status);
+        if (status != 0) {
+            throw CCfits::FitsError(status);
+        }
     }
 
     const auto &offsets = get_offsets();

@@ -415,7 +415,6 @@ int main(int argc, char *argv[]) {
         bool do_subtable = option_variables.count("column-ids") ||
                            (option_variables.count("column-names") && !idx_lookup) ||
                            do_subtable_by_row;
-        //        std::cout << "do_subtable; " << do_subtable << std::endl;
 
         if (do_subtable &&
             (output_format.enum_format != tablator::Format::Enums::IPAC_TABLE)) {

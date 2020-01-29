@@ -22,22 +22,26 @@ std::vector<size_t> get_ipac_column_widths(
 
 
 void tablator::Table::read_ipac_table(std::istream &input_stream) {
-    size_t current_line_num;
     std::array<std::vector<std::string>, 4> ipac_columns;
     std::vector<size_t> ipac_column_offsets;
 
-    current_line_num =
-            read_ipac_header(input_stream, ipac_columns, ipac_column_offsets);
+    std::vector<std::pair<std::string, Property>> labeled_resource_properties;
+    size_t current_line_num =
+            read_ipac_header(input_stream, ipac_columns, ipac_column_offsets,
+                             labeled_resource_properties);
 
     const auto ipac_column_widths = get_ipac_column_widths(ipac_column_offsets);
-    create_types_from_ipac_headers(ipac_columns, ipac_column_widths);
+
+    std::vector<Column> columns;
+    std::vector<size_t> offsets = {0};
+    create_types_from_ipac_headers(columns, offsets, ipac_columns, ipac_column_widths);
 
     std::vector<size_t> minimum_column_widths(ipac_columns[0].size(), 1);
     std::string line;
     std::getline(input_stream, line);
-    Row row_string(row_size());
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
+    Row row_string(row_size(offsets));
+
+    std::vector<uint8_t> data;
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
             row_string.set_zero();
@@ -88,10 +92,16 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                          ": '" + line.substr(bad_char) +
                                          "'.\n\t  Is the header not wide enough?");
 
-            append_row(row_string);
+            append_row(data, row_string);
         }
         ++current_line_num;
         std::getline(input_stream, line);
     }
-    shrink_ipac_string_columns_to_fit(minimum_column_widths);
+    shrink_ipac_string_columns_to_fit(columns, offsets, data, minimum_column_widths);
+
+    Table_Element table_element =
+            Table_Element::Builder(columns, offsets, data).build();
+    add_resource_element(Resource_Element::Builder(table_element)
+                                 .add_labeled_properties(labeled_resource_properties)
+                                 .build());
 }

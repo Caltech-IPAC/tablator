@@ -6,8 +6,9 @@
 
 #include "Common.hxx"
 
-/// A simple class to hold properties.  It gets a little complicated
-/// because XML can have attributes.
+// A simple class to hold properties.  It gets a little complicated
+// because XML can have attributes.
+
 namespace tablator {
 class Property {
 public:
@@ -28,17 +29,13 @@ public:
         return result;
     }
 
-    inline const std::map<std::string, std::string> &get_attributes() const {
-        return attributes_;
-    }
-    inline std::map<std::string, std::string> &get_attributes() { return attributes_; }
+    inline const ATTRIBUTES &get_attributes() const { return attributes_; }
+    inline ATTRIBUTES &get_attributes() { return attributes_; }
 
     inline const std::string &get_value() const { return value_; }
     inline std::string &get_value() { return value_; }
 
-    inline void set_attributes(const std::map<std::string, std::string> &attrs) {
-        attributes_ = attrs;
-    }
+    inline void set_attributes(const ATTRIBUTES &attrs) { attributes_ = attrs; }
     inline void set_value(const std::string &val) { value_.assign(val); }
 
     inline void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
@@ -53,6 +50,6 @@ public:
 
 private:
     std::string value_;
-    std::map<std::string, std::string> attributes_;
+    ATTRIBUTES attributes_;
 };
 }  // namespace tablator

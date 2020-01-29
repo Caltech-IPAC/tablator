@@ -5,12 +5,30 @@
 #include "../HDF5_Attribute.hxx"
 #include "../HDF5_Property.hxx"
 
+namespace {
+const std::string read_description(const H5::DataSet &dataset,
+                                   const std::string desc_label) {
+    std::string desc_str;
+    if (dataset.attrExists(desc_label.c_str())) {
+        auto description = dataset.openAttribute(desc_label.c_str());
+        if (description.getTypeClass() == H5T_STRING) {
+            description.read(description.getDataType(), desc_str);
+        }
+    }
+    return desc_str;
+}
+
+}  // namespace
+////
+
 namespace tablator {
 std::vector<std::pair<std::string, Property> > read_metadata(
         const H5::DataSet &dataset);
 
 std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                                          const std::string &section);
+
+
 }  // namespace tablator
 
 void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
@@ -18,21 +36,39 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
     // FIXME: This needs to be generalized for multiple resources and
     // multiple tables
     H5::Group resource = file.openGroup("/RESOURCE_0");
-    set_resource_element_params(read_column_metadata(resource, PARAM));
+    std::vector<tablator::Column> resource_params =
+            read_column_metadata(resource, "PARAM");
+
     H5::DataSet dataset = resource.openDataSet(resource.getObjnameByIdx(0).c_str());
 
-    auto &comments = get_comments();
-    if (dataset.attrExists(DESCRIPTION)) {
-        auto description = dataset.openAttribute(DESCRIPTION);
-        if (description.getTypeClass() == H5T_STRING) {
-            comments.resize(1);
-            description.read(description.getDataType(), comments[0]);
-        }
-    }
-    set_table_element_params(read_column_metadata(dataset, PARAM));
-    set_labeled_properties(read_metadata(dataset));
+    set_description(read_description(dataset, DESCRIPTION));
+    const auto resource_element_description =
+            read_description(dataset, RESOURCE_ELEMENT_DESCRIPTION);
+    const auto table_element_description =
+            read_description(dataset, TABLE_ELEMENT_DESCRIPTION);
 
-    auto column_metadata(read_column_metadata(dataset, FIELD));
+    std::vector<tablator::Column> table_element_params =
+            read_column_metadata(dataset, "PARAM");
+
+    const auto metadata = read_metadata(dataset);
+
+    // Distribute the mishmash of labeled_properties stored as metadata
+    // between assorted class members at assorted levels.
+    std::vector<std::pair<std::string, Property> > resource_element_labeled_properties;
+    std::vector<Property> resource_element_trailing_infos;
+    ATTRIBUTES resource_element_attributes;
+    std::vector<Property> table_element_trailing_infos;
+    ATTRIBUTES table_element_attributes;
+
+
+    distribute_metadata(resource_element_labeled_properties,
+                        resource_element_trailing_infos, resource_element_attributes,
+                        table_element_trailing_infos, table_element_attributes,
+                        metadata);
+
+    std::vector<tablator::Column> column_metadata =
+            read_column_metadata(dataset, "FIELD");
+
     // FIXME: This does not handle field_properties
     // FIXME: This assumes that the first column is null_bitfield_flags
     auto compound = dataset.getCompType();
@@ -43,9 +79,8 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                 std::to_string(compound.getNmembers()));
     }
 
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
-    auto &data = get_data();
+    std::vector<Column> columns;
+    std::vector<size_t> offsets = {0};
 
     for (int i = 0; i < compound.getNmembers(); ++i) {
         H5::DataType datatype(compound.getMemberDataType(i));
@@ -71,6 +106,24 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                           column_metadata[i].get_field_properties());
         }
     }
-    data.resize(row_size() * dataset.getSpace().getSimpleExtentNpoints());
+    std::vector<uint8_t> data;
+    data.resize(row_size(offsets) * dataset.getSpace().getSimpleExtentNpoints());
     dataset.read(data.data(), compound);
+
+    std::vector<Table_Element> table_elements;
+    const auto table_element =
+            Table_Element::Builder(columns, offsets, data)
+                    .add_params(table_element_params)
+                    .add_description(table_element_description)
+                    .add_trailing_info_list(table_element_trailing_infos)
+                    .add_attributes(table_element_attributes)
+                    .build();
+    add_resource_element(
+            Resource_Element::Builder(table_element)
+                    .add_params(resource_params)
+                    .add_labeled_properties(resource_element_labeled_properties)
+                    .add_description(resource_element_description)
+                    .add_trailing_info_list(resource_element_trailing_infos)
+                    .add_attributes(resource_element_attributes)
+                    .build());
 }

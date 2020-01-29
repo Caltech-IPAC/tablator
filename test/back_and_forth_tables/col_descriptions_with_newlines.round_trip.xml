@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
-  <RESOURCE>
-    <type>results</type>
+  <RESOURCE type="results">
     <TABLE>
       <DESCRIPTION>ra (deg)
 ___ Right Ascension (J2000)      

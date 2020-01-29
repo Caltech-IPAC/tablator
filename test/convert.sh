@@ -44,9 +44,9 @@ shift $((OPTIND-1))
 for table in test/bad_ipac_tables/* test/bad_votables/*; do
     ${tablator_bin} $table bad_table.hdf5 2> /dev/null
     if [ $? -eq 0 ]; then
-        echo "FAIL: $table"
+        echo "FAIL: $table to hdf5"
     else
-        echo "PASS: $table"
+        echo "PASS: $table to hdf5"
     fi
 done
 
@@ -158,9 +158,9 @@ for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/f
             ${tablator_bin} $STREAM_INTERMEDIATE test.$ending temp.tbl
         fi
         if [ $? -eq 0 ]; then
-            echo "PASS: $table <-> $ending"
+            echo "PASS: $table -> $ending"
         else
-            echo "FAIL: $table <-> $ending"
+            echo "FAIL: $table -> $ending"
         fi
         rm -f test.$ending temp.tbl
     done
@@ -564,6 +564,17 @@ else
     echo "FAIL: Convert IPAC Table with spaces to VOTable and back"
 fi
 
+${tablator_bin} test/back_and_forth_tables/info_at_all_levels.xml temp.hdf5 &&
+${tablator_bin} temp.hdf5 temp.xml && diff test/back_and_forth_tables/info_at_all_levels.xml temp.xml
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with info at all levels to hdf5 and back"
+    rm -f temp.hdf5
+    rm -f temp.xml
+else
+    echo "FAIL: Convert VOTable with info at all levels to hdf5 and back"
+fi
+
+
 
 #################################################################
 # not straight conversions
@@ -857,4 +868,37 @@ if [ $? -eq 0 ]; then
     rm -f temp_file
 else
     echo "FAIL: Lookup column names for exclusion"
+fi
+
+${tablator_bin} test/back_and_forth_tables/group_example.vot temp.vot && diff test/back_and_forth_tables/group_example.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Table with group metadata"
+    rm -f temp_file
+else
+    echo "FAIL: Table with group metadata"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multiple_group_example.vot temp.vot && diff test/back_and_forth_tables/multiple_group_example.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Table with multiple group metadata"
+    rm -f temp_file
+else
+    echo "FAIL: Table with multiple group metadata"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multiple_resource_example.vot temp.vot && diff test/back_and_forth_tables/multiple_resource_example.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Table with multiple resources"
+    rm -f temp_file
+else
+    echo "FAIL: Table with multiple resources"
+fi
+
+
+${tablator_bin} test/back_and_forth_tables/multiple_info_example.vot temp.vot && diff test/back_and_forth_tables/multiple_info_example.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Table with multiple infos"
+    rm -f temp_file
+else
+    echo "FAIL: Table with multiple infos"
 fi

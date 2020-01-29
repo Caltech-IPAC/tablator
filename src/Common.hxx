@@ -18,7 +18,16 @@ static const std::string XMLATTR("<xmlattr>");
 static const std::string XMLATTR_DOT("<xmlattr>.");
 static const std::string XMLCOMMENT("<xmlcomment>");
 
-static const std::string VOTABLE_RESOURCE_PREFIX("VOTABLE.RESOURCE.");
+static const std::string VOTABLE_DOT("VOTABLE.");
+static const std::string RESOURCE_DOT("RESOURCE.");
+
+static const std::string VOTABLE_RESOURCE_DOT("VOTABLE.RESOURCE.");
+static const std::string VOTABLE_RESOURCE_TABLE_DOT("VOTABLE.RESOURCE.TABLE.");
+
+
+// For internal use with hdf5 (JTODO and eventually fits?)
+static const std::string ATTR_MARKER("ATTR_MARKER");
+static const std::string END_INFO_MARKER("END_INFO_MARKER");
 
 // JTODO "arraysize" vs. "array_size" (Column, hdf5)
 // lower case vs. upper case
@@ -51,6 +60,8 @@ static const std::string UTYPE("utype");
 static const std::string VALUES("VALUES");
 static const std::string VOTABLE("VOTABLE");
 
+static const std::string RESOURCE_ELEMENT_DESCRIPTION("RESOURCE.DESCRIPTION");
+static const std::string TABLE_ELEMENT_DESCRIPTION("RESOURCE.TABLE.DESCRIPTION");
 static const std::string DATA_TABLEDATA("DATA.TABLEDATA");
 static const std::string TABLEDATA_PLACEHOLDER("TaBlEdAtA_PlAcEhOlDeR");
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;

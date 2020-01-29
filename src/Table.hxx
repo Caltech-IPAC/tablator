@@ -15,11 +15,16 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Column.hxx"
+#include "Common.hxx"
+#include "Data_Element.hxx"
 #include "Field_Properties.hxx"
 #include "Format.hxx"
+#include "Group_Element.hxx"
 #include "Ipac_Table_Writer.hxx"
 #include "Property.hxx"
+#include "Resource_Element.hxx"
 #include "Row.hxx"
+#include "Table_Element.hxx"
 
 namespace tablator {
 class VOTable_Field;
@@ -33,8 +38,84 @@ public:
     static const std::string null_bitfield_flags_name;
     static const std::string null_bitfield_flags_description;
 
+
+private:
+    struct Options {
+        ATTRIBUTES attributes_;
+        std::string description_;
+        std::vector<std::string> comments_;
+        std::vector<Column> params_;
+        boost::property_tree::ptree params_ptree_;
+        std::vector<std::pair<std::string, Property>> labeled_properties_;
+        std::vector<Group_Element> group_elements_;
+        std::vector<Property> trailing_info_list_;
+    };
+
+public:
+    class Builder {
+    public:
+        // JTODO check that resource_elements contains at least one Table_Element?
+        Builder(std::vector<Resource_Element> &resource_elements)
+                : resource_elements_(resource_elements) {}
+
+        Table build() { return Table(resource_elements_, options_); }
+
+        Builder &add_attributes(const ATTRIBUTES &attributes) {
+            options_.attributes_ = attributes;
+            return *this;
+        }
+
+        Builder &add_description(const std::string &description) {
+            options_.description_ = description;
+            return *this;
+        }
+
+        Builder &add_comments(const std::vector<std::string> &comments) {
+            options_.comments_ = comments;
+            return *this;
+        }
+
+        Builder &add_params(const std::vector<Column> &params) {
+            options_.params_ = params;
+            return *this;
+        }
+
+        Builder &add_params_tree(const boost::property_tree::ptree &params_ptree) {
+            options_.params_ptree_ = params_ptree;
+            return *this;
+        }
+
+        Builder &add_labeled_properties(
+                const std::vector<std::pair<std::string, Property>>
+                        &labeled_properties) {
+            options_.labeled_properties_ = labeled_properties;
+            return *this;
+        }
+
+        Builder &add_group_elements(const std::vector<Group_Element> &group_elements) {
+            options_.group_elements_ = group_elements;
+            return *this;
+        }
+
+        Builder &add_trailing_info_list(
+                const std::vector<Property> &trailing_info_list) {
+            options_.trailing_info_list_ = trailing_info_list;
+            return *this;
+        }
+
+
+    private:
+        std::vector<Resource_Element> resource_elements_;
+        Options options_;
+    };
+
+
     Table(const std::vector<Column> &Columns,
           const std::map<std::string, std::string> &property_map);
+
+    Table(const std::vector<Column> &Columns,
+          const std::vector<std::pair<std::string, tablator::Property>>
+                  &property_pair_vec);
 
     Table(const std::vector<Column> &Columns)
             : Table(Columns, std::map<std::string, std::string>()) {}
@@ -44,15 +125,17 @@ public:
     Table(std::istream &input_stream) { read_unknown(input_stream); }
     Table(std::istream &input_stream, const Format &format);
 
-    inline size_t row_size() const { return row_size(get_offsets()); }
-    size_t num_rows() const { return get_data().size() / row_size(); }
-
     // FIXME: Unfortunately, this is an opposite convention from
     // VOTable.  VOTable use the most significant bit for the
     // first column.  This uses the least significant bit.
     bool is_null(size_t row_offset, size_t column) const {
-        return get_data().at(row_offset + (column - 1) / 8) &
-               (128 >> ((column - 1) % 8));
+        auto pos = row_offset + (column - 1) / 8;
+        if (pos >= get_data().size()) {
+            throw std::runtime_error("invalid pos " + std::to_string(pos) +
+                                     "; data size is " +
+                                     std::to_string(get_data().size()));
+        }
+        return get_data().at(pos) & (128 >> ((column - 1) % 8));
     }
 
     std::vector<Column>::const_iterator find_column(const std::string &name) const {
@@ -147,9 +230,11 @@ public:
         resize_rows(get_data(), new_num_rows, row_size());
     }
 
+    // This function is not used internally.
+
     std::vector<std::pair<std::string, std::string>> flatten_properties() const {
         return flatten_properties(get_labeled_properties());
-    };
+    }
 
     void write(std::ostream &os, const std::string &table_name,
                const Format &format) const;
@@ -299,10 +384,13 @@ public:
 
     void write_fits(fitsfile *fits_file) const;
 
+    void splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
+                                    Format::Enums enum_format, uint num_spaces_left,
+                                    uint num_spaces_right) const;
+
     void write_tabledata(std::ostream &os, const Format::Enums &output_format) const;
 
     void write_html(std::ostream &os) const;
-
 
     boost::property_tree::ptree generate_property_tree() const;
 
@@ -329,6 +417,7 @@ public:
         boost::filesystem::ifstream input_stream(path);
         read_json(input_stream);
     }
+
     void read_votable(std::istream &input_stream) {
         boost::property_tree::ptree tree;
         boost::property_tree::read_xml(input_stream, tree);
@@ -339,18 +428,25 @@ public:
         read_votable(input_stream);
     }
 
-    ATTRIBUTES extract_attributes(const boost::property_tree::ptree &node);
     void read_property_tree_as_votable(const boost::property_tree::ptree &tree);
-    void read_resource(const boost::property_tree::ptree &resource);
-    void read_table(const boost::property_tree::ptree &table);
-    VOTable_Field read_field(const boost::property_tree::ptree &field);
-    Property read_property(const boost::property_tree::ptree &prop);
-    void read_data(const boost::property_tree::ptree &data,
-                   const std::vector<VOTable_Field> &fields);
-    void read_tabledata(const boost::property_tree::ptree &tabledata,
-                        const std::vector<VOTable_Field> &fields);
-    void read_binary2(const boost::property_tree::ptree &tabledata,
-                      const std::vector<VOTable_Field> &fields);
+    static ATTRIBUTES extract_attributes(const boost::property_tree::ptree &node);
+
+    // The motivation for the "_element" business is distinguishing
+    // Table from Table_Element. JTODO rename to read_XXX_element
+    // after dust settles?
+    Resource_Element read_resource(const boost::property_tree::ptree &resource_tree,
+                                   bool is_first);
+    static Group_Element read_group(const boost::property_tree::ptree &node);
+    static Table_Element read_table(const boost::property_tree::ptree &table);
+    static VOTable_Field read_field(const boost::property_tree::ptree &field);
+    static Property read_property(const boost::property_tree::ptree &prop);
+
+    static Data_Element read_data(const boost::property_tree::ptree &data,
+                                  const std::vector<VOTable_Field> &fields);
+    static Data_Element read_tabledata(const boost::property_tree::ptree &tabledata,
+                                       const std::vector<VOTable_Field> &fields);
+    static Data_Element read_binary2(const boost::property_tree::ptree &tabledata,
+                                     const std::vector<VOTable_Field> &fields);
 
     void append_data_from_stream(const std::vector<uint8_t> &stream,
                                  const std::vector<VOTable_Field> &fields,
@@ -377,9 +473,10 @@ public:
         set_column_info(get_columns(), get_offsets(), dsv);
     };
 
-    size_t read_ipac_header(std::istream &ipac_file,
-                            std::array<std::vector<std::string>, 4> &Columns,
-                            std::vector<size_t> &ipac_table_offsets);
+    size_t read_ipac_header(
+            std::istream &ipac_file, std::array<std::vector<std::string>, 4> &Columns,
+            std::vector<size_t> &ipac_table_offsets,
+            std::vector<std::pair<std::string, Property>> &labeled_resource_properties);
 
     void create_types_from_ipac_headers(
             std::array<std::vector<std::string>, 4> &Columns,
@@ -477,6 +574,9 @@ public:
         return col_vec;
     }
 
+    inline size_t row_size() const { return row_size(get_offsets()); }
+    size_t num_rows() const { return get_data().size() / row_size(); }
+
     // static functions
     // JTODO Move them out of this class?
     inline static size_t row_size(const std::vector<size_t> &offsets) {
@@ -570,97 +670,256 @@ public:
 
 
     // getters
+    inline std::vector<Resource_Element> &get_resource_elements() {
+        return resource_elements_;
+    }
+
+    inline const std::vector<Resource_Element> &get_resource_elements() const {
+        return resource_elements_;
+    }
+
+    inline ATTRIBUTES &get_attributes() { return options_.attributes_; }
+    inline const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
+
+    inline std::string &get_description() { return options_.description_; }
+    inline const std::string &get_description() const { return options_.description_; }
+
+    inline std::vector<std::string> &get_comments() { return options_.comments_; }
+    inline const std::vector<std::string> &get_comments() const {
+        return options_.comments_;
+    }
+
+    inline std::vector<Column> &get_params() { return options_.params_; }
+    inline const std::vector<Column> &get_params() const { return options_.params_; }
 
     inline std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
-        return labeled_properties_;
+        return options_.labeled_properties_;
     }
+
     inline const std::vector<std::pair<std::string, Property>> &get_labeled_properties()
             const {
-        return labeled_properties_;
+        return options_.labeled_properties_;
     }
 
-    inline std::vector<uint8_t> &get_data() { return data_; }
-    inline const std::vector<uint8_t> &get_data() const { return data_; }
-
-    inline std::vector<std::string> &get_comments() { return comments_; }
-    inline const std::vector<std::string> &get_comments() const { return comments_; }
-
-    inline std::vector<Column> &get_resource_element_params() {
-        return resource_element_params_;
+    inline std::vector<Group_Element> &get_group_elements() {
+        return options_.group_elements_;
     }
+
+    inline const std::vector<Group_Element> &get_group_elements() const {
+        return options_.group_elements_;
+    }
+
+    inline std::vector<Property> &get_trailing_info_list() {
+        return options_.trailing_info_list_;
+    }
+
+    inline const std::vector<Property> &get_trailing_info_list() const {
+        return options_.trailing_info_list_;
+    }
+
+    inline Resource_Element &get_main_resource_element() {
+        if (get_resource_elements().empty()) {
+            throw std::runtime_error("table is empty");
+        }
+        return get_resource_elements().at(0);
+    }
+
+
+    inline const Resource_Element &get_main_resource_element() const {
+        if (get_resource_elements().empty()) {
+            throw std::runtime_error("table is empty");
+        }
+        return get_resource_elements().at(0);
+    }
+
+    inline std::vector<Column> &get_columns() {
+        return get_main_resource_element().get_columns();
+    }
+    inline const std::vector<Column> &get_columns() const {
+        return get_main_resource_element().get_columns();
+    }
+
+    inline std::vector<size_t> &get_offsets() {
+        return get_main_resource_element().get_offsets();
+    }
+
+    inline const std::vector<size_t> &get_offsets() const {
+        return get_main_resource_element().get_offsets();
+    }
+
+    inline std::vector<std::pair<std::string, Property>>
+            &get_resource_element_labeled_properties() {
+        return get_main_resource_element().get_labeled_properties();
+    }
+
+    inline const std::vector<std::pair<std::string, Property>>
+            &get_resource_element_labeled_properties() const {
+        return get_main_resource_element().get_labeled_properties();
+    }
+
     inline const std::vector<Column> &get_resource_element_params() const {
-        return resource_element_params_;
+        return get_main_resource_element().get_params();
     }
 
     inline std::vector<Column> &get_table_element_params() {
-        return table_element_params_;
+        return get_main_resource_element().get_table_element_params();
     }
     inline const std::vector<Column> &get_table_element_params() const {
-        return table_element_params_;
+        return get_main_resource_element().get_table_element_params();
     }
 
-    inline std::vector<Column> &get_columns() { return columns_; }
-    inline const std::vector<Column> &get_columns() const { return columns_; }
+    inline std::vector<uint8_t> &get_data() {
+        return get_main_resource_element().get_data();
+    }
 
-    inline std::vector<size_t> &get_offsets() { return offsets_; }
-    inline const std::vector<size_t> &get_offsets() const { return offsets_; }
+    inline const std::vector<uint8_t> &get_data() const {
+        return get_main_resource_element().get_data();
+    }
+
+
+    inline Table_Element &get_main_table_element() {
+        if (get_resource_elements().empty()) {
+            throw std::runtime_error("table is empty");
+        }
+        return get_resource_elements().at(0).get_table_elements().at(0);
+    }
+
+
+    inline const Table_Element &get_main_table_element() const {
+        if (get_resource_elements().empty()) {
+            throw std::runtime_error("table is empty");
+        }
+        return get_resource_elements().at(0).get_table_elements().at(0);
+    }
+
+
+    // mock getters
+    const std::vector<std::pair<std::string, Property>>
+    combine_trailing_info_lists_all_levels() const;
+
+    const std::vector<std::pair<std::string, Property>>
+    combine_labeled_properties_all_levels() const;
+
+    const std::vector<std::pair<std::string, Property>> combine_attributes_all_levels()
+            const;
+
+
+    //===========================================================
 
     // setters
 
-    inline void set_labeled_properties(
-            const std::vector<std::pair<std::string, Property>> &props) {
-        labeled_properties_ = props;
+    inline void set_attributes(const ATTRIBUTES &attrs) {
+        options_.attributes_ = attrs;
     }
-    inline void set_data(const std::vector<uint8_t> &d) { data_ = d; }
-    inline void set_comments(const std::vector<std::string> &comms) {
-        comments_ = comms;
+
+    void set_description(const std::string &desc) {
+        options_.description_.assign(desc);
+    }
+    inline void set_labeled_properties(
+            const std::vector<std::pair<std::string, Property>> &labeled_props) {
+        options_.labeled_properties_ = labeled_props;
+    }
+
+    inline void set_params(const std::vector<Column> &params) {
+        options_.params_ = params;
     }
     inline void set_resource_element_params(const std::vector<Column> &params) {
-        resource_element_params_ = params;
+        get_main_resource_element().set_params(params);
     }
+
     inline void set_table_element_params(const std::vector<Column> &params) {
-        table_element_params_ = params;
+        get_main_resource_element().set_table_element_params(params);
+    }
+
+    inline void set_data(const std::vector<uint8_t> &d) {
+        get_main_resource_element().set_data(d);
     }
 
 
-    inline void set_columns(const std::vector<Column> &cols) { columns_ = cols; }
-    inline void set_offsets(const std::vector<size_t> &offs) { offsets_ = offs; }
-
-
-    inline void add_labeled_property(
-            const std::pair<std::string, Property> &label_and_prop) {
-        labeled_properties_.emplace_back(label_and_prop);
+    inline void add_comment(const std::string &c) {
+        options_.comments_.emplace_back(c);
     }
+
+    inline void add_param(const Column &param) { get_params().emplace_back(param); }
+
+
+    inline void add_trailing_info(const Property &prop) {
+        get_trailing_info_list().emplace_back(prop);
+    }
+
+    // for backward compatibility
+    void add_labeled_property(const std::pair<std::string, Property> &label_and_prop);
+
     inline void add_labeled_property(const std::string &label, const Property &prop) {
         add_labeled_property(std::make_pair(label, prop));
     }
 
+    // JTODO terminology for table that has been constructed but not loaded.
 
-    void add_comment(const std::string &c) { comments_.emplace_back(c); }
+    // In the middle of a read_XXX(), Table-level class members already exist but
+    // Resource_Element- and Table_Element-level ones do not.  Components destined for
+    // the lower-level classes must be stored in temporary vectors which will then be
+    // sent as arguments to the relevant constructors.
 
-    // This function does something more interesting in refactored tablator.
-    // Adding it now eases the transition.
+    void add_labeled_property(
+            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
+            const std::pair<std::string, Property> &label_and_prop);
+
+
+    inline void add_labeled_property(
+            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
+            const std::string &label, const Property &prop) {
+        add_labeled_property(resource_labeled_properties, std::make_pair(label, prop));
+    }
+
+    inline bool add_labeled_trailing_info(
+            std::vector<Property> &resource_element_infos,
+            std::vector<Property> &table_element_infos,
+            const std::pair<std::string, Property> &label_and_prop);
+
+    inline bool add_labeled_attributes(
+            ATTRIBUTES &resource_element_attributes,
+            ATTRIBUTES &table_element_attributes,
+            const std::pair<std::string, Property> &label_and_prop);
+
+
+    inline void add_resource_element(const Resource_Element &resource_element) {
+        get_resource_elements().emplace_back(resource_element);
+    }
+
+    inline void add_resource_element(const Table_Element &table_element) {
+        get_resource_elements().emplace_back(Resource_Element(table_element));
+    }
+
+    inline void add_attribute(const std::string &name, const std::string &val) {
+        options_.attributes_.insert(std::make_pair(name, val));
+    }
+
+    inline void add_attributes(const ATTRIBUTES &attrs) {
+        get_attributes().insert(attrs.begin(), attrs.end());
+    }
+
+    inline void add_group_element(const Group_Element &ge) {
+        get_group_elements().emplace_back(ge);
+    }
+
     inline void add_resource_element_labeled_property(
             const std::pair<std::string, Property> &label_and_prop) {
-        add_labeled_property(label_and_prop);
+        get_main_resource_element().add_labeled_property(label_and_prop);
     }
 
-    inline void add_resource_element_param(const Column &param) {
-        resource_element_params_.emplace_back(param);
+    inline void add_resource_element_labeled_property(const std::string &label,
+                                                      const Property &prop) {
+        add_resource_element_labeled_property(std::make_pair(label, prop));
     }
-    inline void add_table_element_param(const Column &param) {
-        table_element_params_.emplace_back(param);
-    }
+
 
 private:
-    std::vector<std::pair<std::string, Property>> labeled_properties_;
-    std::vector<uint8_t> data_;
-    std::vector<std::string> comments_;
+    Table(std::vector<Resource_Element> &resource_elements, const Options &options)
+            : resource_elements_(resource_elements), options_(options) {}
 
-    std::vector<Column> resource_element_params_, table_element_params_;
-    std::vector<Column> columns_;
-    std::vector<size_t> offsets_ = {0};
-
+    std::vector<Resource_Element> resource_elements_;
+    Options options_;
 
     std::vector<Data_Type> get_original_datatypes() const {
         std::vector<Data_Type> orig_datatypes;
@@ -681,11 +940,17 @@ private:
     void write_html(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 
-    void splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
-                                    Format::Enums enum_format, uint num_spaces_left,
-                                    uint num_spaces_right) const;
-
     boost::property_tree::ptree generate_property_tree(
             const std::vector<Data_Type> &datatypes_for_writing) const;
+
+    void distribute_metadata(
+            std::vector<std::pair<std::string, tablator::Property>>
+                    &resource_element_labeled_properties,
+            std::vector<tablator::Property> &resource_element_trailing_infos,
+            tablator::ATTRIBUTES &resource_element_attributes,
+            std::vector<tablator::Property> &table_element_trailing_infos,
+            tablator::ATTRIBUTES &table_element_attributes,
+            const std::vector<std::pair<std::string, tablator::Property>>
+                    &label_prop_pairs);
 };
 }  // namespace tablator

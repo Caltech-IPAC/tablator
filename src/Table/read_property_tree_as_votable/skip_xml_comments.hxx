@@ -1,5 +1,6 @@
-#include <boost/property_tree/xml_parser.hpp>
+#pragma once
 
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace tablator {
 inline boost::property_tree::ptree::const_iterator skip_xml_comments(

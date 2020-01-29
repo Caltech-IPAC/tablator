@@ -1,5 +1,6 @@
 #include "../../Table.hxx"
 
+#include "read_resource/VOTable_Field.hxx"  // JTODO because of read_field()
 #include "skip_xml_comments.hxx"
 
 /// This only parses VOTable v1.3.
@@ -23,14 +24,13 @@ void tablator::Table::read_property_tree_as_votable(
         }
         ++child;
     }
-
     if (!votable_property.empty()) {
-        add_labeled_property(std::make_pair(VOTABLE, votable_property));
+        add_labeled_property(VOTABLE, votable_property);
     }
 
     child = skip_xml_comments(child, end);
     if (child != end && child->first == DESCRIPTION) {
-        add_comment(child->second.get_value<std::string>());
+        set_description(child->second.get_value<std::string>());
         ++child;
     }
     child = skip_xml_comments(child, end);
@@ -39,12 +39,15 @@ void tablator::Table::read_property_tree_as_votable(
         /// information in RESOURCE and deprecated since version 1.1.
         ++child;
     }
+
     child = skip_xml_comments(child, end);
     while (child != end && child->first != RESOURCE) {
-        if (child->first == COOSYS || child->first == PARAM || child->first == INFO) {
+        if ((child->first == COOSYS) || (child->first == INFO)) {
             add_labeled_property(child->first, read_property(child->second));
+        } else if (child->first == PARAM) {
+            add_param(read_field(child->second));
         } else if (child->first == GROUP) {
-            // FIXME: Implement groups
+            add_group_element(read_group(child->second));
         } else {
             throw std::runtime_error(
                     "In VOTABLE, expected COOSYS, GROUP, "
@@ -54,19 +57,33 @@ void tablator::Table::read_property_tree_as_votable(
         ++child;
         child = skip_xml_comments(child, end);
     }
+
     if (child == end) {
         throw std::runtime_error("Missing RESOURCE in VOTABLE");
     } else {
-        read_resource(child->second);
+        add_resource_element(read_resource(child->second, true /* is_first */));
     }
     ++child;
     child = skip_xml_comments(child, end);
-    if (child != end && child->first == INFO) {
-        add_labeled_property(child->first, read_property(child->second));
+
+    // read secondary resources
+    while (child != end && child->first == RESOURCE) {
+        add_resource_element(read_resource(child->second, false /* is_first */));
         ++child;
+        child = skip_xml_comments(child, end);
     }
-    child = skip_xml_comments(child, end);
-    if (child != end) {
-        throw std::runtime_error("Unexpected extra node at the end: " + child->first);
+
+    while (child != end) {
+        if (child->first == INFO) {
+            auto curr_attributes = extract_attributes(child->second);
+            add_trailing_info(Property(curr_attributes));
+        } else {
+            throw std::runtime_error(
+                    "In VOTABLE, expected INFO tag, if anything, "
+                    "but got: " +
+                    child->first);
+        }
+        ++child;
+        child = skip_xml_comments(child, end);
     }
 }

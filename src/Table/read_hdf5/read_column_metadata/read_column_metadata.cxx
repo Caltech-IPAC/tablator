@@ -1,6 +1,7 @@
 #include "../../../Table.hxx"
 
 #include "../../../H5_to_Data_Type.hxx"
+#include "../../../Utils/Vector_Utils.hxx"
 #include "../../../string_to_Data_Type.hxx"
 #include "../../HDF5_Attribute.hxx"
 #include "../../HDF5_Column.hxx"
@@ -61,13 +62,19 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
 
         std::vector<std::pair<std::string, std::string> > links;
         hvl_t &hdf5_links(hdf5_column.field_properties.links);
-        for (size_t link = 0; link < hdf5_links.len; ++link) {
-            HDF5_Attribute &a(reinterpret_cast<HDF5_Attribute *>(hdf5_links.p)[link]);
+        for (size_t idx = 0; idx < hdf5_links.len; ++idx) {
+            HDF5_Attribute &a(reinterpret_cast<HDF5_Attribute *>(hdf5_links.p)[idx]);
             links.emplace_back(std::string(a.name), std::string(a.value));
         }
 
-        Field_Properties field_properties(hdf5_field_properties.description, attributes,
-                                          values, links);
+        Field_Properties field_properties =
+                Field_Properties::Builder()
+                        .add_description(hdf5_field_properties.description)
+                        .add_attributes(attributes)
+                        .add_values(values)
+                        .add_links(links)
+                        .build();
+
         result.emplace_back(hdf5_column.name, string_to_Data_Type(hdf5_column.type),
                             hdf5_column.array_size, field_properties);
     }

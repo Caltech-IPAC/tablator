@@ -27,23 +27,62 @@ void tablator::Table::write_hdf5_attributes(H5::DataSet &table) const {
     std::vector<std::vector<const char *> > strings;
     std::vector<HDF5_Property> hdf5_properties;
 
-    for (auto &property : get_labeled_properties()) {
-        auto &p = property.second;
+    // Combine and write properties/attributes/trailing_info_lists for
+    // all levels at which they are defined.
+    // JTODO function to do all the combining
+    auto combined_labeled_properties = combine_labeled_properties_all_levels();
+    const auto combined_labeled_trailing_info_lists =
+            combine_trailing_info_lists_all_levels();
+    const auto combined_labeled_attributes = combine_attributes_all_levels();
 
-        if (!p.empty()) {
+    combined_labeled_properties.insert(combined_labeled_properties.end(),
+                                       combined_labeled_trailing_info_lists.begin(),
+                                       combined_labeled_trailing_info_lists.end());
+    combined_labeled_properties.insert(combined_labeled_properties.end(),
+                                       combined_labeled_attributes.begin(),
+                                       combined_labeled_attributes.end());
+
+    for (auto &label_and_prop : combined_labeled_properties) {
+        const auto &label = label_and_prop.first;
+        const auto &prop = label_and_prop.second;
+
+        if (!prop.empty()) {
             strings.emplace_back();
             std::vector<const char *> &sub_vector = *strings.rbegin();
-            for (auto &a : p.get_attributes()) {
-                sub_vector.push_back(a.first.c_str());
-                sub_vector.push_back(a.second.c_str());
+            for (auto &att : prop.get_attributes()) {
+                sub_vector.push_back(att.first.c_str());
+                sub_vector.push_back(att.second.c_str());
             }
 
-            hvl_t atts;
-            atts.len = sub_vector.size() / 2;
-            atts.p = sub_vector.data();
-            hdf5_properties.emplace_back(property.first.c_str(), p.get_value().c_str(), atts);
+            hvl_t hvl_atts;
+            hvl_atts.len = sub_vector.size() / 2;
+            hvl_atts.p = sub_vector.data();
+            hdf5_properties.emplace_back(label.c_str(), prop.get_value().c_str(),
+                                         hvl_atts);
         }
     }
+
+
+    const std::string empty_string = "";
+    const ATTRIBUTES &resource_element_attributes =
+            get_main_resource_element().get_attributes();
+    if (!resource_element_attributes.empty()) {
+        strings.emplace_back();
+        std::vector<const char *> &sub_vector = *strings.rbegin();
+        for (const auto &att : resource_element_attributes) {
+            const std::string new_name = XMLATTR_DOT + att.first;
+            sub_vector.push_back(att.first.c_str());
+            sub_vector.push_back(att.second.c_str());
+
+
+            hvl_t hvl_atts;
+            hvl_atts.len = sub_vector.size() / 2;
+            hvl_atts.p = sub_vector.data();
+            hdf5_properties.emplace_back("VOTABLE.RESOURCE.ATTR_MARKER",
+                                         empty_string.c_str(), hvl_atts);
+        }
+    }
+
 
     hvl_t hdf5_props;
     hdf5_props.len = hdf5_properties.size();

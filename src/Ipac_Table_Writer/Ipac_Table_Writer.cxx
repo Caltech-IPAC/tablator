@@ -287,13 +287,21 @@ void generate_and_write_default_comments(
         const std::vector<std::string> &json_comments) {
     const auto &columns = table.get_columns();
     const auto &comments = table.get_comments();
+    const auto &table_element_description = table.get_resource_elements()
+                                                    .at(0)
+                                                    .get_table_elements()
+                                                    .at(0)
+                                                    .get_description();
+    std::vector<std::string> description_vec;
+    boost::split(description_vec, table_element_description, boost::is_any_of("\n"));
+
     for (size_t i = 1; i < columns.size(); ++i) {
         const auto &field_props = columns[i].get_field_properties();
-        const auto prop_attributes = field_props.get_attributes();
-        if (!prop_attributes.empty() || !field_props.get_description().empty()) {
+        const auto field_prop_attributes = field_props.get_attributes();
+        if (!field_prop_attributes.empty() || !field_props.get_description().empty()) {
             std::string col_comment(columns[i].get_name());
-            const auto unit = field_props.get_attributes().find("unit");
-            if (unit != prop_attributes.end() && !unit->second.empty()) {
+            const auto unit = field_prop_attributes.find(tablator::UNIT);
+            if (unit != field_prop_attributes.end() && !unit->second.empty()) {
                 col_comment.append(" (").append(unit->second).append(")");
                 boost::replace_if(col_comment, boost::is_any_of(tablator::NEWLINES),
                                   ' ');
@@ -301,7 +309,9 @@ void generate_and_write_default_comments(
 
             if (find(comments.begin(), comments.end(), col_comment) != comments.end() ||
                 find(json_comments.begin(), json_comments.end(), col_comment) !=
-                        json_comments.end()) {
+                        json_comments.end() ||
+                find(description_vec.begin(), description_vec.end(), col_comment) !=
+                        description_vec.end()) {
                 continue;
             }
 
@@ -338,27 +348,65 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
     os << "\\" << tablator::Table::ROWS_RETRIEVED_KEYWORD << " = " << num_requested_rows
        << "\n";
 
+    const auto resource_elements = table.get_resource_elements();
+    auto &resource_attributes = resource_elements.at(0).get_attributes();
+    for (auto &att_pair : resource_attributes) {
+        write_keyword_header_line(os, att_pair.first, att_pair.second);
+    }
+
+    // Iterate through resource-level properties.
+    auto &labeled_resource_element_properties =
+            resource_elements.at(0).get_labeled_properties();
+    for (auto &name_and_property : labeled_resource_element_properties) {
+        const auto &label = name_and_property.first;
+        auto &prop = name_and_property.second;
+        const auto &prop_attributes = prop.get_attributes();
+
+        const auto name_iter = prop_attributes.find(ATTR_NAME);
+        const auto value_iter = prop_attributes.find(ATTR_VALUE);
+
+        if (boost::equals(label, INFO) && prop_attributes.size() == 2 &&
+            (name_iter != prop_attributes.end()) &&
+            value_iter != prop_attributes.end()) {
+            // e.g. if we converted from IPAC format to VOTable and are now converting
+            // back
+            write_keyword_header_line(os, name_iter->second, value_iter->second);
+        } else if (!prop_attributes.empty()) {
+            for (const auto &attr_pair : prop_attributes) {
+                write_keyword_header_line(os, attr_pair.first, attr_pair.second);
+            }
+        }
+
+        if (!label.empty() && !prop.get_value().empty()) {
+            write_keyword_header_line(os, label, prop.get_value());
+        } else if (!prop.get_value().empty()) {
+            write_keyword_header_line(os, ATTR_VALUE, prop.get_value());
+        }
+    }
+
     const auto &comments = table.get_comments();
     std::vector<std::string> json_comments;
 
-    // Iterate through properties, distinguishing between keywords and json5-ified
-    // comments. Write keywords here and save json_comments for a later loop.
-    for (auto &name_and_property :
-         table.get_labeled_properties()) {  // JTODO which level
-        auto &p = name_and_property.second;
-        if (!p.get_value().empty()) {
+    // Iterate through top-level properties, distinguishing between keywords and
+    // json5-ified comments. Write keywords here and save json_comments for a later
+    // loop.
+    // JTODO What about params?
+    for (auto &name_and_property : table.get_labeled_properties()) {
+        auto &prop = name_and_property.second;
+        if (!prop.get_value().empty()) {
             if (boost::equals(name_and_property.first, JSON_DESC_LABEL)) {
                 // This is a comment (or concatenated comments) from the Json5 format.
                 // Err on the side of respecting newlines rather than replacing with
                 // spaces.
-                store_json_comments(p.get_value(), comments, json_comments);
+                store_json_comments(prop.get_value(), comments, json_comments);
             } else {
-                write_keyword_header_line(os, name_and_property.first, p.get_value());
+                write_keyword_header_line(os, name_and_property.first,
+                                          prop.get_value());
             }
         }
-        auto &a = p.get_attributes();
-        auto name(a.find("name")), value(a.find("value"));
-        if (a.size() == 2 && name != a.end() && value != a.end()) {
+        auto &atts = prop.get_attributes();
+        auto name(atts.find(ATTR_NAME)), value(atts.find(ATTR_VALUE));
+        if (atts.size() == 2 && name != atts.end() && value != atts.end()) {
             // We wrote these at the top of this function.
             if (boost::equals(name->second, tablator::Table::FIXLEN_KEYWORD) ||
                 boost::equals(name->second, tablator::Table::ROWS_RETRIEVED_KEYWORD)) {
@@ -366,7 +414,7 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
             }
             write_keyword_header_line(os, name->second, value->second);
         } else {
-            for (auto &attr : a) {
+            for (auto &attr : atts) {
                 write_keyword_header_line(
                         os, name_and_property.first + "." + attr.first, attr.second);
             }
@@ -374,8 +422,16 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
     }
 
     // Stream json_comments followed by comments.
-    write_comment_lines(os, json_comments);
+    if (!table.get_description().empty()) {
+        write_comment_line_with_newlines(os, table.get_description());
+    }
     write_comment_lines(os, comments);
+    const auto table_element_description =
+            resource_elements.at(0).get_table_elements().at(0).get_description();
+
+    if (!table_element_description.empty()) {
+        write_comment_line_with_newlines(os, table_element_description);
+    }
 
     // Add default comments (column name with unit and description) if they aren't
     // present already.

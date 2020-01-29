@@ -1,5 +1,6 @@
 #include "../../../../../../Table.hxx"
 
+#include "../../../../../../Data_Element.hxx"
 #include "../../../VOTable_Field.hxx"
 
 namespace tablator {
@@ -9,8 +10,11 @@ void compute_column_array_sizes(const std::vector<uint8_t> &stream,
                                 std::vector<size_t> &column_array_sizes,
                                 size_t &num_rows);
 
-void Table::read_binary2(const boost::property_tree::ptree &binary2,
-                         const std::vector<VOTable_Field> &fields) {
+
+//==============================================================
+
+Data_Element Table::read_binary2(const boost::property_tree::ptree &binary2,
+                                 const std::vector<VOTable_Field> &fields) {
     std::vector<size_t> column_array_sizes(fields.size(), 1);
     const size_t null_flags_size((fields.size() + 6) / 8);
     column_array_sizes.at(0) = null_flags_size;
@@ -54,10 +58,10 @@ void Table::read_binary2(const boost::property_tree::ptree &binary2,
         compute_column_array_sizes(stream, fields, column_array_sizes, num_rows);
         rows_per_stream.push_back(num_rows);
     }
-    auto &columns = get_columns();
-    auto &offsets = get_offsets();
-    auto &data = get_data();
 
+    std::vector<Column> columns;
+    std::vector<size_t> offsets = {0};
+    std::vector<uint8_t> data;
 
     for (std::size_t c = 0; c < fields.size(); ++c)
         append_column(columns, offsets, fields.at(c).get_name(), fields[c].get_type(),
@@ -66,5 +70,7 @@ void Table::read_binary2(const boost::property_tree::ptree &binary2,
     for (std::size_t stream = 0; stream < streams.size(); ++stream)
         append_data_from_stream(data, columns, offsets, streams[stream], fields,
                                 rows_per_stream[stream]);
+
+    return Data_Element(columns, offsets, data);
 }
 }  // namespace tablator

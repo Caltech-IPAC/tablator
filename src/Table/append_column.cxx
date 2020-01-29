@@ -1,5 +1,6 @@
 #include "../Table.hxx"
 
+// JTODO needn't belong to Table
 void tablator::Table::append_column(std::vector<Column> &columns,
                                     std::vector<size_t> &offsets,
                                     const Column &column) {

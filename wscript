@@ -49,6 +49,7 @@ def build(bld):
              'src/Table/read_property_tree_as_votable/extract_attributes.cxx',
              'src/Table/read_property_tree_as_votable/read_property_tree_as_votable.cxx',
              'src/Table/read_property_tree_as_votable/read_property.cxx',
+             'src/Table/read_property_tree_as_votable/read_group.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_resource.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_table/read_table.cxx',
              'src/Table/read_property_tree_as_votable/read_resource/read_field/read_field.cxx',

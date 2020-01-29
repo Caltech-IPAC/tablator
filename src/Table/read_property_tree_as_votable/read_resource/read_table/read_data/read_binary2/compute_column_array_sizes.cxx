@@ -1,10 +1,10 @@
+#include <algorithm>
+#include <boost/spirit/include/qi.hpp>
+
 #include "../../../../../../data_size.hxx"
 #include "../../../VOTable_Field.hxx"
 #include "is_null_MSb.hxx"
 
-#include <boost/spirit/include/qi.hpp>
-
-#include <algorithm>
 
 namespace tablator {
 void compute_column_array_sizes(const std::vector<uint8_t> &stream,

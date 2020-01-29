@@ -1,8 +1,22 @@
+#include "../../../Table.hxx"
+
 #include <array>
 
 #include "../../../Common.hxx"
 #include "../../../Data_Type_to_H5.hxx"
-#include "../../../Table.hxx"
+
+namespace {
+void write_description(const H5::DataSet &h5_table, const std::string &label,
+                       const std::string &desc_str) {
+    if (!desc_str.empty()) {
+        H5::StrType str_type(0, desc_str.size());
+        H5::DataSpace attribute_space(H5S_SCALAR);
+        H5::Attribute attribute =
+                h5_table.createAttribute(label, str_type, attribute_space);
+        attribute.write(str_type, desc_str.c_str());
+    }
+}
+}  // namespace
 
 namespace tablator {
 void write_hdf5_columns(const std::vector<Column> &columns,
@@ -20,14 +34,14 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     std::array<hsize_t, 1> dims = {{num_rows()}};
     H5::DataSpace dataspace(dims.size(), dims.data());
 
+    const auto &columns = get_columns();
+    const auto &offsets = get_offsets();
+
     std::vector<H5::StrType> string_types;
     std::vector<H5::ArrayType> array_types;
     H5::CompType compound_type(row_size());
     std::vector<std::string> unique_names;
-    const auto &columns = get_columns();
-    const auto &offsets = get_offsets();
-    const auto &data = get_data();
-    const auto &comments = get_comments();
+
     unique_names.reserve(columns.size());
     for (auto &column : columns) {
         unique_names.push_back(column.get_name());
@@ -55,20 +69,30 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     }
     // FIXME: This needs to be generalized for multiple tables
     H5::DataSet h5_table{group.createDataSet("TABLE_0", compound_type, dataspace)};
-    if (!comments.empty()) {
-        std::string description;
-        for (auto &c : comments) description += c + '\n';
+
+    const auto &comments = get_comments();
+    const auto &description = get_description();
+    if (!description.empty() || !comments.empty()) {
+        std::string description_and_comments;
         if (!description.empty()) {
-            description.resize(description.size() - 1);
-            H5::StrType str_type(0, description.size());
-            H5::DataSpace attribute_space(H5S_SCALAR);
-            H5::Attribute attribute =
-                    h5_table.createAttribute(DESCRIPTION, str_type, attribute_space);
-            attribute.write(str_type, description.c_str());
+            description_and_comments.assign(description + "\n");
         }
+        for (auto &c : comments) {
+            description_and_comments += c + '\n';
+        }
+        description_and_comments.resize(description_and_comments.size() - 1);
+        write_description(h5_table, DESCRIPTION, description_and_comments);
     }
+
+    write_description(h5_table, RESOURCE_ELEMENT_DESCRIPTION,
+                      get_main_resource_element().get_description());
+    write_description(h5_table, TABLE_ELEMENT_DESCRIPTION,
+                      get_main_table_element().get_description());
+
     write_hdf5_attributes(h5_table);
     write_hdf5_columns(columns, FIELD, h5_table);
+    // JTODO Top-level params? (Master doesn't.)
     write_hdf5_columns(get_table_element_params(), PARAM, h5_table);
-    h5_table.write(data.data(), compound_type);
+
+    h5_table.write(get_data().data(), compound_type);
 }

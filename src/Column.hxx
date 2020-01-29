@@ -39,6 +39,17 @@ public:
         field_properties_ = fp;
     }
 
+    inline void add_field_property_attribute(
+            const std::pair<std::string, std::string> &att_pair) {
+        get_field_properties().add_attribute(att_pair);
+    }
+
+    inline void add_field_property_attribute(const std::string &name,
+                                             const std::string &value) {
+        add_field_property_attribute(std::make_pair(name, value));
+    }
+
+
 private:
     std::string name_;
     Data_Type type_;

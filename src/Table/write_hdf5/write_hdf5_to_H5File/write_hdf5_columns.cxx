@@ -1,5 +1,6 @@
 #include "../../../Column.hxx"
 #include "../../../Common.hxx"
+#include "../../../Field_Properties.hxx"
 #include "../../HDF5_Attribute.hxx"
 #include "../../HDF5_Column.hxx"
 #include "../../HDF5_Property.hxx"
@@ -44,7 +45,7 @@ void write_hdf5_columns(const std::vector<Column> &columns,
     H5::CompType hdf5_values(sizeof(HDF5_Values));
     hdf5_values.insertMember("min", HOFFSET(HDF5_Values, min), hdf5_min_max);
     hdf5_values.insertMember("max", HOFFSET(HDF5_Values, max), hdf5_min_max);
-    hdf5_values.insertMember("id", HOFFSET(HDF5_Values, ID), hdf5_string);
+    hdf5_values.insertMember("ID", HOFFSET(HDF5_Values, ID), hdf5_string);
     hdf5_values.insertMember("type", HOFFSET(HDF5_Values, type), hdf5_string);
     hdf5_values.insertMember("null", HOFFSET(HDF5_Values, null), hdf5_string);
     hdf5_values.insertMember("ref", HOFFSET(HDF5_Values, ref), hdf5_string);

@@ -3,53 +3,116 @@
 #include "../skip_xml_comments.hxx"
 #include "VOTable_Field.hxx"
 
-void tablator::Table::read_resource(const boost::property_tree::ptree &resource) {
-    auto child = resource.begin();
-    auto end = resource.end();
+tablator::Resource_Element tablator::Table::read_resource(
+        const boost::property_tree::ptree &resource_tree, bool is_first) {
+    auto child = resource_tree.begin();
+    auto end = resource_tree.end();
 
-    add_labeled_property(RESOURCE, Property(extract_attributes(resource)));
+    const auto top_attributes = extract_attributes(resource_tree);
     child = skip_xml_comments(child, end);
+
+    // JTODO Assume XMLATTRs are all at front?
     while (child != end && child->first == XMLATTR) {
         ++child;
         child = skip_xml_comments(child, end);
     }
+
+    std::string description;
     if (child != end && child->first == DESCRIPTION) {
-        add_labeled_property("RESOURCE.DESCRIPTION",
-                             child->second.get_value<std::string>());
+        description = child->second.get_value<std::string>();
         ++child;
     }
     child = skip_xml_comments(child, end);
+
+    std::vector<std::pair<std::string, Property>> labeled_properties;
     while (child != end && child->first == INFO) {
-        add_labeled_property("RESOURCE.INFO", read_property(child->second));
+        labeled_properties.emplace_back(
+                std::make_pair(child->first, read_property(child->second)));
         ++child;
         child = skip_xml_comments(child, end);
     }
+
+    std::vector<Column> params;
+    std::vector<Group_Element> group_elements;
     while (child != end) {
         if (child->first == COOSYS) {
-            add_labeled_property("RESOURCE.COOSYS", read_property(child->second));
+            labeled_properties.emplace_back(
+                    std::make_pair(child->first, read_property(child->second)));
         } else if (child->first == PARAM) {
-            add_resource_element_param(read_field(child->second));
+            params.emplace_back(read_field(child->second));
         } else if (child->first == GROUP) {
-            // FIXME: Implement groups
+            group_elements.emplace_back(read_group(child->second));
+        } else if (child->first == INFO) {
+            // JTODO INFO doesn't belong here unless middle is missing and this is a
+            // trailer
+            throw std::runtime_error(
+                    "Resource_Element, expected PARAM or GROUP but found INFO");
         } else {
             break;
         }
         ++child;
         child = skip_xml_comments(child, end);
     }
-    /// We only allow one TABLE per RESOURCE
-    auto &columns = get_columns();
-    for (; child != end; ++child) {
+
+    while (child != end) {
         if (child->first == LINK) {
-            add_labeled_property("RESOURCE.LINK", read_property(child->second));
-        } else if (child->first == "TABLE") {
-            if (!columns.empty())
+            auto curr_attributes = extract_attributes(child->second);
+            labeled_properties.emplace_back(
+                    std::make_pair(child->first, Property(curr_attributes)));
+        } else if (child->first == TABLE) {
+            break;
+        } else {
+            throw std::runtime_error(
+                    "Resource_Element, expected TABLE or LINK but found " +
+                    child->first);
+        }
+        ++child;
+        child = skip_xml_comments(child, end);
+    }
+
+    // We only allow one TABLE in the first RESOURCE and none in the others.
+    std::vector<Table_Element> table_elements;
+    while (child != end) {
+        if (child->first == TABLE) {
+            if (!is_first) {
+                throw std::runtime_error(
+                        "TABLE element is supported only in the first RESOURCE.");
+            }
+            if (!table_elements.empty()) {
                 throw std::runtime_error(
                         "Multiple TABLE elements are not implemented.");
-            read_table(child->second);
+            }
+            table_elements.emplace_back(read_table(child->second));
         } else if (child->first == INFO) {
-            add_labeled_property("RESOURCE.INFO", read_property(child->second));
+            break;
+        } else {
+            throw std::runtime_error(
+                    "Resource_Element, expected TABLE or INFO but found " +
+                    child->first);
         }
-        /// skip <xmlattr> and <xmlcomment>
+        ++child;
+        child = skip_xml_comments(child, end);
     }
+
+    std::vector<Property> trailing_info_list;
+    while (child != end) {
+        if (child->first == INFO) {
+            trailing_info_list.emplace_back(read_property(child->second));
+        } else {
+            throw std::runtime_error(
+                    std::string("Expected INFO tag, if anything, but found ") +
+                    child->first);
+        }
+        ++child;
+        child = skip_xml_comments(child, end);
+    }
+
+    return tablator::Resource_Element::Builder(table_elements)
+            .add_attributes(top_attributes)
+            .add_description(description)
+            .add_labeled_properties(labeled_properties)
+            .add_trailing_info_list(trailing_info_list)
+            .add_group_elements(group_elements)
+            .add_params(params)
+            .build();
 }
