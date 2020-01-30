@@ -3,7 +3,7 @@
 #include "../../../../../../Common.hxx"
 #include "../../../../../../Data_Element.hxx"
 #include "../../../../../../to_string.hxx"
-#include "../../../../../insert_ascii_in_row.hxx"
+#include "../../../../../../Utils/insert_ascii_in_row.hxx"
 #include "../../../../skip_xml_comments.hxx"
 #include "../../../VOTable_Field.hxx"
 

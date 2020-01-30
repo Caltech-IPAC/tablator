@@ -4,7 +4,7 @@
 
 #include "../../Table.hxx"
 #include "../../to_string.hxx"
-#include "../insert_ascii_in_row.hxx"
+#include "../../Utils/insert_ascii_in_row.hxx"
 
 namespace {
 std::vector<size_t> get_ipac_column_widths(
