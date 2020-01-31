@@ -3,7 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 
-#include "../../../../../../Data_Type.hxx"
+#include "../../../../../Data_Type.hxx"
 
 namespace tablator {
 size_t count_elements(const std::string &entry, const Data_Type &type) {

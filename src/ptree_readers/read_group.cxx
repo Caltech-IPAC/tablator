@@ -1,20 +1,21 @@
-#include "../../Common.hxx"
-#include "../../Table.hxx"
-#include "read_resource/VOTable_Field.hxx"  // JTODO
-#include "skip_xml_comments.hxx"
+#include "../ptree_readers.hxx"
 
-tablator::Group_Element tablator::Table::read_group(
+#include "../Column.hxx"
+#include "../Common.hxx"
+#include "read_resource/VOTable_Field.hxx"  // JTODO
+
+tablator::Group_Element tablator::ptree_readers::read_group(
         const boost::property_tree::ptree &group_tree) {
     auto child = group_tree.begin();
     auto end = group_tree.end();
 
     const auto &attributes = extract_attributes(group_tree);
-    child = skip_xml_comments(child, end);
+    child = ptree_readers::skip_xml_comments(child, end);
 
     // JTODO Assume XMLATTRs are all at front?
     while (child != end && child->first == XMLATTR) {
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::string description;
@@ -40,7 +41,7 @@ tablator::Group_Element tablator::Table::read_group(
             break;
         }
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
     return Group_Element::Builder()
             .add_attributes(attributes)

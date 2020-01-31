@@ -86,8 +86,9 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
         H5::DataType datatype(compound.getMemberDataType(i));
         std::string name(compound.getMemberName(i));
         if (datatype.getClass() == H5T_STRING) {
-            append_column(columns, offsets, name, Data_Type::CHAR, datatype.getSize(),
-                          column_metadata[i].get_field_properties());
+            tablator::append_column(columns, offsets, name, Data_Type::CHAR,
+                                    datatype.getSize(),
+                                    column_metadata[i].get_field_properties());
         } else if (datatype.getClass() == H5T_ARRAY) {
             auto array_type = compound.getMemberArrayType(i);
             hsize_t ndims = array_type.getArrayNDims();
@@ -99,15 +100,16 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                         std::to_string(ndims));
             }
             array_type.getArrayDims(&ndims);
-            append_column(columns, offsets, name, H5_to_Data_Type(datatype), ndims,
-                          column_metadata[i].get_field_properties());
+            tablator::append_column(columns, offsets, name, H5_to_Data_Type(datatype),
+                                    ndims, column_metadata[i].get_field_properties());
         } else {
-            append_column(columns, offsets, name, H5_to_Data_Type(datatype), 1,
-                          column_metadata[i].get_field_properties());
+            tablator::append_column(columns, offsets, name, H5_to_Data_Type(datatype),
+                                    1, column_metadata[i].get_field_properties());
         }
     }
     std::vector<uint8_t> data;
-    data.resize(row_size(offsets) * dataset.getSpace().getSimpleExtentNpoints());
+    data.resize(tablator::row_size(offsets) *
+                dataset.getSpace().getSimpleExtentNpoints());
     dataset.read(data.data(), compound);
 
     std::vector<Table_Element> table_elements;

@@ -1,12 +1,13 @@
-#include "../../Table.hxx"
+#include "../Table.hxx"
 
-#include "read_resource/VOTable_Field.hxx"  // JTODO because of read_field()
-#include "skip_xml_comments.hxx"
+#include "../ptree_readers.hxx"
+#include "../ptree_readers/read_resource/VOTable_Field.hxx"  // JTODO because of read_field()
 
-/// This only parses VOTable v1.3.
 
-void tablator::Table::read_property_tree_as_votable(
-        const boost::property_tree::ptree &tree) {
+// This only parses VOTable v1.3.  // JTODO 1.4 now?
+
+void tablator::ptree_readers::read_property_tree_as_votable(
+        tablator::Table &table, const boost::property_tree::ptree &tree) {
     const auto votable = tree.get_child(VOTABLE);
     auto child = votable.begin();
     auto end = votable.end();
@@ -25,29 +26,30 @@ void tablator::Table::read_property_tree_as_votable(
         ++child;
     }
     if (!votable_property.empty()) {
-        add_labeled_property(VOTABLE, votable_property);
+        table.add_labeled_property(VOTABLE, votable_property);
     }
 
-    child = skip_xml_comments(child, end);
+    child = ptree_readers::skip_xml_comments(child, end);
     if (child != end && child->first == DESCRIPTION) {
-        set_description(child->second.get_value<std::string>());
+        table.set_description(child->second.get_value<std::string>());
         ++child;
     }
-    child = skip_xml_comments(child, end);
+    child = ptree_readers::skip_xml_comments(child, end);
     if (child != end && child->first == DEFINITIONS) {
         /// Deliberately ignore DEFINITIONS.  They are duplicated by the
         /// information in RESOURCE and deprecated since version 1.1.
         ++child;
     }
 
-    child = skip_xml_comments(child, end);
+    child = ptree_readers::skip_xml_comments(child, end);
     while (child != end && child->first != RESOURCE) {
         if ((child->first == COOSYS) || (child->first == INFO)) {
-            add_labeled_property(child->first, read_property(child->second));
+            table.add_labeled_property(child->first,
+                                       ptree_readers::read_property(child->second));
         } else if (child->first == PARAM) {
-            add_param(read_field(child->second));
+            table.add_param(ptree_readers::read_field(child->second));
         } else if (child->first == GROUP) {
-            add_group_element(read_group(child->second));
+            table.add_group_element(ptree_readers::read_group(child->second));
         } else {
             throw std::runtime_error(
                     "In VOTABLE, expected COOSYS, GROUP, "
@@ -55,28 +57,30 @@ void tablator::Table::read_property_tree_as_votable(
                     child->first);
         }
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     if (child == end) {
         throw std::runtime_error("Missing RESOURCE in VOTABLE");
     } else {
-        add_resource_element(read_resource(child->second, true /* is_first */));
+        table.add_resource_element(
+                ptree_readers::read_resource(child->second, true /* is_first */));
     }
     ++child;
-    child = skip_xml_comments(child, end);
+    child = ptree_readers::skip_xml_comments(child, end);
 
     // read secondary resources
     while (child != end && child->first == RESOURCE) {
-        add_resource_element(read_resource(child->second, false /* is_first */));
+        table.add_resource_element(
+                ptree_readers::read_resource(child->second, false /* is_first */));
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     while (child != end) {
         if (child->first == INFO) {
-            auto curr_attributes = extract_attributes(child->second);
-            add_trailing_info(Property(curr_attributes));
+            auto curr_attributes = ptree_readers::extract_attributes(child->second);
+            table.add_trailing_info(Property(curr_attributes));
         } else {
             throw std::runtime_error(
                     "In VOTABLE, expected INFO tag, if anything, "
@@ -84,6 +88,6 @@ void tablator::Table::read_property_tree_as_votable(
                     child->first);
         }
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 }

@@ -9,7 +9,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
     std::vector<size_t> new_offsets = {0};
     std::vector<Column> new_columns(columns);
 
-    size_t old_row_size(row_size(offsets));
+    size_t old_row_size(tablator::row_size(offsets));
     size_t new_row_size(0);
 
     for (size_t i = 0; i < columns.size(); ++i) {

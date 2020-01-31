@@ -5,9 +5,9 @@ void tablator::Table::create_types_from_ipac_headers(
         std::vector<Column> &columns, std::vector<size_t> &offsets,
         const std::array<std::vector<std::string>, 4> &ipac_columns,
         const std::vector<size_t> &ipac_column_widths) {
-    append_column(columns, offsets, ipac_columns.at(0).at(0), Data_Type::UINT8_LE,
-                  ipac_column_widths.at(0),
-                  Field_Properties(null_bitfield_flags_description));
+    tablator::append_column(columns, offsets, ipac_columns.at(0).at(0),
+                            Data_Type::UINT8_LE, ipac_column_widths.at(0),
+                            Field_Properties(null_bitfield_flags_description));
 
     size_t num_columns = ipac_columns[0].size();
     for (size_t i = 1; i < num_columns; ++i) {

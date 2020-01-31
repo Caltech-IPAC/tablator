@@ -1,6 +1,5 @@
-#include "../../../../../Table.hxx"
+#include "../../../../ptree_readers.hxx"
 
-#include "../../../skip_xml_comments.hxx"
 #include "../../VOTable_Field.hxx"
 
 #include <algorithm>
@@ -8,7 +7,7 @@
 void validate_tail(boost::property_tree::ptree::const_iterator &tail_begin,
                    boost::property_tree::ptree::const_iterator &tail_end) {
     boost::property_tree::ptree::const_iterator child = tail_begin;
-    child = tablator::skip_xml_comments(child, tail_end);
+    child = tablator::ptree_readers::skip_xml_comments(child, tail_end);
     if (child != tail_end) {
         throw std::runtime_error("Unexpected element " + child->first +
                                  " at end of RESOURCE.TABLE.DATA.");
@@ -17,7 +16,7 @@ void validate_tail(boost::property_tree::ptree::const_iterator &tail_begin,
 
 //=================================================================
 
-tablator::Data_Element tablator::Table::read_data(
+tablator::Data_Element tablator::ptree_readers::read_data(
         const boost::property_tree::ptree &data,
         const std::vector<VOTable_Field> &fields) {
     auto child = data.begin();

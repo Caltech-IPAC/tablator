@@ -116,9 +116,9 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                                                null_bitfield_flags_name &&
                                        table->column(1).type() == CCfits::Tbyte);
     if (!has_null_bitfield_flags) {
-        append_column(columns, offsets, null_bitfield_flags_name, Data_Type::UINT8_LE,
-                      (table->column().size() + 7) / 8,
-                      Field_Properties(null_bitfield_flags_description, {}));
+        tablator::append_column(columns, offsets, null_bitfield_flags_name,
+                                Data_Type::UINT8_LE, (table->column().size() + 7) / 8,
+                                Field_Properties(null_bitfield_flags_description, {}));
     }
 
     for (size_t i = 0; i < table->column().size(); ++i) {
@@ -127,60 +127,61 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         if (std::isdigit(c.format().at(0))) array_size = std::stoll(c.format());
         switch (c.type()) {
             case CCfits::Tlogical:
-                append_column(columns, offsets, c.name(), Data_Type::INT8_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(), Data_Type::INT8_LE,
+                                        array_size);
                 break;
             case CCfits::Tbyte:
-                append_column(columns, offsets, c.name(), Data_Type::UINT8_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(), Data_Type::UINT8_LE,
+                                        array_size);
                 break;
             case CCfits::Tshort:
-                append_column(columns, offsets, c.name(), Data_Type::INT16_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(), Data_Type::INT16_LE,
+                                        array_size);
                 break;
             case CCfits::Tushort:
-                append_column(columns, offsets, c.name(), Data_Type::UINT16_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(),
+                                        Data_Type::UINT16_LE, array_size);
                 break;
             case CCfits::Tint:
-                append_column(columns, offsets, c.name(), Data_Type::INT32_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(), Data_Type::INT32_LE,
+                                        array_size);
                 break;
             case CCfits::Tuint:
-                append_column(columns, offsets, c.name(), Data_Type::UINT32_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(),
+                                        Data_Type::UINT32_LE, array_size);
                 break;
             case CCfits::Tlong:
                 // The Tlong type code is used for 32-bit integer columns when reading.
-                append_column(columns, offsets, c.name(), Data_Type::INT32_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(), Data_Type::INT32_LE,
+                                        array_size);
                 break;
             case CCfits::Tulong:
                 // The Tulong type code is used for 32-bit unsigned integer columns when
                 // reading.
-                append_column(columns, offsets, c.name(), Data_Type::UINT32_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(),
+                                        Data_Type::UINT32_LE, array_size);
                 break;
             case CCfits::Tlonglong:
-                append_column(columns, offsets, c.name(), Data_Type::INT64_LE,
-                              array_size);
+                tablator::append_column(columns, offsets, c.name(), Data_Type::INT64_LE,
+                                        array_size);
                 break;
             case CCfits::Tfloat: {
                 Field_Properties nan_nulls;
                 nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<float>::quiet_NaN());
-                append_column(columns, offsets, c.name(), Data_Type::FLOAT32_LE,
-                              array_size, nan_nulls);
+                tablator::append_column(columns, offsets, c.name(),
+                                        Data_Type::FLOAT32_LE, array_size, nan_nulls);
             } break;
             case CCfits::Tdouble: {
                 Field_Properties nan_nulls;
                 nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<double>::quiet_NaN());
-                append_column(columns, offsets, c.name(), Data_Type::FLOAT64_LE,
-                              array_size, nan_nulls);
+                tablator::append_column(columns, offsets, c.name(),
+                                        Data_Type::FLOAT64_LE, array_size, nan_nulls);
             } break;
             case CCfits::Tstring:
-                append_column(columns, offsets, c.name(), Data_Type::CHAR, c.width());
+                tablator::append_column(columns, offsets, c.name(), Data_Type::CHAR,
+                                        c.width());
                 break;
             default:
                 throw std::runtime_error(
@@ -194,7 +195,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     // than 2^32 rows
 
     std::vector<uint8_t> data;
-    size_t row_size = tablator::Table::row_size(offsets);
+    size_t row_size = tablator::row_size(offsets);
     data.resize(table->rows() * row_size);
 
     // Exit early if there is no data in the table.  Otherwise CCfits

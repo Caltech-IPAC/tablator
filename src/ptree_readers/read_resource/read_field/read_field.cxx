@@ -1,5 +1,5 @@
 
-#include "../../../../Table.hxx"
+#include "../../../ptree_readers.hxx"
 
 #include "../VOTable_Field.hxx"
 
@@ -29,7 +29,7 @@ tablator::Data_Type string_to_Type(const std::string &s) {
 }
 }  // namespace
 
-tablator::VOTable_Field tablator::Table::read_field(
+tablator::VOTable_Field tablator::ptree_readers::read_field(
         const boost::property_tree::ptree &field) {
     auto child = field.begin();
     auto end = field.end();

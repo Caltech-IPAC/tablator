@@ -1,4 +1,4 @@
-#include "../../../../../../../Table.hxx"
+#include "../../../../../../ptree_readers.hxx"
 #include "../../../../VOTable_Field.hxx"
 #include "../is_null_MSb.hxx"
 
@@ -15,12 +15,12 @@ inline void insert_swapped(const size_t &column_offset, const Column &column,
                           stream, old_position, row);
 }
 
-void Table::append_data_from_stream(std::vector<uint8_t> &data,
-                                    const std::vector<Column> &columns,
-                                    const std::vector<size_t> &offsets,
-                                    const std::vector<uint8_t> &stream,
-                                    const std::vector<VOTable_Field> &fields,
-                                    size_t num_rows) {
+void ptree_readers::append_data_from_stream(std::vector<uint8_t> &data,
+                                            const std::vector<Column> &columns,
+                                            const std::vector<size_t> &offsets,
+                                            const std::vector<uint8_t> &stream,
+                                            const std::vector<VOTable_Field> &fields,
+                                            size_t num_rows) {
     const size_t null_flags_size((columns.size() + 6) / 8);
     size_t position(0);
     Row row(row_size(offsets));

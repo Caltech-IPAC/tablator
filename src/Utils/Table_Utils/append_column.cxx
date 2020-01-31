@@ -1,9 +1,7 @@
-#include "../Table.hxx"
+#include "../Table_Utils.hxx"
 
-// JTODO needn't belong to Table
-void tablator::Table::append_column(std::vector<Column> &columns,
-                                    std::vector<size_t> &offsets,
-                                    const Column &column) {
+void tablator::append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
+                             const Column &column) {
     if (offsets.empty()) {
         throw std::runtime_error("<offsets> is empty");
     }

@@ -1,20 +1,20 @@
-#include "../../../Table.hxx"
+#include "../../ptree_readers.hxx"
 
-#include "../skip_xml_comments.hxx"
+#include "../../Utils/Table_Utils.hxx"
 #include "VOTable_Field.hxx"
 
-tablator::Resource_Element tablator::Table::read_resource(
+tablator::Resource_Element tablator::ptree_readers::read_resource(
         const boost::property_tree::ptree &resource_tree, bool is_first) {
     auto child = resource_tree.begin();
     auto end = resource_tree.end();
 
     const auto top_attributes = extract_attributes(resource_tree);
-    child = skip_xml_comments(child, end);
+    child = ptree_readers::skip_xml_comments(child, end);
 
     // JTODO Assume XMLATTRs are all at front?
     while (child != end && child->first == XMLATTR) {
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::string description;
@@ -22,14 +22,14 @@ tablator::Resource_Element tablator::Table::read_resource(
         description = child->second.get_value<std::string>();
         ++child;
     }
-    child = skip_xml_comments(child, end);
+    child = ptree_readers::skip_xml_comments(child, end);
 
     std::vector<std::pair<std::string, Property>> labeled_properties;
     while (child != end && child->first == INFO) {
         labeled_properties.emplace_back(
                 std::make_pair(child->first, read_property(child->second)));
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::vector<Column> params;
@@ -51,7 +51,7 @@ tablator::Resource_Element tablator::Table::read_resource(
             break;
         }
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     while (child != end) {
@@ -67,7 +67,7 @@ tablator::Resource_Element tablator::Table::read_resource(
                     child->first);
         }
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     // We only allow one TABLE in the first RESOURCE and none in the others.
@@ -91,7 +91,7 @@ tablator::Resource_Element tablator::Table::read_resource(
                     child->first);
         }
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::vector<Property> trailing_info_list;
@@ -104,7 +104,7 @@ tablator::Resource_Element tablator::Table::read_resource(
                     child->first);
         }
         ++child;
-        child = skip_xml_comments(child, end);
+        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     return tablator::Resource_Element::Builder(table_elements)

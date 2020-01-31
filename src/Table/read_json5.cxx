@@ -2,6 +2,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "../Table.hxx"
+#include "../ptree_readers.hxx"
 
 void tablator::Table::read_json5(std::istream &input_stream) {
     json5_parser::Value parse_tree;
@@ -13,5 +14,5 @@ void tablator::Table::read_json5(std::istream &input_stream) {
     json5_parser::write(parse_tree, ss, json5_parser::none);
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(ss, tree);
-    read_property_tree_as_votable(tree);
+    ptree_readers::read_property_tree_as_votable(*this, tree);
 }

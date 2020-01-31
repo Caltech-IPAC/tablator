@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../Column.hxx"
+#include "../../Column.hxx"
 
 namespace tablator {
 /// This is almost the same as Column

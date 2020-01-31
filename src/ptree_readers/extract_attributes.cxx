@@ -1,8 +1,8 @@
-#include "../../Table.hxx"
+#include "../ptree_readers.hxx"
 
-#include "../../Common.hxx"
+#include "../Common.hxx"
 
-tablator::ATTRIBUTES tablator::Table::extract_attributes(
+tablator::ATTRIBUTES tablator::ptree_readers::extract_attributes(
         const boost::property_tree::ptree &node) {
     tablator::ATTRIBUTES attributes;
     for (auto &child : node) {

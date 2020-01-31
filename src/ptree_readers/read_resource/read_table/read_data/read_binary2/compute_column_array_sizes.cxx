@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <boost/spirit/include/qi.hpp>
 
-#include "../../../../../../data_size.hxx"
+#include "../../../../../data_size.hxx"
 #include "../../../VOTable_Field.hxx"
 #include "is_null_MSb.hxx"
 

@@ -1,17 +1,16 @@
-#include "../../../../../../Table.hxx"
+#include "../../../../../ptree_readers.hxx"
 
-#include "../../../../../../Common.hxx"
-#include "../../../../../../Data_Element.hxx"
-#include "../../../../../../to_string.hxx"
-#include "../../../../../../Utils/insert_ascii_in_row.hxx"
-#include "../../../../skip_xml_comments.hxx"
+#include "../../../../../Common.hxx"
+#include "../../../../../Data_Element.hxx"
+#include "../../../../../Utils/Table_Utils/insert_ascii_in_row.hxx"
+#include "../../../../../to_string.hxx"
 #include "../../../VOTable_Field.hxx"
 
 namespace tablator {
 size_t count_elements(const std::string &entry, const Data_Type &type);
 }
 
-tablator::Data_Element tablator::Table::read_tabledata(
+tablator::Data_Element tablator::ptree_readers::read_tabledata(
         const boost::property_tree::ptree &tabledata,
         const std::vector<VOTable_Field> &fields) {
     std::vector<std::vector<std::string> > rows;
@@ -25,10 +24,10 @@ tablator::Data_Element tablator::Table::read_tabledata(
             /// Add something for the null_bitfields_flag
             rows.push_back({});
             auto td = tr.second.begin();
-            td = skip_xml_comments(td, tr.second.end());
+            td = ptree_readers::skip_xml_comments(td, tr.second.end());
             while (td != tr.second.end() && td->first == XMLATTR_DOT + ID) {
                 ++td;
-                td = skip_xml_comments(td, tr.second.end());
+                td = ptree_readers::skip_xml_comments(td, tr.second.end());
             }
             for (std::size_t c = 1; c < fields.size(); ++c) {
                 if (td == tr.second.end())
@@ -52,7 +51,7 @@ tablator::Data_Element tablator::Table::read_tabledata(
                 }
                 // FIXME: Check encoding
                 ++td;
-                td = skip_xml_comments(td, tr.second.end());
+                td = ptree_readers::skip_xml_comments(td, tr.second.end());
             }
             if (td != tr.second.end()) {
                 throw std::runtime_error(
@@ -102,7 +101,7 @@ tablator::Data_Element tablator::Table::read_tabledata(
                             ". Error message: " + error.what());
                 }
         }
-        Table::append_row(data, row_string);
+        append_row(data, row_string);
     }
     return Data_Element(columns, offsets, data);
 }

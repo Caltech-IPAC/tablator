@@ -1,10 +1,10 @@
-#include "../../Table.hxx"
+#include "../ptree_readers.hxx"
 
 #include <boost/lexical_cast.hpp>
 
-#include "../../Common.hxx"
+#include "../Common.hxx"
 
-tablator::Property tablator::Table::read_property(
+tablator::Property tablator::ptree_readers::read_property(
         const boost::property_tree::ptree &prop_tree) {
     auto child = prop_tree.begin();
     auto end = prop_tree.end();

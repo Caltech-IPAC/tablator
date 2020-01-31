@@ -1,7 +1,7 @@
 #include <boost/property_tree/ptree.hpp>
 
-#include "../../../../Common.hxx"
-#include "../../../../Values.hxx"
+#include "../../../Common.hxx"
+#include "../../../Values.hxx"
 
 namespace {
 tablator::Min_Max read_min_max(const boost::property_tree::ptree &min_max) {

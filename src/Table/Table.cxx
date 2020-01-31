@@ -1,9 +1,6 @@
 #include "../Table.hxx"
 
-const std::string tablator::Table::null_bitfield_flags_name = "null_bitfield_flags";
-const std::string tablator::Table::null_bitfield_flags_description =
-        "Packed bit array indicating whether an entry is null";
-
+#include "../ptree_readers.hxx"
 
 namespace {
 void append_info_list_with_label(
@@ -37,15 +34,15 @@ Table_Element load_columns_and_offsets(const std::vector<Column> &Columns) {
     std::vector<size_t> tabledata_offsets = {0};
 
     const size_t null_flags_size = (Columns.size() + 7) / 8;
-    Table::append_column(
-            tabledata_columns, tabledata_offsets, Table::null_bitfield_flags_name,
-            Data_Type::UINT8_LE, null_flags_size,
-            Field_Properties::Builder()
-                    .add_description(Table::null_bitfield_flags_description)
-                    .build());
+    tablator::append_column(tabledata_columns, tabledata_offsets,
+                            null_bitfield_flags_name, Data_Type::UINT8_LE,
+                            null_flags_size,
+                            Field_Properties::Builder()
+                                    .add_description(null_bitfield_flags_description)
+                                    .build());
 
     for (auto &c : Columns) {
-        Table::append_column(tabledata_columns, tabledata_offsets, c);
+        tablator::append_column(tabledata_columns, tabledata_offsets, c);
     }
 
     return Table_Element::Builder(tabledata_columns, tabledata_offsets,
@@ -156,6 +153,20 @@ Table::Table(std::istream &input_stream, const Format &format) {
     if (get_columns().size() < 2) {
         throw std::runtime_error("This stream has no columns");
     }
+}
+
+//===========================================================
+
+void Table::read_votable(std::istream &input_stream) {
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_xml(input_stream, tree);
+    ptree_readers::read_property_tree_as_votable(*this, tree);
+}
+
+void Table::read_json(std::istream &input_stream) {
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(input_stream, tree);
+    tablator::ptree_readers::read_property_tree_as_votable(*this, tree);
 }
 
 

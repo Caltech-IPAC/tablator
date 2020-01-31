@@ -1,10 +1,9 @@
-#include "../../../../Table.hxx"
+#include "../../../ptree_readers.hxx"
 
-#include "../../../../Utils/Vector_Utils.hxx"
-#include "../../skip_xml_comments.hxx"
+#include "../../../Utils/Vector_Utils.hxx"
 #include "../VOTable_Field.hxx"
 
-tablator::Table_Element tablator::Table::read_table(
+tablator::Table_Element tablator::ptree_readers::read_table(
         const boost::property_tree::ptree &table_tree) {
     auto child = table_tree.begin();
     auto end = table_tree.end();

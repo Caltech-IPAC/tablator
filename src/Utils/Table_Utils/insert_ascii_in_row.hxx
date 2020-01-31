@@ -1,4 +1,4 @@
-#include "../Row.hxx"
+#include "../../Row.hxx"
 
 namespace tablator {
 void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,

@@ -7,6 +7,7 @@
 
 #include "Column.hxx"
 #include "Common.hxx"
+
 namespace tablator {
 
 class Group_Element {
@@ -45,7 +46,7 @@ public:
             options_.params_ = params;
             return *this;
         }
-
+        Builder &add_params(const std::string &params_xml);
         Builder &add_field_refs(const std::vector<ATTRIBUTES> &field_refs) {
             options_.field_refs_ = field_refs;
             return *this;

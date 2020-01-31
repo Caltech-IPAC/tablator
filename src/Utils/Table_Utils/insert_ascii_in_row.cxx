@@ -3,8 +3,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "../Row.hxx"
-#include "../data_size.hxx"
+#include "../../data_size.hxx"
+#include "../Table_Utils.hxx"
 
 namespace tablator {
 void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,

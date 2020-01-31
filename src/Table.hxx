@@ -25,6 +25,7 @@
 #include "Resource_Element.hxx"
 #include "Row.hxx"
 #include "Table_Element.hxx"
+#include "Utils/Table_Utils.hxx"
 
 namespace tablator {
 class VOTable_Field;
@@ -34,9 +35,6 @@ public:
     static constexpr char const *FIXLEN_KEYWORD = "fixlen";
     static constexpr char const *ROWS_RETRIEVED_KEYWORD = "RowsRetrieved";
     static constexpr const char *DEFAULT_NULL_VALUE = "null";
-
-    static const std::string null_bitfield_flags_name;
-    static const std::string null_bitfield_flags_description;
 
 
 private:
@@ -212,22 +210,22 @@ public:
     }
 
     void append_column(const Column &column) {
-        append_column(get_columns(), get_offsets(), column);
+        tablator::append_column(get_columns(), get_offsets(), column);
     }
 
     void append_row(const Row &row) {
         assert(row.data.size() == row_size());
-        append_row(get_data(), row);
+        tablator::append_row(get_data(), row);
     }
 
     void unsafe_append_row(const char *row) {
-        unsafe_append_row(get_data(), row, row_size());
+        tablator::unsafe_append_row(get_data(), row, row_size());
     }
 
-    void pop_row() { pop_row(get_data(), row_size()); }
+    void pop_row() { tablator::pop_row(get_data(), row_size()); }
 
     void resize_rows(const size_t &new_num_rows) {
-        resize_rows(get_data(), new_num_rows, row_size());
+        tablator::resize_rows(get_data(), new_num_rows, row_size());
     }
 
     // This function is not used internally.
@@ -408,52 +406,17 @@ public:
         boost::filesystem::ifstream input_stream(path);
         read_json5(input_stream);
     }
-    void read_json(std::istream &input_stream) {
-        boost::property_tree::ptree tree;
-        boost::property_tree::read_json(input_stream, tree);
-        read_property_tree_as_votable(tree);
-    }
+    void read_json(std::istream &input_stream);
     void read_json(const boost::filesystem::path &path) {
         boost::filesystem::ifstream input_stream(path);
         read_json(input_stream);
     }
 
-    void read_votable(std::istream &input_stream) {
-        boost::property_tree::ptree tree;
-        boost::property_tree::read_xml(input_stream, tree);
-        read_property_tree_as_votable(tree);
-    }
+    void read_votable(std::istream &input_stream);
     void read_votable(const boost::filesystem::path &path) {
         boost::filesystem::ifstream input_stream(path);
         read_votable(input_stream);
     }
-
-    void read_property_tree_as_votable(const boost::property_tree::ptree &tree);
-    static ATTRIBUTES extract_attributes(const boost::property_tree::ptree &node);
-
-    // The motivation for the "_element" business is distinguishing
-    // Table from Table_Element. JTODO rename to read_XXX_element
-    // after dust settles?
-    Resource_Element read_resource(const boost::property_tree::ptree &resource_tree,
-                                   bool is_first);
-    static Group_Element read_group(const boost::property_tree::ptree &node);
-    static Table_Element read_table(const boost::property_tree::ptree &table);
-    static VOTable_Field read_field(const boost::property_tree::ptree &field);
-    static Property read_property(const boost::property_tree::ptree &prop);
-
-    static Data_Element read_data(const boost::property_tree::ptree &data,
-                                  const std::vector<VOTable_Field> &fields);
-    static Data_Element read_tabledata(const boost::property_tree::ptree &tabledata,
-                                       const std::vector<VOTable_Field> &fields);
-    static Data_Element read_binary2(const boost::property_tree::ptree &tabledata,
-                                     const std::vector<VOTable_Field> &fields);
-
-    void append_data_from_stream(const std::vector<uint8_t> &stream,
-                                 const std::vector<VOTable_Field> &fields,
-                                 size_t num_rows) {
-        append_data_from_stream(get_data(), get_columns(), get_offsets(), stream,
-                                fields, num_rows);
-    };
 
     void read_dsv(std::istream &input_stream, const Format &format);
     void read_dsv(const boost::filesystem::path &path, const Format &format) {
@@ -574,18 +537,10 @@ public:
         return col_vec;
     }
 
-    inline size_t row_size() const { return row_size(get_offsets()); }
+    inline size_t row_size() const { return tablator::row_size(get_offsets()); }
     size_t num_rows() const { return get_data().size() / row_size(); }
 
     // static functions
-    // JTODO Move them out of this class?
-    inline static size_t row_size(const std::vector<size_t> &offsets) {
-        if (offsets.empty()) {
-            throw std::runtime_error("<offsets> is empty");
-        }
-        return offsets.back();
-    }
-
     static std::vector<uint8_t> read_dsv_rows(
             std::vector<Column> &columns, std::vector<size_t> &offsets,
             const std::list<std::vector<std::string>> &dsv);
@@ -598,56 +553,6 @@ public:
     // WARNING: append_column routines do not increase the size of the
     // null column.  The expectation is that the number of columns is
     // known before adding columns.
-
-    static void append_column(std::vector<Column> &columns,
-                              std::vector<size_t> &offsets, const Column &column);
-
-    static void append_column(std::vector<Column> &columns,
-                              std::vector<size_t> &offsets, const std::string &name,
-                              const Data_Type &type, const size_t &size,
-                              const Field_Properties &field_properties) {
-        append_column(columns, offsets, Column(name, type, size, field_properties));
-    }
-
-    static void append_column(std::vector<Column> &columns,
-                              std::vector<size_t> &offsets, const std::string &name,
-                              const Data_Type &type, const size_t &size) {
-        append_column(columns, offsets, Column(name, type, size, Field_Properties()));
-    }
-
-    static void append_column(std::vector<Column> &columns,
-                              std::vector<size_t> &offsets, const std::string &name,
-                              const Data_Type &type) {
-        append_column(columns, offsets, name, type, 1, Field_Properties());
-    }
-
-
-    static void append_row(std::vector<uint8_t> &data, const Row &row) {
-        data.insert(data.end(), row.data.begin(), row.data.end());
-    }
-
-    static void unsafe_append_row(std::vector<uint8_t> &data, const char *row,
-                                  uint row_size) {
-        data.insert(data.end(), row, row + row_size);
-    }
-
-    static void pop_row(std::vector<uint8_t> &data, uint row_size) {
-        data.resize(data.size() - row_size);
-    }
-
-    static void resize_rows(std::vector<uint8_t> &data, const size_t &new_num_rows,
-                            uint row_size) {
-        data.resize(new_num_rows * row_size);
-    }
-
-    static void append_data_from_stream(std::vector<uint8_t> &data,
-                                        const std::vector<Column> &columns,
-                                        const std::vector<size_t> &offsets,
-                                        const std::vector<uint8_t> &stream,
-                                        const std::vector<VOTable_Field> &fields,
-                                        size_t num_rows);
-
-
     static void append_ipac_data_member(std::vector<Column> &columns,
                                         std::vector<size_t> &offsets,
                                         const std::string &name,

@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "../../Table.hxx"
+#include "../../Utils/Table_Utils/insert_ascii_in_row.hxx"
 #include "../../to_string.hxx"
-#include "../../Utils/insert_ascii_in_row.hxx"
 
 namespace {
 std::vector<size_t> get_ipac_column_widths(
@@ -39,7 +39,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::vector<size_t> minimum_column_widths(ipac_columns[0].size(), 1);
     std::string line;
     std::getline(input_stream, line);
-    Row row_string(row_size(offsets));
+    Row row_string(tablator::row_size(offsets));
 
     std::vector<uint8_t> data;
     while (input_stream) {
@@ -92,7 +92,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                          ": '" + line.substr(bad_char) +
                                          "'.\n\t  Is the header not wide enough?");
 
-            append_row(data, row_string);
+            tablator::append_row(data, row_string);
         }
         ++current_line_num;
         std::getline(input_stream, line);

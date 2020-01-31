@@ -1,6 +1,7 @@
-#include "../../../../../../Table.hxx"
+#include "../../../../../ptree_readers.hxx"
 
-#include "../../../../../../Data_Element.hxx"
+#include "../../../../../Data_Element.hxx"
+#include "../../../../../Utils/Table_Utils.hxx"
 #include "../../../VOTable_Field.hxx"
 
 namespace tablator {
@@ -13,8 +14,8 @@ void compute_column_array_sizes(const std::vector<uint8_t> &stream,
 
 //==============================================================
 
-Data_Element Table::read_binary2(const boost::property_tree::ptree &binary2,
-                                 const std::vector<VOTable_Field> &fields) {
+Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &binary2,
+                                         const std::vector<VOTable_Field> &fields) {
     std::vector<size_t> column_array_sizes(fields.size(), 1);
     const size_t null_flags_size((fields.size() + 6) / 8);
     column_array_sizes.at(0) = null_flags_size;

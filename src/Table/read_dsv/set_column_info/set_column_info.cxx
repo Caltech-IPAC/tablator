@@ -20,9 +20,9 @@ void tablator::Table::set_column_info(std::vector<Column> &columns,
         }
         names.push_back(trimmed_name);
     }
-    append_column(columns, offsets, null_bitfield_flags_name, Data_Type::UINT8_LE,
-                  (names.size() + 7) / 8,
-                  Field_Properties(null_bitfield_flags_description));
+    tablator::append_column(columns, offsets, null_bitfield_flags_name,
+                            Data_Type::UINT8_LE, (names.size() + 7) / 8,
+                            Field_Properties(null_bitfield_flags_description));
 
     /// Try to infer the types of the columns.  Supported are INT8_LE
     /// (bool), INT64_LE, UINT64_LE, FLOAT64_LE, and CHAR.
@@ -50,6 +50,6 @@ void tablator::Table::set_column_info(std::vector<Column> &columns,
     }
 
     for (size_t elem = 0; elem < names.size(); ++elem)
-        append_column(columns, offsets, names[elem], types[elem],
-                      types[elem] == Data_Type::CHAR ? sizes[elem] : 1);
+        tablator::append_column(columns, offsets, names[elem], types[elem],
+                                types[elem] == Data_Type::CHAR ? sizes[elem] : 1);
 }
