@@ -9,12 +9,10 @@ tablator::Group_Element tablator::ptree_readers::read_group(
     auto end = group_tree.end();
 
     const auto &attributes = extract_attributes(group_tree);
-    child = ptree_readers::skip_xml_comments(child, end);
 
     // JTODO Assume XMLATTRs are all at front?
     while (child != end && child->first == XMLATTR) {
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::string description;
@@ -39,7 +37,6 @@ tablator::Group_Element tablator::ptree_readers::read_group(
             break;
         }
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
     return Group_Element::Builder()
             .add_attributes(attributes)

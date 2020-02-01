@@ -27,19 +27,16 @@ void tablator::ptree_readers::read_property_tree_as_votable(
         table.add_labeled_property(VOTABLE, votable_property);
     }
 
-    child = ptree_readers::skip_xml_comments(child, end);
     if (child != end && child->first == DESCRIPTION) {
         table.set_description(child->second.get_value<std::string>());
         ++child;
     }
-    child = ptree_readers::skip_xml_comments(child, end);
     if (child != end && child->first == DEFINITIONS) {
         /// Deliberately ignore DEFINITIONS.  They are duplicated by the
         /// information in RESOURCE and deprecated since version 1.1.
         ++child;
     }
 
-    child = ptree_readers::skip_xml_comments(child, end);
     while (child != end && child->first != RESOURCE) {
         if ((child->first == COOSYS) || (child->first == INFO)) {
             table.add_labeled_property(child->first,
@@ -55,7 +52,6 @@ void tablator::ptree_readers::read_property_tree_as_votable(
                     child->first);
         }
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     if (child == end) {
@@ -65,14 +61,12 @@ void tablator::ptree_readers::read_property_tree_as_votable(
                 ptree_readers::read_resource(child->second, true /* is_first */));
     }
     ++child;
-    child = ptree_readers::skip_xml_comments(child, end);
 
     // read secondary resources
     while (child != end && child->first == RESOURCE) {
         table.add_resource_element(
                 ptree_readers::read_resource(child->second, false /* is_first */));
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     while (child != end) {
@@ -86,6 +80,5 @@ void tablator::ptree_readers::read_property_tree_as_votable(
                     child->first);
         }
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 }

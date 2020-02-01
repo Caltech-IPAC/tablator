@@ -70,6 +70,7 @@ def build(bld):
              'src/Ipac_Table_Writer/Ipac_Table_Writer.cxx',
              'src/Utils/Table_Utils/insert_ascii_in_row.cxx',
              'src/Utils/Table_Utils/append_column.cxx',
+             'src/Group_Element/Group_Element.cxx',
              'src/ptree_readers/ptree_readers.cxx',
              'src/ptree_readers/extract_attributes.cxx',
              'src/ptree_readers/read_property_tree_as_votable.cxx',

@@ -5,7 +5,6 @@
 void validate_tail(boost::property_tree::ptree::const_iterator &tail_begin,
                    boost::property_tree::ptree::const_iterator &tail_end) {
     boost::property_tree::ptree::const_iterator child = tail_begin;
-    child = tablator::ptree_readers::skip_xml_comments(child, tail_end);
     if (child != tail_end) {
         throw std::runtime_error("Unexpected element " + child->first +
                                  " at end of RESOURCE.TABLE.DATA.");
@@ -23,7 +22,6 @@ tablator::Data_Element tablator::ptree_readers::read_data(
     if (child == end) {
         throw std::runtime_error("RESOURCE.TABLE.DATA must not be empty");
     }
-    child = skip_xml_comments(child, end);
 
     if (child->first == TABLEDATA) {
         auto result = read_tabledata(child->second, field_flag_pairs);

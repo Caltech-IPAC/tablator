@@ -62,11 +62,6 @@ void append_data_from_stream(std::vector<uint8_t> &data,
                              const std::vector<Field_And_Flag> &field_flag_pairs,
                              size_t num_rows);
 
-
-boost::property_tree::ptree::const_iterator skip_xml_comments(
-        const boost::property_tree::ptree::const_iterator &old_child,
-        const boost::property_tree::ptree::const_iterator &end);
-
 boost::property_tree::ptree read_string_as_property_tree(const std::string &ptree_xml);
 
 }  // namespace ptree_readers

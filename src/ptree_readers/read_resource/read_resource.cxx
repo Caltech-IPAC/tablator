@@ -8,12 +8,10 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
     auto end = resource_tree.end();
 
     const auto top_attributes = extract_attributes(resource_tree);
-    child = ptree_readers::skip_xml_comments(child, end);
 
     // JTODO Assume XMLATTRs are all at front?
     while (child != end && child->first == XMLATTR) {
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::string description;
@@ -21,14 +19,12 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
         description = child->second.get_value<std::string>();
         ++child;
     }
-    child = ptree_readers::skip_xml_comments(child, end);
 
     std::vector<std::pair<std::string, Property>> labeled_properties;
     while (child != end && child->first == INFO) {
         labeled_properties.emplace_back(
                 std::make_pair(child->first, read_property(child->second)));
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::vector<Field> params;
@@ -50,7 +46,6 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
             break;
         }
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     while (child != end) {
@@ -66,7 +61,6 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
                     child->first);
         }
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     // We only allow one TABLE in the first RESOURCE and none in the others.
@@ -90,7 +84,6 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
                     child->first);
         }
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     std::vector<Property> trailing_info_list;
@@ -103,7 +96,6 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
                     child->first);
         }
         ++child;
-        child = ptree_readers::skip_xml_comments(child, end);
     }
 
     return tablator::Resource_Element::Builder(table_elements)

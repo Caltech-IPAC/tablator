@@ -25,18 +25,15 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
             /// Add something for the null_bitfields_flag
             rows.push_back({});
             auto td = tr.second.begin();
-            td = ptree_readers::skip_xml_comments(td, tr.second.end());
             while (td != tr.second.end() && td->first == XMLATTR_DOT + ID) {
                 ++td;
-                td = ptree_readers::skip_xml_comments(td, tr.second.end());
             }
             for (std::size_t c = 1; c < num_fields; ++c) {
                 const auto &field = field_flag_pairs.at(c).get_field();
                 if (td == tr.second.end())
                     throw std::runtime_error(
                             "Not enough columns in row " + std::to_string(rows.size()) +
-                            ".  Expected " +
-                            std::to_string(num_fields - 1) +
+                            ".  Expected " + std::to_string(num_fields - 1) +
                             ", but only got " + std::to_string(c - 1) + ".");
 
                 if (td->first == "TD" || td->first.empty()) {
@@ -54,13 +51,11 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                 }
                 // FIXME: Check encoding
                 ++td;
-                td = ptree_readers::skip_xml_comments(td, tr.second.end());
             }
             if (td != tr.second.end()) {
                 throw std::runtime_error(
                         "Too many elements in row " + std::to_string(rows.size()) +
-                        ".  Only expected " +
-                        std::to_string(num_fields - 1) + ".");
+                        ".  Only expected " + std::to_string(num_fields - 1) + ".");
             }
         } else if (tr.first != XMLATTR_DOT + "encoding" && tr.first != XMLCOMMENT) {
             throw std::runtime_error(
@@ -99,9 +94,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                 } catch (std::exception &error) {
                     throw std::runtime_error(
                             "Invalid " +
-                            to_string(field_flag_pairs[column]
-                                              .get_field()
-                                              .get_type()) +
+                            to_string(field_flag_pairs[column].get_field().get_type()) +
                             " value " + element + " in row " +
                             std::to_string(current_row + 1) + ", field " +
                             std::to_string(column) + ", array_size: " +

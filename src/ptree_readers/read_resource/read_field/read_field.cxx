@@ -28,8 +28,6 @@ tablator::Data_Type string_to_Type(const std::string &s) {
 
 tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
         const boost::property_tree::ptree &field_tree) {
-
-
     // Set default values for Field class members and adjust as we read the ptree.
     std::string name = "";
     Data_Type type = tablator::Data_Type::UINT8_LE;

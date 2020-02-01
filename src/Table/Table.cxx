@@ -160,7 +160,7 @@ Table::Table(std::istream &input_stream, const Format &format) {
 void Table::read_votable(std::istream &input_stream) {
     boost::property_tree::ptree tree;
     using namespace boost::property_tree::xml_parser;
-    boost::property_tree::read_xml(input_stream, tree);
+    boost::property_tree::read_xml(input_stream, tree, no_comments);
     ptree_readers::read_property_tree_as_votable(*this, tree);
 }
 

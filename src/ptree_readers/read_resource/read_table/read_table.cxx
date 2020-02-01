@@ -8,20 +8,16 @@ tablator::Table_Element tablator::ptree_readers::read_table(
     auto end = table_tree.end();
 
     const auto attributes = extract_attributes(table_tree);
-    child = skip_xml_comments(child, end);
 
     while (child != end && child->first == XMLATTR) {
         ++child;
-        child = skip_xml_comments(child, end);
     }
-    child = skip_xml_comments(child, end);
 
     std::string description;
     if (child != end && child->first == DESCRIPTION) {
         description = child->second.get_value<std::string>();
         ++child;
     }
-    child = skip_xml_comments(child, end);
 
     std::vector<Field_And_Flag> field_flag_pairs;
     // Register null column
@@ -49,7 +45,6 @@ tablator::Table_Element tablator::ptree_readers::read_table(
                     child->first);
         }
         ++child;
-        child = skip_xml_comments(child, end);
     }
 
     if (field_flag_pairs.size() < 2) {
@@ -59,7 +54,6 @@ tablator::Table_Element tablator::ptree_readers::read_table(
     if (child != end && child->first == DATA) {
         data_elements.emplace_back(read_data(child->second, field_flag_pairs));
         ++child;
-        child = skip_xml_comments(child, end);
     }
     std::vector<Property> trailing_info_list;
     while (child != end) {
@@ -71,7 +65,6 @@ tablator::Table_Element tablator::ptree_readers::read_table(
                                      child->first);
         }
         ++child;
-        child = skip_xml_comments(child, end);
     }
 
 
