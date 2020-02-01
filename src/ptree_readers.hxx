@@ -16,12 +16,23 @@
 
 
 namespace tablator {
-class VOTable_Field;
 class Table;
 
 namespace ptree_readers {
 
 ATTRIBUTES extract_attributes(const boost::property_tree::ptree &node);
+
+class Field_And_Flag {
+public:
+    Field_And_Flag(const tablator::Field &field, bool flag)
+            : field_(field), flag_(flag) {}
+    const tablator::Field &get_field() const { return field_; }
+    bool get_dynamic_array_flag() const { return flag_; }
+
+private:
+    tablator::Field field_;
+    bool flag_;
+};
 
 // The motivation for the "_element" business is distinguishing
 // Table from Table_Element. JTODO rename to read_XXX_element
@@ -34,21 +45,22 @@ Resource_Element read_resource(const boost::property_tree::ptree &resource_tree,
                                bool is_first);
 Group_Element read_group(const boost::property_tree::ptree &node);
 Table_Element read_table(const boost::property_tree::ptree &table);
-VOTable_Field read_field(const boost::property_tree::ptree &field);
+Field_And_Flag read_field(const boost::property_tree::ptree &field);
 Property read_property(const boost::property_tree::ptree &prop);
 
 Data_Element read_data(const boost::property_tree::ptree &data,
-                       const std::vector<VOTable_Field> &fields);
+                       const std::vector<Field_And_Flag> &field_flag_pairs);
 Data_Element read_tabledata(const boost::property_tree::ptree &tabledata,
-                            const std::vector<VOTable_Field> &fields);
-Data_Element read_binary2(const boost::property_tree::ptree &tabledata,
-                          const std::vector<VOTable_Field> &fields);
+                            const std::vector<Field_And_Flag> &field_flag_pairs);
+Data_Element read_binary2(const boost::property_tree::ptree &binary2,
+                          const std::vector<Field_And_Flag> &field_flag_pairs);
 
 void append_data_from_stream(std::vector<uint8_t> &data,
                              const std::vector<Column> &columns,
                              const std::vector<size_t> &offsets,
                              const std::vector<uint8_t> &stream,
-                             const std::vector<VOTable_Field> &fields, size_t num_rows);
+                             const std::vector<Field_And_Flag> &field_flag_pairs,
+                             size_t num_rows);
 
 
 boost::property_tree::ptree::const_iterator skip_xml_comments(

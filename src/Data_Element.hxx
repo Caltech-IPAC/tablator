@@ -6,7 +6,6 @@
 #include "Column.hxx"
 
 namespace tablator {
-class VOTable_Field;
 
 class Data_Element {
 public:

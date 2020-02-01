@@ -4,6 +4,7 @@
 #include "data_size.hxx"
 
 namespace tablator {
+
 class Column {
 public:
     static constexpr char const *COL_ARRAY_SIZE = "array_size";
@@ -49,11 +50,17 @@ public:
         add_field_property_attribute(std::make_pair(name, value));
     }
 
-
 private:
     std::string name_;
     Data_Type type_;
     size_t array_size_;
     Field_Properties field_properties_;
 };
+
+
+// JTODO If we were following IVOA terminology, this class would IMHO
+// be called Field.  I'm not ready to rename the class and file
+// altogether, though.
+typedef Column Field;
+
 }  // namespace tablator

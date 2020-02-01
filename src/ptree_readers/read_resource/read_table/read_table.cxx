@@ -1,7 +1,6 @@
 #include "../../../ptree_readers.hxx"
 
 #include "../../../Utils/Vector_Utils.hxx"
-#include "../VOTable_Field.hxx"
 
 tablator::Table_Element tablator::ptree_readers::read_table(
         const boost::property_tree::ptree &table_tree) {
@@ -24,19 +23,21 @@ tablator::Table_Element tablator::ptree_readers::read_table(
     }
     child = skip_xml_comments(child, end);
 
-    std::vector<VOTable_Field> fields;
-    fields.emplace_back(null_bitfield_flags_name, Data_Type::UINT8_LE, true,
-                        Field_Properties(null_bitfield_flags_description, {}));
-
+    std::vector<Field_And_Flag> field_flag_pairs;
+    // Register null column
+    field_flag_pairs.emplace_back(
+            Field(null_bitfield_flags_name, Data_Type::UINT8_LE, true,
+                  Field_Properties(null_bitfield_flags_description, {})),
+            false);
     std::vector<Group_Element> group_elements;
     std::vector<Data_Element> data_elements;
-    std::vector<Column> params;
+    std::vector<Field> params;
 
     while (child != end) {
         if (child->first == FIELD) {
-            fields.emplace_back(read_field(child->second));
+            field_flag_pairs.emplace_back(read_field(child->second));
         } else if (child->first == PARAM) {
-            params.emplace_back(read_field(child->second));
+            params.emplace_back(read_field(child->second).get_field());
         } else if (child->first == GROUP) {
             group_elements.emplace_back(read_group(child->second));
         } else if ((child->first == DATA) || (child->first == INFO)) {
@@ -51,16 +52,15 @@ tablator::Table_Element tablator::ptree_readers::read_table(
         child = skip_xml_comments(child, end);
     }
 
-    if (fields.size() < 2) {
+    if (field_flag_pairs.size() < 2) {
         throw std::runtime_error("This VOTable is empty.");
     }
 
     if (child != end && child->first == DATA) {
-        data_elements.emplace_back(read_data(child->second, fields));
+        data_elements.emplace_back(read_data(child->second, field_flag_pairs));
         ++child;
         child = skip_xml_comments(child, end);
     }
-
     std::vector<Property> trailing_info_list;
     while (child != end) {
         if (child->first == INFO) {
@@ -75,16 +75,19 @@ tablator::Table_Element tablator::ptree_readers::read_table(
     }
 
 
-    // Nobody from now on cares about VOTable_Fields.  Convert to Columns.
-    std::vector<Column> field_columns;
-    field_columns.insert(field_columns.end(), fields.begin(), fields.end());
+    std::vector<Field> fields;
+    std::transform(field_flag_pairs.begin(), field_flag_pairs.end(),
+                   std::back_inserter(fields),
+                   [&](const Field_And_Flag &field_flag) -> Field {
+                       return field_flag.get_field();
+                   });
 
     return tablator::Table_Element::Builder(data_elements)
             .add_attributes(attributes)
             .add_description(description)
             .add_group_elements(group_elements)
             .add_params(params)
-            .add_fields(field_columns)
+            .add_fields(fields)
             .add_trailing_info_list(trailing_info_list)
             .build();
 }

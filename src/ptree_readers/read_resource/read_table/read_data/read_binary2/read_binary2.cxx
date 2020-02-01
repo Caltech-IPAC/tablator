@@ -2,22 +2,22 @@
 
 #include "../../../../../Data_Element.hxx"
 #include "../../../../../Utils/Table_Utils.hxx"
-#include "../../../VOTable_Field.hxx"
 
 namespace tablator {
 std::vector<uint8_t> decode_base64_stream(const std::string &val);
-void compute_column_array_sizes(const std::vector<uint8_t> &stream,
-                                const std::vector<VOTable_Field> &fields,
-                                std::vector<size_t> &column_array_sizes,
-                                size_t &num_rows);
+void compute_column_array_sizes(
+        const std::vector<uint8_t> &stream,
+        const std::vector<ptree_readers::Field_And_Flag> &field_flag_pairs,
+        std::vector<size_t> &column_array_sizes, size_t &num_rows);
 
 
 //==============================================================
 
-Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &binary2,
-                                         const std::vector<VOTable_Field> &fields) {
-    std::vector<size_t> column_array_sizes(fields.size(), 1);
-    const size_t null_flags_size((fields.size() + 6) / 8);
+Data_Element ptree_readers::read_binary2(
+        const boost::property_tree::ptree &binary2,
+        const std::vector<ptree_readers::Field_And_Flag> &field_flag_pairs) {
+    std::vector<size_t> column_array_sizes(field_flag_pairs.size(), 1);
+    const size_t null_flags_size((field_flag_pairs.size() + 6) / 8);
     column_array_sizes.at(0) = null_flags_size;
     std::vector<std::vector<uint8_t> > streams;
     for (auto &stream : binary2) {
@@ -52,11 +52,11 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
         streams.emplace_back(
                 decode_base64_stream(stream.second.get_value<std::string>()));
     }
-
     std::vector<size_t> rows_per_stream;
     for (auto &stream : streams) {
         size_t num_rows;
-        compute_column_array_sizes(stream, fields, column_array_sizes, num_rows);
+        compute_column_array_sizes(stream, field_flag_pairs, column_array_sizes,
+                                   num_rows);
         rows_per_stream.push_back(num_rows);
     }
 
@@ -64,14 +64,15 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
     std::vector<size_t> offsets = {0};
     std::vector<uint8_t> data;
 
-    for (std::size_t c = 0; c < fields.size(); ++c)
-        append_column(columns, offsets, fields.at(c).get_name(), fields[c].get_type(),
-                      column_array_sizes[c], fields.at(c).get_field_properties());
-
-    for (std::size_t stream = 0; stream < streams.size(); ++stream)
-        append_data_from_stream(data, columns, offsets, streams[stream], fields,
-                                rows_per_stream[stream]);
-
+    for (std::size_t c = 0; c < field_flag_pairs.size(); ++c) {
+        const auto &field = field_flag_pairs.at(c).get_field();
+        append_column(columns, offsets, field.get_name(), field.get_type(),
+                      column_array_sizes[c], field.get_field_properties());
+    }
+    for (std::size_t stream = 0; stream < streams.size(); ++stream) {
+        append_data_from_stream(data, columns, offsets, streams[stream],
+                                field_flag_pairs, rows_per_stream[stream]);
+    }
     return Data_Element(columns, offsets, data);
 }
 }  // namespace tablator

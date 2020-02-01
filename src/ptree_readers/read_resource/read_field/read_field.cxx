@@ -1,7 +1,4 @@
-
 #include "../../../ptree_readers.hxx"
-
-#include "../VOTable_Field.hxx"
 
 #include <boost/lexical_cast.hpp>
 
@@ -29,31 +26,40 @@ tablator::Data_Type string_to_Type(const std::string &s) {
 }
 }  // namespace
 
-tablator::VOTable_Field tablator::ptree_readers::read_field(
-        const boost::property_tree::ptree &field) {
-    auto child = field.begin();
-    auto end = field.end();
+tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
+        const boost::property_tree::ptree &field_tree) {
 
-    VOTable_Field result;
+
+    // Set default values for Field class members and adjust as we read the ptree.
+    std::string name = "";
+    Data_Type type = tablator::Data_Type::UINT8_LE;
+    size_t array_size = 1;
+    Field_Properties field_properties;
+
+    bool is_array_dynamic_f = false;
+
+    auto child = field_tree.begin();
+    auto end = field_tree.end();
+
     if (child != end && child->first == XMLATTR) {
         for (auto &attribute : child->second) {
             if (attribute.first == ATTR_NAME) {
-                result.set_name(attribute.second.get_value<std::string>());
+                name.assign(attribute.second.get_value<std::string>());
             } else if (attribute.first == DATATYPE) {
-                result.set_type(
-                        string_to_Type(attribute.second.get_value<std::string>()));
+                type = string_to_Type(attribute.second.get_value<std::string>());
+
             }
             // FIXME: We do not handle arrays correctly
             else if (attribute.first == ARRAYSIZE) {
-                std::string array_size = attribute.second.get_value<std::string>();
-                if (array_size == "*") {
-                    result.set_array_size(std::numeric_limits<size_t>::max());
-                    result.set_is_array_dynamic(true);
+                std::string array_size_str = attribute.second.get_value<std::string>();
+                if (array_size_str == "*") {
+                    array_size = std::numeric_limits<size_t>::max();
+                    is_array_dynamic_f = true;
                 } else {
-                    result.set_array_size(boost::lexical_cast<size_t>(array_size));
+                    array_size = boost::lexical_cast<size_t>(array_size_str);
                 }
             } else {
-                result.get_field_properties().add_attribute(
+                field_properties.add_attribute(
                         attribute.first, attribute.second.get_value<std::string>());
             }
         }
@@ -61,19 +67,18 @@ tablator::VOTable_Field tablator::ptree_readers::read_field(
     }
 
     if (child != end && child->first == DESCRIPTION) {
-        result.get_field_properties().set_description(
-                child->second.get_value<std::string>());
+        field_properties.set_description(child->second.get_value<std::string>());
         ++child;
     }
     if (child != end && child->first == VALUES) {
-        result.get_field_properties().set_values(read_values(child->second));
+        field_properties.set_values(read_values(child->second));
         ++child;
     }
     if (child != end && child->first == LINK) {
         for (auto &link_child : child->second) {
             if (link_child.first == XMLATTR) {
                 for (auto &attribute : link_child.second) {
-                    result.get_field_properties().add_link(
+                    field_properties.add_link(
                             attribute.first, attribute.second.get_value<std::string>());
                 }
             } else {
@@ -85,5 +90,6 @@ tablator::VOTable_Field tablator::ptree_readers::read_field(
         }
         ++child;
     }
-    return result;
+    return Field_And_Flag(Field(name, type, array_size, field_properties),
+                          is_array_dynamic_f);
 }

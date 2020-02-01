@@ -147,6 +147,7 @@ for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/f
         STREAM_INTERMEDIATE="--stream-intermediate=yes"
     fi
     for ending in tbl hdf5 xml csv tsv fits html json json5 postgres sqlite oracle db; do
+        # echo "table: $table, ending: $ending"
         if [ $ending == "db" ]; then
             ${tablator_bin} $table test.$ending
         else
@@ -177,6 +178,7 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: clobbered existing temp.db"
 fi
+
 ###########################################################
 # Test one-way conversions
 

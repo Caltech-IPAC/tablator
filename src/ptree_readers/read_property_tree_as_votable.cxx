@@ -1,8 +1,6 @@
 #include "../Table.hxx"
 
 #include "../ptree_readers.hxx"
-#include "../ptree_readers/read_resource/VOTable_Field.hxx"  // JTODO because of read_field()
-
 
 // This only parses VOTable v1.3.  // JTODO 1.4 now?
 
@@ -47,7 +45,7 @@ void tablator::ptree_readers::read_property_tree_as_votable(
             table.add_labeled_property(child->first,
                                        ptree_readers::read_property(child->second));
         } else if (child->first == PARAM) {
-            table.add_param(ptree_readers::read_field(child->second));
+            table.add_param(ptree_readers::read_field(child->second).get_field());
         } else if (child->first == GROUP) {
             table.add_group_element(ptree_readers::read_group(child->second));
         } else {

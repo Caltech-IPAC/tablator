@@ -28,7 +28,6 @@
 #include "Utils/Table_Utils.hxx"
 
 namespace tablator {
-class VOTable_Field;
 
 class Table {
 public:
@@ -42,7 +41,7 @@ private:
         ATTRIBUTES attributes_;
         std::string description_;
         std::vector<std::string> comments_;
-        std::vector<Column> params_;
+        std::vector<Field> params_;
         boost::property_tree::ptree params_ptree_;
         std::vector<std::pair<std::string, Property>> labeled_properties_;
         std::vector<Group_Element> group_elements_;
@@ -73,7 +72,7 @@ public:
             return *this;
         }
 
-        Builder &add_params(const std::vector<Column> &params) {
+        Builder &add_params(const std::vector<Field> &params) {
             options_.params_ = params;
             return *this;
         }
@@ -561,7 +560,7 @@ public:
 
     static void create_types_from_ipac_headers(
             std::vector<Column> &columns, std::vector<size_t> &offsets,
-            const std::array<std::vector<std::string>, 4> &Columns,
+            const std::array<std::vector<std::string>, 4> &ipac_columns,
             const std::vector<size_t> &ipac_column_widths);
 
     static void shrink_ipac_string_columns_to_fit(
@@ -594,8 +593,8 @@ public:
         return options_.comments_;
     }
 
-    inline std::vector<Column> &get_params() { return options_.params_; }
-    inline const std::vector<Column> &get_params() const { return options_.params_; }
+    inline std::vector<Field> &get_params() { return options_.params_; }
+    inline const std::vector<Field> &get_params() const { return options_.params_; }
 
     inline std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
         return options_.labeled_properties_;
@@ -662,14 +661,14 @@ public:
         return get_main_resource_element().get_labeled_properties();
     }
 
-    inline const std::vector<Column> &get_resource_element_params() const {
+    inline const std::vector<Field> &get_resource_element_params() const {
         return get_main_resource_element().get_params();
     }
 
-    inline std::vector<Column> &get_table_element_params() {
+    inline std::vector<Field> &get_table_element_params() {
         return get_main_resource_element().get_table_element_params();
     }
-    inline const std::vector<Column> &get_table_element_params() const {
+    inline const std::vector<Field> &get_table_element_params() const {
         return get_main_resource_element().get_table_element_params();
     }
 
@@ -725,14 +724,14 @@ public:
         options_.labeled_properties_ = labeled_props;
     }
 
-    inline void set_params(const std::vector<Column> &params) {
+    inline void set_params(const std::vector<Field> &params) {
         options_.params_ = params;
     }
-    inline void set_resource_element_params(const std::vector<Column> &params) {
+    inline void set_resource_element_params(const std::vector<Field> &params) {
         get_main_resource_element().set_params(params);
     }
 
-    inline void set_table_element_params(const std::vector<Column> &params) {
+    inline void set_table_element_params(const std::vector<Field> &params) {
         get_main_resource_element().set_table_element_params(params);
     }
 
@@ -745,7 +744,7 @@ public:
         options_.comments_.emplace_back(c);
     }
 
-    inline void add_param(const Column &param) { get_params().emplace_back(param); }
+    inline void add_param(const Field &param) { get_params().emplace_back(param); }
 
 
     inline void add_trailing_info(const Property &prop) {

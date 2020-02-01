@@ -1,7 +1,6 @@
 #include "../../ptree_readers.hxx"
 
 #include "../../Utils/Table_Utils.hxx"
-#include "VOTable_Field.hxx"
 
 tablator::Resource_Element tablator::ptree_readers::read_resource(
         const boost::property_tree::ptree &resource_tree, bool is_first) {
@@ -32,14 +31,14 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
         child = ptree_readers::skip_xml_comments(child, end);
     }
 
-    std::vector<Column> params;
+    std::vector<Field> params;
     std::vector<Group_Element> group_elements;
     while (child != end) {
         if (child->first == COOSYS) {
             labeled_properties.emplace_back(
                     std::make_pair(child->first, read_property(child->second)));
         } else if (child->first == PARAM) {
-            params.emplace_back(read_field(child->second));
+            params.emplace_back(read_field(child->second).get_field());
         } else if (child->first == GROUP) {
             group_elements.emplace_back(read_group(child->second));
         } else if (child->first == INFO) {

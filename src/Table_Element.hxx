@@ -19,10 +19,10 @@ private:
     struct Options {
         ATTRIBUTES attributes_;
         std::string description_;
-        std::vector<Column> params_;
+        std::vector<Field> params_;
         boost::property_tree::ptree params_ptree_;
         std::vector<Group_Element> group_elements_;
-        std::vector<Column> fields_;
+        std::vector<Field> fields_;
         std::vector<Property> trailing_info_list_;
     };
 
@@ -54,7 +54,7 @@ public:
             return *this;
         }
 
-        Builder &add_params(const std::vector<Column> &params) {
+        Builder &add_params(const std::vector<Field> &params) {
             options_.params_ = params;
             return *this;
         }
@@ -69,7 +69,7 @@ public:
             return *this;
         }
 
-        Builder &add_fields(const std::vector<Column> &fields) {
+        Builder &add_fields(const std::vector<Field> &fields) {
             options_.fields_.insert(options_.fields_.end(), fields.begin(),
                                     fields.end());
             return *this;
@@ -105,8 +105,8 @@ public:
     }
 
 
-    inline std::vector<Column> &get_params() { return options_.params_; }
-    inline const std::vector<Column> &get_params() const { return options_.params_; }
+    inline std::vector<Field> &get_params() { return options_.params_; }
+    inline const std::vector<Field> &get_params() const { return options_.params_; }
 
     inline const boost::property_tree::ptree &get_params_ptree() const {
         return options_.params_ptree_;
@@ -137,7 +137,7 @@ public:
         return get_data_elements().at(0).get_data();
     }
 
-    inline void add_param(const Column &param) {
+    inline void add_param(const Field &param) {
         if (!options_.params_ptree_.empty()) {
             throw std::runtime_error(
                     "Cannot add <param> if params_ptree is non-empty.");
@@ -145,7 +145,7 @@ public:
         options_.params_.emplace_back(param);
     }
 
-    inline void set_params(const std::vector<Column> &params) {
+    inline void set_params(const std::vector<Field> &params) {
         options_.params_ = params;
     }
 

@@ -9,6 +9,8 @@
 namespace tablator {
 bool is_columns_valid(H5::VarLenType &columns);
 
+// JTODO Rename to read_field_metadata.cxx when renaming Column.hxx to Field.hxx.
+
 std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                                          const std::string &section) {
     /// Returns an empty result if the types do not match exactly.

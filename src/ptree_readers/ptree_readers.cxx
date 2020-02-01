@@ -12,4 +12,3 @@ boost::property_tree::ptree::const_iterator tablator::ptree_readers::skip_xml_co
     }
     return child;
 }
-

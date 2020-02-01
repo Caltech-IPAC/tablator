@@ -10,7 +10,6 @@
 #include "Table_Element.hxx"
 
 namespace tablator {
-class VOTable_Field;
 
 class Resource_Element {
     // JTODO check for required attributes.
@@ -21,7 +20,7 @@ private:
         std::string description_;
         std::vector<std::pair<std::string, Property>> labeled_properties_;
         std::vector<Group_Element> group_elements_;
-        std::vector<Column> params_;
+        std::vector<Field> params_;
         boost::property_tree::ptree params_ptree_;
         std::vector<Property> trailing_info_list_;
     };
@@ -49,7 +48,7 @@ public:
             return *this;
         }
 
-        Builder &add_params(const std::vector<Column> &params) {
+        Builder &add_params(const std::vector<Field> &params) {
             options_.params_ = params;
             return *this;
         }
@@ -98,7 +97,7 @@ public:
     inline const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
     inline const std::string &get_description() const { return options_.description_; }
 
-    inline const std::vector<Column> &get_params() const { return options_.params_; }
+    inline const std::vector<Field> &get_params() const { return options_.params_; }
     inline const boost::property_tree::ptree &get_params_ptree() const {
         return options_.params_ptree_;
     }
@@ -140,11 +139,11 @@ public:
         return get_table_elements().at(0).get_offsets();
     }
 
-    inline std::vector<Column> &get_table_element_params() {
+    inline std::vector<Field> &get_table_element_params() {
         return get_table_elements().at(0).get_params();
     }
 
-    inline const std::vector<Column> &get_table_element_params() const {
+    inline const std::vector<Field> &get_table_element_params() const {
         return get_table_elements().at(0).get_params();
     }
 
@@ -156,16 +155,16 @@ public:
         return get_table_elements().at(0).get_data();
     }
 
-    inline void set_params(const std::vector<Column> &params) {
+    inline void set_params(const std::vector<Field> &params) {
         options_.params_ = params;
     }
 
-    inline void set_table_element_params(const std::vector<Column> &params) {
+    inline void set_table_element_params(const std::vector<Field> &params) {
         assert(!get_table_elements().empty());
         get_table_elements().at(0).set_params(params);
     }
 
-    inline void add_param(const Column &param) {
+    inline void add_param(const Field &param) {
         if (!options_.params_ptree_.empty()) {
             throw std::runtime_error(
                     "Cannot add <param> if params_ptree is non-empty.");

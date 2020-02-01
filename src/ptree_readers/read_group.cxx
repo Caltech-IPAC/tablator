@@ -2,7 +2,6 @@
 
 #include "../Column.hxx"
 #include "../Common.hxx"
-#include "read_resource/VOTable_Field.hxx"  // JTODO
 
 tablator::Group_Element tablator::ptree_readers::read_group(
         const boost::property_tree::ptree &group_tree) {
@@ -24,7 +23,7 @@ tablator::Group_Element tablator::ptree_readers::read_group(
         ++child;
     }
 
-    std::vector<Column> params;
+    std::vector<Field> params;
     std::vector<ATTRIBUTES> field_refs;
     std::vector<ATTRIBUTES> param_refs;
     while (child != end) {
@@ -33,8 +32,7 @@ tablator::Group_Element tablator::ptree_readers::read_group(
         } else if (child->first == "PARAMref") {
             param_refs.emplace_back(extract_attributes(child->second));
         } else if (child->first == "PARAM") {
-            // JTODO this function returns VOTable_Field; all we need is Column.
-            params.emplace_back(read_field(child->second));
+            params.emplace_back(read_field(child->second).get_field());
         } else if (child->first == "GROUP") {
             //            read_group("GROUP", child->second);  // JTODO recurse
         } else {
