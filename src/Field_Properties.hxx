@@ -42,5 +42,31 @@ public:
               attributes(Attributes),
               values(v),
               links(Links) {}
+
+    inline const std::string &get_description() const { return description; }
+
+    inline const std::map<std::string, std::string> &get_attributes() const {
+        return attributes;
+    }
+    inline std::map<std::string, std::string> &get_attributes() { return attributes; }
+
+    inline const Values &get_values() const { return values; }
+    inline Values &get_values() { return values; }
+
+    inline const std::vector<std::pair<std::string, std::string> > &get_links() const {
+        return links;
+    }
+    inline std::vector<std::pair<std::string, std::string> > &get_links() {
+        return links;
+    }
+
+    inline void set_description(const std::string &desc) { description.assign(desc); }
+    inline void set_attributes(const std::map<std::string, std::string> &attrs) {
+        attributes = attrs;
+    }
+    inline void set_values(const Values &vals) { values = vals; }
+    inline void set_links(const std::vector<std::pair<std::string, std::string> > &ls) {
+        links = ls;
+    }
 };
 }  // namespace tablator
