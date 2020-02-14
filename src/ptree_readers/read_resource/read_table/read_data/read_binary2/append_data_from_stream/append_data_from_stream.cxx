@@ -3,6 +3,8 @@
 
 #include <boost/spirit/include/qi.hpp>
 
+#include "../../../../../../Utils/Table_Utils.hxx"
+
 namespace tablator {
 void insert_swapped(const size_t &column_offset, const Data_Type &data_type,
                     const size_t &array_size, const std::vector<uint8_t> &stream,

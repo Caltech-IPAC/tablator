@@ -2,6 +2,8 @@
 
 #include <boost/spirit/include/qi.hpp>
 
+#include "../../../../../../Utils/Table_Utils.hxx"
+
 namespace {
 template <class T, class Rule>
 void parse_and_insert_element(const Rule &rule,

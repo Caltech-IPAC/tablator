@@ -6,17 +6,18 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "Column.hxx"
 #include "Common.hxx"
-#include "Data_Element.hxx"
-#include "Group_Element.hxx"
-#include "Property.hxx"
-#include "Resource_Element.hxx"
-#include "Table_Element.hxx"
-#include "Utils/Table_Utils.hxx"
-
 
 namespace tablator {
+
+class Property;
+class Data_Element;
+class Group_Element;
+class Resource_Element;
+class Table_Element;
 class Table;
+
 
 namespace ptree_readers {
 
@@ -62,7 +63,10 @@ void append_data_from_stream(std::vector<uint8_t> &data,
                              const std::vector<Field_And_Flag> &field_flag_pairs,
                              size_t num_rows);
 
-boost::property_tree::ptree read_string_as_property_tree(const std::string &ptree_xml);
+boost::property_tree::ptree read_xml_string_as_property_tree(
+        const std::string &ptree_xml);
+void add_params_from_xml_string(std::vector<Field> &params,
+                                const std::string &params_xml);
 
 }  // namespace ptree_readers
 }  // namespace tablator

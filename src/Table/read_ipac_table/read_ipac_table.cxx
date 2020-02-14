@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "../../Table.hxx"
-#include "../../Utils/Table_Utils/insert_ascii_in_row.hxx"
 #include "../../to_string.hxx"
 
 namespace {

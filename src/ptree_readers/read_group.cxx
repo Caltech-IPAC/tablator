@@ -1,7 +1,7 @@
 #include "../ptree_readers.hxx"
 
-#include "../Column.hxx"
 #include "../Common.hxx"
+#include "../Group_Element.hxx"
 
 tablator::Group_Element tablator::ptree_readers::read_group(
         const boost::property_tree::ptree &group_tree) {

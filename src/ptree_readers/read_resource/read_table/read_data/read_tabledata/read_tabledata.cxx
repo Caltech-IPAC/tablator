@@ -2,7 +2,7 @@
 
 #include "../../../../../Common.hxx"
 #include "../../../../../Data_Element.hxx"
-#include "../../../../../Utils/Table_Utils/insert_ascii_in_row.hxx"
+#include "../../../../../Utils/Table_Utils.hxx"
 #include "../../../../../to_string.hxx"
 
 namespace tablator {

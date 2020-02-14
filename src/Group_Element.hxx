@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include "ptree_readers.hxx"
 #include "Column.hxx"
 #include "Common.hxx"
 
@@ -46,7 +47,11 @@ public:
             options_.params_ = params;
             return *this;
         }
-        Builder &add_params(const std::string &params_xml);
+        Builder &add_params(const std::string &params_xml) {
+            tablator::ptree_readers::add_params_from_xml_string(options_.params_, params_xml);
+            return *this;
+        }
+
         Builder &add_field_refs(const std::vector<ATTRIBUTES> &field_refs) {
             options_.field_refs_ = field_refs;
             return *this;

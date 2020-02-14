@@ -1,5 +1,8 @@
 #include "../../../ptree_readers.hxx"
 
+#include "../../../Property.hxx"
+#include "../../../Table_Element.hxx"
+#include "../../../Utils/Table_Utils.hxx"
 #include "../../../Utils/Vector_Utils.hxx"
 
 tablator::Table_Element tablator::ptree_readers::read_table(

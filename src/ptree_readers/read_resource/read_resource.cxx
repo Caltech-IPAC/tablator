@@ -1,5 +1,8 @@
 #include "../../ptree_readers.hxx"
 
+#include "../../Group_Element.hxx"
+#include "../../Resource_Element.hxx"
+#include "../../Table_Element.hxx"
 #include "../../Utils/Table_Utils.hxx"
 
 tablator::Resource_Element tablator::ptree_readers::read_resource(

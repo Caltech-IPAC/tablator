@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "../../../../Data_Element.hxx"
+
 void validate_tail(boost::property_tree::ptree::const_iterator &tail_begin,
                    boost::property_tree::ptree::const_iterator &tail_end) {
     boost::property_tree::ptree::const_iterator child = tail_begin;

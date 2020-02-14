@@ -2,7 +2,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../Common.hxx"
+#include "../Property.hxx"
 
 tablator::Property tablator::ptree_readers::read_property(
         const boost::property_tree::ptree &prop_tree) {

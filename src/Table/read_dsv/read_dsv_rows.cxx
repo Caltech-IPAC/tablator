@@ -1,7 +1,5 @@
 #include "../../Table.hxx"
 
-#include "../../Utils/Table_Utils/insert_ascii_in_row.hxx"
-
 std::vector<uint8_t> tablator::Table::read_dsv_rows(
         std::vector<Column> &columns, std::vector<size_t> &offsets,
         const std::list<std::vector<std::string> > &dsv) {
