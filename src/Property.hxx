@@ -16,7 +16,7 @@ public:
     Property(const std::string &Value) : value_(Value) {}
     Property(const ATTRIBUTES &Attributes) : attributes_(Attributes) {}
     Property(const std::string &Value, const ATTRIBUTES &Attributes)
-            : value_(Value), attributes_(Attributes) {}
+            : attributes_(Attributes), value_(Value) {}
 
     // Called internally, directly or otherwise, only by flatten_properties().
     std::vector<std::pair<std::string, std::string> > flatten(
@@ -29,27 +29,31 @@ public:
         return result;
     }
 
-    inline const ATTRIBUTES &get_attributes() const { return attributes_; }
-    inline ATTRIBUTES &get_attributes() { return attributes_; }
+    const ATTRIBUTES &get_attributes() const { return attributes_; }
+    ATTRIBUTES &get_attributes() { return attributes_; }
 
-    inline const std::string &get_value() const { return value_; }
-    inline std::string &get_value() { return value_; }
+    const std::string &get_value() const { return value_; }
+    std::string &get_value() { return value_; }
 
-    inline void set_attributes(const ATTRIBUTES &attrs) { attributes_ = attrs; }
-    inline void set_value(const std::string &val) { value_.assign(val); }
+    void set_attributes(const ATTRIBUTES &attrs) { attributes_ = attrs; }
+    void add_attributes(const ATTRIBUTES &attrs) {
+        attributes_.insert(attrs.begin(), attrs.end());
+    }
 
-    inline void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+    void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
         attributes_.insert(attr_pair);
     }
 
-    inline void add_attribute(const std::string &name, const std::string &value) {
+    void add_attribute(const std::string &name, const std::string &value) {
         add_attribute(std::make_pair(name, value));
     }
 
-    inline bool empty() const { return (attributes_.empty() && value_.empty()); }
+    void set_value(const std::string &val) { value_.assign(val); }
+
+    bool empty() const { return (attributes_.empty() && value_.empty()); }
 
 private:
-    std::string value_;
     ATTRIBUTES attributes_;
+    std::string value_;
 };
 }  // namespace tablator

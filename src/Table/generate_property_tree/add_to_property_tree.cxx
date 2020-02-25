@@ -257,9 +257,6 @@ void add_to_property_tree(
         add_to_property_tree(resource_tree, group);
     }
 
-    for (const auto &ptree : resource_element.get_params_ptree()) {
-        resource_tree.add_child(PARAM, ptree.second);
-    }
     for (const auto &param : resource_element.get_params()) {
         add_to_property_tree(resource_tree, PARAM, param);
     }

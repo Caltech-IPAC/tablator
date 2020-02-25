@@ -42,10 +42,82 @@ private:
         std::string description_;
         std::vector<std::string> comments_;
         std::vector<Field> params_;
-        boost::property_tree::ptree params_ptree_;
+        //        boost::property_tree::ptree params_ptree_;
         std::vector<std::pair<std::string, Property>> labeled_properties_;
         std::vector<Group_Element> group_elements_;
         std::vector<Property> trailing_info_list_;
+
+        void set_attributes(
+                const std::initializer_list<std::pair<const std::string, std::string>>
+                        attributes) {
+            attributes_ = attributes;
+        }
+
+        void add_attributes(const ATTRIBUTES &attributes) {
+            attributes_.insert(attributes.begin(), attributes.end());
+        }
+
+        void add_attribute(const std::pair<std::string, std::string> att_pair) {
+            attributes_.emplace(att_pair);
+        }
+
+        void set_description(const std::string &description) {
+            description_ = description;
+        }
+
+        void add_comments(const std::vector<std::string> &comments) {
+            comments_.insert(comments_.end(), comments.begin(), comments.end());
+        }
+
+        void add_comment(const std::string &comment) {
+            comments_.emplace_back(comment);
+        }
+
+        void set_params(const std::vector<Field> &params) { params_ = params; }
+
+        void add_params(const std::vector<Field> &params) {
+            params_.insert(params_.end(), params.begin(), params.end());
+        }
+
+        void add_params(const std::string &params_xml) {
+            tablator::ptree_readers::add_params_from_xml_string(params_, params_xml);
+        }
+
+        void add_param(const Field &param) { params_.emplace_back(param); }
+
+        void add_labeled_properties(const std::vector<std::pair<std::string, Property>>
+                                            &labeled_properties) {
+            labeled_properties_.insert(labeled_properties_.end(),
+                                       labeled_properties.begin(),
+                                       labeled_properties.end());
+            ;
+        }
+
+        // For backward compatibility, Table implements its analogue of
+        // this function itself rather than delegating to Options.
+        void add_labeled_property(
+                const std::pair<std::string, Property> &labeled_property) {
+            labeled_properties_.emplace_back(labeled_property);
+        }
+
+        void add_group_elements(const std::vector<Group_Element> &group_elements) {
+            group_elements_.insert(group_elements_.end(), group_elements.begin(),
+                                   group_elements.end());
+        }
+
+        void add_group_element(const Group_Element &group_element) {
+            group_elements_.emplace_back(group_element);
+        }
+
+        void add_trailing_info_list(const std::vector<Property> &trailing_info_list) {
+            trailing_info_list_.insert(trailing_info_list_.end(),
+                                       trailing_info_list.begin(),
+                                       trailing_info_list.end());
+        }
+
+        void add_trailing_info(const Property &trailing_info) {
+            trailing_info_list_.emplace_back(trailing_info);
+        }
     };
 
 public:
@@ -57,18 +129,36 @@ public:
 
         Table build() { return Table(resource_elements_, options_); }
 
+        Builder &set_attributes(
+                const std::initializer_list<std::pair<const std::string, std::string>>
+                        attributes) {
+            options_.set_attributes(attributes);
+            return *this;
+        }
+
+
         Builder &add_attributes(const ATTRIBUTES &attributes) {
-            options_.attributes_ = attributes;
+            options_.add_attributes(attributes);
+            return *this;
+        }
+
+        Builder &add_attribute(const std::pair<std::string, std::string> att_pair) {
+            options_.add_attribute(att_pair);
             return *this;
         }
 
         Builder &add_description(const std::string &description) {
-            options_.description_ = description;
+            options_.set_description(description);
             return *this;
         }
 
         Builder &add_comments(const std::vector<std::string> &comments) {
-            options_.comments_ = comments;
+            options_.add_comments(comments);
+            return *this;
+        }
+
+        Builder &add_comment(const std::string &comment) {
+            options_.add_comment(comment);
             return *this;
         }
 
@@ -77,26 +167,21 @@ public:
             return *this;
         }
 
-        Builder &add_params_tree(const boost::property_tree::ptree &params_ptree) {
-            options_.params_ptree_ = params_ptree;
-            return *this;
-        }
-
         Builder &add_labeled_properties(
                 const std::vector<std::pair<std::string, Property>>
                         &labeled_properties) {
-            options_.labeled_properties_ = labeled_properties;
+            options_.add_labeled_properties(labeled_properties);
             return *this;
         }
 
         Builder &add_group_elements(const std::vector<Group_Element> &group_elements) {
-            options_.group_elements_ = group_elements;
+            options_.add_group_elements(group_elements);
             return *this;
         }
 
         Builder &add_trailing_info_list(
                 const std::vector<Property> &trailing_info_list) {
-            options_.trailing_info_list_ = trailing_info_list;
+            options_.add_trailing_info_list(trailing_info_list);
             return *this;
         }
 
@@ -536,7 +621,7 @@ public:
         return col_vec;
     }
 
-    inline size_t row_size() const { return tablator::row_size(get_offsets()); }
+    size_t row_size() const { return tablator::row_size(get_offsets()); }
     size_t num_rows() const { return get_data().size() / row_size(); }
 
     // static functions
@@ -573,131 +658,118 @@ public:
             const std::vector<std::pair<std::string, Property>> &properties);
 
 
-    // getters
-    inline std::vector<Resource_Element> &get_resource_elements() {
-        return resource_elements_;
-    }
+    // getters for Optional elements
+    ATTRIBUTES &get_attributes() { return options_.attributes_; }
+    const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
 
-    inline const std::vector<Resource_Element> &get_resource_elements() const {
-        return resource_elements_;
-    }
+    std::string &get_description() { return options_.description_; }
+    const std::string &get_description() const { return options_.description_; }
 
-    inline ATTRIBUTES &get_attributes() { return options_.attributes_; }
-    inline const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
+    std::vector<std::string> &get_comments() { return options_.comments_; }
+    const std::vector<std::string> &get_comments() const { return options_.comments_; }
 
-    inline std::string &get_description() { return options_.description_; }
-    inline const std::string &get_description() const { return options_.description_; }
+    std::vector<Field> &get_params() { return options_.params_; }
+    const std::vector<Field> &get_params() const { return options_.params_; }
 
-    inline std::vector<std::string> &get_comments() { return options_.comments_; }
-    inline const std::vector<std::string> &get_comments() const {
-        return options_.comments_;
-    }
 
-    inline std::vector<Field> &get_params() { return options_.params_; }
-    inline const std::vector<Field> &get_params() const { return options_.params_; }
-
-    inline std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
+    std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
         return options_.labeled_properties_;
     }
-
-    inline const std::vector<std::pair<std::string, Property>> &get_labeled_properties()
+    const std::vector<std::pair<std::string, Property>> &get_labeled_properties()
             const {
         return options_.labeled_properties_;
     }
 
-    inline std::vector<Group_Element> &get_group_elements() {
+    std::vector<Group_Element> &get_group_elements() {
+        return options_.group_elements_;
+    }
+    const std::vector<Group_Element> &get_group_elements() const {
         return options_.group_elements_;
     }
 
-    inline const std::vector<Group_Element> &get_group_elements() const {
-        return options_.group_elements_;
-    }
-
-    inline std::vector<Property> &get_trailing_info_list() {
+    std::vector<Property> &get_trailing_info_list() {
         return options_.trailing_info_list_;
     }
 
-    inline const std::vector<Property> &get_trailing_info_list() const {
+    const std::vector<Property> &get_trailing_info_list() const {
         return options_.trailing_info_list_;
     }
 
-    inline Resource_Element &get_main_resource_element() {
-        if (get_resource_elements().empty()) {
-            throw std::runtime_error("table is empty");
-        }
+
+    // getters for non-Optional elements
+    std::vector<Resource_Element> &get_resource_elements() {
+        return resource_elements_;
+    }
+
+    const std::vector<Resource_Element> &get_resource_elements() const {
+        return resource_elements_;
+    }
+
+    Resource_Element &get_main_resource_element() {
+        assert(!get_resource_elements().empty());
         return get_resource_elements().at(0);
     }
 
 
-    inline const Resource_Element &get_main_resource_element() const {
-        if (get_resource_elements().empty()) {
-            throw std::runtime_error("table is empty");
-        }
+    const Resource_Element &get_main_resource_element() const {
+        assert(!get_resource_elements().empty());
         return get_resource_elements().at(0);
     }
 
-    inline std::vector<Column> &get_columns() {
+    std::vector<Column> &get_columns() {
         return get_main_resource_element().get_columns();
     }
-    inline const std::vector<Column> &get_columns() const {
+    const std::vector<Column> &get_columns() const {
         return get_main_resource_element().get_columns();
     }
 
-    inline std::vector<size_t> &get_offsets() {
+    std::vector<size_t> &get_offsets() {
         return get_main_resource_element().get_offsets();
     }
 
-    inline const std::vector<size_t> &get_offsets() const {
+    const std::vector<size_t> &get_offsets() const {
         return get_main_resource_element().get_offsets();
     }
 
-    inline std::vector<std::pair<std::string, Property>>
+    std::vector<std::pair<std::string, Property>>
             &get_resource_element_labeled_properties() {
         return get_main_resource_element().get_labeled_properties();
     }
 
-    inline const std::vector<std::pair<std::string, Property>>
+    const std::vector<std::pair<std::string, Property>>
             &get_resource_element_labeled_properties() const {
         return get_main_resource_element().get_labeled_properties();
     }
 
-    inline const std::vector<Field> &get_resource_element_params() const {
+    const std::vector<Field> &get_resource_element_params() const {
         return get_main_resource_element().get_params();
     }
 
-    inline std::vector<Field> &get_table_element_params() {
+    std::vector<Field> &get_table_element_params() {
         return get_main_resource_element().get_table_element_params();
     }
-    inline const std::vector<Field> &get_table_element_params() const {
+    const std::vector<Field> &get_table_element_params() const {
         return get_main_resource_element().get_table_element_params();
     }
 
-    inline std::vector<uint8_t> &get_data() {
+    std::vector<uint8_t> &get_data() { return get_main_resource_element().get_data(); }
+
+    const std::vector<uint8_t> &get_data() const {
         return get_main_resource_element().get_data();
     }
 
-    inline const std::vector<uint8_t> &get_data() const {
-        return get_main_resource_element().get_data();
+
+    Table_Element &get_main_table_element() {
+        return get_main_resource_element().get_main_table_element();
     }
 
 
-    inline Table_Element &get_main_table_element() {
-        if (get_resource_elements().empty()) {
-            throw std::runtime_error("table is empty");
-        }
-        return get_resource_elements().at(0).get_table_elements().at(0);
+    const Table_Element &get_main_table_element() const {
+        return get_main_resource_element().get_main_table_element();
     }
 
 
-    inline const Table_Element &get_main_table_element() const {
-        if (get_resource_elements().empty()) {
-            throw std::runtime_error("table is empty");
-        }
-        return get_resource_elements().at(0).get_table_elements().at(0);
-    }
-
-
-    // mock getters
+    // virtual getters
     const std::vector<std::pair<std::string, Property>>
     combine_trailing_info_lists_all_levels() const;
 
@@ -710,52 +782,97 @@ public:
 
     //===========================================================
 
-    // setters
+    // setters for Optional elements
 
-    inline void set_attributes(const ATTRIBUTES &attrs) {
-        options_.attributes_ = attrs;
+    void set_attributes(
+            const std::initializer_list<std::pair<const std::string, std::string>>
+                    attributes) {
+        options_.set_attributes(attributes);
     }
 
-    void set_description(const std::string &desc) {
-        options_.description_.assign(desc);
+    void add_attributes(const ATTRIBUTES &attributes) {
+        options_.add_attributes(attributes);
     }
-    inline void set_labeled_properties(
+
+    void add_attribute(const std::string &name, const std::string &val) {
+        options_.add_attribute(std::make_pair(name, val));
+    }
+
+    void set_description(const std::string &description) {
+        options_.set_description(description);
+    }
+
+    void add_comments(const std::vector<std::string> &comments) {
+        options_.add_comments(comments);
+    }
+    void add_comment(const std::string &comment) { options_.add_comment(comment); }
+
+    void set_params(const std::vector<Field> &params) { options_.set_params(params); }
+
+    void add_params(const std::vector<Field> &params) { options_.add_params(params); }
+
+    void add_param(const Field &param) { options_.add_param(param); }
+
+    void set_labeled_properties(
             const std::vector<std::pair<std::string, Property>> &labeled_props) {
         options_.labeled_properties_ = labeled_props;
     }
 
-    inline void set_params(const std::vector<Field> &params) {
-        options_.params_ = params;
+    void add_labeled_properties(
+            const std::vector<std::pair<std::string, Property>> &labeled_props) {
+        options_.add_labeled_properties(labeled_props);
     }
-    inline void set_resource_element_params(const std::vector<Field> &params) {
+
+    // Temporarily implemented so as to support backward compatibility; not just a
+    // wrapper.
+    void add_labeled_property(const std::pair<std::string, Property> &label_and_prop);
+    void add_labeled_property(const std::string &label, const Property &prop) {
+        add_labeled_property(std::make_pair(label, prop));
+    }
+
+    void add_group_elements(const std::vector<Group_Element> &ges) {
+        options_.add_group_elements(ges);
+    }
+    void add_group_element(const Group_Element &ge) { options_.add_group_element(ge); }
+    void add_trailing_info_list(const std::vector<Property> &trailing_info_list) {
+        options_.add_trailing_info_list(trailing_info_list);
+    }
+    void add_trailing_info(const Property &prop) { options_.add_trailing_info(prop); }
+
+
+    //=================================================
+    // setters for non-Optional elements
+    void add_resource_element(const Resource_Element &resource_element) {
+        resource_elements_.emplace_back(resource_element);
+    }
+
+    void add_resource_element(const Table_Element &table_element) {
+        resource_elements_.emplace_back(Resource_Element(table_element));
+    }
+
+    //=================================================
+    // Setter-wrappers for sub-elements
+
+    void set_resource_element_params(const std::vector<Field> &params) {
         get_main_resource_element().set_params(params);
     }
 
-    inline void set_table_element_params(const std::vector<Field> &params) {
+    void set_table_element_params(const std::vector<Field> &params) {
         get_main_resource_element().set_table_element_params(params);
     }
 
-    inline void set_data(const std::vector<uint8_t> &d) {
+    void set_data(const std::vector<uint8_t> &d) {
         get_main_resource_element().set_data(d);
     }
 
-
-    inline void add_comment(const std::string &c) {
-        options_.comments_.emplace_back(c);
+    void add_resource_element_labeled_property(
+            const std::pair<std::string, Property> &label_and_prop) {
+        get_main_resource_element().add_labeled_property(label_and_prop);
     }
 
-    inline void add_param(const Field &param) { get_params().emplace_back(param); }
-
-
-    inline void add_trailing_info(const Property &prop) {
-        get_trailing_info_list().emplace_back(prop);
-    }
-
-    // for backward compatibility
-    void add_labeled_property(const std::pair<std::string, Property> &label_and_prop);
-
-    inline void add_labeled_property(const std::string &label, const Property &prop) {
-        add_labeled_property(std::make_pair(label, prop));
+    void add_resource_element_labeled_property(const std::string &label,
+                                               const Property &prop) {
+        add_resource_element_labeled_property(std::make_pair(label, prop));
     }
 
     // JTODO terminology for table that has been constructed but not loaded.
@@ -765,56 +882,16 @@ public:
     // the lower-level classes must be stored in temporary vectors which will then be
     // sent as arguments to the relevant constructors.
 
-    void add_labeled_property(
-            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
+    void add_element_labeled_property(
+            std::vector<std::pair<std::string, Property>> &element_labeled_properties,
             const std::pair<std::string, Property> &label_and_prop);
 
 
-    inline void add_labeled_property(
-            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
+    void add_element_labeled_property(
+            std::vector<std::pair<std::string, Property>> &element_labeled_properties,
             const std::string &label, const Property &prop) {
-        add_labeled_property(resource_labeled_properties, std::make_pair(label, prop));
-    }
-
-    inline bool add_labeled_trailing_info(
-            std::vector<Property> &resource_element_infos,
-            std::vector<Property> &table_element_infos,
-            const std::pair<std::string, Property> &label_and_prop);
-
-    inline bool add_labeled_attributes(
-            ATTRIBUTES &resource_element_attributes,
-            ATTRIBUTES &table_element_attributes,
-            const std::pair<std::string, Property> &label_and_prop);
-
-
-    inline void add_resource_element(const Resource_Element &resource_element) {
-        get_resource_elements().emplace_back(resource_element);
-    }
-
-    inline void add_resource_element(const Table_Element &table_element) {
-        get_resource_elements().emplace_back(Resource_Element(table_element));
-    }
-
-    inline void add_attribute(const std::string &name, const std::string &val) {
-        options_.attributes_.insert(std::make_pair(name, val));
-    }
-
-    inline void add_attributes(const ATTRIBUTES &attrs) {
-        get_attributes().insert(attrs.begin(), attrs.end());
-    }
-
-    inline void add_group_element(const Group_Element &ge) {
-        get_group_elements().emplace_back(ge);
-    }
-
-    inline void add_resource_element_labeled_property(
-            const std::pair<std::string, Property> &label_and_prop) {
-        get_main_resource_element().add_labeled_property(label_and_prop);
-    }
-
-    inline void add_resource_element_labeled_property(const std::string &label,
-                                                      const Property &prop) {
-        add_resource_element_labeled_property(std::make_pair(label, prop));
+        add_element_labeled_property(element_labeled_properties,
+                                     std::make_pair(label, prop));
     }
 
 
@@ -856,5 +933,16 @@ private:
             tablator::ATTRIBUTES &table_element_attributes,
             const std::vector<std::pair<std::string, tablator::Property>>
                     &label_prop_pairs);
+
+    // labeled by element: Table, Resource_Element, Table_Element.
+    bool add_trailing_info_labeled_by_element(
+            std::vector<Property> &resource_element_infos,
+            std::vector<Property> &table_element_infos,
+            const std::pair<std::string, Property> &label_and_prop);
+
+    bool add_attributes_labeled_by_element(
+            ATTRIBUTES &resource_element_attributes,
+            ATTRIBUTES &table_element_attributes,
+            const std::pair<std::string, Property> &label_and_prop);
 };
 }  // namespace tablator
