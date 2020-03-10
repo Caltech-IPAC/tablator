@@ -33,7 +33,7 @@ Table_Element load_columns_and_offsets(const std::vector<Column> &Columns) {
     std::vector<Column> tabledata_columns;
     std::vector<size_t> tabledata_offsets = {0};
 
-    const size_t null_flags_size = (Columns.size() + 7) / 8;
+    const size_t null_flags_size = bits_to_bytes(Columns.size());
     tablator::append_column(tabledata_columns, tabledata_offsets,
                             null_bitfield_flags_name, Data_Type::UINT8_LE,
                             null_flags_size,
@@ -316,8 +316,8 @@ void Table::add_labeled_property(
         const std::pair<std::string, Property> &label_and_prop) {
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
-    if (boost::equals(label, "COOSYS") || boost::equals(label, "PARAM") ||
-        boost::equals(label, "INFO")) {
+    if (boost::equals(label, COOSYS) || boost::equals(label, PARAM) ||
+        boost::equals(label, INFO)) {
         get_labeled_properties().emplace_back(label_and_prop);
         return;
     }
@@ -331,10 +331,11 @@ void Table::add_labeled_property(
                                               prop);
     } else {
         add_resource_element_labeled_property(
-                "INFO", Property({{"name", label}, {"value", prop.get_value()}}));
+                "INFO", Property({{ATTR_NAME, label}, {ATTR_VALUE, prop.get_value()}}));
         for (const auto &att : prop.get_attributes()) {
             add_resource_element_labeled_property(
-                    "INFO", Property({{"name", att.first}, {"value", att.second}}));
+                    "INFO",
+                    Property({{ATTR_NAME, att.first}, {ATTR_VALUE, att.second}}));
         }
     }
 }
@@ -348,8 +349,8 @@ void Table::add_element_labeled_property(
         const std::pair<std::string, Property> &label_and_prop) {
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
-    if (boost::equals(label, "COOSYS") || boost::equals(label, "PARAM") ||
-        boost::equals(label, "INFO")) {
+    if (boost::equals(label, COOSYS) || boost::equals(label, PARAM) ||
+        boost::equals(label, INFO)) {
         get_labeled_properties().emplace_back(label_and_prop);
     } else if (boost::starts_with(
                        label,
@@ -361,10 +362,10 @@ void Table::add_element_labeled_property(
                                                  prop);
     } else {
         resource_labeled_properties.emplace_back(
-                "INFO", Property({{"name", label}, {"value", prop.get_value()}}));
+                INFO, Property({{ATTR_NAME, label}, {ATTR_VALUE, prop.get_value()}}));
         for (const auto &att : prop.get_attributes()) {
             resource_labeled_properties.emplace_back(
-                    "INFO", Property({{"name", att.first}, {"value", att.second}}));
+                    INFO, Property({{ATTR_NAME, att.first}, {ATTR_VALUE, att.second}}));
         }
     }
 }

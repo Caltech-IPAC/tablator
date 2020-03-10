@@ -5,6 +5,8 @@
 
 #include "Column.hxx"
 
+// JTODO: Create struct to hold commonly used (columns, offsets) pair?
+
 namespace tablator {
 
 class Data_Element {

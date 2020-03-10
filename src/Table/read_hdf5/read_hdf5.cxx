@@ -37,7 +37,7 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
     // multiple tables
     H5::Group resource = file.openGroup("/RESOURCE_0");
     std::vector<tablator::Field> resource_params =
-            read_column_metadata(resource, "PARAM");
+            read_column_metadata(resource, PARAM);
 
     H5::DataSet dataset = resource.openDataSet(resource.getObjnameByIdx(0).c_str());
 
@@ -48,7 +48,7 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
             read_description(dataset, TABLE_ELEMENT_DESCRIPTION);
 
     std::vector<tablator::Field> table_element_params =
-            read_column_metadata(dataset, "PARAM");
+            read_column_metadata(dataset, PARAM);
 
     const auto metadata = read_metadata(dataset);
 

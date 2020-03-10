@@ -11,7 +11,7 @@ std::vector<size_t> get_ipac_column_widths(
     const size_t num_columns = ipac_column_offsets.size() - 1;
     std::vector<size_t> ipac_column_widths;
     /// Add a column for null flags.
-    ipac_column_widths.push_back((num_columns + 7) / 8);
+    ipac_column_widths.push_back(tablator::bits_to_bytes(num_columns));
     for (size_t i = 0; i < num_columns; ++i)
         ipac_column_widths.push_back(ipac_column_offsets[i + 1] -
                                      ipac_column_offsets[i] - 1);

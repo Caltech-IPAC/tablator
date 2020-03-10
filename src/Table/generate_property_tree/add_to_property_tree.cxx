@@ -15,8 +15,8 @@ void Min_Max_to_xml(boost::property_tree::ptree &tree, const std::string &min_ma
                     const tablator::Min_Max &m) {
     if (!m.empty()) {
         boost::property_tree::ptree &min_max_tree = tree.add(min_max, "");
-        min_max_tree.add(tablator::XMLATTR + ".value", m.value);
-        min_max_tree.add(tablator::XMLATTR + ".inclusive", m.inclusive ? "yes" : "no");
+        min_max_tree.add(tablator::XMLATTR_VALUE, m.value);
+        min_max_tree.add(tablator::XMLATTR_INCLUSIVE, m.inclusive ? "yes" : "no");
     }
 }
 
@@ -24,10 +24,10 @@ void Option_to_xml(boost::property_tree::ptree &tree, const tablator::Option &op
     if (!option.empty()) {
         boost::property_tree::ptree &option_tree = tree.add("OPTION", "");
         if (!option.name.empty()) {
-            option_tree.add(tablator::XMLATTR + ".name", option.name);
+            option_tree.add(tablator::XMLATTR_NAME, option.name);
         }
         if (!option.value.empty()) {
-            option_tree.add(tablator::XMLATTR + ".value", option.value);
+            option_tree.add(tablator::XMLATTR_VALUE, option.value);
         }
         for (auto &o : option.options) Option_to_xml(option_tree, o);
     }
@@ -41,7 +41,7 @@ namespace tablator {
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const tablator::ATTRIBUTES &attributes) {
     for (const auto &att_pair : attributes) {
-        parent_tree.add(tablator::XMLATTR + "." + att_pair.first, att_pair.second);
+        parent_tree.add(tablator::XMLATTR_DOT + att_pair.first, att_pair.second);
     }
 }
 
@@ -62,8 +62,8 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     } else {
         // Backward compatibility.
         auto &label_tree = parent_tree.add(INFO, "");
-        label_tree.add(XMLATTR + ".name", label);
-        label_tree.add(XMLATTR + ".value", value);
+        label_tree.add(XMLATTR_NAME, label);
+        label_tree.add(XMLATTR_VALUE, value);
         add_to_property_tree(label_tree, attributes);
     }
 }
@@ -86,14 +86,14 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::string &col_label, const Column &column,
                           const Data_Type &active_datatype) {
     boost::property_tree::ptree &field_tree = parent_tree.add(col_label, "");
-    field_tree.add(XMLATTR + ".name", column.get_name());
+    field_tree.add(XMLATTR_NAME, column.get_name());
     std::string datatype = to_xml_string(active_datatype);
-    field_tree.add(XMLATTR + ".datatype", datatype);
+    field_tree.add(XMLATTR_DATATYPE, datatype);
 
     bool added_arraysize =
             (active_datatype == Data_Type::CHAR || column.get_array_size() != 1);
     if (added_arraysize) {
-        field_tree.add("<xmlattr>.arraysize", "*");
+        field_tree.add(XMLATTR_ARRAYSIZE, "*");
     }
 
     const auto &field_properties = column.get_field_properties();
@@ -109,7 +109,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         if (added_arraysize && boost::equals(a.first, "arraysize")) {
             continue;
         }
-        field_tree.add(XMLATTR + "." + a.first, a.second);
+        field_tree.add(XMLATTR_DOT + a.first, a.second);
     }
 
     const auto &desc = field_properties.get_description();
@@ -120,9 +120,9 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     auto &v(field_properties.get_values());
     if (!v.empty_except_null()) {
         boost::property_tree::ptree &values = field_tree.add("VALUES", "");
-        if (!v.ID.empty()) values.add(XMLATTR + ".ID", v.ID);
-        if (!v.type.empty()) values.add(XMLATTR + ".type", v.type);
-        if (!v.ref.empty()) values.add(XMLATTR + ".ref", v.ref);
+        if (!v.ID.empty()) values.add(XMLATTR_ID, v.ID);
+        if (!v.type.empty()) values.add(XMLATTR_TYPE, v.type);
+        if (!v.ref.empty()) values.add(XMLATTR_REF, v.ref);
 
         Min_Max_to_xml(values, "MIN", v.min);
         Min_Max_to_xml(values, "MAX", v.max);
@@ -133,7 +133,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     if (!field_properties.get_links().empty()) {
         boost::property_tree::ptree &link_tree = field_tree.add("LINK", "");
         for (auto &link : field_properties.get_links()) {
-            link_tree.add(XMLATTR + "." + link.first, link.second);
+            link_tree.add(XMLATTR_DOT + link.first, link.second);
         }
     }
 }
@@ -152,7 +152,7 @@ void add_to_property_tree(boost::property_tree::ptree &tree,
                           const Group_Element &group_element) {
     boost::property_tree::ptree &group_tree = tree.add(GROUP, "");
     for (const auto &pair : group_element.get_attributes()) {
-        group_tree.add(XMLATTR + "." + pair.first, pair.second);
+        group_tree.add(XMLATTR_DOT + pair.first, pair.second);
     }
     if (!group_element.get_description().empty()) {
         group_tree.add(DESCRIPTION, group_element.get_description());
@@ -165,7 +165,7 @@ void add_to_property_tree(boost::property_tree::ptree &tree,
     for (const auto &att_map : group_element.get_field_refs()) {
         boost::property_tree::ptree &field_ref_tree = group_tree.add(FIELDREF, "");
         for (const auto &att : att_map) {
-            field_ref_tree.add(XMLATTR + "." + att.first, att.second);
+            field_ref_tree.add(XMLATTR_DOT + att.first, att.second);
         }
     }
 }
@@ -180,7 +180,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     boost::property_tree::ptree &table_tree = parent_tree.add(TABLE, "");
 
     for (const auto &pair : table_element.get_attributes()) {
-        table_tree.add(XMLATTR + "." + pair.first, pair.second);
+        table_tree.add(XMLATTR_DOT + pair.first, pair.second);
     }
     // VOTable allows Table_Element only a single DESCRIPTION element, so we combine
     // RESOURCE.TABLE.DESCRIPTION and comments in a single string.
@@ -233,7 +233,7 @@ void add_to_property_tree(
         const std::vector<std::pair<std::string, Property>> &table_labeled_properties) {
     boost::property_tree::ptree &resource_tree = parent_tree.add(RESOURCE, "");
     for (const auto &pair : resource_element.get_attributes()) {
-        resource_tree.add(XMLATTR + "." + pair.first, pair.second);
+        resource_tree.add(XMLATTR_DOT + pair.first, pair.second);
     }
     if (!resource_element.get_description().empty()) {
         resource_tree.add(DESCRIPTION, resource_element.get_description());

@@ -5,6 +5,8 @@
 #include "../../Table_Element.hxx"
 #include "../../Utils/Table_Utils.hxx"
 
+// FIXME: Refactor to reduce cyclomatic complexity.
+
 tablator::Resource_Element tablator::ptree_readers::read_resource(
         const boost::property_tree::ptree &resource_tree, bool is_first) {
     auto child = resource_tree.begin();

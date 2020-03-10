@@ -64,8 +64,6 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
             "http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 "
             "http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30");
 
-    bool overflow = false;
-
     if (!get_description().empty()) {
         votable_tree.add(DESCRIPTION, get_description());
     }
@@ -121,12 +119,6 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     }
     for (const auto &info : get_trailing_info_list()) {
         add_to_property_tree(votable_tree, INFO, info);
-    }
-
-    if (overflow) {
-        auto &info = outermost_tree.add("VOTABLE.RESOURCE.INFO", "");
-        info.add(XMLATTR + ".name", "QUERY_STATUS");
-        info.add(XMLATTR + ".value", "OVERFLOW");
     }
 
     return outermost_tree;

@@ -9,6 +9,11 @@ namespace tablator {
     static const std::string null_bitfield_flags_description(
         "Packed bit array indicating whether an entry is null");
 
+    // Computes the minimum number of bytes which collectively contain
+    // n distinct bits.
+    inline size_t bits_to_bytes(size_t n) {
+        return (n + 7)/8;
+    }
     inline  size_t row_size(const std::vector<size_t> &offsets) {
         if (offsets.empty()) {
             throw std::runtime_error("<offsets> is empty");

@@ -25,14 +25,14 @@ tablator::Group_Element tablator::ptree_readers::read_group(
     std::vector<ATTRIBUTES> field_refs;
     std::vector<ATTRIBUTES> param_refs;
     while (child != end) {
-        if (child->first == "FIELDref") {
+        if (child->first == FIELDREF) {
             field_refs.emplace_back(extract_attributes(child->second));
-        } else if (child->first == "PARAMref") {
+        } else if (child->first == PARAMREF) {
             param_refs.emplace_back(extract_attributes(child->second));
-        } else if (child->first == "PARAM") {
+        } else if (child->first == PARAM) {
             params.emplace_back(read_field(child->second).get_field());
-        } else if (child->first == "GROUP") {
-            //            read_group("GROUP", child->second);  // JTODO recurse
+        } else if (child->first == GROUP) {
+            //            read_group(GROUP, child->second);  // JTODO recurse
         } else {
             break;
         }

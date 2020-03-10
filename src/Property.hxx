@@ -15,13 +15,16 @@ public:
     // JTODO Builder
     Property(const std::string &Value) : value_(Value) {}
     Property(const ATTRIBUTES &Attributes) : attributes_(Attributes) {}
+    Property(const std::initializer_list<std::pair<const std::string, std::string>>
+                     &Attributes)
+            : attributes_(Attributes) {}
     Property(const std::string &Value, const ATTRIBUTES &Attributes)
             : attributes_(Attributes), value_(Value) {}
 
     // Called internally, directly or otherwise, only by flatten_properties().
-    std::vector<std::pair<std::string, std::string> > flatten(
+    std::vector<std::pair<std::string, std::string>> flatten(
             const std::string &key) const {
-        std::vector<std::pair<std::string, std::string> > result;
+        std::vector<std::pair<std::string, std::string>> result;
         result.push_back(std::make_pair(key, value_));
         for (auto &a : attributes_)
             result.push_back(

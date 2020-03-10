@@ -49,7 +49,7 @@ private:
 
         void set_attributes(
                 const std::initializer_list<std::pair<const std::string, std::string>>
-                        attributes) {
+                        &attributes) {
             attributes_ = attributes;
         }
 
@@ -633,10 +633,6 @@ public:
                                 std::vector<size_t> &offsets,
                                 std::list<std::vector<std::string>> &dsv);
 
-
-    // WARNING: append_column routines do not increase the size of the
-    // null column.  The expectation is that the number of columns is
-    // known before adding columns.
     static void append_ipac_data_member(std::vector<Column> &columns,
                                         std::vector<size_t> &offsets,
                                         const std::string &name,

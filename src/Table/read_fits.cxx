@@ -59,7 +59,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         throw std::runtime_error("Could not find any extensions in this file: " +
                                  path.string());
     CCfits::ExtHDU &table_extension = *(fits.extension().begin()->second);
-    CCfits::BinTable *table(dynamic_cast<CCfits::BinTable *>(&table_extension));
+    CCfits::BinTable *ccfits_table(dynamic_cast<CCfits::BinTable *>(&table_extension));
 
     std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
     auto keyword_mapping = fits_keyword_mapping(false);
@@ -111,18 +111,19 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
 
     // CCfits is 1 based, not 0 based.
-    const bool has_null_bitfield_flags(table->column().size() > 0 &&
-                                       table->column(1).name() ==
+    const bool has_null_bitfield_flags(ccfits_table->column().size() > 0 &&
+                                       ccfits_table->column(1).name() ==
                                                null_bitfield_flags_name &&
-                                       table->column(1).type() == CCfits::Tbyte);
+                                       ccfits_table->column(1).type() == CCfits::Tbyte);
     if (!has_null_bitfield_flags) {
         tablator::append_column(columns, offsets, null_bitfield_flags_name,
-                                Data_Type::UINT8_LE, (table->column().size() + 7) / 8,
+                                Data_Type::UINT8_LE,
+                                bits_to_bytes(ccfits_table->column().size()),
                                 Field_Properties(null_bitfield_flags_description, {}));
     }
 
-    for (size_t i = 0; i < table->column().size(); ++i) {
-        CCfits::Column &c = table->column(i + 1);
+    for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
+        CCfits::Column &c = ccfits_table->column(i + 1);
         size_t array_size = 1;
         if (std::isdigit(c.format().at(0))) array_size = std::stoll(c.format());
         switch (c.type()) {
@@ -191,12 +192,12 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         }
     }
 
-    // table->rows () returns an int, so there may be issues with more
+    // ccfits_table->rows () returns an int, so there may be issues with more
     // than 2^32 rows
 
     std::vector<uint8_t> data;
     size_t row_size = tablator::row_size(offsets);
-    data.resize(table->rows() * row_size);
+    data.resize(ccfits_table->rows() * row_size);
 
     // Exit early if there is no data in the table.  Otherwise CCfits
     // dies in read_column() :(
@@ -213,17 +214,17 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     fitsfile *fits_pointer = fits.fitsPointer();
     const size_t column_data_offset(has_null_bitfield_flags ? 0 : 1);
-    for (size_t i = 0; i < table->column().size(); ++i) {
+    for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
         const size_t offset(offsets[i + column_data_offset]);
         /// CCfits is 1 based, not 0 based.
-        CCfits::Column &c = table->column(i + 1);
+        CCfits::Column &c = ccfits_table->column(i + 1);
         const bool is_array(std::isdigit(c.format().at(0)) &&
                             (std::stoll(c.format()) != 1));
         switch (c.type()) {
             case CCfits::Tlogical: {
                 if (!is_array) {
                     std::vector<int> v;
-                    c.read(v, 1, table->rows());
+                    c.read(v, 1, ccfits_table->rows());
                     size_t element_offset = offset;
                     for (auto &element : v) {
                         data[element_offset] = element;
@@ -233,7 +234,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                     // FIXME: Use the C api because Column::readArrays is
                     // horrendously slow.
                     std::vector<std::valarray<int>> v;
-                    c.readArrays(v, 1, table->rows());
+                    c.readArrays(v, 1, ccfits_table->rows());
                     size_t start_offset_for_row = offset;
                     for (auto &array : v) {
                         auto element_offset = start_offset_for_row;
@@ -247,41 +248,41 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             } break;
             case CCfits::Tbyte:
                 read_column<uint8_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size);
+                                     ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tshort:
                 read_column<int16_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size);
+                                     ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tushort:
                 read_column<uint16_t>(fits_pointer, data.data() + offset, c, is_array,
-                                      table->rows(), row_size);
+                                      ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tuint:
             case CCfits::Tulong:
                 read_column<uint32_t>(fits_pointer, data.data() + offset, c, is_array,
-                                      table->rows(), row_size);
+                                      ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tint:
             case CCfits::Tlong:
                 read_column<int32_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size);
+                                     ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tlonglong:
                 read_column<int64_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     table->rows(), row_size);
+                                     ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tfloat:
                 read_column<float>(fits_pointer, data.data() + offset, c, is_array,
-                                   table->rows(), row_size);
+                                   ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tdouble:
                 read_column<double>(fits_pointer, data.data() + offset, c, is_array,
-                                    table->rows(), row_size);
+                                    ccfits_table->rows(), row_size);
                 break;
             case CCfits::Tstring: {
                 std::vector<std::string> v;
-                c.read(v, 1, table->rows());
+                c.read(v, 1, ccfits_table->rows());
                 size_t element_offset = offset;
                 for (auto &element : v) {
                     for (size_t j = 0; j < element.size(); ++j)

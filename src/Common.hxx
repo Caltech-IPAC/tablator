@@ -16,6 +16,17 @@ static const std::string ATTR_VALUE("value");
 
 static const std::string XMLATTR("<xmlattr>");
 static const std::string XMLATTR_DOT("<xmlattr>.");
+
+static const std::string XMLATTR_ARRAYSIZE("<xmlattr>.arraysize");
+static const std::string XMLATTR_DATATYPE("<xmlattr>.datatype");
+static const std::string XMLATTR_ENCODING("<xmlattr>.encoding");
+static const std::string XMLATTR_ID("<xmlattr>.ID");
+static const std::string XMLATTR_INCLUSIVE("<xmlattr>.inclusive");
+static const std::string XMLATTR_NAME("<xmlattr>.name");
+static const std::string XMLATTR_REF("<xmlattr>.ref");
+static const std::string XMLATTR_TYPE("<xmlattr>.type");
+static const std::string XMLATTR_VALUE("<xmlattr>.value");
+
 static const std::string XMLCOMMENT("<xmlcomment>");
 
 static const std::string VOTABLE_DOT("VOTABLE.");
@@ -49,6 +60,7 @@ static const std::string MIN("MIN");
 static const std::string MAX("MAX");
 static const std::string NAME("name");
 static const std::string OPTION("OPTION");
+static const std::string PARAMREF("PARAMref");
 static const std::string QUERY_STATUS("QUERY_STATUS");
 static const std::string REF("ref");
 static const std::string RESOURCE("RESOURCE");
