@@ -7,7 +7,7 @@
 
 // FIXME: Refactor to reduce cyclomatic complexity.
 
-tablator::Resource_Element tablator::ptree_readers::read_resource(
+tablator::Resource_Element tablator::ptree_readers::read_resource_element(
         const boost::property_tree::ptree &resource_tree, bool is_first) {
     auto child = resource_tree.begin();
     auto end = resource_tree.end();
@@ -41,7 +41,7 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
         } else if (child->first == PARAM) {
             params.emplace_back(read_field(child->second).get_field());
         } else if (child->first == GROUP) {
-            group_elements.emplace_back(read_group(child->second));
+            group_elements.emplace_back(read_group_element(child->second));
         } else if (child->first == INFO) {
             // JTODO INFO doesn't belong here unless middle is missing and this is a
             // trailer
@@ -80,7 +80,7 @@ tablator::Resource_Element tablator::ptree_readers::read_resource(
                 throw std::runtime_error(
                         "Multiple TABLE elements are not implemented.");
             }
-            table_elements.emplace_back(read_table(child->second));
+            table_elements.emplace_back(read_table_element(child->second));
         } else if (child->first == INFO) {
             break;
         } else {

@@ -890,7 +890,6 @@ public:
                                      std::make_pair(label, prop));
     }
 
-
 private:
     Table(std::vector<Resource_Element> &resource_elements, const Options &options)
             : resource_elements_(resource_elements), options_(options) {}

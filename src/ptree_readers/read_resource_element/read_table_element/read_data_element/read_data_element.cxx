@@ -15,7 +15,7 @@ void validate_tail(boost::property_tree::ptree::const_iterator &tail_begin,
 
 //=================================================================
 
-tablator::Data_Element tablator::ptree_readers::read_data(
+tablator::Data_Element tablator::ptree_readers::read_data_element(
         const boost::property_tree::ptree &data,
         const std::vector<ptree_readers::Field_And_Flag> &field_flag_pairs) {
     auto child = data.begin();

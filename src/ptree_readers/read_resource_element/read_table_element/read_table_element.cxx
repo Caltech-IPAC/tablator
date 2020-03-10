@@ -5,7 +5,7 @@
 #include "../../../Utils/Table_Utils.hxx"
 #include "../../../Utils/Vector_Utils.hxx"
 
-tablator::Table_Element tablator::ptree_readers::read_table(
+tablator::Table_Element tablator::ptree_readers::read_table_element(
         const boost::property_tree::ptree &table_tree) {
     auto child = table_tree.begin();
     auto end = table_tree.end();
@@ -38,7 +38,7 @@ tablator::Table_Element tablator::ptree_readers::read_table(
         } else if (child->first == PARAM) {
             params.emplace_back(read_field(child->second).get_field());
         } else if (child->first == GROUP) {
-            group_elements.emplace_back(read_group(child->second));
+            group_elements.emplace_back(read_group_element(child->second));
         } else if ((child->first == DATA) || (child->first == INFO)) {
             break;
         } else {
@@ -55,7 +55,7 @@ tablator::Table_Element tablator::ptree_readers::read_table(
     }
 
     if (child != end && child->first == DATA) {
-        data_elements.emplace_back(read_data(child->second, field_flag_pairs));
+        data_elements.emplace_back(read_data_element(child->second, field_flag_pairs));
         ++child;
     }
     std::vector<Property> trailing_info_list;

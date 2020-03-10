@@ -42,15 +42,15 @@ private:
 void read_property_tree_as_votable(Table &table,
                                    const boost::property_tree::ptree &tree);
 
-Resource_Element read_resource(const boost::property_tree::ptree &resource_tree,
-                               bool is_first);
-Group_Element read_group(const boost::property_tree::ptree &node);
-Table_Element read_table(const boost::property_tree::ptree &table);
+Resource_Element read_resource_element(const boost::property_tree::ptree &resource_tree,
+                                       bool is_first);
+Group_Element read_group_element(const boost::property_tree::ptree &node);
+Table_Element read_table_element(const boost::property_tree::ptree &table);
 Field_And_Flag read_field(const boost::property_tree::ptree &field);
 Property read_property(const boost::property_tree::ptree &prop);
 
-Data_Element read_data(const boost::property_tree::ptree &data,
-                       const std::vector<Field_And_Flag> &field_flag_pairs);
+Data_Element read_data_element(const boost::property_tree::ptree &data,
+                               const std::vector<Field_And_Flag> &field_flag_pairs);
 Data_Element read_tabledata(const boost::property_tree::ptree &tabledata,
                             const std::vector<Field_And_Flag> &field_flag_pairs);
 Data_Element read_binary2(const boost::property_tree::ptree &binary2,

@@ -3,7 +3,7 @@
 #include "../Common.hxx"
 #include "../Group_Element.hxx"
 
-tablator::Group_Element tablator::ptree_readers::read_group(
+tablator::Group_Element tablator::ptree_readers::read_group_element(
         const boost::property_tree::ptree &group_tree) {
     auto child = group_tree.begin();
     auto end = group_tree.end();
@@ -32,7 +32,7 @@ tablator::Group_Element tablator::ptree_readers::read_group(
         } else if (child->first == PARAM) {
             params.emplace_back(read_field(child->second).get_field());
         } else if (child->first == GROUP) {
-            //            read_group(GROUP, child->second);  // JTODO recurse
+            //            read_group_element(GROUP, child->second);  // JTODO recurse
         } else {
             break;
         }

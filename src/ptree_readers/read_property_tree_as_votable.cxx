@@ -44,7 +44,7 @@ void tablator::ptree_readers::read_property_tree_as_votable(
         } else if (child->first == PARAM) {
             table.add_param(ptree_readers::read_field(child->second).get_field());
         } else if (child->first == GROUP) {
-            table.add_group_element(ptree_readers::read_group(child->second));
+            table.add_group_element(ptree_readers::read_group_element(child->second));
         } else {
             throw std::runtime_error(
                     "In VOTABLE, expected COOSYS, GROUP, "
@@ -57,15 +57,15 @@ void tablator::ptree_readers::read_property_tree_as_votable(
     if (child == end) {
         throw std::runtime_error("Missing RESOURCE in VOTABLE");
     } else {
-        table.add_resource_element(
-                ptree_readers::read_resource(child->second, true /* is_first */));
+        table.add_resource_element(ptree_readers::read_resource_element(
+                child->second, true /* is_first */));
     }
     ++child;
 
     // read secondary resources
     while (child != end && child->first == RESOURCE) {
-        table.add_resource_element(
-                ptree_readers::read_resource(child->second, false /* is_first */));
+        table.add_resource_element(ptree_readers::read_resource_element(
+                child->second, false /* is_first */));
         ++child;
     }
 

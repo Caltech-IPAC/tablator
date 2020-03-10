@@ -91,6 +91,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     field_tree.add(XMLATTR_DATATYPE, datatype);
 
     bool added_arraysize =
+
             (active_datatype == Data_Type::CHAR || column.get_array_size() != 1);
     if (added_arraysize) {
         field_tree.add(XMLATTR_ARRAYSIZE, "*");
@@ -98,17 +99,19 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 
     const auto &field_properties = column.get_field_properties();
     for (auto &a : field_properties.get_attributes()) {
-        /// Empty attributes cause field_tree.add to crash :(, so make sure
-        /// that does not happen.
+        // Empty attributes cause field_tree.add to crash :(, so make sure
+        // that does not happen.
 
         // FIXME: This error is thrown a bit too late to be useful.
-
         if (a.first.empty())
+
             throw std::runtime_error("Empty attribute in field " + column.get_name() +
                                      " which has type " + to_string(column.get_type()));
+
         if (added_arraysize && boost::equals(a.first, "arraysize")) {
             continue;
         }
+
         field_tree.add(XMLATTR_DOT + a.first, a.second);
     }
 
