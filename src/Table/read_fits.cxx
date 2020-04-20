@@ -21,10 +21,6 @@ namespace {
 // Helper functions for reading keywords
 //====================================================
 
-
-//====================================================
-
-
 // If the present FITS file was created by write_fits() from a table
 // in VOTable format, the table's labeled_properties,
 // trailing_info_lists, and attributes were translated into FITs
@@ -461,6 +457,7 @@ private:
 
 };  // end of Keyword_Reader class
 
+
 //====================================================
 // Helper functions/classes for parsing binary data
 //====================================================
@@ -520,6 +517,7 @@ public:
         column_info_list_.emplace_back(tab_data_type, array_size, got_null,
                                        null_list_idx);
     }
+
 
     //=====================================================
 
@@ -782,7 +780,6 @@ private:
     const Column_Info_Manager &col_info_manager_;
     const std::vector<size_t> &offsets_;
 };
-
 
 }  // namespace
 
