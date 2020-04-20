@@ -1,65 +1,54 @@
 {
-    "VOTABLE":
-    {
-        "<xmlattr>":
-        {
+    "VOTABLE": {
+        "<xmlattr>": {
             "version": "1.3",
             "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
             "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE_ARRAY":
-        [
+        "RESOURCE_ARRAY": [
             {
-                "TABLE":
-                {
+                "TABLE": {
                     "DESCRIPTION": "created 2014-01-24T19:11:10\nra_int (deg)\ndec_int (deg)\nReally cool file with a long history.  A modification of a \nreal-life table, its float-valued elements were replaced by \nintegers so as to avoid white noise due to round-off error in \nbefore-and-after comparisons. It was originally intended as an \nexample of a strange bug involving tabs and misleading error \nmessages but turned onto a test for the conversion of long \ncomments.",
-                    "FIELD_ARRAY":
-                    [
+                    "FIELD_ARRAY": [
                         {
-                            "<xmlattr>":
-                            {
+                            "<xmlattr>": {
                                 "name": "TARGET",
                                 "datatype": "char",
                                 "arraysize": "*"
                             }
                         },
                         {
-                            "<xmlattr>":
-                            {
+                            "<xmlattr>": {
                                 "name": "ra_int",
                                 "datatype": "int",
                                 "unit": "deg"
                             }
                         },
                         {
-                            "<xmlattr>":
-                            {
+                            "<xmlattr>": {
                                 "name": "dec_int",
                                 "datatype": "int",
                                 "unit": "deg"
                             }
                         },
                         {
-                            "<xmlattr>":
-                            {
+                            "<xmlattr>": {
                                 "name": "TYPE",
                                 "datatype": "char",
                                 "arraysize": "*"
                             }
                         },
                         {
-                            "<xmlattr>":
-                            {
+                            "<xmlattr>": {
                                 "name": "Preview",
                                 "datatype": "char",
                                 "arraysize": "*"
                             }
                         }
                     ],
-                    "DATA":
-                    {
+                    "DATA": {
                         "TABLEDATA":
                     [
                         [
