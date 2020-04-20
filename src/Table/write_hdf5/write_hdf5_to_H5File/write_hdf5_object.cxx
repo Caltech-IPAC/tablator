@@ -24,10 +24,10 @@ hvl_t make_option_array(const std::vector<Option> &options,
     return hdf5_options;
 }
 
-// column_flavor is PARAM or FIELD.
-void write_hdf5_columns(const std::vector<Column> &tab_columns,
-                        const std::string &column_flavor, H5::H5Location &location) {
-    if (tab_columns.empty()) {
+  // Fields correspond to params or columns.
+void write_hdf5_object(H5::H5Object &h5_object, const std::vector<Field> &fields,
+                       const std::string &field_name) {
+    if (fields.empty()) {
         return;
     }
 
@@ -93,7 +93,8 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
     std::deque<std::string> type_strings;  // Use a deque to avoid
                                            // invalidating iterators
     std::deque<std::vector<HDF5_Attribute> > option_arrays;
-    for (auto &field : tab_columns) {
+
+    for (auto &field : fields) {
         const Field_Properties &field_properties(field.get_field_properties());
 
         strings.emplace_back();
@@ -148,9 +149,8 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
     hvl_t H5_columns = {hdf5_columns.size(), hdf5_columns.data()};
 
     H5::DataSpace column_space(H5S_SCALAR);
-    H5::Attribute location_attribute =
-            location.createAttribute(column_flavor, hdf5_columns_type, column_space);
-
-    location_attribute.write(hdf5_columns_type, &H5_columns);
+    H5::Attribute h5_object_attribute =
+            h5_object.createAttribute(field_name, hdf5_columns_type, column_space);
+    h5_object_attribute.write(hdf5_columns_type, &H5_columns);
 }
 }  // namespace tablator

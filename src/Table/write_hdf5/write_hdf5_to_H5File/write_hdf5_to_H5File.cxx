@@ -18,9 +18,10 @@ void write_description(const H5::DataSet &h5_table, const std::string &label,
 }
 }  // namespace
 
+
 namespace tablator {
-void write_hdf5_columns(const std::vector<Column> &columns,
-                        const std::string &column_type, H5::H5Location &table);
+void write_hdf5_object(H5::H5Object &table, const std::vector<Column> &columns,
+                       const std::string &column_type);
 }
 
 void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
@@ -29,8 +30,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     /// attribute.
     // FIXME: This needs to be generalized for multiple resources
     H5::Group group(outfile.createGroup("RESOURCE_0"));
-
-    write_hdf5_columns(get_resource_element_params(), PARAM, group);
+    write_hdf5_object(group, get_resource_element_params(), PARAM);
 
     std::array<hsize_t, 1> dims = {{get_num_rows()}};
     H5::DataSpace dataspace(dims.size(), dims.data());
@@ -70,6 +70,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
                                        Data_Type_to_H5(columns[i].get_type()));
         }
     }
+
     // FIXME: This needs to be generalized for multiple tables
     H5::DataSet h5_table{group.createDataSet("TABLE_0", compound_type, dataspace)};
     const auto &comments = get_comments();
@@ -92,11 +93,9 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
                       get_main_table_element().get_description());
 
     write_hdf5_attributes(h5_table);
-
-    write_hdf5_columns(columns, FIELD, h5_table);
+    write_hdf5_object(h5_table, columns, FIELD);
     // JTODO Top-level params? (Master doesn't.)
-
-    write_hdf5_columns(get_table_element_params(), PARAM, h5_table);
+    write_hdf5_object(h5_table, get_table_element_params(), PARAM);
 
     h5_table.write(get_data().data(), compound_type);
 }
