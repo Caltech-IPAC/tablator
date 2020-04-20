@@ -5,6 +5,8 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+// #include "../Data_Type_Adjuster.hxx"
+
 
 /**********************************************************/
 
@@ -74,7 +76,7 @@ void tablator::Table::write_html(std::ostream &os,
     // since write_xml always writes the <?xml...> header.
     boost::property_tree::xml_parser::write_xml_element(
             ss, std::string(), tree, -1,
-            boost::property_tree::xml_writer_settings<char>(' ', 2));
+            boost::property_tree::xml_writer_settings<std::string>(' ', 2));
 
     splice_tabledata_and_write(os, ss, Format::Enums::HTML, PLACEHOLDER_LEFT_MARGIN,
                                PLACEHOLDER_RIGHT_MARGIN, options);
