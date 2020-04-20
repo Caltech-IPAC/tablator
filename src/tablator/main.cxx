@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <json5_parser.h>
+#include "json5_parser.h"
 #include <CCfits/CCfits>
 
 #include <boost/algorithm/string.hpp>

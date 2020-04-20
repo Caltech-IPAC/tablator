@@ -1,1417 +1,1288 @@
 {
-    "VOTABLE":
-    {
-        "<xmlattr>":
-        {
-            version: "1.3",
+    "VOTABLE": {
+        "<xmlattr>": {
+            "version": "1.3",
             "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
-            xmlns: "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
-            "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
+            "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
+            "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
+            "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        DESCRIPTION: "                                                                              \n\nra (deg) \n___ right ascension (J2000 decimal deg)\ndec (deg) \n___ declination (J2000 decimal deg)\nclon \n___ Right ascention in Sexagesimal format.\nclat \n___ Declination in Sexagesimal format.\nerr_maj (arcsec) \n___ Semi-major axis length of the one sigma position uncertainty ellipse\nerr_min (arcsec) \n___ Semi-minor axis length of the one sigma position uncertainty ellipse\nerr_ang (deg) \n___ angle of error ellipse major axis (E of N)\ndesignation \n___ source designation formed from sexigesimal coordinates\nj_m (mag) \n___ J band selected \"default\" magnitude\nj_cmsig (mag) \n___ corrected J band photometric uncertainty\nj_msigcom (mag) \n___ combined (total) J band photometric uncertainty\nj_snr \n___ J band \"scan\" signal-to-noise ratio\nh_m (mag) \n___ H band selected \"default\" magnitude\nh_cmsig (mag) \n___ corrected H band photometric uncertainty\nh_msigcom (mag) \n___ combined (total) H band photometric uncertainty\nh_snr \n___ H band \"scan\" signal-to-noise ratio\nk_m (mag) \n___ K band selected \"default\" magnitude\nk_cmsig (mag) \n___ corrected K band photometric uncertainty\nk_msigcom (mag) \n___ combined (total) K band photometric uncertainty\nk_snr \n___ K band \"scan\" signal-to-noise ratio\nph_qual \n___ flag indicating photometric quality of source\nrd_flg \n___ source of JHK \"default\" mags (AKA \"read flag\")\nbl_flg \n___ indicates # JHK components fit simultaneously to source\ncc_flg \n___ indicates JHK artifact contamination and\/or confusion\nndet \n___ number of >3-sig. ap. mag measurements, # possible (jjhhkk)\ngal_contam \n___ flag indicating if src is contaminated by extended source\nmp_flg \n___ src is positionally associated with an asteroid, comet, etc\nhemis \n___ hemisphere (N\/S) of facility from which src was observed\nxdate \n___ observation reference date\nscan \n___ scan number (unique within date)\nglon (deg) \n___ galactic longitude (decimal deg)\nglat (deg) \n___ galactic latitude (decimal deg)\na \n___ optical source catalog identifier of closest match within 5\"\ndist_opt (arcsec) \n___ distance in arcsec relative to associated optical source\nphi_opt (deg) \n___ position angle relative to optical source (E of N)\nb_m_opt (mag) \n___ catalog blue mag of associated optical source\nvr_m_opt (mag) \n___ catalog visual or red mag of associated optical source\nnopt_mchs \n___ number of optical sources matched to this 2MASS source\next_key \n___ key to extended source data DB record\nangle (deg) \n___ Position Angle in degree.\ndist (arcsec) \n___ Distance between the target position and each source in arcsec.\n\nj_h ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg\nh_k ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg\nj_k ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg",
-        RESOURCE:
-        {
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "ORIGIN",
-                    value: "IPAC Infrared Science Archive (IRSA), Caltech\/JPL"
+        "DESCRIPTION": "                                                                              \n\nra (deg) \n___ right ascension (J2000 decimal deg)\ndec (deg) \n___ declination (J2000 decimal deg)\nclon \n___ Right ascention in Sexagesimal format.\nclat \n___ Declination in Sexagesimal format.\nerr_maj (arcsec) \n___ Semi-major axis length of the one sigma position uncertainty ellipse\nerr_min (arcsec) \n___ Semi-minor axis length of the one sigma position uncertainty ellipse\nerr_ang (deg) \n___ angle of error ellipse major axis (E of N)\ndesignation \n___ source designation formed from sexigesimal coordinates\nj_m (mag) \n___ J band selected \"default\" magnitude\nj_cmsig (mag) \n___ corrected J band photometric uncertainty\nj_msigcom (mag) \n___ combined (total) J band photometric uncertainty\nj_snr \n___ J band \"scan\" signal-to-noise ratio\nh_m (mag) \n___ H band selected \"default\" magnitude\nh_cmsig (mag) \n___ corrected H band photometric uncertainty\nh_msigcom (mag) \n___ combined (total) H band photometric uncertainty\nh_snr \n___ H band \"scan\" signal-to-noise ratio\nk_m (mag) \n___ K band selected \"default\" magnitude\nk_cmsig (mag) \n___ corrected K band photometric uncertainty\nk_msigcom (mag) \n___ combined (total) K band photometric uncertainty\nk_snr \n___ K band \"scan\" signal-to-noise ratio\nph_qual \n___ flag indicating photometric quality of source\nrd_flg \n___ source of JHK \"default\" mags (AKA \"read flag\")\nbl_flg \n___ indicates # JHK components fit simultaneously to source\ncc_flg \n___ indicates JHK artifact contamination and\/or confusion\nndet \n___ number of >3-sig. ap. mag measurements, # possible (jjhhkk)\ngal_contam \n___ flag indicating if src is contaminated by extended source\nmp_flg \n___ src is positionally associated with an asteroid, comet, etc\nhemis \n___ hemisphere (N\/S) of facility from which src was observed\nxdate \n___ observation reference date\nscan \n___ scan number (unique within date)\nglon (deg) \n___ galactic longitude (decimal deg)\nglat (deg) \n___ galactic latitude (decimal deg)\na \n___ optical source catalog identifier of closest match within 5\"\ndist_opt (arcsec) \n___ distance in arcsec relative to associated optical source\nphi_opt (deg) \n___ position angle relative to optical source (E of N)\nb_m_opt (mag) \n___ catalog blue mag of associated optical source\nvr_m_opt (mag) \n___ catalog visual or red mag of associated optical source\nnopt_mchs \n___ number of optical sources matched to this 2MASS source\next_key \n___ key to extended source data DB record\nangle (deg) \n___ Position Angle in degree.\ndist (arcsec) \n___ Distance between the target position and each source in arcsec.\n\nj_h ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg\nh_k ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg\nj_k ->  Reference:    Input column(s): j_m, h_m, k_m, rd_flg",
+        "RESOURCE": {
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "ORIGIN",
+                    "value": "IPAC Infrared Science Archive (IRSA), Caltech\/JPL"
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "DATETIME",
-                    value: "2013-10-23 1:23:09"
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "DATETIME",
+                    "value": "2013-10-23 1:23:09"
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "DataTag",
-                    value: "ADS\/IRSA.Gator#2013\/1023\/122309_15417"
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "DataTag",
+                    "value": "ADS\/IRSA.Gator#2013\/1023\/122309_15417"
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "DATABASE",
-                    value: "2MASS All-Sky Point Source Catalog (PSC) (fp_psc)"
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "DATABASE",
+                    "value": "2MASS All-Sky Point Source Catalog (PSC) (fp_psc)"
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "EQUINOX",
-                    value: "J2000"
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "EQUINOX",
+                    "value": "J2000"
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "SKYAREA",
-                    value: "within 10 arcsec of  ra=10.68479 dec=+41.26906 Eq J2000 "
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "SKYAREA",
+                    "value": "within 10 arcsec of  ra=10.68479 dec=+41.26906 Eq J2000 "
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "StatusFile",
-                    value: "\/workspace\/TMP_RJwd7q_18059\/Gator\/irsa\/15417\/log.15417.html"
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "StatusFile",
+                    "value": "\/workspace\/TMP_RJwd7q_18059\/Gator\/irsa\/15417\/log.15417.html"
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "SQL",
-                    value: "WHERE (no constraints)"
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "SQL",
+                    "value": "WHERE (no constraints)"
                 }
             },
-            INFO:
-            {
-                "<xmlattr>":
-                {
-                    name: "SQL",
-                    value: "SELECT (39 column names follow in next row.)"
+            "INFO": {
+                "<xmlattr>": {
+                    "name": "SQL",
+                    "value": "SELECT (39 column names follow in next row.)"
                 }
             },
-            TABLE:
-            {
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "ra",
-                        datatype: "double",
-                        null: "null",
-                        unit: "deg"
+            "TABLE": {
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "ra",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "deg"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "dec",
-                        datatype: "double",
-                        null: "null",
-                        unit: "deg"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "dec",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "deg"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "clon",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "clon",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "clat",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "clat",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "err_maj",
-                        datatype: "double",
-                        null: "null",
-                        unit: "arcsec"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "err_maj",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "arcsec"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "err_min",
-                        datatype: "double",
-                        null: "null",
-                        unit: "arcsec"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "err_min",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "arcsec"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "err_ang",
-                        datatype: "int",
-                        null: "null",
-                        unit: "deg"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "err_ang",
+                        "datatype": "int",
+                        "null": "null",
+                        "unit": "deg"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "designation",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "designation",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "j_m",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "j_m",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "j_cmsig",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "j_cmsig",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "j_msigcom",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "j_msigcom",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "j_snr",
-                        datatype: "double",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "j_snr",
+                        "datatype": "double",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "h_m",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "h_m",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "h_cmsig",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "h_cmsig",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "h_msigcom",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "h_msigcom",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "h_snr",
-                        datatype: "double",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "h_snr",
+                        "datatype": "double",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "k_m",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "k_m",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "k_cmsig",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "k_cmsig",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "k_msigcom",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "k_msigcom",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "k_snr",
-                        datatype: "double",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "k_snr",
+                        "datatype": "double",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "ph_qual",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "ph_qual",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "rd_flg",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "rd_flg",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "bl_flg",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "bl_flg",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "cc_flg",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "cc_flg",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "ndet",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "ndet",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "gal_contam",
-                        datatype: "int",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "gal_contam",
+                        "datatype": "int",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "mp_flg",
-                        datatype: "int",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "mp_flg",
+                        "datatype": "int",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "hemis",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "hemis",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "xdate",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "xdate",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "scan",
-                        datatype: "int",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "scan",
+                        "datatype": "int",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "glon",
-                        datatype: "double",
-                        null: "null",
-                        unit: "deg"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "glon",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "deg"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "glat",
-                        datatype: "double",
-                        null: "null",
-                        unit: "deg"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "glat",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "deg"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "a",
-                        datatype: "char",
-                        arraysize: "*",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "a",
+                        "datatype": "char",
+                        "arraysize": "*",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "dist_opt",
-                        datatype: "double",
-                        null: "null",
-                        unit: "arcsec"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "dist_opt",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "arcsec"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "phi_opt",
-                        datatype: "int",
-                        null: "null",
-                        unit: "deg"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "phi_opt",
+                        "datatype": "int",
+                        "null": "null",
+                        "unit": "deg"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "b_m_opt",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "b_m_opt",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "vr_m_opt",
-                        datatype: "double",
-                        null: "null",
-                        unit: "mag"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "vr_m_opt",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "mag"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "nopt_mchs",
-                        datatype: "int",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "nopt_mchs",
+                        "datatype": "int",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "ext_key",
-                        datatype: "int",
-                        null: "null"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "ext_key",
+                        "datatype": "int",
+                        "null": "null"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "dist",
-                        datatype: "double",
-                        null: "null",
-                        unit: "arcsec"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "dist",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "arcsec"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "angle",
-                        datatype: "double",
-                        null: "null",
-                        unit: "deg"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "angle",
+                        "datatype": "double",
+                        "null": "null",
+                        "unit": "deg"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "j_h",
-                        datatype: "double",
-                        null: "-"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "j_h",
+                        "datatype": "double",
+                        "null": "-"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "h_k",
-                        datatype: "double",
-                        null: "-"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "h_k",
+                        "datatype": "double",
+                        "null": "-"
                     }
                 },
-                FIELD:
-                {
-                    "<xmlattr>":
-                    {
-                        name: "j_k",
-                        datatype: "double",
-                        null: "-"
+                "FIELD": {
+                    "<xmlattr>": {
+                        "name": "j_k",
+                        "datatype": "double",
+                        "null": "-"
                     }
                 },
-                DATA:
-                {
-                    TABLEDATA:
-                    {
-                        TR:
-                        {
-                            TD: "10.682383",
-                            TD: "41.267925",
-                            TD: "00h42m43.77s",
-                            TD: "41d16m04.53s",
-                            TD: "0.1",
-                            TD: "0.09",
-                            TD: "69",
-                            TD: "00424377+4116045",
-                            TD: "12.446",
-                            TD: "0.06",
-                            TD: "0.061",
-                            TD: "342",
-                            TD: "11.753",
-                            TD: "0.062",
-                            TD: "0.063",
-                            TD: "297",
-                            TD: "9.075",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "AAU",
-                            TD: "220",
-                            TD: "110",
-                            TD: "cc0",
-                            TD: "666600",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.172",
-                            TD: "-21.574",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "7.688598",
-                            TD: "237.898243",
-                            TD: "0.693",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.682713",
-                            TD: "41.267056",
-                            TD: "00h42m43.85s",
-                            TD: "41d16m01.40s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "69",
-                            TD: "00424385+4116014",
-                            TD: "10.176",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "11.876",
-                            TD: "0.049",
-                            TD: "0.05",
-                            TD: "265.2",
-                            TD: "9.252",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "UEU",
-                            TD: "020",
-                            TD: "010",
-                            TD: "0c0",
-                            TD: "006600",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.173",
-                            TD: "-21.575",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "9.145114",
-                            TD: "217.919695",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.682777",
-                            TD: "41.270111",
-                            TD: "00h42m43.87s",
-                            TD: "41d16m12.40s",
-                            TD: "0.1",
-                            TD: "0.09",
-                            TD: "111",
-                            TD: "00424386+4116123",
-                            TD: "9.977",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "11.683",
-                            TD: "0.056",
-                            TD: "0.056",
-                            TD: "316.8",
-                            TD: "11.839",
-                            TD: "0.062",
-                            TD: "0.062",
-                            TD: "166.3",
-                            TD: "UAA",
-                            TD: "022",
-                            TD: "011",
-                            TD: "0cc",
-                            TD: "006666",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.173",
-                            TD: "-21.572",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "6.631987",
-                            TD: "304.786305",
-                            TD: "",
-                            TD: "-0.156",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.683263",
-                            TD: "41.267456",
-                            TD: "00h42m43.98s",
-                            TD: "41d16m02.84s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "79",
-                            TD: "00424398+4116028",
-                            TD: "12.136",
-                            TD: "0.038",
-                            TD: "0.04",
-                            TD: "455",
-                            TD: "9.226",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "8.994",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "AUU",
-                            TD: "200",
-                            TD: "100",
-                            TD: "c00",
-                            TD: "660000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.173",
-                            TD: "-21.574",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "7.100419",
-                            TD: "215.586031",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.683465",
-                            TD: "41.269676",
-                            TD: "00h42m44.03s",
-                            TD: "41d16m10.83s",
-                            TD: "0.13",
-                            TD: "0.11",
-                            TD: "119",
-                            TD: "00424403+4116108",
-                            TD: "11.507",
-                            TD: "0.055",
-                            TD: "0.056",
-                            TD: "812.1",
-                            TD: "8.744",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "8.489",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "EUU",
-                            TD: "200",
-                            TD: "100",
-                            TD: "c00",
-                            TD: "660000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.173",
-                            TD: "-21.572",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "4.215626",
-                            TD: "301.738916",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.683469",
-                            TD: "41.268585",
-                            TD: "00h42m44.03s",
-                            TD: "41d16m06.91s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "69",
-                            TD: "00424403+4116069",
-                            TD: "9.321",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "8.614",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "10.601",
-                            TD: "0.023",
-                            TD: "0.025",
-                            TD: "520",
-                            TD: "UUE",
-                            TD: "002",
-                            TD: "001",
-                            TD: "00c",
-                            TD: "000066",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.173",
-                            TD: "-21.573",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "3.962395",
-                            TD: "244.434011",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.683944",
-                            TD: "41.266682",
-                            TD: "00h42m44.15s",
-                            TD: "41d16m00.06s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "93",
-                            TD: "00424414+4116000",
-                            TD: "12.565",
-                            TD: "0.054",
-                            TD: "0.055",
-                            TD: "306.5",
-                            TD: "9.51",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.274",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "AUU",
-                            TD: "206",
-                            TD: "200",
-                            TD: "c00",
-                            TD: "660000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.174",
-                            TD: "-21.575",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "8.861581",
-                            TD: "194.971035",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.684029",
-                            TD: "41.270901",
-                            TD: "00h42m44.17s",
-                            TD: "41d16m15.24s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "111",
-                            TD: "00424416+4116152",
-                            TD: "10.063",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.359",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "11.409",
-                            TD: "0.054",
-                            TD: "0.055",
-                            TD: "247.1",
-                            TD: "UUA",
-                            TD: "002",
-                            TD: "001",
-                            TD: "00c",
-                            TD: "000066",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.174",
-                            TD: "-21.571",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "6.940102",
-                            TD: "342.740902",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.68418",
-                            TD: "41.266941",
-                            TD: "00h42m44.20s",
-                            TD: "41d16m00.99s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "101",
-                            TD: "00424420+4116009",
-                            TD: "10.065",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.374",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "11.504",
-                            TD: "0.051",
-                            TD: "0.052",
-                            TD: "226.4",
-                            TD: "UUA",
-                            TD: "002",
-                            TD: "002",
-                            TD: "00c",
-                            TD: "000066",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.174",
-                            TD: "-21.575",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "7.804929",
-                            TD: "192.209291",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.684737",
-                            TD: "41.269035",
-                            TD: "00h42m44.34s",
-                            TD: "41d16m08.53s",
-                            TD: "0.08",
-                            TD: "0.07",
-                            TD: "87",
-                            TD: "00424433+4116085",
-                            TD: "9.453",
-                            TD: "0.051",
-                            TD: "0.052",
-                            TD: "5385.6",
-                            TD: "8.668",
-                            TD: "0.05",
-                            TD: "0.051",
-                            TD: "5089.9",
-                            TD: "8.475",
-                            TD: "0.05",
-                            TD: "0.051",
-                            TD: "3684.8",
-                            TD: "EEE",
-                            TD: "222",
-                            TD: "111",
-                            TD: "000",
-                            TD: "556655",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.174",
-                            TD: "-21.573",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "0.169298",
-                            TD: "237.888672",
-                            TD: "0.785",
-                            TD: "0.193",
-                            TD: "0.978"
-                        },
-                        TR:
-                        {
-                            TD: "10.68527",
-                            TD: "41.267124",
-                            TD: "00h42m44.46s",
-                            TD: "41d16m01.65s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "90",
-                            TD: "00424446+4116016",
-                            TD: "12.07",
-                            TD: "0.033",
-                            TD: "0.035",
-                            TD: "483.5",
-                            TD: "9.301",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.057",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "EUU",
-                            TD: "206",
-                            TD: "200",
-                            TD: "c00",
-                            TD: "660000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.175",
-                            TD: "-21.575",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "7.089588",
-                            TD: "169.443579",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.685657",
-                            TD: "41.26955",
-                            TD: "00h42m44.56s",
-                            TD: "41d16m10.38s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "90",
-                            TD: "00424455+4116103",
-                            TD: "10.773",
-                            TD: "0.067",
-                            TD: "0.069",
-                            TD: "1596.7",
-                            TD: "8.532",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "8.254",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "EUU",
-                            TD: "200",
-                            TD: "200",
-                            TD: "c00",
-                            TD: "550000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.175",
-                            TD: "-21.572",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "2.935161",
-                            TD: "53.058944",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.685837",
-                            TD: "41.270599",
-                            TD: "00h42m44.60s",
-                            TD: "41d16m14.16s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "87",
-                            TD: "00424460+4116141",
-                            TD: "9.88",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "12.051",
-                            TD: "0.067",
-                            TD: "0.068",
-                            TD: "225.7",
-                            TD: "8.934",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "UAU",
-                            TD: "020",
-                            TD: "020",
-                            TD: "0c0",
-                            TD: "005500",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.175",
-                            TD: "-21.571",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "6.222682",
-                            TD: "27.081691",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.686015",
-                            TD: "41.26963",
-                            TD: "00h42m44.64s",
-                            TD: "41d16m10.67s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "90",
-                            TD: "00424464+4116106",
-                            TD: "9.399",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.985",
-                            TD: "0.07",
-                            TD: "0.07",
-                            TD: "1513.2",
-                            TD: "8.429",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "UEU",
-                            TD: "020",
-                            TD: "020",
-                            TD: "0c0",
-                            TD: "006600",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.175",
-                            TD: "-21.572",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "3.898395",
-                            TD: "58.239051",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.686026",
-                            TD: "41.269226",
-                            TD: "00h42m44.65s",
-                            TD: "41d16m09.21s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "90",
-                            TD: "00424464+4116092",
-                            TD: "9.299",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "8.606",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "10.119",
-                            TD: "0.055",
-                            TD: "0.056",
-                            TD: "810.6",
-                            TD: "UUE",
-                            TD: "002",
-                            TD: "001",
-                            TD: "00c",
-                            TD: "000055",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.175",
-                            TD: "-21.573",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "3.397378",
-                            TD: "79.868535",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.686846",
-                            TD: "41.270714",
-                            TD: "00h42m44.84s",
-                            TD: "41d16m14.57s",
-                            TD: "0.13",
-                            TD: "0.11",
-                            TD: "61",
-                            TD: "00424484+4116145",
-                            TD: "12.872",
-                            TD: "0.06",
-                            TD: "0.061",
-                            TD: "231",
-                            TD: "9.433",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.178",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "AUU",
-                            TD: "200",
-                            TD: "200",
-                            TD: "c00",
-                            TD: "550000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.176",
-                            TD: "-21.571",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "8.148817",
-                            TD: "43.053601",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.686963",
-                            TD: "41.266827",
-                            TD: "00h42m44.87s",
-                            TD: "41d16m00.58s",
-                            TD: "0.1",
-                            TD: "0.09",
-                            TD: "93",
-                            TD: "00424487+4116005",
-                            TD: "10.45",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "12.094",
-                            TD: "0.032",
-                            TD: "0.033",
-                            TD: "216.9",
-                            TD: "11.728",
-                            TD: "0.038",
-                            TD: "0.039",
-                            TD: "184.2",
-                            TD: "UEE",
-                            TD: "622",
-                            TD: "021",
-                            TD: "bcc",
-                            TD: "006666",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.176",
-                            TD: "-21.575",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "9.959681",
-                            TD: "143.81616",
-                            TD: "",
-                            TD: "0.366",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.687414",
-                            TD: "41.267632",
-                            TD: "00h42m44.98s",
-                            TD: "41d16m03.48s",
-                            TD: "0.13",
-                            TD: "0.12",
-                            TD: "93",
-                            TD: "00424497+4116034",
-                            TD: "12.371",
-                            TD: "0.034",
-                            TD: "0.036",
-                            TD: "366.5",
-                            TD: "9.627",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.379",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "EUU",
-                            TD: "200",
-                            TD: "100",
-                            TD: "c00",
-                            TD: "660000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.176",
-                            TD: "-21.574",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "8.765869",
-                            TD: "125.905082",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        },
-                        TR:
-                        {
-                            TD: "10.687611",
-                            TD: "41.270302",
-                            TD: "00h42m45.03s",
-                            TD: "41d16m13.09s",
-                            TD: "0.18",
-                            TD: "0.14",
-                            TD: "173",
-                            TD: "00424502+4116130",
-                            TD: "13.055",
-                            TD: "0.108",
-                            TD: "0.109",
-                            TD: "195.2",
-                            TD: "9.504",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "9.246",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "AUU",
-                            TD: "200",
-                            TD: "200",
-                            TD: "c00",
-                            TD: "550000",
-                            TD: "2",
-                            TD: "0",
-                            TD: "n",
-                            TD: "1997-10-24",
-                            TD: "8",
-                            TD: "121.177",
-                            TD: "-21.572",
-                            TD: "0",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "",
-                            TD: "0",
-                            TD: "",
-                            TD: "8.84622",
-                            TD: "59.638754",
-                            TD: "",
-                            TD: "",
-                            TD: ""
-                        }
-                    }
+                "DATA": {
+                    "TABLEDATA":
+                    [
+                        [
+                            "10.682383",
+                            "41.267924999999998",
+                            "00h42m43.77s",
+                            "41d16m04.53s",
+                            "0.10000000000000001",
+                            "0.089999999999999997",
+                            "69",
+                            "00424377+4116045",
+                            "12.446",
+                            "0.059999999999999998",
+                            "0.060999999999999999",
+                            "342",
+                            "11.753",
+                            "0.062",
+                            "0.063",
+                            "297",
+                            "9.0749999999999993",
+                            "",
+                            "",
+                            "",
+                            "AAU",
+                            "220",
+                            "110",
+                            "cc0",
+                            "666600",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.172",
+                            "-21.574000000000002",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "7.6885979999999998",
+                            "237.89824300000001",
+                            "0.69299999999999995",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.682713",
+                            "41.267055999999997",
+                            "00h42m43.85s",
+                            "41d16m01.40s",
+                            "0.13",
+                            "0.12",
+                            "69",
+                            "00424385+4116014",
+                            "10.176",
+                            "",
+                            "",
+                            "",
+                            "11.875999999999999",
+                            "0.049000000000000002",
+                            "0.050000000000000003",
+                            "265.19999999999999",
+                            "9.2520000000000007",
+                            "",
+                            "",
+                            "",
+                            "UEU",
+                            "020",
+                            "010",
+                            "0c0",
+                            "006600",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.173",
+                            "-21.574999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "9.1451139999999995",
+                            "217.91969499999999",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.682777",
+                            "41.270111",
+                            "00h42m43.87s",
+                            "41d16m12.40s",
+                            "0.10000000000000001",
+                            "0.089999999999999997",
+                            "111",
+                            "00424386+4116123",
+                            "9.9770000000000003",
+                            "",
+                            "",
+                            "",
+                            "11.683",
+                            "0.056000000000000001",
+                            "0.056000000000000001",
+                            "316.80000000000001",
+                            "11.839",
+                            "0.062",
+                            "0.062",
+                            "166.30000000000001",
+                            "UAA",
+                            "022",
+                            "011",
+                            "0cc",
+                            "006666",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.173",
+                            "-21.571999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "6.6319869999999996",
+                            "304.78630500000003",
+                            "",
+                            "-0.156",
+                            ""
+                        ],
+                        [
+                            "10.683263",
+                            "41.267456000000003",
+                            "00h42m43.98s",
+                            "41d16m02.84s",
+                            "0.13",
+                            "0.12",
+                            "79",
+                            "00424398+4116028",
+                            "12.135999999999999",
+                            "0.037999999999999999",
+                            "0.040000000000000001",
+                            "455",
+                            "9.2260000000000009",
+                            "",
+                            "",
+                            "",
+                            "8.9939999999999998",
+                            "",
+                            "",
+                            "",
+                            "AUU",
+                            "200",
+                            "100",
+                            "c00",
+                            "660000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.173",
+                            "-21.574000000000002",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "7.1004189999999996",
+                            "215.58603099999999",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.683465",
+                            "41.269675999999997",
+                            "00h42m44.03s",
+                            "41d16m10.83s",
+                            "0.13",
+                            "0.11",
+                            "119",
+                            "00424403+4116108",
+                            "11.507",
+                            "0.055",
+                            "0.056000000000000001",
+                            "812.10000000000002",
+                            "8.7439999999999998",
+                            "",
+                            "",
+                            "",
+                            "8.4890000000000008",
+                            "",
+                            "",
+                            "",
+                            "EUU",
+                            "200",
+                            "100",
+                            "c00",
+                            "660000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.173",
+                            "-21.571999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "4.2156260000000003",
+                            "301.73891600000002",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.683469000000001",
+                            "41.268585000000002",
+                            "00h42m44.03s",
+                            "41d16m06.91s",
+                            "0.13",
+                            "0.12",
+                            "69",
+                            "00424403+4116069",
+                            "9.3209999999999997",
+                            "",
+                            "",
+                            "",
+                            "8.6140000000000008",
+                            "",
+                            "",
+                            "",
+                            "10.601000000000001",
+                            "0.023",
+                            "0.025000000000000001",
+                            "520",
+                            "UUE",
+                            "002",
+                            "001",
+                            "00c",
+                            "000066",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.173",
+                            "-21.573",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "3.9623949999999999",
+                            "244.434011",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.683944",
+                            "41.266682000000003",
+                            "00h42m44.15s",
+                            "41d16m00.06s",
+                            "0.13",
+                            "0.12",
+                            "93",
+                            "00424414+4116000",
+                            "12.565",
+                            "0.053999999999999999",
+                            "0.055",
+                            "306.5",
+                            "9.5099999999999998",
+                            "",
+                            "",
+                            "",
+                            "9.2739999999999991",
+                            "",
+                            "",
+                            "",
+                            "AUU",
+                            "206",
+                            "200",
+                            "c00",
+                            "660000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.17400000000001",
+                            "-21.574999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "8.8615809999999993",
+                            "194.971035",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.684029000000001",
+                            "41.270901000000002",
+                            "00h42m44.17s",
+                            "41d16m15.24s",
+                            "0.13",
+                            "0.12",
+                            "111",
+                            "00424416+4116152",
+                            "10.063000000000001",
+                            "",
+                            "",
+                            "",
+                            "9.359",
+                            "",
+                            "",
+                            "",
+                            "11.409000000000001",
+                            "0.053999999999999999",
+                            "0.055",
+                            "247.09999999999999",
+                            "UUA",
+                            "002",
+                            "001",
+                            "00c",
+                            "000066",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.17400000000001",
+                            "-21.571000000000002",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "6.9401020000000004",
+                            "342.74090200000001",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.68418",
+                            "41.266941000000003",
+                            "00h42m44.20s",
+                            "41d16m00.99s",
+                            "0.13",
+                            "0.12",
+                            "101",
+                            "00424420+4116009",
+                            "10.065",
+                            "",
+                            "",
+                            "",
+                            "9.3740000000000006",
+                            "",
+                            "",
+                            "",
+                            "11.504",
+                            "0.050999999999999997",
+                            "0.051999999999999998",
+                            "226.40000000000001",
+                            "UUA",
+                            "002",
+                            "002",
+                            "00c",
+                            "000066",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.17400000000001",
+                            "-21.574999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "7.8049289999999996",
+                            "192.20929100000001",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.684737",
+                            "41.269035000000002",
+                            "00h42m44.34s",
+                            "41d16m08.53s",
+                            "0.080000000000000002",
+                            "0.070000000000000007",
+                            "87",
+                            "00424433+4116085",
+                            "9.4529999999999994",
+                            "0.050999999999999997",
+                            "0.051999999999999998",
+                            "5385.6000000000004",
+                            "8.6679999999999993",
+                            "0.050000000000000003",
+                            "0.050999999999999997",
+                            "5089.8999999999996",
+                            "8.4749999999999996",
+                            "0.050000000000000003",
+                            "0.050999999999999997",
+                            "3684.8000000000002",
+                            "EEE",
+                            "222",
+                            "111",
+                            "000",
+                            "556655",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.17400000000001",
+                            "-21.573",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "0.169298",
+                            "237.88867200000001",
+                            "0.78500000000000003",
+                            "0.193",
+                            "0.97799999999999998"
+                        ],
+                        [
+                            "10.685269999999999",
+                            "41.267124000000003",
+                            "00h42m44.46s",
+                            "41d16m01.65s",
+                            "0.13",
+                            "0.12",
+                            "90",
+                            "00424446+4116016",
+                            "12.07",
+                            "0.033000000000000002",
+                            "0.035000000000000003",
+                            "483.5",
+                            "9.3010000000000002",
+                            "",
+                            "",
+                            "",
+                            "9.0570000000000004",
+                            "",
+                            "",
+                            "",
+                            "EUU",
+                            "206",
+                            "200",
+                            "c00",
+                            "660000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.175",
+                            "-21.574999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "7.089588",
+                            "169.443579",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.685657000000001",
+                            "41.269550000000002",
+                            "00h42m44.56s",
+                            "41d16m10.38s",
+                            "0.13",
+                            "0.12",
+                            "90",
+                            "00424455+4116103",
+                            "10.773",
+                            "0.067000000000000004",
+                            "0.069000000000000006",
+                            "1596.7",
+                            "8.532",
+                            "",
+                            "",
+                            "",
+                            "8.2539999999999996",
+                            "",
+                            "",
+                            "",
+                            "EUU",
+                            "200",
+                            "200",
+                            "c00",
+                            "550000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.175",
+                            "-21.571999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "2.9351609999999999",
+                            "53.058943999999997",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.685836999999999",
+                            "41.270598999999997",
+                            "00h42m44.60s",
+                            "41d16m14.16s",
+                            "0.13",
+                            "0.12",
+                            "87",
+                            "00424460+4116141",
+                            "9.8800000000000008",
+                            "",
+                            "",
+                            "",
+                            "12.051",
+                            "0.067000000000000004",
+                            "0.068000000000000005",
+                            "225.69999999999999",
+                            "8.9339999999999993",
+                            "",
+                            "",
+                            "",
+                            "UAU",
+                            "020",
+                            "020",
+                            "0c0",
+                            "005500",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.175",
+                            "-21.571000000000002",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "6.2226819999999998",
+                            "27.081690999999999",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.686014999999999",
+                            "41.269629999999999",
+                            "00h42m44.64s",
+                            "41d16m10.67s",
+                            "0.13",
+                            "0.12",
+                            "90",
+                            "00424464+4116106",
+                            "9.3989999999999991",
+                            "",
+                            "",
+                            "",
+                            "9.9849999999999994",
+                            "0.070000000000000007",
+                            "0.070000000000000007",
+                            "1513.2",
+                            "8.4290000000000003",
+                            "",
+                            "",
+                            "",
+                            "UEU",
+                            "020",
+                            "020",
+                            "0c0",
+                            "006600",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.175",
+                            "-21.571999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "3.8983949999999998",
+                            "58.239051000000003",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.686026",
+                            "41.269226000000003",
+                            "00h42m44.65s",
+                            "41d16m09.21s",
+                            "0.13",
+                            "0.12",
+                            "90",
+                            "00424464+4116092",
+                            "9.2989999999999995",
+                            "",
+                            "",
+                            "",
+                            "8.6059999999999999",
+                            "",
+                            "",
+                            "",
+                            "10.119",
+                            "0.055",
+                            "0.056000000000000001",
+                            "810.60000000000002",
+                            "UUE",
+                            "002",
+                            "001",
+                            "00c",
+                            "000055",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.175",
+                            "-21.573",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "3.3973779999999998",
+                            "79.868534999999994",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.686845999999999",
+                            "41.270713999999998",
+                            "00h42m44.84s",
+                            "41d16m14.57s",
+                            "0.13",
+                            "0.11",
+                            "61",
+                            "00424484+4116145",
+                            "12.872",
+                            "0.059999999999999998",
+                            "0.060999999999999999",
+                            "231",
+                            "9.4329999999999998",
+                            "",
+                            "",
+                            "",
+                            "9.1780000000000008",
+                            "",
+                            "",
+                            "",
+                            "AUU",
+                            "200",
+                            "200",
+                            "c00",
+                            "550000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.176",
+                            "-21.571000000000002",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "8.1488169999999993",
+                            "43.053601",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.686963",
+                            "41.266826999999999",
+                            "00h42m44.87s",
+                            "41d16m00.58s",
+                            "0.10000000000000001",
+                            "0.089999999999999997",
+                            "93",
+                            "00424487+4116005",
+                            "10.449999999999999",
+                            "",
+                            "",
+                            "",
+                            "12.093999999999999",
+                            "0.032000000000000001",
+                            "0.033000000000000002",
+                            "216.90000000000001",
+                            "11.728",
+                            "0.037999999999999999",
+                            "0.039",
+                            "184.19999999999999",
+                            "UEE",
+                            "622",
+                            "021",
+                            "bcc",
+                            "006666",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.176",
+                            "-21.574999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "9.9596809999999998",
+                            "143.81616",
+                            "",
+                            "0.36599999999999999",
+                            ""
+                        ],
+                        [
+                            "10.687414",
+                            "41.267631999999999",
+                            "00h42m44.98s",
+                            "41d16m03.48s",
+                            "0.13",
+                            "0.12",
+                            "93",
+                            "00424497+4116034",
+                            "12.371",
+                            "0.034000000000000002",
+                            "0.035999999999999997",
+                            "366.5",
+                            "9.6270000000000007",
+                            "",
+                            "",
+                            "",
+                            "9.3789999999999996",
+                            "",
+                            "",
+                            "",
+                            "EUU",
+                            "200",
+                            "100",
+                            "c00",
+                            "660000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.176",
+                            "-21.574000000000002",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "8.7658690000000004",
+                            "125.90508199999999",
+                            "",
+                            "",
+                            ""
+                        ],
+                        [
+                            "10.687611",
+                            "41.270302000000001",
+                            "00h42m45.03s",
+                            "41d16m13.09s",
+                            "0.17999999999999999",
+                            "0.14000000000000001",
+                            "173",
+                            "00424502+4116130",
+                            "13.055",
+                            "0.108",
+                            "0.109",
+                            "195.19999999999999",
+                            "9.5039999999999996",
+                            "",
+                            "",
+                            "",
+                            "9.2460000000000004",
+                            "",
+                            "",
+                            "",
+                            "AUU",
+                            "200",
+                            "200",
+                            "c00",
+                            "550000",
+                            "2",
+                            "0",
+                            "n",
+                            "1997-10-24",
+                            "8",
+                            "121.17700000000001",
+                            "-21.571999999999999",
+                            "0",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            "",
+                            "8.8462200000000006",
+                            "59.638753999999999",
+                            "",
+                            "",
+                            ""
+                        ]
+                    ]
                 }
             }
         }
