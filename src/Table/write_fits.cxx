@@ -13,10 +13,10 @@
 
 namespace {
 template <typename data_type>
-void write_column(fitsfile *fits_file, int fits_type, int col_id, const uint8_t *data,
+void write_column(fitsfile *fits_file, int format_str, int col_id, const uint8_t *data,
                   hsize_t array_size, size_t row) {
     int status = 0;
-    fits_write_col(fits_file, fits_type, col_id + 1, row, 1, array_size,
+    fits_write_col(fits_file, format_str, col_id + 1, row, 1, array_size,
                    reinterpret_cast<data_type *>(const_cast<uint8_t *>(data)), &status);
     if (status != 0) throw CCfits::FitsError(status);
 }
@@ -24,6 +24,137 @@ void write_column(fitsfile *fits_file, int fits_type, int col_id, const uint8_t 
 
 /**********************************************************/
 
+// The function write_labeled_properties_as_keywords() stores
+//  labeled_properties as FITs keywords.  value_ elements (if such
+//  exist) of labeled_properties instances are added to their parent's
+//  attributes_ element as the value corresponding to the
+//  ATTR_IRSA_VALUE attribute.
+
+// Since FITS has better support for long keyword values than for long
+// keys, this function stores names of the aforementioned
+// VOTable-style elements ("prop_labels") as part of keyword values
+// rather than as FITS keys.  The FITS keys for these values are
+// strings of the form VOTABLE_KEYWORD_HEAD followed by consecutive
+// integers N; their only purpose is to support sorting by N so that
+// values corresponding to a single VOTable element can be processed
+// as a group.  The string LABEL_END_MARKER indicates where the
+// prop_label ends and the string corresponding to the element's
+// <value_> (or value of one of its attributes_) begins.  For example:
+
+// key: {VOTABLE_KEYWORD_HEAD}3
+// value: VOTABLE.RESOURCE.INFO.ADQL.<xmlattr>ucd{LABEL_END_MARKER}meta.adql
+
+// In general,  prop_labels have the following form:
+
+// <votable_element_name>.<prop_name>.{XMLATTR}.<attr_name>
+//   (for elements of prop.attributes_), or
+//
+// <votable_element_name>.<prop_name>.{XMLATTR}.{ATTR_IRSA_VALUE}
+//   (for prop.value_)
+
+// where <votable_element_name> is on the lines of
+// "VOTABLE.RESOURCE.INFO" and <prop_name> is the value of the
+// property's ATTR_NAME attribute, assumed to be non-empty and
+// distinct for INFO elements.
+
+//(We can't yet convert VOTables with more than one RESOURCE to FITS format.
+// 07Dec20)
+
+void write_labeled_properties_as_keywords(
+        fitsfile *fits_file,
+        const std::vector<std::pair<std::string, tablator::Property>>
+                &labeled_properties) {
+    int status = 0;
+    uint kwd_idx = 0;
+
+    for (const auto &label_and_prop : labeled_properties) {
+        std::string label = label_and_prop.first;
+        const auto &prop = label_and_prop.second;
+        std::string value(prop.get_value());
+        std::string comment;
+
+        // Base for the prop_label with which we will store each of prop's
+        // value and attributes.
+        auto prop_label_base = label + tablator::DOT;
+
+        const auto &attributes = prop.get_attributes();
+        auto name_iter = attributes.find(tablator::ATTR_NAME);
+
+        if (name_iter == attributes.end()) {
+            name_iter = attributes.find(boost::to_upper_copy(tablator::ATTR_NAME));
+        }
+
+        // FITS requires that key values be unique, but there could be
+        // many INFO elements having attributes with the same names.
+        // If <label> ends in INFO, we include in each <prop_label> the
+        // value of the relevant NAME attribute as well as the name of
+        // the attribute whose value is being stored.  (INFO elements
+        // are assumed to have NAME attributes.)
+
+        // value_ elements of labeled_properties are stored as values
+        // of the ATTR_IRSA_VALUE attribute, so the corresponding
+        // prop_label_base strings, like those corresponding to
+        // components of the attributes_ element, must contain
+        // XMLATTR_DOT.
+
+        if (boost::ends_with(label, tablator::INFO)) {
+            if (name_iter == attributes.end() || (name_iter->second).empty()) {
+                // Shouldn't happen!
+                std::cout << "*** Oops, couldn't find NAME. ***" << std::endl;
+            } else {
+                prop_label_base = label + tablator::DOT + name_iter->second +
+                                  tablator::DOT + tablator::XMLATTR_DOT;
+            }
+        } else if (!boost::ends_with(prop_label_base, tablator::XMLATTR_DOT)) {
+            // e.g. if the table was originally in FITS or IPAC_TABLE format
+            // JTODO standardize?
+            prop_label_base += tablator::XMLATTR_DOT;
+        }
+
+        // Deal first with <value>, if non-empty (it is empty for INFO elements).
+        if (!value.empty()) {
+            std::string idx_label(tablator::VOTABLE_KEYWORD_HEAD);
+            idx_label.append(std::to_string(kwd_idx));
+
+            fits_write_key_longstr(fits_file, idx_label.c_str(),
+                                   (prop_label_base + tablator::ATTR_IRSA_VALUE +
+                                    tablator::LABEL_END_MARKER + value)
+                                           .c_str(),
+                                   NULL, &status);
+
+            if (status != 0) {
+                throw CCfits::FitsError(status);
+            }
+            ++kwd_idx;
+        }
+
+        // On to attributes
+        for (auto &attr : prop.get_attributes()) {
+            std::string idx_label(tablator::VOTABLE_KEYWORD_HEAD);
+            idx_label.append(std::to_string(kwd_idx));
+#ifdef FIXED_FITS_COMMENT
+            // This step prepares us to store the comment in a special FITS way,
+            // but as of 13Nov20, comments will be truncated or omitted if
+            // comment.size() + value.size() > 65.
+            if (attr.first == "comment") {
+                comment.assign(attr.second);
+            } else
+#endif
+                fits_write_key_longstr(fits_file, idx_label.c_str(),
+                                       (prop_label_base + attr.first +
+                                        tablator::LABEL_END_MARKER + attr.second)
+                                               .c_str(),
+                                       comment.c_str(), &status);
+            if (status != 0) {
+                throw CCfits::FitsError(status);
+            }
+            ++kwd_idx;
+        }
+    }
+}
+
+
+/**********************************************************/
 void tablator::Table::write_fits(std::ostream &os) const {
     write_fits(os, Data_Type_Adjuster(*this).get_datatypes_for_writing(
                            Format::Enums::FITS));
@@ -103,49 +234,70 @@ void tablator::Table::write_fits(
     }
 }
 
+/**********************************************************/
+
 // We separate out the write_fits implementation so that we can
-// insert a read of the memory image so that we can write to a
-// stream.
+// write to a stream or to a file.
+//
 void tablator::Table::write_fits(
         fitsfile *fits_file,
         const std::vector<Data_Type> &datatypes_for_writing) const {
     int status = 0;
-    std::vector<string> fits_names;
-    std::vector<string> fits_types;
 
-    std::vector<string> fits_units;
 
-    // According to the FITS standard, the TTYPEn keyword shall have a value
-    // equal to the n-th field name.
-    std::vector<const char *> ttype, tunit;
+    //*********************************************************
+    // Create FITS table
+    //*********************************************************
+
+    // According to the FITS standard, the TTYPEn keyword's value shall be
+    // equal to the n-th field's name, and the TFORMn keyword's value to the
+    // n-th field's format code.
+
+    std::vector<const char *> ttype;
+    std::vector<const char *> tunit;
+
+    // We store formats as (copies of) strings for now and
+    // convert to const char* for the fits function call.
+    std::vector<string> format_strs;
+
+    //  Load types, units, and formats
     const auto &columns = get_columns();
     for (size_t column_idx = 0; column_idx < columns.size(); ++column_idx) {
         auto &column = columns[column_idx];
-        ttype.push_back(column.get_name().c_str());
-        std::string array_size_str(std::to_string(column.get_array_size()));
-        char fits_type;
 
+        ttype.emplace_back(column.get_name().c_str());
+
+        const auto &col_attrs = column.get_field_properties().get_attributes();
+        auto unit_p = col_attrs.find(UNIT);
+        if (unit_p == col_attrs.end()) {
+            tunit.emplace_back("");
+        } else {
+            tunit.emplace_back(unit_p->second.c_str());
+        }
+
+        std::string array_size_str(std::to_string(column.get_array_size()));
+        char format_str;
         switch (datatypes_for_writing[column_idx]) {
             case Data_Type::INT8_LE:
-                fits_type = 'L';
+                format_str = 'L';
                 break;
             case Data_Type::UINT8_LE:
-                fits_type = 'B';
+                format_str = 'B';
                 break;
             case Data_Type::INT16_LE:
-                fits_type = 'I';
+                format_str = 'I';
                 break;
             case Data_Type::UINT16_LE:
-                fits_type = 'U';
+                format_str = 'U';
                 break;
             case Data_Type::INT32_LE:
-                fits_type = 'J';
+                format_str = 'J';
                 break;
             case Data_Type::UINT32_LE:
-                fits_type = 'V';
+                format_str = 'V';
                 break;
             case Data_Type::INT64_LE:
-                fits_type = 'K';
+                format_str = 'K';
                 break;
             case Data_Type::UINT64_LE:
                 throw std::runtime_error(
@@ -155,13 +307,13 @@ void tablator::Table::write_fits(
                         to_string(column.get_type()));
                 break;
             case Data_Type::FLOAT32_LE:
-                fits_type = 'E';
+                format_str = 'E';
                 break;
             case Data_Type::FLOAT64_LE:
-                fits_type = 'D';
+                format_str = 'D';
                 break;
             case Data_Type::CHAR:
-                fits_type = 'A';
+                format_str = 'A';
                 if (column.get_type() == Data_Type::UINT64_LE) {
                     // Adjust array_size as well as data_type.
                     array_size_str.assign(std::to_string(
@@ -176,30 +328,32 @@ void tablator::Table::write_fits(
                         to_string(column.get_type()));
                 break;
         }
-        fits_types.push_back(array_size_str + fits_type);
-
-        const auto col_attrs = column.get_field_properties().get_attributes();
-        auto unit = col_attrs.find(UNIT);
-        if (unit == col_attrs.end()) {
-            tunit.push_back("");
-        } else {
-            tunit.push_back(unit->second.c_str());
-        }
+        format_strs.emplace_back(array_size_str + format_str);
     }
 
-    // We have to store the fits_type in a string and then set the
+    // We have to store the format_str in a string and then set the
     // c_str(), because otherwise the string will get deallocated.
     std::vector<const char *> tform;
-    for (auto &t : fits_types) tform.push_back(t.c_str());
+    for (auto &t : format_strs) {
+        tform.push_back(t.c_str());
+    }
 
     fits_create_tbl(fits_file, BINARY_TBL, 0, ttype.size(),
                     const_cast<char **>(ttype.data()),
                     const_cast<char **>(tform.data()),
                     const_cast<char **>(tunit.data()), "Table", &status);
-    if (status != 0) throw CCfits::FitsError(status);
+    if (status != 0) {
+        throw CCfits::FitsError(status);
+    }
 
     fits_write_key_longwarn(fits_file, &status);
-    if (status != 0) throw CCfits::FitsError(status);
+    if (status != 0) {
+        throw CCfits::FitsError(status);
+    }
+
+    //*********************************************************
+    // Represent various elements using FITS keywords
+    //*********************************************************
 
     assert(get_resource_elements().size() > 0);
     const auto combined_labeled_attributes = combine_attributes_all_levels();
@@ -218,67 +372,11 @@ void tablator::Table::write_fits(
                                        combined_labeled_attributes.end());
 
 
-    // Labeled_properties are stored as keywords whose values are strings
-    // of the form
+    write_labeled_properties_as_keywords(fits_file, combined_labeled_properties);
 
-    // label + DOT + XMLATTR_DOT + ATTR_IRSA_VALUE : value  (for prop.value_)
-    // label + DOT + XMLATTR_DOT + attrname : attrvalue  (for elements of
-    // prop.attributes_)
-
-    // where label includes value of prop's ATTR_NAME attribute for
-    // uniqueness.
-    for (const auto &label_and_prop : combined_labeled_properties) {
-        std::string label = label_and_prop.first;
-        const auto &prop = label_and_prop.second;
-        std::string value(prop.get_value());
-        std::string comment;
-
-        // Base for the (distinct) keywords with which we will store each of prop's
-        // value and attributes.
-        auto keyword_base = label + DOT;
-        const auto &attributes = prop.get_attributes();
-        auto name_iter = attributes.find(ATTR_NAME);
-
-        // FITS wants keywords to be unique, but there could be many
-        // INFO elements having attributes with the same names.  If label ends in
-        // INFO, we include in each keyword the value of the relevant NAME
-        // attribute as well as the name of the attribute whose value
-        // is being stored.
-
-        // (INFO elements are assumed to have NAME attributes.)
-        if (boost::ends_with(label, INFO)) {
-            if (name_iter == attributes.end() || (name_iter->second).empty()) {
-                // Shouldn't happen!
-            } else {
-                keyword_base = label + DOT + name_iter->second + DOT;
-            }
-        }
-
-        if (!boost::ends_with(keyword_base, XMLATTR_DOT)) {
-            keyword_base += XMLATTR_DOT;
-        }
-
-        if (!value.empty()) {
-            fits_write_key_longstr(fits_file, (keyword_base + ATTR_IRSA_VALUE).c_str(),
-                                   value.c_str(), comment.c_str(), &status);
-        }
-
-        for (auto &attr : prop.get_attributes()) {
-#ifdef FIXED_FITS_COMMENT
-            // This step prepares us to store the comment in a special FITS way,
-            // but as of 13Nov20, comments will be truncated or omitted if
-            // comment.size() + value.size() > 65.
-            if (attr.first == "comment") {
-                comment.assign(attr.second);
-            } else
-#endif
-                fits_write_key_longstr(fits_file, (keyword_base + attr.first).c_str(),
-                                       attr.second.c_str(), comment.c_str(), &status);
-            if (status != 0) {
-                throw CCfits::FitsError(status);
-            }
-        }
-    }
+    //*********************************************************
+    // Write column-level metadata and data.
+    //*********************************************************
 
     const auto &offsets = get_offsets();
     const uint8_t *row_pointer(get_data().data());

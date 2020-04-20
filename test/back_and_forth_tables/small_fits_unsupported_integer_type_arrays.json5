@@ -1,87 +1,73 @@
 {
-    "VOTABLE":
-    {
-        "<xmlattr>":
-        {
+    "VOTABLE": {
+        "<xmlattr>": {
             "version": "1.3",
             "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
             "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE":
-        {
-            "TABLE":
-            {
-                "FIELD_ARRAY":
-                [
-                    {
-                        "<xmlattr>":
-                        {
+        "RESOURCE": {
+            "TABLE": {
+                "FIELD_ARRAY": [
+                    { 
+                        "<xmlattr>": {
                             "name": "bools",
                             "datatype": "boolean",
                             "arraysize": "*"
                         }
                     },
                     {
-                        "<xmlattr>":
-                        {
+                        "<xmlattr>": {
                             "name": "ubools",
                             "datatype": "unsignedByte",
                             "arraysize": "*"
                         }
                     },
                     {
-                        "<xmlattr>":
-                        {
+                        "<xmlattr>": {
                             "name": "small_shorts",
                             "datatype": "short",
                             "arraysize": "*"
                         }
                     },
                     {
-                        "<xmlattr>":
-                        {
+                        "<xmlattr>": {
                             "name": "small_ushorts",
                             "datatype": "ushort",
                             "arraysize": "*"
                         }
                     },
                     {
-                        "<xmlattr>":
-                        {
+                        "<xmlattr>": {
                             "name": "small_int32s",
                             "datatype": "int",
                             "arraysize": "*"
                         }
                     },
                     {
-                        "<xmlattr>":
-                        {
+                        "<xmlattr>": {
                             "name": "small_uint32s",
                             "datatype": "uint",
                             "arraysize": "*"
                         }
                     },
                     {
-                        "<xmlattr>":
-                        {
+                        "<xmlattr>": {
                             "name": "small_longs",
                             "datatype": "long",
                             "arraysize": "*"
                         }
                     },
                     {
-                        "<xmlattr>":
-                        {
+                        "<xmlattr>": {
                             "name": "small_ulongs",
                             "datatype": "ulong",
                             "arraysize": "*"
                         }
                     }
                 ],
-                "DATA":
-                {
+                "DATA": {
                     "TABLEDATA":
                     [
                         [
