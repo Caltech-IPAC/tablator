@@ -25,7 +25,7 @@ namespace tablator {
 std::vector<std::pair<std::string, Property> > read_metadata(
         const H5::DataSet &dataset);
 
-std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
+std::vector<Column> read_column_metadata(const H5::H5Object &h5_object,
                                          const std::string &section);
 
 
@@ -35,12 +35,12 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
     H5::H5File file(path.string(), H5F_ACC_RDONLY);
     // FIXME: This needs to be generalized for multiple resources and
     // multiple tables
+
     H5::Group resource = file.openGroup("/RESOURCE_0");
     std::vector<tablator::Field> resource_params =
             read_column_metadata(resource, PARAM);
 
     H5::DataSet dataset = resource.openDataSet(resource.getObjnameByIdx(0).c_str());
-
     set_description(read_description(dataset, DESCRIPTION));
     const auto resource_element_description =
             read_description(dataset, RESOURCE_ELEMENT_DESCRIPTION);
