@@ -1,154 +1,117 @@
 {
-    "VOTABLE":
-    {
-        "<xmlattr>":
-        {
+    "VOTABLE": {
+        "<xmlattr>": {
             "version": "1.3",
             "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
             "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE":
-        {
-            "INFO":
-            {
+        "RESOURCE": {
+            "INFO": {
                 "<xmlattr>":
                 {
                     "name": "ORIGIN",
                     "value": "IPAC Infrared Science Archive (IRSA), Caltech\/JPL"
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "DATETIME",
                     "value": "2018-07-19 10:44:39"
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "DataTag",
                     "value": "ADS\/IRSA.Gator#2018\/0719\/104439_19323"
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "DATABASE",
                     "value": "2MASS All-Sky Point Source Catalog (PSC) (fp_psc)"
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "EQUINOX",
                     "value": "J2000"
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "SKYAREA",
                     "value": "within 10 arcsec of  ra=10.68479 dec=+41.26906 Eq J2000 "
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "StatusFile",
                     "value": "\/workspace\/TMP_BxOEy6_18113\/Gator\/irsa\/19323\/log.19323.html"
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "SQL",
                     "value": "WHERE (no constraints)"
                 }
             },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
+            "INFO": {
+                "<xmlattr>": {
                     "name": "SQL",
                     "value": "SELECT (27 column names follow in next row.)"
                 }
             },
-            "TABLE":
-            {
+            "TABLE": {
                 "DESCRIPTION": "ra (deg)\n___ right ascension (J2000 decimal deg)\ndec (deg)\n___ declination (J2000 decimal deg)\nany_uint16\n___ big, small, whatever\nbig_uint64\n___ a uint64 too big for int64\nlittle_uint64\n___ a uint64 that fits in an int64\nbig_uint64_2\n___ another uint64 too big for int64\nany_uint32\n___ big, small, whatever",
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
+                "FIELD": {
+                    "<xmlattr>": {
                         "name": "ra",
                         "datatype": "double",
                         "unit": "deg"
                     }
                 },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
+                "FIELD": {
+                    "<xmlattr>": {
                         "name": "dec",
                         "datatype": "double",
                         "unit": "deg"
                     }
                 },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
+                "FIELD": {
+                    "<xmlattr>": {
                         "name": "any_uint16",
                         "datatype": "ushort",
                         "unit": "arcsec"
                     }
                 },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
+                "FIELD": {
+                    "<xmlattr>": {
                         "name": "big_uint64",
                         "datatype": "ulong"
                     }
                 },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
+                "FIELD": {
+                    "<xmlattr>": {
                         "name": "little_uint64",
                         "datatype": "ulong"
                     }
                 },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
+                "FIELD": {
+                    "<xmlattr>": {
                         "name": "big_uint64_2",
                         "datatype": "ulong"
                     }
                 },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
+                "FIELD": {
+                    "<xmlattr>": {
                         "name": "any_uint32",
                         "datatype": "uint"
                     }
                 },
-                "DATA":
-                {
-                    "TABLEDATA":
-                    [
+                "DATA": {
+                    "TABLEDATA": [
                         [
                             "10.684737",
                             "41.269035000000002",

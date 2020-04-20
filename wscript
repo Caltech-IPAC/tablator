@@ -1,11 +1,11 @@
 def options(opt):
-    opt.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
+    opt.load('compiler_cxx gnu_dirs cxx17 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
     opt.add_option('--debug', help='Include debug symbols and turn ' +
                                    'compiler optimizations off',
                    action='store_true', default=False, dest='debug')
 
 def configure(conf):
-    conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
+    conf.load('compiler_cxx gnu_dirs cxx17 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
     conf.check_boost(lib='filesystem system program_options regex thread')
 
 def build(bld):
@@ -16,7 +16,7 @@ def build(bld):
         default_flags=['-Wall', '-Wextra', '-g', '-Ofast', '-fno-finite-math-only', '-DNDEBUG']
     default_flags.append("-DBOOST_SPIRIT_THREADSAFE")
 
-    use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
+    use_packages=['cxx17', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser', 'sqlite3', 'vsqlitepp']
 
     sources=['src/fits_keyword_ucd_mapping.cxx',
@@ -72,7 +72,7 @@ def build(bld):
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_to_H5File.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_attributes.cxx',
-             'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_columns.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_object.cxx',
              'src/Table_Ops.cxx',
 	     'src/Data_Details/Data_Details.cxx',
              'src/Ipac_Table_Writer/internals.cxx',
@@ -118,6 +118,10 @@ def build(bld):
     bld.program(source=['src/tablator/main.cxx'],
                 target='tablator',
                 cxxflags=default_flags,
+                # libcfitsio and libccfits need special treatment
+                # because copies live in /usr/lib/x86_64-linux-gnu,
+                # which is on our libpath because of boost.
+                stlibpath=[bld.env.cfitsio_libdir, bld.env.ccfits_libdir],
                 use=use_packages + ['libtablator_st']
                 )
 

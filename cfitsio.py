@@ -24,6 +24,10 @@ def configure(conf):
     if conf.options.cfitsio_libs:
         cfitsio_libs=conf.options.cfitsio_libs.split()
 
+    # Save this so we can ensure that the correct version of libcfitsio is used
+    # during build().
+    conf.env.cfitsio_libdir = conf.options.cfitsio_libdir
+
     found_cfitsio=False
     for incdir in cfitsio_incdir:
         try:
