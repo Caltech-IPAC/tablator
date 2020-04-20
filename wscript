@@ -65,7 +65,7 @@ def build(bld):
              'src/Table/write_hdf5/write_hdf5.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_to_H5File.cxx',
              'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_attributes.cxx',
-             'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_columns.cxx',
+             'src/Table/write_hdf5/write_hdf5_to_H5File/write_hdf5_object.cxx',
              'src/Ipac_Table_Writer/internals.cxx',
              'src/Ipac_Table_Writer/Ipac_Table_Writer.cxx',
              'src/Utils/Table_Utils/insert_ascii_in_row.cxx',
@@ -110,6 +110,10 @@ def build(bld):
     bld.program(source=['src/tablator/main.cxx'],
                 target='tablator',
                 cxxflags=default_flags,
+                # libcfitsio and libccfits need special treatment
+                # because copies live in /usr/lib/x86_64-linux-gnu,
+                # which is on our libpath because of boost.
+                stlibpath=[bld.env.cfitsio_libdir, bld.env.ccfits_libdir],
                 use=use_packages + ['libtablator_st']
                 )
 

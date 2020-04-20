@@ -11,14 +11,14 @@ bool is_columns_valid(H5::VarLenType &columns);
 
 // JTODO Rename to read_field_metadata.cxx when renaming Column.hxx to Field.hxx.
 
-std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
+std::vector<Column> read_column_metadata(const H5::H5Object &h5_object,
                                          const std::string &section) {
     /// Returns an empty result if the types do not match exactly.
     std::vector<Column> result;
-    if (!dataset.attrExists(section)) {
+    if (!h5_object.attrExists(section)) {
         return result;
     }
-    auto attribute = dataset.openAttribute(section);
+    auto attribute = h5_object.openAttribute(section);
     if (attribute.getTypeClass() != H5T_VLEN) {
         return result;
     }

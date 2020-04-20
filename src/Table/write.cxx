@@ -54,13 +54,13 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
             boost::property_tree::ptree tree(
                     generate_property_tree(datatypes_for_writing, is_json));
             std::stringstream ss;
-
             if (is_json) {
                 boost::property_tree::write_json(ss, tree, true);
             } else {
                 boost::property_tree::write_xml(
                         ss, tree,
-                        boost::property_tree::xml_writer_make_settings(' ', 2));
+                        boost::property_tree::xml_writer_make_settings<std::string>(' ',
+                                                                                    2));
             }
             uint num_spaces = is_json ? 2 : 0;
             splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,

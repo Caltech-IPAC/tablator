@@ -11,7 +11,7 @@ def configure(conf):
             conf.options.json5_parser_incdir=conf.options.json5_parser_dir + "/include"
         if not conf.options.json5_parser_libdir:
             conf.options.json5_parser_libdir=conf.options.json5_parser_dir + "/lib"
-    frag="#include <json5_parser_value.h>\n" + 'int main()\n' \
+    frag="#include \"json5_parser.h\"\n" + 'int main()\n' \
         + "{json5_parser::Value v1( true );}\n"
     if conf.options.json5_parser_incdir:
         json5_parser_inc=[conf.options.json5_parser_incdir]

@@ -1,6 +1,6 @@
 // A simple converter program based on the tablator library.
 
-#include <json5_parser.h>
+#include "json5_parser.h"
 #include <CCfits/CCfits>
 #include <boost/program_options.hpp>
 #include <iostream>
