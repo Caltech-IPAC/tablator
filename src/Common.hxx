@@ -36,6 +36,9 @@ static const std::string XMLCOMMENT("<xmlcomment>");
 // For internal use with hdf5 (JTODO and eventually fits?)
 static const std::string END_INFO_MARKER("END_INFO_MARKER");
 
+static const std::string VOTABLE_KEYWORD_HEAD("VOKW");
+static const std::string LABEL_END_MARKER("<VOEND>");
+
 // JTODO "arraysize" vs. "array_size" (Column, hdf5)
 // lower case vs. upper case
 static const std::string ARRAYSIZE("arraysize");
