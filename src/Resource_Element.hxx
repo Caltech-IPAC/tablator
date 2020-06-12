@@ -130,6 +130,12 @@ public:
             options_.add_params(params);
             return *this;
         }
+
+        Builder &add_params(const std::string &params_xml) {
+            options_.add_params(params_xml);
+            return *this;
+        }
+
         Builder &add_param(const Field &param) {
             options_.add_param(param);
             return *this;
