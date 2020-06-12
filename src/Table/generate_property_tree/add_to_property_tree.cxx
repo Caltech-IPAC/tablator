@@ -91,7 +91,6 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     field_tree.add(XMLATTR_DATATYPE, datatype);
 
     bool added_arraysize =
-
             (active_datatype == Data_Type::CHAR || column.get_array_size() != 1);
     if (added_arraysize) {
         field_tree.add(XMLATTR_ARRAYSIZE, "*");
