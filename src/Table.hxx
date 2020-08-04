@@ -700,67 +700,69 @@ public:
         return resource_elements_;
     }
 
-    Resource_Element &get_main_resource_element() {
+    Resource_Element &get_results_resource_element() {
         assert(get_resource_elements().size() > get_results_resource_idx());
         return get_resource_elements().at(get_results_resource_idx());
     }
 
 
-    const Resource_Element &get_main_resource_element() const {
+    const Resource_Element &get_results_resource_element() const {
         assert(get_resource_elements().size() > get_results_resource_idx());
         return get_resource_elements().at(get_results_resource_idx());
     }
 
     std::vector<Column> &get_columns() {
-        return get_main_resource_element().get_columns();
+        return get_results_resource_element().get_columns();
     }
     const std::vector<Column> &get_columns() const {
-        return get_main_resource_element().get_columns();
+        return get_results_resource_element().get_columns();
     }
 
     std::vector<size_t> &get_offsets() {
-        return get_main_resource_element().get_offsets();
+        return get_results_resource_element().get_offsets();
     }
 
     const std::vector<size_t> &get_offsets() const {
-        return get_main_resource_element().get_offsets();
+        return get_results_resource_element().get_offsets();
     }
 
     std::vector<std::pair<std::string, Property>>
             &get_resource_element_labeled_properties() {
-        return get_main_resource_element().get_labeled_properties();
+        return get_results_resource_element().get_labeled_properties();
     }
 
     const std::vector<std::pair<std::string, Property>>
             &get_resource_element_labeled_properties() const {
-        return get_main_resource_element().get_labeled_properties();
+        return get_results_resource_element().get_labeled_properties();
     }
 
     const std::vector<Field> &get_resource_element_params() const {
-        return get_main_resource_element().get_params();
+        return get_results_resource_element().get_params();
     }
 
     std::vector<Field> &get_table_element_params() {
-        return get_main_resource_element().get_table_element_params();
+        return get_results_resource_element().get_table_element_params();
     }
     const std::vector<Field> &get_table_element_params() const {
-        return get_main_resource_element().get_table_element_params();
+        return get_results_resource_element().get_table_element_params();
     }
 
-    std::vector<uint8_t> &get_data() { return get_main_resource_element().get_data(); }
+    std::vector<uint8_t> &get_data() {
+        return get_results_resource_element().get_data();
+    }
 
     const std::vector<uint8_t> &get_data() const {
-        return get_main_resource_element().get_data();
+        return get_results_resource_element().get_data();
     }
 
 
     Table_Element &get_main_table_element() {
-        return get_main_resource_element().get_main_table_element();
+        return get_results_resource_element().get_main_table_element();
     }
 
 
     const Table_Element &get_main_table_element() const {
-        return get_main_resource_element().get_main_table_element();
+        return get_results_resource_element().get_main_table_element();
     }
 
 
@@ -858,20 +860,20 @@ public:
     // Setter-wrappers for sub-elements
 
     void set_resource_element_params(const std::vector<Field> &params) {
-        get_main_resource_element().set_params(params);
+        get_results_resource_element().set_params(params);
     }
 
     void set_table_element_params(const std::vector<Field> &params) {
-        get_main_resource_element().set_table_element_params(params);
+        get_results_resource_element().set_table_element_params(params);
     }
 
     void set_data(const std::vector<uint8_t> &d) {
-        get_main_resource_element().set_data(d);
+        get_results_resource_element().set_data(d);
     }
 
     void add_resource_element_labeled_property(
             const std::pair<std::string, Property> &label_and_prop) {
-        get_main_resource_element().add_labeled_property(label_and_prop);
+        get_results_resource_element().add_labeled_property(label_and_prop);
     }
 
     void add_resource_element_labeled_property(const std::string &label,
@@ -922,8 +924,7 @@ private:
             // assume not VOTABLE and only 1 resource
             results_resource_idx_ = 0;
         } else {
-            results_resource_idx_ =
-                    distance(resource_elements_.begin(), iter);
+            results_resource_idx_ = distance(resource_elements_.begin(), iter);
         }
     }
 

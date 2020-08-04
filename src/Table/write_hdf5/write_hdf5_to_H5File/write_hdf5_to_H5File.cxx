@@ -85,7 +85,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     }
 
     write_description(h5_table, RESOURCE_ELEMENT_DESCRIPTION,
-                      get_main_resource_element().get_description());
+                      get_results_resource_element().get_description());
     write_description(h5_table, TABLE_ELEMENT_DESCRIPTION,
                       get_main_table_element().get_description());
 

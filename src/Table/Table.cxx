@@ -179,7 +179,7 @@ Table::combine_trailing_info_lists_all_levels() const {
     append_info_list_with_label(combined_list, get_trailing_info_list(),
                                 VOTABLE_DOT + END_INFO_MARKER);
     append_info_list_with_label(combined_list,
-                                get_main_resource_element().get_trailing_info_list(),
+                                get_results_resource_element().get_trailing_info_list(),
                                 VOTABLE_RESOURCE_DOT + END_INFO_MARKER);
     append_info_list_with_label(combined_list,
                                 get_main_table_element().get_trailing_info_list(),
@@ -196,7 +196,7 @@ Table::combine_attributes_all_levels() const {
     append_attributes_with_label(combined_list, get_attributes(),
                                  VOTABLE_DOT + ATTR_MARKER);
     append_attributes_with_label(combined_list,
-                                 get_main_resource_element().get_attributes(),
+                                 get_results_resource_element().get_attributes(),
                                  VOTABLE_RESOURCE_DOT + ATTR_MARKER);
     append_attributes_with_label(combined_list,
                                  get_main_table_element().get_attributes(),

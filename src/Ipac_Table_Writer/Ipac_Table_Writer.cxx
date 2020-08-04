@@ -287,7 +287,7 @@ void generate_and_write_default_comments(
         const std::vector<std::string> &json_comments) {
     const auto &columns = table.get_columns();
     const auto &comments = table.get_comments();
-    const auto &results_resource_element = table.get_main_resource_element();
+    const auto &results_resource_element = table.get_results_resource_element();
 
     const auto &table_element_description =
             results_resource_element.get_main_table_element().get_description();
@@ -348,7 +348,7 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
     os << "\\" << tablator::Table::ROWS_RETRIEVED_KEYWORD << " = " << num_requested_rows
        << "\n";
 
-    const auto &results_resource_element = table.get_main_resource_element();
+    const auto &results_resource_element = table.get_results_resource_element();
     auto &resource_attributes = results_resource_element.get_attributes();
     for (auto &att_pair : resource_attributes) {
         write_keyword_header_line(os, att_pair.first, att_pair.second);
