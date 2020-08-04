@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE type="meta" utype="adhoc:service">
+    <DESCRIPTION>Link to ZTF light curve for ztf_dr1</DESCRIPTION>
+    <GROUP name="inputParams">
+      <PARAM name="oid" datatype="char" arraysize="*" ref="col_0" value="">
+        <DESCRIPTION>identifier of a ztf object.</DESCRIPTION>
+      </PARAM>
+      <PARAM name="bad_catflags_mask" datatype="int" value="">
+        <DESCRIPTION>Bitmask used to exclude lightcurve points with at least one of the indicated catflag bits set. Default is 0.</DESCRIPTION>
+      </PARAM>
+      <PARAM name="time" datatype="char" arraysize="*" value="">
+        <DESCRIPTION>Date-time range for which lightcurve data is to be retrieved, unlimited by default. Space-separated range endpoint(s) are interpreted as Modified Julian Dates (MJD).</DESCRIPTION>
+      </PARAM>
+    </GROUP>
+    <PARAM name="standardID" datatype="char" arraysize="*" value="ivo://ivoa.net/std/DataLink#links-1.0"/>
+    <PARAM name="accessURL" datatype="char" arraysize="*" value="https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?collection=ztf_dr1"/>
+  </RESOURCE>
+  <RESOURCE type="results">
+    <INFO name="QUERY_STATUS" value="OK"/>
+    <TABLE>
+      <FIELD name="oid" datatype="long" ID="col_0" ucd="meta.id;src;meta.main">
+        <DESCRIPTION>Unique object identifier</DESCRIPTION>
+      </FIELD>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>1776210100038495</TD>
+          </TR>
+          <TR>
+            <TD>1776110100014596</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

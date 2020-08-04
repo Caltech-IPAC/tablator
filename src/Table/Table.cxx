@@ -1,5 +1,4 @@
 #include "../Table.hxx"
-
 #include "../ptree_readers.hxx"
 
 namespace {
@@ -20,20 +19,19 @@ void append_attributes_with_label(
     combined_list.emplace_back(std::make_pair(label, tablator::Property(attrs)));
 }
 
-
 }  // namespace
 
 namespace tablator {
 
-Table_Element load_columns_and_offsets(const std::vector<Column> &Columns) {
-    if (Columns.empty()) {
+Table_Element load_columns_and_offsets(const std::vector<Column> &columns) {
+    if (columns.empty()) {
         throw std::runtime_error("This table has no columns");
     }
 
     std::vector<Column> tabledata_columns;
     std::vector<size_t> tabledata_offsets = {0};
 
-    const size_t null_flags_size = bits_to_bytes(Columns.size());
+    const size_t null_flags_size = bits_to_bytes(columns.size());
     tablator::append_column(tabledata_columns, tabledata_offsets,
                             null_bitfield_flags_name, Data_Type::UINT8_LE,
                             null_flags_size,
@@ -41,7 +39,7 @@ Table_Element load_columns_and_offsets(const std::vector<Column> &Columns) {
                                     .add_description(null_bitfield_flags_description)
                                     .build());
 
-    for (auto &c : Columns) {
+    for (auto &c : columns) {
         tablator::append_column(tabledata_columns, tabledata_offsets, c);
     }
 
@@ -51,18 +49,19 @@ Table_Element load_columns_and_offsets(const std::vector<Column> &Columns) {
 }
 
 
-Table::Table(const std::vector<Column> &Columns,
+Table::Table(const std::vector<Column> &columns,
              const std::map<std::string, std::string> &property_map) {
-    add_resource_element(load_columns_and_offsets(Columns));
+    add_resource_element(load_columns_and_offsets(columns));
 
     for (auto &p : property_map) {
         add_labeled_property(p.first, Property(p.second));
     }
 }
 
-Table::Table(const std::vector<Column> &Columns,
-             const std::vector<std::pair<std::string, Property>> &property_pair_vec) {
-    add_resource_element(load_columns_and_offsets(Columns));
+Table::Table(const std::vector<Column> &columns,
+             const std::vector<std::pair<std::string, Property>> &property_pair_vec)
+        : results_resource_idx_(0) {
+    add_resource_element(load_columns_and_offsets(columns));
 
     for (const auto &label_and_prop : property_pair_vec) {
         if (boost::starts_with(label_and_prop.first, VOTABLE_RESOURCE_DOT)) {
@@ -74,7 +73,6 @@ Table::Table(const std::vector<Column> &Columns,
         }
     }
 }
-
 
 Table::Table(const boost::filesystem::path &input_path, const Format &format) {
     switch (format.enum_format) {
@@ -113,6 +111,7 @@ Table::Table(const boost::filesystem::path &input_path, const Format &format) {
     if (get_columns().size() < 2) {
         throw std::runtime_error("This file has no columns: " + input_path.string());
     }
+    arrange_resources();
 }
 
 Table::Table(std::istream &input_stream, const Format &format) {
@@ -153,6 +152,7 @@ Table::Table(std::istream &input_stream, const Format &format) {
     if (get_columns().size() < 2) {
         throw std::runtime_error("This stream has no columns");
     }
+    arrange_resources();
 }
 
 //===========================================================

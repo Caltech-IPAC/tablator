@@ -287,11 +287,11 @@ void generate_and_write_default_comments(
         const std::vector<std::string> &json_comments) {
     const auto &columns = table.get_columns();
     const auto &comments = table.get_comments();
-    const auto &table_element_description = table.get_resource_elements()
-                                                    .at(0)
-                                                    .get_table_elements()
-                                                    .at(0)
-                                                    .get_description();
+    const auto &results_resource_element = table.get_main_resource_element();
+
+    const auto &table_element_description =
+            results_resource_element.get_main_table_element().get_description();
+
     std::vector<std::string> description_vec;
     boost::split(description_vec, table_element_description, boost::is_any_of("\n"));
 
@@ -348,15 +348,15 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
     os << "\\" << tablator::Table::ROWS_RETRIEVED_KEYWORD << " = " << num_requested_rows
        << "\n";
 
-    const auto resource_elements = table.get_resource_elements();
-    auto &resource_attributes = resource_elements.at(0).get_attributes();
+    const auto &results_resource_element = table.get_main_resource_element();
+    auto &resource_attributes = results_resource_element.get_attributes();
     for (auto &att_pair : resource_attributes) {
         write_keyword_header_line(os, att_pair.first, att_pair.second);
     }
 
     // Iterate through resource-level properties.
     auto &labeled_resource_element_properties =
-            resource_elements.at(0).get_labeled_properties();
+            results_resource_element.get_labeled_properties();
     for (auto &name_and_property : labeled_resource_element_properties) {
         const auto &label = name_and_property.first;
         auto &prop = name_and_property.second;
@@ -427,7 +427,7 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
     }
     write_comment_lines(os, comments);
     const auto table_element_description =
-            resource_elements.at(0).get_table_elements().at(0).get_description();
+            results_resource_element.get_main_table_element().get_description();
 
     if (!table_element_description.empty()) {
         write_comment_line_with_newlines(os, table_element_description);

@@ -8,7 +8,7 @@
 // FIXME: Refactor to reduce cyclomatic complexity.
 
 tablator::Resource_Element tablator::ptree_readers::read_resource_element(
-        const boost::property_tree::ptree &resource_tree, bool is_first) {
+        const boost::property_tree::ptree &resource_tree, bool &is_results_resource) {
     auto child = resource_tree.begin();
     auto end = resource_tree.end();
 
@@ -72,14 +72,11 @@ tablator::Resource_Element tablator::ptree_readers::read_resource_element(
     std::vector<Table_Element> table_elements;
     while (child != end) {
         if (child->first == TABLE) {
-            if (!is_first) {
-                throw std::runtime_error(
-                        "TABLE element is supported only in the first RESOURCE.");
-            }
             if (!table_elements.empty()) {
                 throw std::runtime_error(
                         "Multiple TABLE elements are not implemented.");
             }
+            is_results_resource = true;
             table_elements.emplace_back(read_table_element(child->second));
         } else if (child->first == INFO) {
             break;

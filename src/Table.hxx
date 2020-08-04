@@ -198,7 +198,6 @@ public:
     Table(const std::vector<Column> &Columns,
           const std::vector<std::pair<std::string, tablator::Property>>
                   &property_pair_vec);
-
     Table(const std::vector<Column> &Columns)
             : Table(Columns, std::map<std::string, std::string>()) {}
 
@@ -702,14 +701,14 @@ public:
     }
 
     Resource_Element &get_main_resource_element() {
-        assert(!get_resource_elements().empty());
-        return get_resource_elements().at(0);
+        assert(get_resource_elements().size() > get_results_resource_idx());
+        return get_resource_elements().at(get_results_resource_idx());
     }
 
 
     const Resource_Element &get_main_resource_element() const {
-        assert(!get_resource_elements().empty());
-        return get_resource_elements().at(0);
+        assert(get_resource_elements().size() > get_results_resource_idx());
+        return get_resource_elements().at(get_results_resource_idx());
     }
 
     std::vector<Column> &get_columns() {
@@ -838,12 +837,21 @@ public:
 
     //=================================================
     // setters for non-Optional elements
-    void add_resource_element(const Resource_Element &resource_element) {
-        resource_elements_.emplace_back(resource_element);
+
+    void set_resource_elements(const std::vector<Resource_Element> &resource_elements) {
+        resource_elements_ = resource_elements;
+        arrange_resources();
     }
 
-    void add_resource_element(const Table_Element &table_element) {
-        resource_elements_.emplace_back(Resource_Element(table_element));
+    void add_resource_elements(const std::vector<Resource_Element> &resource_elements) {
+        resource_elements_.insert(resource_elements_.end(), resource_elements.begin(),
+                                  resource_elements.end());
+        arrange_resources();
+    }
+
+    void add_resource_element(const Resource_Element &resource_element) {
+        resource_elements_.emplace_back(resource_element);
+        arrange_resources();
     }
 
     //=================================================
@@ -890,12 +898,38 @@ public:
                                      std::make_pair(label, prop));
     }
 
+    size_t get_results_resource_idx() const { return results_resource_idx_; }
+    void set_results_resource_idx(size_t idx) { results_resource_idx_ = idx; }
+
 private:
-    Table(std::vector<Resource_Element> &resource_elements, const Options &options)
-            : resource_elements_(resource_elements), options_(options) {}
+    Table(const std::vector<Resource_Element> &resource_elements,
+          const Options &options)
+            : resource_elements_(resource_elements), options_(options) {
+        arrange_resources();
+    }
+
+    void arrange_resources() {
+        if (resource_elements_.size() == 1) {
+            results_resource_idx_ = 0;
+            return;
+        }
+
+        stable_sort(resource_elements_.begin(), resource_elements_.end());
+        const auto iter = std::find_if(
+                resource_elements_.begin(), resource_elements_.end(),
+                [&](const Resource_Element &elt) { return elt.is_results_resource(); });
+        if (iter == resource_elements_.end()) {
+            // assume not VOTABLE and only 1 resource
+            results_resource_idx_ = 0;
+        } else {
+            results_resource_idx_ =
+                    distance(resource_elements_.begin(), iter);
+        }
+    }
 
     std::vector<Resource_Element> resource_elements_;
     Options options_;
+    size_t results_resource_idx_;
 
     std::vector<Data_Type> get_original_datatypes() const {
         std::vector<Data_Type> orig_datatypes;

@@ -11,6 +11,7 @@
 
 
 namespace tablator {
+static constexpr size_t DEFAULT_DATA_ELEMENT_IDX = 0;
 
 // JTODO check for required attributes.
 
@@ -85,6 +86,8 @@ private:
 public:
     class Builder {
     public:
+        Builder() {}
+
         Builder(const Data_Element &data_element) {
             data_elements_.emplace_back(data_element);
         }
@@ -242,11 +245,11 @@ public:
 
     const Data_Element &get_main_data_element() const {
         assert(!get_data_elements().empty());
-        return data_elements_.at(0);
+        return data_elements_.at(DEFAULT_DATA_ELEMENT_IDX);
     }
     Data_Element &get_main_data_element() {
         assert(!get_data_elements().empty());
-        return data_elements_.at(0);
+        return data_elements_.at(DEFAULT_DATA_ELEMENT_IDX);
     }
 
     const std::vector<Column> &get_columns() const {
@@ -268,7 +271,6 @@ public:
     void set_data(const std::vector<uint8_t> &d) {
         get_main_data_element().set_data(d);
     }
-
 
 private:
     Table_Element(const std::vector<Data_Element> &data_elements,

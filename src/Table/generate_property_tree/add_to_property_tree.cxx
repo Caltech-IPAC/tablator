@@ -211,11 +211,10 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 
     const auto columns = table_element.get_columns();
 
-    /// Skip null_bitfield_flag
+    // Skip null_bitfield_flag
     for (size_t i = 1; i < columns.size(); ++i) {
         add_to_property_tree(table_tree, FIELD, columns[i], datatypes_for_writing[i]);
     }
-
 
     // We don't add tabledata directly because it is not in ptree format.
     table_tree.add(DATA_TABLEDATA, TABLEDATA_PLACEHOLDER);
@@ -230,7 +229,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 void add_to_property_tree(
         boost::property_tree::ptree &parent_tree,
         const Resource_Element &resource_element,
-        const std::vector<Data_Type> &datatypes_for_writing, size_t resource_id,
+        const std::vector<Data_Type> &datatypes_for_writing,
         const std::vector<std::string> &comments,
         const std::vector<std::pair<std::string, Property>> &table_labeled_properties) {
     boost::property_tree::ptree &resource_tree = parent_tree.add(RESOURCE, "");
@@ -263,12 +262,10 @@ void add_to_property_tree(
         add_to_property_tree(resource_tree, PARAM, param);
     }
 
-    if (resource_id == TABLE_RESOURCE_IDX &&
-        !resource_element.get_table_elements()
-                 .empty()) {  // JTODO shouldn't have to check
-        // add only one table_element
-        const auto &table_element_0 = resource_element.get_table_elements().at(0);
-        add_to_property_tree(resource_tree, table_element_0, datatypes_for_writing,
+    if (resource_element.is_results_resource()) {
+        // write only one table_element
+        const auto &table_element = resource_element.get_main_table_element();
+        add_to_property_tree(resource_tree, table_element, datatypes_for_writing,
                              comments);
     }
 
@@ -288,11 +285,9 @@ static const std::vector<std::pair<std::string, Property>>
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
-                          const std::vector<Data_Type> &datatypes_for_writing,
-                          size_t resource_id) {
+                          const std::vector<Data_Type> &datatypes_for_writing) {
     add_to_property_tree(parent_tree, resource_element, datatypes_for_writing,
-                         resource_id, DEFAULT_COMMENTS,
-                         DEFAULT_TABLE_LABELED_PROPERTIES);
+                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES);
 }
 
 

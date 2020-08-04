@@ -56,16 +56,27 @@ void tablator::ptree_readers::read_property_tree_as_votable(
 
     if (child == end) {
         throw std::runtime_error("Missing RESOURCE in VOTABLE");
-    } else {
-        table.add_resource_element(ptree_readers::read_resource_element(
-                child->second, true /* is_first */));
     }
-    ++child;
 
-    // read secondary resources
+    // read resources
+    bool found_results_resource = false;
+    size_t curr_resource_idx = 0;
+
     while (child != end && child->first == RESOURCE) {
+        bool is_results_resource = false;
         table.add_resource_element(ptree_readers::read_resource_element(
-                child->second, false /* is_first */));
+                child->second, is_results_resource));
+
+        if (is_results_resource) {
+            if (found_results_resource) {
+                throw std::runtime_error(
+                        "TABLE element is supported only in only one RESOURCE.");
+            }
+            found_results_resource = true;
+            table.set_results_resource_idx(curr_resource_idx);
+        }
+
+        ++curr_resource_idx;
         ++child;
     }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -10,6 +11,15 @@
 #include "Table_Element.hxx"
 
 namespace tablator {
+
+static constexpr size_t MAIN_TABLE_ELEMENT_IDX = 0;
+
+enum class Resource_Type {
+    META,
+    RESULTS,
+    OTHER,
+};
+
 
 class Resource_Element {
     // JTODO check for required attributes.
@@ -89,13 +99,14 @@ private:
 public:
     class Builder {
     public:
+        Builder() {}
+
         Builder(const std::vector<Table_Element> &table_elements)
                 : table_elements_(table_elements) {}
 
         Builder(const Table_Element &table_element) {
             table_elements_.emplace_back(table_element);
         }
-
 
         Resource_Element build() { return Resource_Element(table_elements_, options_); }
 
@@ -181,14 +192,18 @@ public:
     };
 
     Resource_Element(const Table_Element &table_element) {
+        assert(!table_element.get_columns().empty());
         table_elements_.emplace_back(table_element);
+
+        // can't make this call until table_elements_ has been updated
+        resource_type_ = determine_resource_type_without_attrs();
     }
 
     Resource_Element(const std::vector<Table_Element> &table_elements)
             : table_elements_(table_elements) {}
 
 
-    size_t num_rows() const { return get_table_elements().at(0).num_rows(); }
+    size_t num_rows() const { return get_main_table_element().num_rows(); }
 
     // accessors for Optional elements
 
@@ -262,12 +277,12 @@ public:
     std::vector<Table_Element> &get_table_elements() { return table_elements_; }
 
     const Table_Element &get_main_table_element() const {
-        assert(!get_table_elements().empty());
-        return table_elements_.at(0);
+        assert(!get_table_elements().empty());  // JTODO
+        return table_elements_.at(MAIN_TABLE_ELEMENT_IDX);
     }
     Table_Element &get_main_table_element() {
         assert(!get_table_elements().empty());
-        return table_elements_.at(0);
+        return table_elements_.at(MAIN_TABLE_ELEMENT_IDX);
     }
 
 
@@ -311,14 +326,56 @@ public:
         get_main_table_element().set_data(d);
     }
 
+    Resource_Type get_resource_type() const { return resource_type_; };
+
+    bool is_results_resource() const {
+        return (resource_type_ == Resource_Type::RESULTS);
+    }
+
+
 private:
+    static inline Resource_Type get_type_enum(const std::string &type_str) {
+        if (boost::equals(type_str, "results")) {
+            return Resource_Type::RESULTS;
+        }
+        if (boost::equals(type_str, "meta")) {
+            return Resource_Type::META;
+        }
+        return Resource_Type::OTHER;
+    }
+
+
+    tablator::Resource_Type determine_resource_type(tablator::ATTRIBUTES attributes) {
+        for (const auto &attr_pair : attributes) {
+            if (boost::iequals(attr_pair.first, tablator::TYPE)) {
+                return tablator::Resource_Element::get_type_enum(attr_pair.second);
+            }
+        }
+        return determine_resource_type_without_attrs();
+    }
+
+    tablator::Resource_Type determine_resource_type_without_attrs() {
+        if (!table_elements_.empty() &&
+            !get_main_table_element().get_columns().empty()) {
+            return tablator::Resource_Type::RESULTS;
+        }
+        return tablator::Resource_Type::OTHER;
+    }
+
     Resource_Element(const std::vector<Table_Element> &table_elements,
                      const Options &options)
-            : table_elements_(table_elements), options_(options) {}
-
+            : table_elements_(table_elements),
+              options_(options),
+              resource_type_(determine_resource_type(options.attributes_)) {}
 
     std::vector<Table_Element> table_elements_;
     Options options_;
-};
+    Resource_Type resource_type_;
+};  // namespace tablator
+
+inline bool operator<(const Resource_Element &lhs, const Resource_Element &rhs) {
+    return (lhs.get_resource_type() < rhs.get_resource_type());
+}
+
 
 }  // namespace tablator
