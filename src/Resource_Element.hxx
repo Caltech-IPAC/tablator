@@ -18,7 +18,56 @@ enum class Resource_Type {
     META,
     RESULTS,
     OTHER,
+    NONE,
 };
+
+namespace {
+
+Resource_Type get_type_enum(const std::string &type_str) {
+    if (boost::equals(type_str, "results")) {
+        return Resource_Type::RESULTS;
+    }
+    if (boost::equals(type_str, "meta")) {
+        return Resource_Type::META;
+    }
+    return Resource_Type::OTHER;
+}
+
+
+inline tablator::Resource_Type determine_resource_type(
+        const std::vector<Table_Element> &table_elements,
+        const tablator::ATTRIBUTES &attributes) {
+    bool has_results_table_element = !table_elements.empty();
+
+    tablator::Resource_Type attr_rtype = Resource_Type::NONE;
+    for (const auto &attr_pair : attributes) {
+        if (boost::iequals(attr_pair.first, tablator::TYPE)) {
+            attr_rtype = get_type_enum(attr_pair.second);
+            break;
+        }
+    }
+
+    if (!has_results_table_element && (attr_rtype == Resource_Type::RESULTS)) {
+        throw std::runtime_error(
+                "Resource_Element has type attribute 'results' but does not contain "
+                "results.");
+    }
+
+    if (has_results_table_element && (attr_rtype != Resource_Type::RESULTS) &&
+        (attr_rtype != Resource_Type::NONE)) {
+        throw std::runtime_error(
+                "Resource_Element contains results but has type attribute other than "
+                "'results'.");
+    }
+
+    if (!has_results_table_element) {
+        return attr_rtype;
+    }
+
+    return Resource_Type::RESULTS;
+}
+
+}  // namespace
 
 
 class Resource_Element {
@@ -191,12 +240,12 @@ public:
         Options options_;
     };
 
-    Resource_Element(const Table_Element &table_element) {
+
+    // As of 05Aug20, if a Resource_Element has a Table_Element, its type is RESULTS.
+    Resource_Element(const Table_Element &table_element)
+            : resource_type_(Resource_Type::RESULTS) {
         assert(!table_element.get_columns().empty());
         table_elements_.emplace_back(table_element);
-
-        // can't make this call until table_elements_ has been updated
-        resource_type_ = determine_resource_type_without_attrs();
     }
 
     Resource_Element(const std::vector<Table_Element> &table_elements)
@@ -334,44 +383,17 @@ public:
 
 
 private:
-    static inline Resource_Type get_type_enum(const std::string &type_str) {
-        if (boost::equals(type_str, "results")) {
-            return Resource_Type::RESULTS;
-        }
-        if (boost::equals(type_str, "meta")) {
-            return Resource_Type::META;
-        }
-        return Resource_Type::OTHER;
-    }
-
-
-    tablator::Resource_Type determine_resource_type(tablator::ATTRIBUTES attributes) {
-        for (const auto &attr_pair : attributes) {
-            if (boost::iequals(attr_pair.first, tablator::TYPE)) {
-                return tablator::Resource_Element::get_type_enum(attr_pair.second);
-            }
-        }
-        return determine_resource_type_without_attrs();
-    }
-
-    tablator::Resource_Type determine_resource_type_without_attrs() {
-        if (!table_elements_.empty() &&
-            !get_main_table_element().get_columns().empty()) {
-            return tablator::Resource_Type::RESULTS;
-        }
-        return tablator::Resource_Type::OTHER;
-    }
-
     Resource_Element(const std::vector<Table_Element> &table_elements,
                      const Options &options)
             : table_elements_(table_elements),
               options_(options),
-              resource_type_(determine_resource_type(options.attributes_)) {}
+              resource_type_(
+                      determine_resource_type(table_elements_, options.attributes_)) {}
 
     std::vector<Table_Element> table_elements_;
     Options options_;
     Resource_Type resource_type_;
-};  // namespace tablator
+};  // class Resource_Element
 
 inline bool operator<(const Resource_Element &lhs, const Resource_Element &rhs) {
     return (lhs.get_resource_type() < rhs.get_resource_type());

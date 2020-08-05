@@ -96,7 +96,6 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
         throw std::runtime_error("no resource_elements");
     }
 
-    size_t resource_id = 0;
     for (const auto &resource_element : get_resource_elements()) {
         if (resource_element.is_results_resource()) {
             add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
@@ -104,7 +103,6 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
         } else {
             add_to_property_tree(votable_tree, resource_element, datatypes_for_writing);
         }
-        ++resource_id;
     }
 
     for (const auto &info : get_trailing_info_list()) {

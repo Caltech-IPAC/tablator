@@ -7,7 +7,7 @@
     <FIELDref ref="col1" utype="stc:AstroCoords.Position2D.Value2.C1"/>
     <FIELDref ref="col2" utype="stc:AstroCoords.Position2D.Value2.C2"/>
   </GROUP>
-  <RESOURCE name="myFavouriteGalaxies" type="meta">
+  <RESOURCE name="myFavouriteGalaxies" type="results">
     <TABLE name="results">
       <DESCRIPTION>Velocities and Distance estimations</DESCRIPTION>
       <GROUP utype="stc:CatalogEntryLocation">

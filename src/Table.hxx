@@ -915,13 +915,12 @@ private:
             results_resource_idx_ = 0;
             return;
         }
-
         stable_sort(resource_elements_.begin(), resource_elements_.end());
         const auto iter = std::find_if(
                 resource_elements_.begin(), resource_elements_.end(),
                 [&](const Resource_Element &elt) { return elt.is_results_resource(); });
         if (iter == resource_elements_.end()) {
-            // assume not VOTABLE and only 1 resource
+            // Assume not VOTABLE and only 1 resource. (Shouldn't happen.)
             results_resource_idx_ = 0;
         } else {
             results_resource_idx_ = distance(resource_elements_.begin(), iter);

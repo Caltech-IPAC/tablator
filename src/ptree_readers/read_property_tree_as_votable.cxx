@@ -80,6 +80,10 @@ void tablator::ptree_readers::read_property_tree_as_votable(
         ++child;
     }
 
+    if (!found_results_resource) {
+        throw std::runtime_error("Missing results RESOURCE.");
+    }
+
     while (child != end) {
         if (child->first == INFO) {
             auto curr_attributes = ptree_readers::extract_attributes(child->second);

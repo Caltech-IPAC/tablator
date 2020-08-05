@@ -137,6 +137,15 @@ else
     rm -f temp_file
 fi
 
+${tablator_bin}  test/back_and_forth_tables/no_results_resource.vot out.tbl 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: attempt to read votable with no 'results' resource correctly resulted in error"
+else
+    echo "PASS: attempt to read votable with no 'results' resource correctly resulted in error"
+    rm -f temp_file
+
+fi
+
 
 ###########################################################
 

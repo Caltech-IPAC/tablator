@@ -68,7 +68,7 @@ tablator::Resource_Element tablator::ptree_readers::read_resource_element(
         ++child;
     }
 
-    // We only allow one TABLE in the first RESOURCE and none in the others.
+    // We only allow one (nonempty) TABLE in one RESOURCE and none in the others.
     std::vector<Table_Element> table_elements;
     while (child != end) {
         if (child->first == TABLE) {
