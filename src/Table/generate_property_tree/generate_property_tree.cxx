@@ -27,13 +27,12 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
-                          const std::vector<Data_Type> &datatypes_for_writing,
-                          size_t resource_id);
+                          const std::vector<Data_Type> &datatypes_for_writing);
 
 void add_to_property_tree(
         boost::property_tree::ptree &parent_tree,
         const Resource_Element &resource_element,
-        const std::vector<Data_Type> &datatypes_for_writing, size_t resource_id,
+        const std::vector<Data_Type> &datatypes_for_writing,
         const std::vector<std::string> &comments,
         const std::vector<std::pair<std::string, Property>> &table_labeled_properties);
 
@@ -95,28 +94,17 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
 
     if (get_resource_elements().empty()) {
         throw std::runtime_error("no resource_elements");
-    } else {
-        // JTODO rethink TABLE_RESOURCE_IDX
-        const auto &resource_element_with_table =
-                get_resource_elements().at(TABLE_RESOURCE_IDX);
-        add_to_property_tree(votable_tree, resource_element_with_table,
-                             datatypes_for_writing, TABLE_RESOURCE_IDX, get_comments(),
-                             get_labeled_properties());
     }
 
-    // Add secondary resource_elements
-
-    size_t resource_id = TABLE_RESOURCE_IDX;
     for (const auto &resource_element : get_resource_elements()) {
-        if (resource_id == TABLE_RESOURCE_IDX) {
-            ++resource_id;
-            continue;
+        if (resource_element.is_results_resource()) {
+            add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
+                                 get_comments(), get_labeled_properties());
+        } else {
+            add_to_property_tree(votable_tree, resource_element, datatypes_for_writing);
         }
-        add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
-                             resource_id);
-
-        ++resource_id;
     }
+
     for (const auto &info : get_trailing_info_list()) {
         add_to_property_tree(votable_tree, INFO, info);
     }

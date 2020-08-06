@@ -78,7 +78,6 @@ static const std::string DATA_TABLEDATA("DATA.TABLEDATA");
 static const std::string TABLEDATA_PLACEHOLDER("TaBlEdAtA_PlAcEhOlDeR");
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;
 static constexpr size_t PLACEHOLDER_RIGHT_MARGIN = 5;
-static constexpr size_t TABLE_RESOURCE_IDX = 0;
 
 static std::vector<std::string> PROPERTY_STYLE_LABELS = {COOSYS, GROUP, PARAM, INFO};
 inline bool is_property_style_label(const std::string &label) {

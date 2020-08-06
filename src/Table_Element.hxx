@@ -11,8 +11,10 @@
 
 
 namespace tablator {
+static constexpr size_t DEFAULT_DATA_ELEMENT_IDX = 0;
 
 // JTODO check for required attributes.
+// JTODO Fields should match up with Columns.
 
 class Table_Element {
 private:
@@ -85,6 +87,8 @@ private:
 public:
     class Builder {
     public:
+        Builder() {}
+
         Builder(const Data_Element &data_element) {
             data_elements_.emplace_back(data_element);
         }
@@ -242,11 +246,11 @@ public:
 
     const Data_Element &get_main_data_element() const {
         assert(!get_data_elements().empty());
-        return data_elements_.at(0);
+        return data_elements_.at(DEFAULT_DATA_ELEMENT_IDX);
     }
     Data_Element &get_main_data_element() {
         assert(!get_data_elements().empty());
-        return data_elements_.at(0);
+        return data_elements_.at(DEFAULT_DATA_ELEMENT_IDX);
     }
 
     const std::vector<Column> &get_columns() const {
@@ -269,11 +273,15 @@ public:
         get_main_data_element().set_data(d);
     }
 
-
 private:
     Table_Element(const std::vector<Data_Element> &data_elements,
                   const Options &options)
-            : data_elements_(data_elements), options_(options) {}
+            : data_elements_(data_elements), options_(options) {
+        // JTODO  What exactly is our restriction on Table_Elements?
+        if (data_elements_.empty() || get_columns().empty()) {
+            throw std::runtime_error("Table_Element must have non-empty Data_Element.");
+        }
+    }
 
 
     std::vector<Data_Element> data_elements_;

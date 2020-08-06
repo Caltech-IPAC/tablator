@@ -43,7 +43,7 @@ void read_property_tree_as_votable(Table &table,
                                    const boost::property_tree::ptree &tree);
 
 Resource_Element read_resource_element(const boost::property_tree::ptree &resource_tree,
-                                       bool is_first);
+                                       bool &is_results_resource);
 Group_Element read_group_element(const boost::property_tree::ptree &node);
 Table_Element read_table_element(const boost::property_tree::ptree &table);
 Field_And_Flag read_field(const boost::property_tree::ptree &field);

@@ -137,6 +137,15 @@ else
     rm -f temp_file
 fi
 
+${tablator_bin}  test/back_and_forth_tables/no_results_resource.vot out.tbl 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: attempt to read votable with no 'results' resource correctly resulted in error"
+else
+    echo "PASS: attempt to read votable with no 'results' resource correctly resulted in error"
+    rm -f temp_file
+
+fi
+
 
 ###########################################################
 
@@ -888,16 +897,24 @@ else
     echo "FAIL: Table with multiple group metadata"
 fi
 
-${tablator_bin} test/back_and_forth_tables/multiple_resource_example.vot temp.vot && diff test/back_and_forth_tables/multiple_resource_example.vot temp.vot
+${tablator_bin} test/back_and_forth_tables/multiple_resource_results_first.vot temp.vot && diff test/back_and_forth_tables/multiple_resource_results_first_rearranged.vot temp.vot
 if [ $? -eq 0 ]; then
-    echo "PASS: Table with multiple resources"
+    echo "PASS: Table with results resource first"
     rm -f temp_file
 else
-    echo "FAIL: Table with multiple resources"
+    echo "FAIL: Table with results resource first"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multiple_resource_results_last.vot temp.vot && diff test/back_and_forth_tables/multiple_resource_results_last.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Table with results resource last"
+    rm -f temp_file
+else
+    echo "FAIL: Table with results resource last"
 fi
 
 
-${tablator_bin} test/back_and_forth_tables/multiple_info_example.vot temp.vot && diff test/back_and_forth_tables/multiple_info_example.vot temp.vot
+${tablator_bin} test/back_and_forth_tables/multiple_info_example.vot temp.vot && diff test/back_and_forth_tables/multiple_info_example_rearranged.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Table with multiple infos"
     rm -f temp_file
