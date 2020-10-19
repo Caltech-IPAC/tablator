@@ -109,7 +109,6 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         table_element_trailing_infos, table_element_attributes,
                         combined_labeled_properties);
 
-
     // CCfits is 1 based, not 0 based.
     const bool has_null_bitfield_flags(ccfits_table->column().size() > 0 &&
                                        ccfits_table->column(1).name() ==
@@ -199,110 +198,100 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     size_t row_size = tablator::row_size(offsets);
     data.resize(ccfits_table->rows() * row_size);
 
-    // Exit early if there is no data in the table.  Otherwise CCfits
-    // dies in read_column() :(
-    if (data.empty()) {
-        std::vector<Table_Element> table_elements;
-        table_elements.emplace_back(
-                Table_Element::Builder(columns, offsets, data).build());
-
-        get_resource_elements().emplace_back(
-                Resource_Element::Builder(table_elements).build());
-        return;
-    }
-
-
-    fitsfile *fits_pointer = fits.fitsPointer();
-    const size_t column_data_offset(has_null_bitfield_flags ? 0 : 1);
-    for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
-        const size_t offset(offsets[i + column_data_offset]);
-        /// CCfits is 1 based, not 0 based.
-        CCfits::Column &c = ccfits_table->column(i + 1);
-        const bool is_array(std::isdigit(c.format().at(0)) &&
-                            (std::stoll(c.format()) != 1));
-        switch (c.type()) {
-            case CCfits::Tlogical: {
-                if (!is_array) {
-                    std::vector<int> v;
+    // CCfits dies in read_column() if there is no data in the table. :(
+    if (!data.empty()) {
+        fitsfile *fits_pointer = fits.fitsPointer();
+        const size_t column_data_offset(has_null_bitfield_flags ? 0 : 1);
+        for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
+            const size_t offset(offsets[i + column_data_offset]);
+            /// CCfits is 1 based, not 0 based.
+            CCfits::Column &c = ccfits_table->column(i + 1);
+            const bool is_array(std::isdigit(c.format().at(0)) &&
+                                (std::stoll(c.format()) != 1));
+            switch (c.type()) {
+                case CCfits::Tlogical: {
+                    if (!is_array) {
+                        std::vector<int> v;
+                        c.read(v, 1, ccfits_table->rows());
+                        size_t element_offset = offset;
+                        for (auto &element : v) {
+                            data[element_offset] = element;
+                            element_offset += row_size;
+                        }
+                    } else {
+                        // FIXME: Use the C api because Column::readArrays is
+                        // horrendously slow.
+                        std::vector<std::valarray<int>> v;
+                        c.readArrays(v, 1, ccfits_table->rows());
+                        size_t start_offset_for_row = offset;
+                        for (auto &array : v) {
+                            auto element_offset = start_offset_for_row;
+                            for (auto &element : array) {
+                                data[element_offset] = element;
+                                ++element_offset;
+                            }
+                            start_offset_for_row += row_size;
+                        }
+                    }
+                } break;
+                case CCfits::Tbyte:
+                    read_column<uint8_t>(fits_pointer, data.data() + offset, c,
+                                         is_array, ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tshort:
+                    read_column<int16_t>(fits_pointer, data.data() + offset, c,
+                                         is_array, ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tushort:
+                    read_column<uint16_t>(fits_pointer, data.data() + offset, c,
+                                          is_array, ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tuint:
+                case CCfits::Tulong:
+                    read_column<uint32_t>(fits_pointer, data.data() + offset, c,
+                                          is_array, ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tint:
+                case CCfits::Tlong:
+                    read_column<int32_t>(fits_pointer, data.data() + offset, c,
+                                         is_array, ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tlonglong:
+                    read_column<int64_t>(fits_pointer, data.data() + offset, c,
+                                         is_array, ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tfloat:
+                    read_column<float>(fits_pointer, data.data() + offset, c, is_array,
+                                       ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tdouble:
+                    read_column<double>(fits_pointer, data.data() + offset, c, is_array,
+                                        ccfits_table->rows(), row_size);
+                    break;
+                case CCfits::Tstring: {
+                    std::vector<std::string> v;
                     c.read(v, 1, ccfits_table->rows());
                     size_t element_offset = offset;
                     for (auto &element : v) {
-                        data[element_offset] = element;
+                        for (size_t j = 0; j < element.size(); ++j)
+                            data[element_offset + j] = element[j];
+                        for (int j = element.size(); j < c.width(); ++j)
+                            data[element_offset + j] = '\0';
                         element_offset += row_size;
                     }
-                } else {
-                    // FIXME: Use the C api because Column::readArrays is
-                    // horrendously slow.
-                    std::vector<std::valarray<int>> v;
-                    c.readArrays(v, 1, ccfits_table->rows());
-                    size_t start_offset_for_row = offset;
-                    for (auto &array : v) {
-                        auto element_offset = start_offset_for_row;
-                        for (auto &element : array) {
-                            data[element_offset] = element;
-                            ++element_offset;
-                        }
-                        start_offset_for_row += row_size;
-                    }
-                }
-            } break;
-            case CCfits::Tbyte:
-                read_column<uint8_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tshort:
-                read_column<int16_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tushort:
-                read_column<uint16_t>(fits_pointer, data.data() + offset, c, is_array,
-                                      ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tuint:
-            case CCfits::Tulong:
-                read_column<uint32_t>(fits_pointer, data.data() + offset, c, is_array,
-                                      ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tint:
-            case CCfits::Tlong:
-                read_column<int32_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tlonglong:
-                read_column<int64_t>(fits_pointer, data.data() + offset, c, is_array,
-                                     ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tfloat:
-                read_column<float>(fits_pointer, data.data() + offset, c, is_array,
-                                   ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tdouble:
-                read_column<double>(fits_pointer, data.data() + offset, c, is_array,
-                                    ccfits_table->rows(), row_size);
-                break;
-            case CCfits::Tstring: {
-                std::vector<std::string> v;
-                c.read(v, 1, ccfits_table->rows());
-                size_t element_offset = offset;
-                for (auto &element : v) {
-                    for (size_t j = 0; j < element.size(); ++j)
-                        data[element_offset + j] = element[j];
-                    for (int j = element.size(); j < c.width(); ++j)
-                        data[element_offset + j] = '\0';
-                    element_offset += row_size;
-                }
-            } break;
-            default:
-                throw std::runtime_error(
-                        "Unsupported data type in the fits file for "
-                        "column " +
-                        c.name());
-        }
-        // FIXME: This should get the comment, but the comment()
-        // function is protected???
-        if (!c.unit().empty()) {
-            columns[i + column_data_offset].get_field_properties().set_attributes(
-                    {{"unit", c.unit()}});
+                } break;
+                default:
+                    throw std::runtime_error(
+                            "Unsupported data type in the fits file for "
+                            "column " +
+                            c.name());
+            }
+            // FIXME: This should get the comment, but the comment()
+            // function is protected???
+            if (!c.unit().empty()) {
+                columns[i + column_data_offset].get_field_properties().set_attributes(
+                        {{"unit", c.unit()}});
+            }
         }
     }
     const auto table_element =

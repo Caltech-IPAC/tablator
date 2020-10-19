@@ -1,5 +1,6 @@
 \fixlen = T
 \RowsRetrieved = 3
+\type = 'results'
 |                    htm7|                     dec|                                  object|
 |                    long|                  double|                                    char|
 |                        |                        |                                        |

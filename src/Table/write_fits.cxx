@@ -11,6 +11,7 @@
 
 // JTODO Descriptions and attributes get lost in conversion to and from fits.
 
+namespace {
 template <typename data_type>
 void write_column(fitsfile *fits_file, int fits_type, int col_id, const uint8_t *data,
                   hsize_t array_size, size_t row) {
@@ -20,6 +21,21 @@ void write_column(fitsfile *fits_file, int fits_type, int col_id, const uint8_t 
     if (status != 0) throw CCfits::FitsError(status);
 }
 
+void write_attributes(fitsfile *fits_file, const tablator::ATTRIBUTES &attributes,
+                      const std::string &prefix) {
+    for (const auto &att_pair : attributes) {
+        static const char *empty_comment = "";
+        const auto &name = att_pair.first;
+        const auto &value = att_pair.second;
+        int status = 0;
+        fits_write_key_longstr(fits_file, (prefix + name).c_str(), value.c_str(),
+                               empty_comment, &status);
+        if (status != 0) {
+            throw CCfits::FitsError(status);
+        }
+    }
+}
+}  // namespace
 /**********************************************************/
 
 void tablator::Table::write_fits(std::ostream &os) const {
@@ -198,6 +214,17 @@ void tablator::Table::write_fits(
 
     assert(get_resource_elements().size() > 0);
 
+    static const std::string resource_element_attr_prefix =
+            VOTABLE_RESOURCE_DOT + XMLATTR_DOT;
+    static const std::string table_element_attr_prefix =
+            VOTABLE_RESOURCE_TABLE_DOT + XMLATTR_DOT;
+    write_attributes(fits_file, get_results_resource_element().get_attributes(),
+                     resource_element_attr_prefix);
+    write_attributes(
+            fits_file,
+            get_results_resource_element().get_main_table_element().get_attributes(),
+            table_element_attr_prefix);
+
     // Combine and write properties and trailing info for all levels at which they are
     // defined.
     auto combined_labeled_properties = combine_labeled_properties_all_levels();
@@ -208,7 +235,7 @@ void tablator::Table::write_fits(
                                        combined_labeled_trailing_info_lists.end());
 
 
-    for (auto &label_and_prop : combined_labeled_properties) {
+    for (const auto &label_and_prop : combined_labeled_properties) {
         auto keyword_mapping = fits_keyword_mapping(true);
         std::string name = label_and_prop.first;
         const auto &prop = label_and_prop.second;
