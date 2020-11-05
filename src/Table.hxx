@@ -871,6 +871,17 @@ public:
         get_results_resource_element().set_data(d);
     }
 
+
+    void add_resource_element_attribute(const std::string &name,
+                                        const std::string &value) {
+        get_results_resource_element().add_attribute(name, value);
+    }
+
+    void add_resource_element_attribute(
+            const std::pair<std::string, std::string> &att_pair) {
+        get_results_resource_element().add_attribute(att_pair);
+    }
+
     void add_resource_element_labeled_property(
             const std::pair<std::string, Property> &label_and_prop) {
         get_results_resource_element().add_labeled_property(label_and_prop);
@@ -880,26 +891,6 @@ public:
                                                const Property &prop) {
         add_resource_element_labeled_property(std::make_pair(label, prop));
     }
-
-    // JTODO terminology for table that has been constructed but not loaded.
-
-    // In the middle of a read_XXX(), Table-level class members already exist but
-    // Resource_Element- and Table_Element-level ones do not.  Components destined for
-    // the lower-level classes must be stored in temporary vectors which will then be
-    // sent as arguments to the relevant constructors.
-
-    void add_element_labeled_property(
-            std::vector<std::pair<std::string, Property>> &element_labeled_properties,
-            const std::pair<std::string, Property> &label_and_prop);
-
-
-    void add_element_labeled_property(
-            std::vector<std::pair<std::string, Property>> &element_labeled_properties,
-            const std::string &label, const Property &prop) {
-        add_element_labeled_property(element_labeled_properties,
-                                     std::make_pair(label, prop));
-    }
-
     size_t get_results_resource_idx() const { return results_resource_idx_; }
     void set_results_resource_idx(size_t idx) { results_resource_idx_ = idx; }
 
@@ -963,15 +954,37 @@ private:
             const std::vector<std::pair<std::string, tablator::Property>>
                     &label_prop_pairs);
 
+
+    // JTODO terminology for table that has been constructed but not loaded.
+
+    // In the middle of a read_XXX(), Table-level class members already exist but
+    // Resource_Element- and Table_Element-level ones do not.  Components destined for
+    // the lower-level classes must be stored in temporary vectors which will then be
+    // sent as arguments to the relevant constructors.
+
+
     // labeled by element: Table, Resource_Element, Table_Element.
-    bool add_trailing_info_labeled_by_element(
+    bool stash_trailing_info_labeled_by_element(
             std::vector<Property> &resource_element_infos,
             std::vector<Property> &table_element_infos,
             const std::pair<std::string, Property> &label_and_prop);
 
-    bool add_attributes_labeled_by_element(
+    bool stash_attributes_labeled_by_element(
             ATTRIBUTES &resource_element_attributes,
             ATTRIBUTES &table_element_attributes,
             const std::pair<std::string, Property> &label_and_prop);
+
+
+    void stash_resource_element_labeled_property(
+            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
+            const std::pair<std::string, Property> &label_and_prop);
+
+
+    void stash_resource_element_labeled_property(
+            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
+            const std::string &label, const Property &prop) {
+        stash_resource_element_labeled_property(resource_labeled_properties,
+                                                std::make_pair(label, prop));
+    }
 };
 }  // namespace tablator

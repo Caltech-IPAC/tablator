@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "../Table.hxx"
 #include "../ptree_readers.hxx"
 
@@ -57,6 +59,7 @@ Table::Table(const std::vector<Column> &columns,
         add_labeled_property(p.first, Property(p.second));
     }
 }
+
 
 Table::Table(const std::vector<Column> &columns,
              const std::vector<std::pair<std::string, Property>> &property_pair_vec)
@@ -245,25 +248,25 @@ void Table::distribute_metadata(
     for (const auto &label_and_prop : label_prop_pairs) {
         const auto &label = label_and_prop.first;
         const auto &prop = label_and_prop.second;
-        if (add_trailing_info_labeled_by_element(resource_element_trailing_infos,
-                                                 table_element_trailing_infos,
-                                                 label_and_prop)) {
+        if (stash_trailing_info_labeled_by_element(resource_element_trailing_infos,
+                                                   table_element_trailing_infos,
+                                                   label_and_prop)) {
             continue;
         }
-        if (add_attributes_labeled_by_element(resource_element_attributes,
-                                              table_element_attributes,
-                                              label_and_prop)) {
+        if (stash_attributes_labeled_by_element(resource_element_attributes,
+                                                table_element_attributes,
+                                                label_and_prop)) {
             continue;
         }
-        add_element_labeled_property(resource_element_labeled_properties,
-                                     label_and_prop);
+        stash_resource_element_labeled_property(resource_element_labeled_properties,
+                                                label_and_prop);
     }
 }
 
 
 //=============================================
 
-bool Table::add_trailing_info_labeled_by_element(
+bool Table::stash_trailing_info_labeled_by_element(
         std::vector<Property> &resource_element_infos,
         std::vector<Property> &table_element_infos,
         const std::pair<std::string, Property> &label_and_prop) {
@@ -286,7 +289,7 @@ bool Table::add_trailing_info_labeled_by_element(
 
 //=============================================
 
-bool Table::add_attributes_labeled_by_element(
+bool Table::stash_attributes_labeled_by_element(
         ATTRIBUTES &resource_element_attributes, ATTRIBUTES &table_element_attributes,
         const std::pair<std::string, Property> &label_and_prop) {
     const auto &label = label_and_prop.first;
@@ -311,32 +314,25 @@ bool Table::add_attributes_labeled_by_element(
 
 // JTODO Call this version to add labeled_property to initialized(?) table
 // (one with a non-empty <resource_elements_> member).
-// Backward compatibility: called by query_server.
 void Table::add_labeled_property(
         const std::pair<std::string, Property> &label_and_prop) {
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
-    if (boost::equals(label, COOSYS) || boost::equals(label, PARAM) ||
-        boost::equals(label, INFO)) {
+    if (is_property_style_label(label)) {
         get_labeled_properties().emplace_back(label_and_prop);
         return;
     }
     if (get_resource_elements().empty()) {
         throw std::runtime_error(
                 "This function cannot be used to add resource-level properties to "
-                "empty table.");
+                "embryonic table (one without resource_elements).");
     }
+
     if (boost::starts_with(label, VOTABLE_RESOURCE_DOT)) {
         add_resource_element_labeled_property(label.substr(VOTABLE_RESOURCE_DOT.size()),
                                               prop);
     } else {
-        add_resource_element_labeled_property(
-                "INFO", Property({{ATTR_NAME, label}, {ATTR_VALUE, prop.get_value()}}));
-        for (const auto &att : prop.get_attributes()) {
-            add_resource_element_labeled_property(
-                    "INFO",
-                    Property({{ATTR_NAME, att.first}, {ATTR_VALUE, att.second}}));
-        }
+        add_resource_element_labeled_property(label_and_prop);
     }
 }
 
@@ -344,29 +340,18 @@ void Table::add_labeled_property(
 
 // This version is to be called e.g. by a read_XXX() function at a time when
 // Table's <resource_elements_> vector is still empty.
-void Table::add_element_labeled_property(
+void Table::stash_resource_element_labeled_property(
         std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
         const std::pair<std::string, Property> &label_and_prop) {
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
-    if (boost::equals(label, COOSYS) || boost::equals(label, PARAM) ||
-        boost::equals(label, INFO)) {
+    if (is_property_style_label(label)) {
         get_labeled_properties().emplace_back(label_and_prop);
-    } else if (boost::starts_with(
-                       label,
-                       VOTABLE_RESOURCE_DOT)) {  // Backward compatibility w/qs
+    } else if (boost::starts_with(label, VOTABLE_RESOURCE_DOT)) {
         resource_labeled_properties.emplace_back(
                 label.substr(VOTABLE_RESOURCE_DOT.size()), prop);
-    } else if (boost::starts_with(label, RESOURCE_DOT)) {
-        resource_labeled_properties.emplace_back(label.substr(RESOURCE_DOT.size()),
-                                                 prop);
     } else {
-        resource_labeled_properties.emplace_back(
-                INFO, Property({{ATTR_NAME, label}, {ATTR_VALUE, prop.get_value()}}));
-        for (const auto &att : prop.get_attributes()) {
-            resource_labeled_properties.emplace_back(
-                    INFO, Property({{ATTR_NAME, att.first}, {ATTR_VALUE, att.second}}));
-        }
+        resource_labeled_properties.emplace_back(label, prop);
     }
 }
 

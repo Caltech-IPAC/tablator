@@ -75,7 +75,7 @@ ___ Position Angle in degree.
 dist (arcsec) 
 ___ Distance between the target position and each source in arcsec.
 </DESCRIPTION>
-  <RESOURCE>
+  <RESOURCE type="results">
     <TABLE>
       <FIELD name="usno_b1" datatype="char" arraysize="*"/>
       <FIELD name="tycho2" datatype="char" arraysize="*"/>

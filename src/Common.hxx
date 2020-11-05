@@ -66,6 +66,7 @@ static const std::string REF("ref");
 static const std::string RESOURCE("RESOURCE");
 static const std::string TABLE("TABLE");
 static const std::string TABLEDATA("TABLEDATA");
+static const std::string TIMESYS("TIMESYS");
 static const std::string TYPE("type");
 static const std::string UNIT("unit");
 static const std::string UTYPE("utype");
@@ -79,7 +80,8 @@ static const std::string TABLEDATA_PLACEHOLDER("TaBlEdAtA_PlAcEhOlDeR");
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;
 static constexpr size_t PLACEHOLDER_RIGHT_MARGIN = 5;
 
-static std::vector<std::string> PROPERTY_STYLE_LABELS = {COOSYS, GROUP, PARAM, INFO};
+// No complicated sub-elements, only attributes and/or string value.
+static std::vector<std::string> PROPERTY_STYLE_LABELS = {COOSYS, INFO, TIMESYS};
 inline bool is_property_style_label(const std::string &label) {
     return (std::find(PROPERTY_STYLE_LABELS.begin(), PROPERTY_STYLE_LABELS.end(),
                       label) != PROPERTY_STYLE_LABELS.end());

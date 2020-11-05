@@ -200,7 +200,6 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         table_tree.add(DESCRIPTION, table_description);
     }
 
-
     for (const auto &group : table_element.get_group_elements()) {
         add_to_property_tree(table_tree, group);
     }
@@ -233,6 +232,7 @@ void add_to_property_tree(
         const std::vector<std::string> &comments,
         const std::vector<std::pair<std::string, Property>> &table_labeled_properties) {
     boost::property_tree::ptree &resource_tree = parent_tree.add(RESOURCE, "");
+
     for (const auto &pair : resource_element.get_attributes()) {
         resource_tree.add(XMLATTR_DOT + pair.first, pair.second);
     }

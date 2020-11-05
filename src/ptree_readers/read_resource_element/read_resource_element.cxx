@@ -35,7 +35,7 @@ tablator::Resource_Element tablator::ptree_readers::read_resource_element(
     std::vector<Field> params;
     std::vector<Group_Element> group_elements;
     while (child != end) {
-        if (child->first == COOSYS) {
+        if ((child->first == COOSYS) || (child->first == TIMESYS)) {
             labeled_properties.emplace_back(
                     std::make_pair(child->first, read_property(child->second)));
         } else if (child->first == PARAM) {
@@ -45,8 +45,7 @@ tablator::Resource_Element tablator::ptree_readers::read_resource_element(
         } else if (child->first == INFO) {
             // JTODO INFO doesn't belong here unless middle is missing and this is a
             // trailer
-            throw std::runtime_error(
-                    "Resource_Element, expected PARAM or GROUP but found INFO");
+            throw std::runtime_error("Resource_Element, found unexpected INFO element");
         } else {
             break;
         }

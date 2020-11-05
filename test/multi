@@ -1,3 +1,4 @@
+\type = 'results'
 | object                                   | ra        | dec       | htm20               | htm7      | htm3   | shtm20              | shtm7      |  shtm3 | flags | SSO   |
 | char                                     | double    | real      | ulong               | uint      | ushort | long                |  int       |  short | byte  |boolean|
  118289arstratraetratratsrastratsrastrats    359.88703   50.832570  16446744073709551616  3294967296    12000   8223372036854775808   1147483648    12000    122    0      

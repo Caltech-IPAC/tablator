@@ -162,20 +162,29 @@ for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/f
         else
             ${tablator_bin} $STREAM_INTERMEDIATE $table test.$ending
         fi
+
+        if [ $? -eq 0 ]; then
+            echo "PASS: $table -> $ending I"
+        else
+            echo "FAIL: $table -> $ending I"
+        fi
+
+        # optionally convert result to IPAC_TABLE format
         if [ $ending == "hdf5" ] || [ $ending == "fits" ]; then
             ${tablator_bin} test.$ending temp.tbl
         elif [ $ending == "xml" ] || [ $ending == "json" ] || [ $ending == "tbl" ]; then
             ${tablator_bin} $STREAM_INTERMEDIATE test.$ending temp.tbl
         fi
+
         if [ $? -eq 0 ]; then
-            echo "PASS: $table -> $ending"
+            echo "PASS: $table -> $ending II"
         else
-            echo "FAIL: $table -> $ending"
+            echo "FAIL: $table -> $ending II"
         fi
+
         rm -f test.$ending temp.tbl
     done
 done
-
 
 ###########################################################
 # Test clobbering when converting to .db.
@@ -445,6 +454,16 @@ else
     echo "FAIL: Convert VOTable with single two-row array col of type ulong with large values to FITS and back"
 fi
 
+${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.fits &&
+${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with resource of type results and single two-row array col of type ulong with large values to FITS and back"
+    rm -f temp.fits
+    rm -f temp.vot
+else
+    echo "FAIL: Convert VOTable with resource of type results and single two-row array col of type ulong with large values to FITS and back"
+fi
+
 
 ${tablator_bin} --output-format=fits test/back_and_forth_tables/one_row_bool_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/one_row_bool_array.json5 temp.json5
 if [ $? -eq 0 ]; then
@@ -467,7 +486,7 @@ if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type unsignedByte to FITS and back"
     rm -f temp.json5
 else
-    echo "FAIL: Convert Json5 Table with single two-row array col of type unsignedBytee to FITS and back"
+    echo "FAIL: Convert Json5 Table with single two-row array col of type unsignedByte to FITS and back"
 fi
 
 ${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/two_row_byte_array.json5 out.tbl && ${tablator_bin} --input-format=ipac_table out.tbl temp.json5 && diff -w test/back_and_forth_tables/two_row_byte_array_via_ipac.json5 temp.json5
@@ -600,7 +619,7 @@ else
     echo "FAIL: Write subtable with selected rows in IPAC Table format"
 fi
 
-${tablator_bin} --static=1 --row-list="0 2 1 2 0" test/back_and_forth_tables/multi_row.json5 temp.tbl && diff -w test/back_and_forth_tables/multi_row_02120.json5 temp.tbl
+${tablator_bin} --static=1 --row-list="0 2 1 2 0" test/back_and_forth_tables/multi_row.json5 temp.tbl && diff -w test/back_and_forth_tables/multi_row_02120.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected rows in IPAC Table format"
     rm -f temp_file
@@ -887,6 +906,14 @@ if [ $? -eq 0 ]; then
     rm -f temp_file
 else
     echo "FAIL: Table with group metadata"
+fi
+
+${tablator_bin} test/back_and_forth_tables/coosys_example.vot temp.vot && diff test/back_and_forth_tables/coosys_example.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Table with coosys and timesys"
+    rm -f temp_file
+else
+    echo "FAIL: Table with coosys and timesys"
 fi
 
 ${tablator_bin} test/back_and_forth_tables/multiple_group_example.vot temp.vot && diff test/back_and_forth_tables/multiple_group_example.vot temp.vot

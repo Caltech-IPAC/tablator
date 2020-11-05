@@ -13,6 +13,10 @@
 namespace tablator {
 
 static constexpr size_t MAIN_TABLE_ELEMENT_IDX = 0;
+static constexpr const char* RESULTS("results");
+static constexpr const char* META("meta");
+static constexpr const char* OTHER("other");
+static constexpr const char* NONE("none");
 
 enum class Resource_Type {
     META,
@@ -23,29 +27,46 @@ enum class Resource_Type {
 
 namespace {
 
-Resource_Type get_type_enum(const std::string &type_str) {
-    if (boost::equals(type_str, "results")) {
+Resource_Type get_type_enum(const tablator::ATTRIBUTES &attributes) {
+    std::string type_str(NONE);
+    for (const auto &attr_pair : attributes) {
+        if (boost::iequals(attr_pair.first, tablator::TYPE)) {
+            type_str.assign(attr_pair.second);
+            break;
+        }
+    }
+
+    if (boost::equals(type_str, RESULTS)) {
         return Resource_Type::RESULTS;
     }
-    if (boost::equals(type_str, "meta")) {
+    if (boost::equals(type_str, META)) {
         return Resource_Type::META;
+    }
+    if (boost::equals(type_str, NONE)) {
+        return Resource_Type::NONE;
     }
     return Resource_Type::OTHER;
 }
 
+std::string get_type_string(Resource_Type type) {
+    switch (type) {
+        case Resource_Type::RESULTS:
+            return RESULTS;
+        case Resource_Type::META:
+            return META;
+        case Resource_Type::NONE:
+            return NONE;
+        default:
+            return OTHER;
+    }
+    return OTHER;
+}
 
 inline tablator::Resource_Type determine_resource_type(
         const std::vector<Table_Element> &table_elements,
         const tablator::ATTRIBUTES &attributes) {
     bool has_results_table_element = !table_elements.empty();
-
-    tablator::Resource_Type attr_rtype = Resource_Type::NONE;
-    for (const auto &attr_pair : attributes) {
-        if (boost::iequals(attr_pair.first, tablator::TYPE)) {
-            attr_rtype = get_type_enum(attr_pair.second);
-            break;
-        }
-    }
+    tablator::Resource_Type attr_rtype = get_type_enum(attributes);
 
     if (!has_results_table_element && (attr_rtype == Resource_Type::RESULTS)) {
         throw std::runtime_error(
@@ -55,9 +76,11 @@ inline tablator::Resource_Type determine_resource_type(
 
     if (has_results_table_element && (attr_rtype != Resource_Type::RESULTS) &&
         (attr_rtype != Resource_Type::NONE)) {
-        throw std::runtime_error(
+        std::string msg(
                 "Resource_Element contains results but has type attribute other than "
-                "'results'.");
+                "'results': ");
+        msg.append(get_type_string(attr_rtype));
+        throw std::runtime_error(msg);
     }
 
     if (!has_results_table_element) {
@@ -80,6 +103,7 @@ private:
         std::vector<Field> params_;
         std::vector<std::pair<std::string, Property>> labeled_properties_;
         std::vector<Group_Element> group_elements_;
+        std::vector<Table_Element> table_elements_;
         std::vector<Property> trailing_info_list_;
 
         void set_attributes(
@@ -134,6 +158,15 @@ private:
             group_elements_.emplace_back(group_element);
         }
 
+        void add_table_elements(const std::vector<Table_Element> &table_elements) {
+            table_elements_.insert(table_elements_.end(), table_elements.begin(),
+                                   table_elements.end());
+        }
+
+        void add_table_element(const Table_Element &table_element) {
+            table_elements_.emplace_back(table_element);
+        }
+
         void add_trailing_info_list(const std::vector<Property> &trailing_info_list) {
             trailing_info_list_.insert(trailing_info_list_.end(),
                                        trailing_info_list.begin(),
@@ -150,14 +183,15 @@ public:
     public:
         Builder() {}
 
-        Builder(const std::vector<Table_Element> &table_elements)
-                : table_elements_(table_elements) {}
-
-        Builder(const Table_Element &table_element) {
-            table_elements_.emplace_back(table_element);
+        Builder(const std::vector<Table_Element> &table_elements) {
+            options_.table_elements_ = table_elements;
         }
 
-        Resource_Element build() { return Resource_Element(table_elements_, options_); }
+        Builder(const Table_Element &table_element) {
+            options_.table_elements_.emplace_back(table_element);
+        }
+
+        Resource_Element build() { return Resource_Element(options_); }
 
         Builder &set_attributes(
                 const std::initializer_list<std::pair<const std::string, std::string>>
@@ -171,7 +205,7 @@ public:
             return *this;
         }
 
-        Builder &add_attribute(const std::pair<std::string, std::string> att_pair) {
+        Builder &add_attribute(const std::pair<std::string, std::string> &att_pair) {
             options_.add_attribute(att_pair);
             return *this;
         }
@@ -224,6 +258,16 @@ public:
             return *this;
         }
 
+        Builder &add_table_elements(const std::vector<Table_Element> &table_elements) {
+            options_.add_table_elements(table_elements);
+            return *this;
+        }
+
+        Builder &add_table_element(const Table_Element &table_element) {
+            options_.add_table_element(table_element);
+            return *this;
+        }
+
         Builder &add_trailing_info_list(
                 const std::vector<Property> &trailing_info_list) {
             options_.add_trailing_info_list(trailing_info_list);
@@ -236,7 +280,6 @@ public:
         }
 
     private:
-        std::vector<Table_Element> table_elements_;
         Options options_;
     };
 
@@ -245,12 +288,8 @@ public:
     Resource_Element(const Table_Element &table_element)
             : resource_type_(Resource_Type::RESULTS) {
         assert(!table_element.get_columns().empty());
-        table_elements_.emplace_back(table_element);
+        get_table_elements().emplace_back(table_element);
     }
-
-    Resource_Element(const std::vector<Table_Element> &table_elements)
-            : table_elements_(table_elements) {}
-
 
     size_t num_rows() const { return get_main_table_element().num_rows(); }
 
@@ -280,6 +319,10 @@ public:
 
     void add_attribute(const std::string &name, const std::string &val) {
         options_.add_attribute(std::make_pair(name, val));
+    }
+
+    void add_attribute(const std::pair<std::string, std::string> &att_pair) {
+        options_.add_attribute(att_pair);
     }
 
     void set_description(const std::string &description) {
@@ -319,21 +362,23 @@ public:
     }
 
 
-    // getters for non-Optional elements
     const std::vector<Table_Element> &get_table_elements() const {
-        return table_elements_;
+        return options_.table_elements_;
     }
-    std::vector<Table_Element> &get_table_elements() { return table_elements_; }
+    std::vector<Table_Element> &get_table_elements() {
+        return options_.table_elements_;
+    }
+
+    //  These will fail if type != RESULTS.
 
     const Table_Element &get_main_table_element() const {
         assert(!get_table_elements().empty());  // JTODO
-        return table_elements_.at(MAIN_TABLE_ELEMENT_IDX);
+        return get_table_elements().at(MAIN_TABLE_ELEMENT_IDX);
     }
     Table_Element &get_main_table_element() {
         assert(!get_table_elements().empty());
-        return table_elements_.at(MAIN_TABLE_ELEMENT_IDX);
+        return get_table_elements().at(MAIN_TABLE_ELEMENT_IDX);
     }
-
 
     const std::vector<Column> &get_columns() const {
         return get_main_table_element().get_columns();
@@ -352,7 +397,6 @@ public:
     std::vector<Field> &get_table_element_params() {
         return get_main_table_element().get_params();
     }
-
     const std::vector<Field> &get_table_element_params() const {
         return get_main_table_element().get_params();
     }
@@ -383,14 +427,10 @@ public:
 
 
 private:
-    Resource_Element(const std::vector<Table_Element> &table_elements,
-                     const Options &options)
-            : table_elements_(table_elements),
-              options_(options),
-              resource_type_(
-                      determine_resource_type(table_elements_, options.attributes_)) {}
-
-    std::vector<Table_Element> table_elements_;
+    Resource_Element(const Options &options)
+            : options_(options),
+              resource_type_(determine_resource_type(options_.table_elements_,
+                                                     options_.attributes_)) {}
     Options options_;
     Resource_Type resource_type_;
 };  // class Resource_Element
