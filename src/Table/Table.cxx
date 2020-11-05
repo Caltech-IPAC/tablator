@@ -246,8 +246,6 @@ void Table::distribute_metadata(
         ATTRIBUTES &table_element_attributes,
         const std::vector<std::pair<std::string, Property>> &label_prop_pairs) {
     for (const auto &label_and_prop : label_prop_pairs) {
-        const auto &label = label_and_prop.first;
-        const auto &prop = label_and_prop.second;
         if (stash_trailing_info_labeled_by_element(resource_element_trailing_infos,
                                                    table_element_trailing_infos,
                                                    label_and_prop)) {
