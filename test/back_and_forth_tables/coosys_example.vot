@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE type="results">
+    <COOSYS ID="system" epoch="J2015.5" system="ICRS"/>
+    <TIMESYS ID="time_frame" refposition="BARYCENTER" timeorigin="2455197.5" timescale="TCB"/>
+    <TABLE name="ts_data">
+      <PARAM name="ra" datatype="double" ref="system" ucd="pos.eq.ra" value="45.7164887146879"/>
+      <PARAM name="dec" datatype="double" ref="system" ucd="pos.eq.dec" value="1.18583048057467"/>
+      <FIELD name="obs_time" datatype="double" ref="time_frame" ucd="time.epoch" unit="d"/>
+      <FIELD name="flux" datatype="float" ucd="phot.flux;em.opt.V" unit="s**-1"/>
+      <FIELD name="mag" datatype="float" ucd="phot.mag;em.opt.V" unit="mag"/>
+      <FIELD name="flux_error" datatype="float" ucd="stat.error;phot.flux;em.opt.V" unit="s**-1"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>1821.2846388435</TD>
+            <TD>168.358002</TD>
+            <TD>20.1228161</TD>
+            <TD>8.71436977</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

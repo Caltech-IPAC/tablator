@@ -526,7 +526,7 @@ void tablator::Ipac_Table_Writer::write_single_value(
 
         for (size_t element = 0; element < column.get_array_size(); ++element) {
             os << IPAC_COLUMN_SEPARATOR << std::setw(width);
-            os << static_cast<const uint16_t>(*curr_data);
+            os << static_cast<uint16_t>(*curr_data);
             curr_data += element_size;
         }
     } else {

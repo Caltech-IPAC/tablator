@@ -64,7 +64,7 @@ void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
             break;
         case Data_Type::UINT8_LE: {
             std::stringstream ss;
-            ss << "0x" << std::hex << static_cast<const uint16_t>(*data) << std::dec;
+            ss << "0x" << std::hex << static_cast<uint16_t>(*data) << std::dec;
             os << ss.str();
         } break;
         case Data_Type::INT16_LE:
