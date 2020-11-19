@@ -11,6 +11,22 @@
         },
         "RESOURCE":
         {
+            "INFO":
+            {
+                "<xmlattr>":
+                {
+                    "name": "ORIGIN",
+                    "value": "necessity"
+                }
+            },
+            "INFO":
+            {
+                "<xmlattr>":
+                {
+                    "name": "ucd",
+                    "value": "cool.resource"
+                }
+            },
             "TABLE":
             {
                 "FIELD":

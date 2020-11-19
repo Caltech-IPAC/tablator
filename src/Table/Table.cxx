@@ -18,8 +18,12 @@ void append_info_list_with_label(
 void append_attributes_with_label(
         std::vector<std::pair<std::string, tablator::Property>> &combined_list,
         const tablator::ATTRIBUTES &attrs, const std::string &label) {
-    combined_list.emplace_back(std::make_pair(label, tablator::Property(attrs)));
+    if (attrs.empty()) {
+        return;
+    }
+    combined_list.emplace_back(std::make_pair(label, attrs));
 }
+
 
 }  // namespace
 
@@ -193,17 +197,17 @@ Table::combine_trailing_info_lists_all_levels() const {
 
 //===========================================================
 
+// Called by write_fits().
 const std::vector<std::pair<std::string, Property>>
 Table::combine_attributes_all_levels() const {
     std::vector<std::pair<std::string, Property>> combined_list;
-    append_attributes_with_label(combined_list, get_attributes(),
-                                 VOTABLE_DOT + ATTR_MARKER);
+    append_attributes_with_label(combined_list, get_attributes(), VOTABLE_XMLATTR);
     append_attributes_with_label(combined_list,
                                  get_results_resource_element().get_attributes(),
-                                 VOTABLE_RESOURCE_DOT + ATTR_MARKER);
+                                 VOTABLE_RESOURCE_XMLATTR);
     append_attributes_with_label(combined_list,
                                  get_main_table_element().get_attributes(),
-                                 VOTABLE_RESOURCE_TABLE_DOT + ATTR_MARKER);
+                                 VOTABLE_RESOURCE_TABLE_XMLATTR);
     return combined_list;
 }
 
@@ -246,6 +250,9 @@ void Table::distribute_metadata(
         ATTRIBUTES &table_element_attributes,
         const std::vector<std::pair<std::string, Property>> &label_prop_pairs) {
     for (const auto &label_and_prop : label_prop_pairs) {
+        if (label_and_prop.second.empty()) {
+            continue;
+        }
         if (stash_trailing_info_labeled_by_element(resource_element_trailing_infos,
                                                    table_element_trailing_infos,
                                                    label_and_prop)) {
@@ -293,15 +300,15 @@ bool Table::stash_attributes_labeled_by_element(
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
     const auto &prop_attrs = prop.get_attributes();
-    if (boost::equals(label, VOTABLE_RESOURCE_TABLE_DOT + ATTR_MARKER)) {
+    if (boost::equals(label, VOTABLE_RESOURCE_TABLE_XMLATTR)) {
         table_element_attributes.insert(prop_attrs.begin(), prop_attrs.end());
         return true;
     }
-    if (boost::equals(label, VOTABLE_RESOURCE_DOT + ATTR_MARKER)) {
+    if (boost::equals(label, VOTABLE_RESOURCE_XMLATTR)) {
         resource_element_attributes.insert(prop_attrs.begin(), prop_attrs.end());
         return true;
     }
-    if (boost::ends_with(label, ATTR_MARKER)) {
+    if (boost::ends_with(label, XMLATTR)) {
         add_attributes(prop_attrs);
         return true;
     }
@@ -310,7 +317,7 @@ bool Table::stash_attributes_labeled_by_element(
 
 //===========================================================
 
-// JTODO Call this version to add labeled_property to initialized(?) table
+// Call this version to add labeled_property to initialized(?) table
 // (one with a non-empty <resource_elements_> member).
 void Table::add_labeled_property(
         const std::pair<std::string, Property> &label_and_prop) {
@@ -342,6 +349,7 @@ void Table::stash_resource_element_labeled_property(
         std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
         const std::pair<std::string, Property> &label_and_prop) {
     const auto &label = label_and_prop.first;
+
     const auto &prop = label_and_prop.second;
     if (is_property_style_label(label)) {
         get_labeled_properties().emplace_back(label_and_prop);

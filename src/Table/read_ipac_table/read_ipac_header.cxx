@@ -32,7 +32,6 @@ size_t tablator::Table::read_ipac_header(
         std::vector<std::pair<std::string, Property>> &labeled_resource_properties) {
     size_t line_num = 0;
     char first_character = ipac_file.peek();
-    auto &comments = get_comments();
 
     for (; ipac_file && first_character == '\\'; first_character = ipac_file.peek()) {
         std::string line;

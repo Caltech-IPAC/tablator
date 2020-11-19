@@ -13,10 +13,10 @@
 namespace tablator {
 
 static constexpr size_t MAIN_TABLE_ELEMENT_IDX = 0;
-static constexpr const char* RESULTS("results");
-static constexpr const char* META("meta");
-static constexpr const char* OTHER("other");
-static constexpr const char* NONE("none");
+static constexpr const char *RESULTS("results");
+static constexpr const char *META("meta");
+static constexpr const char *OTHER("other");
+static constexpr const char *NONE("none");
 
 enum class Resource_Type {
     META,
@@ -29,9 +29,9 @@ namespace {
 
 Resource_Type get_type_enum(const tablator::ATTRIBUTES &attributes) {
     std::string type_str(NONE);
-    for (const auto &attr_pair : attributes) {
-        if (boost::iequals(attr_pair.first, tablator::TYPE)) {
-            type_str.assign(attr_pair.second);
+    for (const auto &att_pair : attributes) {
+        if (boost::iequals(att_pair.first, tablator::TYPE)) {
+            type_str.assign(att_pair.second);
             break;
         }
     }

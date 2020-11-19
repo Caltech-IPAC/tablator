@@ -12,7 +12,7 @@
 namespace tablator {
 class Property {
 public:
-    // JTODO Builder
+    Property() {}
     Property(const std::string &Value) : value_(Value) {}
     Property(const ATTRIBUTES &Attributes) : attributes_(Attributes) {}
     Property(const std::initializer_list<std::pair<const std::string, std::string>>
@@ -43,8 +43,8 @@ public:
         attributes_.insert(attrs.begin(), attrs.end());
     }
 
-    void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
-        attributes_.insert(attr_pair);
+    void add_attribute(const std::pair<std::string, std::string> &att_pair) {
+        attributes_.emplace(att_pair);
     }
 
     void add_attribute(const std::string &name, const std::string &value) {
@@ -54,6 +54,11 @@ public:
     void set_value(const std::string &val) { value_.assign(val); }
 
     bool empty() const { return (attributes_.empty() && value_.empty()); }
+
+    void clear() {
+        attributes_.clear();
+        value_.clear();
+    }
 
 private:
     ATTRIBUTES attributes_;

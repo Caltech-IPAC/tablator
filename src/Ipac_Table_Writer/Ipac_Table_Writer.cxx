@@ -372,8 +372,8 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
             // back
             write_keyword_header_line(os, name_iter->second, value_iter->second);
         } else if (!prop_attributes.empty()) {
-            for (const auto &attr_pair : prop_attributes) {
-                write_keyword_header_line(os, attr_pair.first, attr_pair.second);
+            for (const auto &att_pair : prop_attributes) {
+                write_keyword_header_line(os, att_pair.first, att_pair.second);
             }
         }
 

@@ -1,9 +1,12 @@
 #include <CCfits/CCfits>
 
-#include "../Table.hxx"
-#include "../fits_keyword_mapping.hxx"
+#include <boost/algorithm/string/regex.hpp>
 
-// JTODO Descriptions and attributes get lost in conversion to and from fits.
+#include "../Table.hxx"
+#include "../fits_keyword_ucd_mapping.hxx"
+
+// JTODO Descriptions and field-level attributes get lost in conversion to and from
+// fits.
 
 namespace {
 template <typename T>
@@ -21,8 +24,8 @@ void read_scalar_column(uint8_t *position, CCfits::Column &c, const size_t &rows
 template <typename T>
 void read_vector_column(fitsfile *fits_file, uint8_t *position, CCfits::Column &c,
                         const size_t &rows, const size_t &row_size) {
-    /// Use the C api because the C++ api (Column::readArrays) is
-    /// horrendously slow.
+    // Use the C api because the C++ api (Column::readArrays) is
+    // horrendously slow.
     int status(0), anynul(0);
     std::vector<T> temp_array(c.repeat());
 
@@ -52,7 +55,7 @@ void read_column(fitsfile *fits_file, uint8_t *position, CCfits::Column &c,
 }
 }  // namespace
 
-// FIXME: This does not copy any keywords
+
 void tablator::Table::read_fits(const boost::filesystem::path &path) {
     CCfits::FITS fits(path.string(), CCfits::Read, false);
     if (fits.extension().empty())
@@ -61,49 +64,126 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     CCfits::ExtHDU &table_extension = *(fits.extension().begin()->second);
     CCfits::BinTable *ccfits_table(dynamic_cast<CCfits::BinTable *>(&table_extension));
 
-    std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
-    auto keyword_mapping = fits_keyword_mapping(false);
+    static std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
+    const auto keyword_ucd_mapping = fits_keyword_ucd_mapping(false);
     table_extension.readAllKeys();
 
     std::vector<Column> columns;
     std::vector<size_t> offsets = {0};
 
-    // Retrieve labeled_properties/trailing_info_lists/attributes,
-    // which were all stored in a big mishmash as labeled_properties
-    // by write_fits().
+
+    // Extract labeled_properties/trailing_info_lists/attributes.
+    // If this table was created by write_fits(), those elements
+    // would have been converted to labeled_properties and stored as keywords
+    // of the form
+
+    // ELEMENT.<prop_name>.XMLATTR.<attr_name> : attr_value or
+    // ELEMENT.<prop_name>.XMLATTR.ATTR_VALUE : prop.value
+
+    // where <prop_name> is the value of prop's ATTR_NAME attribute and is
+    // assumed to be non-empty for INFO elements, of which we might have many.
+    //(We can't yet convert to FITS format VOTables with more than one RESOURCE.
+    // 07Dec20)
+
     std::vector<std::pair<std::string, Property>> combined_labeled_properties;
+    std::string prev_keyword = "";
+    std::string prev_label = "";
+    Property prop;
+
     for (auto &kwd : table_extension.keyWord()) {
-        std::string name(kwd.first), value;
-        if (std::find(fits_ignored_keywords.begin(), fits_ignored_keywords.end(),
-                      name) != fits_ignored_keywords.end()) {
-            continue;
-        }
+        std::string keyword(kwd.first), value;
 
         // Annoyingly, CCfits does not have a way to just return the
         // value.  You have to give it something to put it in.
-        Property prop(kwd.second->value(value));
+        std::string kwd_value;
+        kwd.second->value(kwd_value);
 
-        // Turn names with keyword mappings into UCD attributes.
-        // JTODO huh?
-        auto i = keyword_mapping.find(name);
-        if (i != keyword_mapping.end()) {
-            name = i->second;
-            prop.add_attribute("ucd", name);
+        // If `kwd` was generated from a labeled_property by
+        // write_fits(), then the `keyword` string includes the value
+        // of ATTR_NAME for that property.  We group together all kwds
+        // with the same keyword and construct from them a
+        // labeled_property whose label is `label`.
+
+        // Set to defaults and adjust as needed.
+        std::string label(keyword);
+        std::string name(keyword);
+
+        // Used to undo write_fits() hackery.
+        static boost::regex attr_expr{"^(.*)\\" + DOT + XMLATTR + "\\" + DOT + "(.*)$"};
+        static boost::regex info_expr{"^((?:.*\\.)?" + INFO + ")" + "\\" + DOT +
+                                      "(.*)$"};
+
+        bool convert_value_to_attr = false;
+
+        boost::smatch what;
+        if (boost::regex_search(keyword, what, attr_expr)) {
+            // Undo write_fits() hackery: extract keyword and attrname from
+            // "keyword.XMLATTR.name".
+            keyword.assign(what[1]);
+            name.assign(what[2]);
+            label.assign(keyword);
+
+            // If keyword indicates that we are looking at an INFO element,
+            // further undo hackery by dropping everything past INFO from label.
+            if (boost::regex_search(keyword, what, info_expr)) {
+                label.assign(what[1]);
+            } else {
+                // Otherwise, prepare for an attribute at the level of e.g. RESOURCE or
+                // TABLE.
+                label += DOT + XMLATTR;
+            }
+
+        } else {
+            // Plain old keyword straight from FITS (not via tablator's write_fits()).
+            if (std::find(fits_ignored_keywords.begin(), fits_ignored_keywords.end(),
+                          name) != fits_ignored_keywords.end()) {
+                continue;
+            }
+            // Prepare to store it with ATTR_VALUE as an attribute.
+            convert_value_to_attr = true;
         }
-        if (!kwd.second->comment().empty())
+
+        if (keyword != prev_keyword) {
+            // Save the prop-in-progress with the appropriate label and prepare to move
+            // on.
+            if (!prev_label.empty() && !prop.empty()) {
+                combined_labeled_properties.emplace_back(
+                        std::make_pair(prev_label, prop));
+                prop.clear();
+            }
+
+            prev_keyword.assign(keyword);
+            prev_label.assign(label);
+        }
+
+        // Concoct UCD attributes from names which are keys of keyword_ucd_mapping.
+        auto i = keyword_ucd_mapping.find(name);
+        if (i != keyword_ucd_mapping.end()) {
+            // JTODO only if no other UCD attr is present for this keyword?
+            prop.add_attribute("ucd", i->second);
+        } else if (convert_value_to_attr) {
+            prop.add_attribute(ATTR_VALUE, kwd_value);
+        } else {
+            prop.add_attribute(name, kwd_value);
+        }
+
+        if (!kwd.second->comment().empty()) {
             prop.add_attribute("comment", kwd.second->comment());
-        // JTODO Label could also be UCD attribute!?
-        combined_labeled_properties.emplace_back(std::make_pair(name, prop));
+        }
+    }
+
+    // Add the final prop, if appropriate.
+    if (!prev_label.empty() && !prop.empty()) {
+        combined_labeled_properties.emplace_back(std::make_pair(prev_label, prop));
     }
 
     // Distribute the labeled_properties between assorted class members at assorted
-    // levels. JTODO  Combine this step with previous loop.
+    // levels.
     std::vector<std::pair<std::string, Property>> resource_element_labeled_properties;
     std::vector<Property> resource_element_trailing_infos;
     ATTRIBUTES resource_element_attributes;
     std::vector<Property> table_element_trailing_infos;
     ATTRIBUTES table_element_attributes;
-
     distribute_metadata(resource_element_labeled_properties,
                         resource_element_trailing_infos, resource_element_attributes,
                         table_element_trailing_infos, table_element_attributes,
