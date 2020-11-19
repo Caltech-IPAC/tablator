@@ -766,17 +766,6 @@ public:
     }
 
 
-    // virtual getters
-    const std::vector<std::pair<std::string, Property>>
-    combine_trailing_info_lists_all_levels() const;
-
-    const std::vector<std::pair<std::string, Property>>
-    combine_labeled_properties_all_levels() const;
-
-    const std::vector<std::pair<std::string, Property>> combine_attributes_all_levels()
-            const;
-
-
     //===========================================================
 
     // setters for Optional elements
@@ -941,6 +930,7 @@ private:
     void write_html(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 
+
     boost::property_tree::ptree generate_property_tree(
             const std::vector<Data_Type> &datatypes_for_writing) const;
 
@@ -953,6 +943,17 @@ private:
             tablator::ATTRIBUTES &table_element_attributes,
             const std::vector<std::pair<std::string, tablator::Property>>
                     &label_prop_pairs);
+
+
+    const std::vector<std::pair<std::string, Property>>
+    combine_trailing_info_lists_all_levels() const;
+
+    const std::vector<std::pair<std::string, Property>>
+    combine_labeled_properties_all_levels() const;
+
+    // Called by write_hdf5_attributes() and write_fits().
+    const std::vector<std::pair<std::string, Property>> combine_attributes_all_levels()
+            const;
 
 
     // JTODO terminology for table that has been constructed but not loaded.

@@ -60,10 +60,12 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     } else if (boost::starts_with(label, XMLATTR)) {
         parent_tree.add(label, value);
     } else {
-        // Backward compatibility.
+        // For write_fits()
         auto &label_tree = parent_tree.add(INFO, "");
         label_tree.add(XMLATTR_NAME, label);
-        label_tree.add(XMLATTR_VALUE, value);
+        if (!value.empty()) {
+            label_tree.add(XMLATTR_VALUE, value);
+        }
         add_to_property_tree(label_tree, attributes);
     }
 }

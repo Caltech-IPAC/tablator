@@ -18,7 +18,7 @@ def build(bld):
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser', 'sqlite3', 'vsqlitepp']
 
-    sources=['src/fits_keyword_mapping.cxx',
+    sources=['src/fits_keyword_ucd_mapping.cxx',
              'src/Data_Type_Adjuster.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Format/content_type.cxx',

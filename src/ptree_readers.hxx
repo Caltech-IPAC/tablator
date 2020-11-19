@@ -36,8 +36,7 @@ private:
 };
 
 // The motivation for the "_element" business is distinguishing
-// Table from Table_Element. JTODO rename to read_XXX_element
-// after dust settles?
+// Table from Table_Element.
 
 void read_property_tree_as_votable(Table &table,
                                    const boost::property_tree::ptree &tree);

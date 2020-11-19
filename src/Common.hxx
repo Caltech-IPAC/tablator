@@ -7,11 +7,14 @@
 
 namespace tablator {
 
+// JTODO make these constexpr.
+
 static const std::string DESCRIPTION("DESCRIPTION");
 static const std::string FIELD("FIELD");
 static const std::string PARAM("PARAM");
 
 static const std::string ATTR_NAME("name");
+static const std::string ATTR_UCD("ucd");
 static const std::string ATTR_VALUE("value");
 
 static const std::string XMLATTR("<xmlattr>");
@@ -29,15 +32,7 @@ static const std::string XMLATTR_VALUE("<xmlattr>.value");
 
 static const std::string XMLCOMMENT("<xmlcomment>");
 
-static const std::string VOTABLE_DOT("VOTABLE.");
-static const std::string RESOURCE_DOT("RESOURCE.");
-
-static const std::string VOTABLE_RESOURCE_DOT("VOTABLE.RESOURCE.");
-static const std::string VOTABLE_RESOURCE_TABLE_DOT("VOTABLE.RESOURCE.TABLE.");
-
-
 // For internal use with hdf5 (JTODO and eventually fits?)
-static const std::string ATTR_MARKER("ATTR_MARKER");
 static const std::string END_INFO_MARKER("END_INFO_MARKER");
 
 // JTODO "arraysize" vs. "array_size" (Column, hdf5)
@@ -73,10 +68,52 @@ static const std::string UTYPE("utype");
 static const std::string VALUES("VALUES");
 static const std::string VOTABLE("VOTABLE");
 
-static const std::string RESOURCE_ELEMENT_DESCRIPTION("RESOURCE.DESCRIPTION");
-static const std::string TABLE_ELEMENT_DESCRIPTION("RESOURCE.TABLE.DESCRIPTION");
-static const std::string DATA_TABLEDATA("DATA.TABLEDATA");
+static const std::string DOT(".");
+static const std::string VOTABLE_DOT(VOTABLE + DOT);
+static const std::string RESOURCE_DOT(RESOURCE + DOT);
+static const std::string TABLE_DOT(TABLE + DOT);
+static const std::string INFO_DOT(INFO + DOT);
+
+static const std::string VOTABLE_RESOURCE(VOTABLE_DOT + RESOURCE);
+static const std::string VOTABLE_RESOURCE_DOT(VOTABLE_DOT + RESOURCE_DOT);
+
+static const std::string VOTABLE_RESOURCE_INFO(VOTABLE_RESOURCE_DOT + INFO);
+static const std::string VOTABLE_RESOURCE_INFO_DOT(VOTABLE_RESOURCE_DOT + INFO_DOT);
+
+static const std::string VOTABLE_RESOURCE_TABLE(VOTABLE_RESOURCE_DOT + TABLE);
+static const std::string VOTABLE_RESOURCE_TABLE_DOT(VOTABLE_RESOURCE_DOT + TABLE_DOT);
+
+static const std::string VOTABLE_RESOURCE_TABLE_INFO(VOTABLE_RESOURCE_TABLE_DOT + INFO);
+static const std::string VOTABLE_RESOURCE_TABLE_INFO_DOT(VOTABLE_RESOURCE_TABLE_DOT +
+                                                         INFO_DOT);
+
+static const std::string VOTABLE_XMLATTR(VOTABLE_DOT + XMLATTR);
+static const std::string VOTABLE_RESOURCE_XMLATTR(VOTABLE_RESOURCE_DOT + XMLATTR);
+static const std::string VOTABLE_RESOURCE_INFO_XMLATTR(VOTABLE_RESOURCE_INFO_DOT +
+                                                       XMLATTR);
+static const std::string VOTABLE_RESOURCE_TABLE_XMLATTR(VOTABLE_RESOURCE_TABLE_DOT +
+                                                        XMLATTR);
+static const std::string VOTABLE_RESOURCE_TABLE_INFO_XMLATTR(
+        VOTABLE_RESOURCE_TABLE_INFO_DOT + XMLATTR);
+
+static const std::string VOTABLE_RESOURCE_XMLATTR_DOT(VOTABLE_RESOURCE_XMLATTR + DOT);
+
+
+static const std::string VOTABLE_RESOURCE_TABLE_XMLATTR_DOT(
+        VOTABLE_RESOURCE_TABLE_XMLATTR + DOT);
+
+static const std::string VOTABLE_RESOURCE_INFO_XMLATTR_DOT(VOTABLE_RESOURCE_INFO_DOT +
+                                                           XMLATTR_DOT);
+static const std::string VOTABLE_RESOURCE_TABLE_INFO_XMLATTR_DOT(
+        VOTABLE_RESOURCE_TABLE_INFO_DOT + XMLATTR_DOT);
+
+
+static const std::string RESOURCE_ELEMENT_DESCRIPTION(RESOURCE_DOT + DESCRIPTION);
+static const std::string TABLE_ELEMENT_DESCRIPTION(TABLE_DOT + DESCRIPTION);
+static const std::string DATA_TABLEDATA(DATA + DOT + TABLEDATA);
+
 static const std::string TABLEDATA_PLACEHOLDER("TaBlEdAtA_PlAcEhOlDeR");
+
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;
 static constexpr size_t PLACEHOLDER_RIGHT_MARGIN = 5;
 

@@ -6,10 +6,10 @@
 
 #include "../Data_Type_Adjuster.hxx"
 #include "../Utils/Vector_Utils.hxx"
-#include "../fits_keyword_mapping.hxx"
 #include "../to_string.hxx"
 
-// JTODO Descriptions and attributes get lost in conversion to and from fits.
+// JTODO Descriptions and field-level attributes get lost in conversion to and from
+// fits.
 
 namespace {
 template <typename data_type>
@@ -20,22 +20,8 @@ void write_column(fitsfile *fits_file, int fits_type, int col_id, const uint8_t 
                    reinterpret_cast<data_type *>(const_cast<uint8_t *>(data)), &status);
     if (status != 0) throw CCfits::FitsError(status);
 }
-
-void write_attributes(fitsfile *fits_file, const tablator::ATTRIBUTES &attributes,
-                      const std::string &prefix) {
-    for (const auto &att_pair : attributes) {
-        static const char *empty_comment = "";
-        const auto &name = att_pair.first;
-        const auto &value = att_pair.second;
-        int status = 0;
-        fits_write_key_longstr(fits_file, (prefix + name).c_str(), value.c_str(),
-                               empty_comment, &status);
-        if (status != 0) {
-            throw CCfits::FitsError(status);
-        }
-    }
-}
 }  // namespace
+
 /**********************************************************/
 
 void tablator::Table::write_fits(std::ostream &os) const {
@@ -62,8 +48,8 @@ void tablator::Table::write_fits(fitsfile *fits_file) const {
 void tablator::Table::write_fits(
         const boost::filesystem::path &filename,
         const std::vector<Data_Type> &datatypes_for_writing) const {
-    /// Remove the file because cfitsio will fail if the file still
-    /// exists.
+    // Remove the file because cfitsio will fail if the file still
+    // exists.
     boost::filesystem::remove(filename);
     int status = 0;
     fitsfile *fits_file;
@@ -93,8 +79,8 @@ void tablator::Table::write_fits(
         }
         write_fits(fits_file, datatypes_for_writing);
 
-        /// I have to reopen the file because otherwise fits_close_file
-        /// will delete the memory
+        // I have to reopen the file because otherwise fits_close_file
+        // will delete the memory
         fits_reopen_file(fits_file, &reopen_file, &status);
         if (status != 0) {
             throw CCfits::FitsError(status);
@@ -106,7 +92,7 @@ void tablator::Table::write_fits(
         }
 
         os.write(static_cast<const char *>(buffer), buffer_size);
-        /// This also free's buffer.
+        // This also free's buffer.
         fits_close_file(reopen_file, &status);
         if (status != 0) {
             throw CCfits::FitsError(status);
@@ -117,9 +103,9 @@ void tablator::Table::write_fits(
     }
 }
 
-/// We separate out the write_fits implementation so that we can
-/// insert a read of the memory image so that we can write to a
-/// stream.
+// We separate out the write_fits implementation so that we can
+// insert a read of the memory image so that we can write to a
+// stream.
 void tablator::Table::write_fits(
         fitsfile *fits_file,
         const std::vector<Data_Type> &datatypes_for_writing) const {
@@ -128,15 +114,18 @@ void tablator::Table::write_fits(
     std::vector<string> fits_types;
 
     std::vector<string> fits_units;
+
+    // According to the FITS standard, the TTYPEn keyword shall have a value
+    // equal to the n-th field name.
     std::vector<const char *> ttype, tunit;
     const auto &columns = get_columns();
-    for (size_t i = 0; i < columns.size(); ++i) {
-        auto &column = columns[i];
+    for (size_t column_idx = 0; column_idx < columns.size(); ++column_idx) {
+        auto &column = columns[column_idx];
         ttype.push_back(column.get_name().c_str());
         std::string array_size_str(std::to_string(column.get_array_size()));
         char fits_type;
 
-        switch (datatypes_for_writing[i]) {
+        switch (datatypes_for_writing[column_idx]) {
             case Data_Type::INT8_LE:
                 fits_type = 'L';
                 break;
@@ -162,7 +151,7 @@ void tablator::Table::write_fits(
                 throw std::runtime_error(
                         "Unsupported uint64 data type when writing fits "
                         "data: , column #" +
-                        std::to_string(i) + ", original data type " +
+                        std::to_string(column_idx) + ", original data type " +
                         to_string(column.get_type()));
                 break;
             case Data_Type::FLOAT32_LE:
@@ -213,17 +202,7 @@ void tablator::Table::write_fits(
     if (status != 0) throw CCfits::FitsError(status);
 
     assert(get_resource_elements().size() > 0);
-
-    static const std::string resource_element_attr_prefix =
-            VOTABLE_RESOURCE_DOT + XMLATTR_DOT;
-    static const std::string table_element_attr_prefix =
-            VOTABLE_RESOURCE_TABLE_DOT + XMLATTR_DOT;
-    write_attributes(fits_file, get_results_resource_element().get_attributes(),
-                     resource_element_attr_prefix);
-    write_attributes(
-            fits_file,
-            get_results_resource_element().get_main_table_element().get_attributes(),
-            table_element_attr_prefix);
+    const auto combined_labeled_attributes = combine_attributes_all_levels();
 
     // Combine and write properties and trailing info for all levels at which they are
     // defined.
@@ -234,34 +213,71 @@ void tablator::Table::write_fits(
                                        combined_labeled_trailing_info_lists.begin(),
                                        combined_labeled_trailing_info_lists.end());
 
+    combined_labeled_properties.insert(combined_labeled_properties.end(),
+                                       combined_labeled_attributes.begin(),
+                                       combined_labeled_attributes.end());
 
+
+    // Labeled_properties are stored as keywords whose values are strings
+    // of the form
+
+    // label + DOT + XMLATTR_DOT + ATTR_VALUE : value  (for prop.value_)
+    // label + DOT + XMLATTR_DOT + attrname : attrvalue  (for elements of
+    // prop.attributes_)
+
+    // where label includes value of prop's ATTR_NAME attribute for
+    // uniqueness.
+    std::cout << "write_fits(), before l&p loop\n";
     for (const auto &label_and_prop : combined_labeled_properties) {
-        auto keyword_mapping = fits_keyword_mapping(true);
-        std::string name = label_and_prop.first;
+        std::string label = label_and_prop.first;
         const auto &prop = label_and_prop.second;
-        auto i = keyword_mapping.find(name);
-        if (i != keyword_mapping.end()) {
-            name = i->second;
-        }
-        std::string comment, value(prop.get_value());
-        for (auto &att : prop.get_attributes()) {
-            if (att.first == "comment") {
-                comment = att.second;
-            } else if (att.first != "ucd") {
-                if (!value.empty()) {
-                    value += ", ";
-                }
-                // JTODO Serge, are we allowed to change how we write
-                // attributes for fits?  We could make it easier to
-                // restore the originals when reading (right now we
-                // don't even try).
-                value += att.first + ": " + att.second;
+        std::string value(prop.get_value());
+        std::string comment;
+
+        // Base for the (distinct) keywords with which we will store each of prop's
+        // value and attributes.
+        auto keyword_base = label + DOT;
+        const auto &attributes = prop.get_attributes();
+        auto name_iter = attributes.find(ATTR_NAME);
+
+        // FITS wants keywords to be unique, but there could be many
+        // INFO elements having attributes with the same names.  If label ends in
+        // INFO, we include in each keyword the value of the relevant NAME
+        // attribute as well as the name of the attribute whose value
+        // is being stored.
+
+        // (INFO elements are assumed to have NAME attributes.)
+        if (boost::ends_with(label, INFO)) {
+            if (name_iter == attributes.end() || (name_iter->second).empty()) {
+                // Shouldn't happen!
+            } else {
+                keyword_base = label + DOT + name_iter->second + DOT;
             }
         }
-        fits_write_key_longstr(fits_file, name.c_str(), value.c_str(), comment.c_str(),
-                               &status);
-        if (status != 0) {
-            throw CCfits::FitsError(status);
+
+        if (!boost::ends_with(keyword_base, XMLATTR_DOT)) {
+            keyword_base += XMLATTR_DOT;
+        }
+
+        if (!value.empty()) {
+            fits_write_key_longstr(fits_file, (keyword_base + ATTR_VALUE).c_str(),
+                                   value.c_str(), comment.c_str(), &status);
+        }
+
+        for (auto &att : prop.get_attributes()) {
+#ifdef FIXED_FITS_COMMENT
+            // This step prepares us to store the comment in a special FITS way,
+            // but as of 13Nov20, comments will be truncated or omitted if
+            // comment.size() + value.size() > 65.
+            if (att.first == "comment") {
+                comment.assign(att.second);
+            } else
+#endif
+                fits_write_key_longstr(fits_file, (keyword_base + att.first).c_str(),
+                                       att.second.c_str(), comment.c_str(), &status);
+            if (status != 0) {
+                throw CCfits::FitsError(status);
+            }
         }
     }
 

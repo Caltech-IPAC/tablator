@@ -62,28 +62,6 @@ void tablator::Table::write_hdf5_attributes(H5::DataSet &table) const {
         }
     }
 
-
-    const std::string empty_string = "";
-    const ATTRIBUTES &resource_element_attributes =
-            get_results_resource_element().get_attributes();
-    if (!resource_element_attributes.empty()) {
-        strings.emplace_back();
-        std::vector<const char *> &sub_vector = *strings.rbegin();
-        for (const auto &att : resource_element_attributes) {
-            const std::string new_name = XMLATTR_DOT + att.first;
-            sub_vector.push_back(att.first.c_str());
-            sub_vector.push_back(att.second.c_str());
-
-
-            hvl_t hvl_atts;
-            hvl_atts.len = sub_vector.size() / 2;
-            hvl_atts.p = sub_vector.data();
-            hdf5_properties.emplace_back("VOTABLE.RESOURCE.ATTR_MARKER",
-                                         empty_string.c_str(), hvl_atts);
-        }
-    }
-
-
     hvl_t hdf5_props;
     hdf5_props.len = hdf5_properties.size();
     hdf5_props.p = hdf5_properties.data();

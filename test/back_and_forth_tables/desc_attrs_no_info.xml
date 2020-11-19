@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <DESCRIPTION>VOTable description</DESCRIPTION>
+  <RESOURCE type="results">
+    <TABLE ID="32" name="my test table" ucd="pos.radius" utype="utype.C4">
+      <FIELD name="ra" datatype="double" ID="ra" ucd="pos.eq.ra;meta.main" unit="deg">
+        <DESCRIPTION>
+          Right Ascension (J2000)
+        </DESCRIPTION>
+      </FIELD>
+      <FIELD name="dec_int" datatype="int" ID="dec" ucd="pos.eq.dec_int;meta.main" unit="deg">
+        <DESCRIPTION>
+          Declination (J2000)
+        </DESCRIPTION>
+      </FIELD>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>0</TD>
+            <TD>23</TD>
+          </TR>
+          <TR>
+            <TD>7</TD>
+            <TD>25</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>
