@@ -109,9 +109,8 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         std::string name(keyword);
 
         // Used to undo write_fits() hackery.
-        static boost::regex attr_expr{"^(.*)\\" + DOT + XMLATTR + "\\" + DOT + "(.*)$"};
-        static boost::regex info_expr{"^((?:.*\\.)?" + INFO + ")" + "\\" + DOT +
-                                      "(.*)$"};
+        static boost::regex attr_expr{"^(.*)\\." + XMLATTR + "\\." + "(.*)$"};
+        static boost::regex info_expr{"^((?:.*\\.)?" + INFO + ")" + "\\." + "(.*)$"};
 
         bool convert_value_to_attr = false;
 

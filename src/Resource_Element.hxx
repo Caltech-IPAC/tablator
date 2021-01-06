@@ -29,9 +29,9 @@ namespace {
 
 Resource_Type get_type_enum(const tablator::ATTRIBUTES &attributes) {
     std::string type_str(NONE);
-    for (const auto &att_pair : attributes) {
-        if (boost::iequals(att_pair.first, tablator::TYPE)) {
-            type_str.assign(att_pair.second);
+    for (const auto &attr_pair : attributes) {
+        if (boost::iequals(attr_pair.first, tablator::TYPE)) {
+            type_str.assign(attr_pair.second);
             break;
         }
     }
@@ -116,8 +116,8 @@ private:
             attributes_.insert(attributes.begin(), attributes.end());
         }
 
-        void add_attribute(const std::pair<std::string, std::string> att_pair) {
-            attributes_.emplace(att_pair);
+        void add_attribute(const std::pair<std::string, std::string> attr_pair) {
+            attributes_.emplace(attr_pair);
         }
 
         void set_description(const std::string &description) {
@@ -205,8 +205,8 @@ public:
             return *this;
         }
 
-        Builder &add_attribute(const std::pair<std::string, std::string> &att_pair) {
-            options_.add_attribute(att_pair);
+        Builder &add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+            options_.add_attribute(attr_pair);
             return *this;
         }
 
@@ -321,8 +321,8 @@ public:
         options_.add_attribute(std::make_pair(name, val));
     }
 
-    void add_attribute(const std::pair<std::string, std::string> &att_pair) {
-        options_.add_attribute(att_pair);
+    void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+        options_.add_attribute(attr_pair);
     }
 
     void set_description(const std::string &description) {

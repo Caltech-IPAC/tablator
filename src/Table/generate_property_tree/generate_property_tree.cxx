@@ -76,8 +76,8 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
         } else if (is_property_style_label(name)) {
             // e.g. if came from ipac_table keyword
             auto &element = votable_tree.add(name, prop.get_value());
-            for (auto &att : prop.get_attributes()) {
-                element.add(XMLATTR_DOT + att.first, att.second);
+            for (auto &attr : prop.get_attributes()) {
+                element.add(XMLATTR_DOT + attr.first, attr.second);
             }
         }
         // "else" is handled in add_to_property_tree() for Resource.

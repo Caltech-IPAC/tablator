@@ -350,8 +350,8 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
 
     const auto &results_resource_element = table.get_results_resource_element();
     auto &resource_attributes = results_resource_element.get_attributes();
-    for (auto &att_pair : resource_attributes) {
-        write_keyword_header_line(os, att_pair.first, att_pair.second);
+    for (auto &attr_pair : resource_attributes) {
+        write_keyword_header_line(os, attr_pair.first, attr_pair.second);
     }
 
     // Iterate through resource-level properties.
@@ -372,8 +372,8 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
             // back
             write_keyword_header_line(os, name_iter->second, value_iter->second);
         } else if (!prop_attributes.empty()) {
-            for (const auto &att_pair : prop_attributes) {
-                write_keyword_header_line(os, att_pair.first, att_pair.second);
+            for (const auto &attr_pair : prop_attributes) {
+                write_keyword_header_line(os, attr_pair.first, attr_pair.second);
             }
         }
 
@@ -404,9 +404,9 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
                                           prop.get_value());
             }
         }
-        auto &atts = prop.get_attributes();
-        auto name(atts.find(ATTR_NAME)), value(atts.find(ATTR_VALUE));
-        if (atts.size() == 2 && name != atts.end() && value != atts.end()) {
+        auto &attrs = prop.get_attributes();
+        auto name(attrs.find(ATTR_NAME)), value(attrs.find(ATTR_VALUE));
+        if (attrs.size() == 2 && name != attrs.end() && value != attrs.end()) {
             // We wrote these at the top of this function.
             if (boost::equals(name->second, tablator::Table::FIXLEN_KEYWORD) ||
                 boost::equals(name->second, tablator::Table::ROWS_RETRIEVED_KEYWORD)) {
@@ -414,7 +414,7 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
             }
             write_keyword_header_line(os, name->second, value->second);
         } else {
-            for (auto &attr : atts) {
+            for (auto &attr : attrs) {
                 write_keyword_header_line(
                         os, name_and_property.first + "." + attr.first, attr.second);
             }
