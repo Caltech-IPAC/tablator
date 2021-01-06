@@ -7,9 +7,9 @@ tablator::ATTRIBUTES tablator::ptree_readers::extract_attributes(
     tablator::ATTRIBUTES attributes;
     for (auto &child : node) {
         if (child.first == XMLATTR) {
-            for (auto &att : child.second) {
+            for (auto &attr : child.second) {
                 attributes.insert(
-                        std::make_pair(att.first, att.second.get_value<std::string>()));
+                        std::make_pair(attr.first, attr.second.get_value<std::string>()));
             }
         }
     }

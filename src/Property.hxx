@@ -43,8 +43,8 @@ public:
         attributes_.insert(attrs.begin(), attrs.end());
     }
 
-    void add_attribute(const std::pair<std::string, std::string> &att_pair) {
-        attributes_.emplace(att_pair);
+    void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+        attributes_.emplace(attr_pair);
     }
 
     void add_attribute(const std::string &name, const std::string &value) {

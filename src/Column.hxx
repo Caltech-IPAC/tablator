@@ -41,8 +41,8 @@ public:
     }
 
     inline void add_field_property_attribute(
-            const std::pair<std::string, std::string> &att_pair) {
-        get_field_properties().add_attribute(att_pair);
+            const std::pair<std::string, std::string> &attr_pair) {
+        get_field_properties().add_attribute(attr_pair);
     }
 
     inline void add_field_property_attribute(const std::string &name,

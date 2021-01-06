@@ -40,8 +40,8 @@ namespace tablator {
 //*** ATTRIBUTES
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const tablator::ATTRIBUTES &attributes) {
-    for (const auto &att_pair : attributes) {
-        parent_tree.add(tablator::XMLATTR_DOT + att_pair.first, att_pair.second);
+    for (const auto &attr_pair : attributes) {
+        parent_tree.add(tablator::XMLATTR_DOT + attr_pair.first, attr_pair.second);
     }
 }
 
@@ -166,10 +166,10 @@ void add_to_property_tree(boost::property_tree::ptree &tree,
         add_to_property_tree(group_tree, PARAM, param);
     }
 
-    for (const auto &att_map : group_element.get_field_refs()) {
+    for (const auto &attr_map : group_element.get_field_refs()) {
         boost::property_tree::ptree &field_ref_tree = group_tree.add(FIELDREF, "");
-        for (const auto &att : att_map) {
-            field_ref_tree.add(XMLATTR_DOT + att.first, att.second);
+        for (const auto &attr : attr_map) {
+            field_ref_tree.add(XMLATTR_DOT + attr.first, attr.second);
         }
     }
 }

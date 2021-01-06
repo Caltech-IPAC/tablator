@@ -56,8 +56,8 @@ private:
             attributes_.insert(attributes.begin(), attributes.end());
         }
 
-        void add_attribute(const std::pair<std::string, std::string> &att_pair) {
-            attributes_.emplace(att_pair);
+        void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+            attributes_.emplace(attr_pair);
         }
 
         void set_description(const std::string &description) {
@@ -102,8 +102,8 @@ public:
             return *this;
         }
 
-        Builder &add_attribute(const std::pair<std::string, std::string> &att_pair) {
-            options_.add_attribute(att_pair);
+        Builder &add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+            options_.add_attribute(attr_pair);
             return *this;
         }
 
@@ -190,8 +190,8 @@ public:
 
     void set_attributes(const ATTRIBUTES &attrs) { options_.set_attributes(attrs); }
 
-    void add_attribute(const std::pair<std::string, std::string> &att_pair) {
-        options_.add_attribute(att_pair);
+    void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+        options_.add_attribute(attr_pair);
     }
 
     void add_attribute(const std::string &name, const std::string &value) {

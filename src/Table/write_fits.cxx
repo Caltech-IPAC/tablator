@@ -178,9 +178,9 @@ void tablator::Table::write_fits(
         }
         fits_types.push_back(array_size_str + fits_type);
 
-        const auto col_atts = column.get_field_properties().get_attributes();
-        auto unit = col_atts.find(UNIT);
-        if (unit == col_atts.end()) {
+        const auto col_attrs = column.get_field_properties().get_attributes();
+        auto unit = col_attrs.find(UNIT);
+        if (unit == col_attrs.end()) {
             tunit.push_back("");
         } else {
             tunit.push_back(unit->second.c_str());
@@ -227,7 +227,6 @@ void tablator::Table::write_fits(
 
     // where label includes value of prop's ATTR_NAME attribute for
     // uniqueness.
-    std::cout << "write_fits(), before l&p loop\n";
     for (const auto &label_and_prop : combined_labeled_properties) {
         std::string label = label_and_prop.first;
         const auto &prop = label_and_prop.second;
@@ -264,17 +263,17 @@ void tablator::Table::write_fits(
                                    value.c_str(), comment.c_str(), &status);
         }
 
-        for (auto &att : prop.get_attributes()) {
+        for (auto &attr : prop.get_attributes()) {
 #ifdef FIXED_FITS_COMMENT
             // This step prepares us to store the comment in a special FITS way,
             // but as of 13Nov20, comments will be truncated or omitted if
             // comment.size() + value.size() > 65.
-            if (att.first == "comment") {
-                comment.assign(att.second);
+            if (attr.first == "comment") {
+                comment.assign(attr.second);
             } else
 #endif
-                fits_write_key_longstr(fits_file, (keyword_base + att.first).c_str(),
-                                       att.second.c_str(), comment.c_str(), &status);
+                fits_write_key_longstr(fits_file, (keyword_base + attr.first).c_str(),
+                                       attr.second.c_str(), comment.c_str(), &status);
             if (status != 0) {
                 throw CCfits::FitsError(status);
             }
