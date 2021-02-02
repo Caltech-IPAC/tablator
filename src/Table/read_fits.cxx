@@ -9,6 +9,35 @@
 // fits.
 
 namespace {
+
+// CCfits does not make it easy to retrieve keyword values.  Only
+// keyword values of keytypes Tint, Tfloat, Tdouble, and Tstring can
+// be retrieved from CCfits in string form.
+
+// This function retrieves values of the keytypes mentioned above as
+// strings. It retrieves values of keytypes implicitly convertible to
+// int as int and then converts them to string.  It propagates the
+// exception CCfits throws when asked to retrieve a value of any other
+// keytype, e.g. Tcomplex.
+
+void get_keyword_value_as_string(std::string &value_str,
+                                 const CCfits::Keyword *keyword) {
+    if ((keyword->keytype() == CCfits::Tint || keyword->keytype() == CCfits::Tfloat ||
+         keyword->keytype() == CCfits::Tdouble ||
+         keyword->keytype() == CCfits::Tstring)) {
+        keyword->value(value_str);
+    } else if (keyword->keytype() == CCfits::Tlogical) {
+        bool value_bool;
+        keyword->value(value_bool);
+        value_str.assign(value_bool ? "true" : "false");
+    } else {
+        // If the keytype is not convertible to int, value() will throw an exception.
+        int value_int;
+        keyword->value(value_int);
+        value_str.assign(std::to_string(value_int));
+    }
+}
+
 template <typename T>
 void read_scalar_column(uint8_t *position, CCfits::Column &c, const size_t &rows,
                         const size_t &row_size) {
@@ -91,12 +120,12 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     Property prop;
 
     for (auto &kwd : table_extension.keyWord()) {
-        std::string keyword(kwd.first), value;
+        std::string keyword(kwd.first);
+        std::string kwd_value;
 
         // Annoyingly, CCfits does not have a way to just return the
         // value.  You have to give it something to put it in.
-        std::string kwd_value;
-        kwd.second->value(kwd_value);
+        get_keyword_value_as_string(kwd_value, kwd.second);
 
         // If `kwd` was generated from a labeled_property by
         // write_fits(), then the `keyword` string includes the value
