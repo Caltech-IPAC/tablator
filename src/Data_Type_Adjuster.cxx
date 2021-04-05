@@ -18,13 +18,15 @@ tablator::Data_Type_Adjuster::get_datatypes_for_writing(
     bool format_votable = (enum_format == Format::Enums::VOTABLE);
     bool format_fits = (enum_format == Format::Enums::FITS);
     bool adjust_uint64 = (format_ipac || format_votable || format_fits);
-    for (size_t col = 0; col <= table_columns.size(); ++col) {
-        auto orig_datatype = table_columns[col].get_type();
+
+    for (size_t col = 0; col < table_columns.size(); ++col) {
+        const auto &curr_col = table_columns[col];
+        auto orig_datatype = curr_col.get_type();
         auto adjusted_datatype = orig_datatype;  // set default and adjust
         if ((orig_datatype == tablator::Data_Type::UINT64_LE) && adjust_uint64) {
             if (contains_large_uint64_val(col)) {
                 if (format_ipac) {
-                    auto array_size = table_columns[col].get_array_size();
+                    auto array_size = curr_col.get_array_size();
                     if (array_size > 1) {
                         throw std::runtime_error(
                                 "Tables with array-valued columns of type uint64 "

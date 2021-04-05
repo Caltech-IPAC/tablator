@@ -14,6 +14,7 @@ static const std::string FIELD("FIELD");
 static const std::string PARAM("PARAM");
 
 static const std::string ATTR_NAME("name");
+static const std::string ATTR_IRSA_VALUE("irsa_value");
 static const std::string ATTR_UCD("ucd");
 static const std::string ATTR_VALUE("value");
 

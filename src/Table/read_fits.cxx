@@ -94,7 +94,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     CCfits::BinTable *ccfits_table(dynamic_cast<CCfits::BinTable *>(&table_extension));
 
     static std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
-    const auto keyword_ucd_mapping = fits_keyword_ucd_mapping(false);
+    static const auto keyword_ucd_mapping = fits_keyword_ucd_mapping(false);
     table_extension.readAllKeys();
 
     std::vector<Column> columns;
@@ -107,7 +107,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     // of the form
 
     // ELEMENT.<prop_name>.XMLATTR.<attr_name> : attr_value or
-    // ELEMENT.<prop_name>.XMLATTR.ATTR_VALUE : prop.value
+    // ELEMENT.<prop_name>.XMLATTR.ATTR_IRSA_VALUE : prop.value
 
     // where <prop_name> is the value of prop's ATTR_NAME attribute and is
     // assumed to be non-empty for INFO elements, of which we might have many.
@@ -167,7 +167,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                           name) != fits_ignored_keywords.end()) {
                 continue;
             }
-            // Prepare to store it with ATTR_VALUE as an attribute.
+            // Prepare to store it with ATTR_IRSA_VALUE as an attribute.
             convert_value_to_attr = true;
         }
 
@@ -184,15 +184,20 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             prev_label.assign(label);
         }
 
+        if (convert_value_to_attr) {
+            prop.add_attribute(ATTR_VALUE, kwd_value);
+        } else if (name == tablator::ATTR_IRSA_VALUE) {
+            // if kwd came from FITS-ified labeled_properties.value_ via write_fits()
+            prop.set_value(kwd_value);
+        } else {
+            prop.add_attribute(name, kwd_value);
+        }
+
         // Concoct UCD attributes from names which are keys of keyword_ucd_mapping.
         auto i = keyword_ucd_mapping.find(name);
         if (i != keyword_ucd_mapping.end()) {
             // JTODO only if no other UCD attr is present for this keyword?
             prop.add_attribute("ucd", i->second);
-        } else if (convert_value_to_attr) {
-            prop.add_attribute(ATTR_VALUE, kwd_value);
-        } else {
-            prop.add_attribute(name, kwd_value);
         }
 
         if (!kwd.second->comment().empty()) {
