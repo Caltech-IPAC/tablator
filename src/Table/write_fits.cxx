@@ -221,7 +221,7 @@ void tablator::Table::write_fits(
     // Labeled_properties are stored as keywords whose values are strings
     // of the form
 
-    // label + DOT + XMLATTR_DOT + ATTR_VALUE : value  (for prop.value_)
+    // label + DOT + XMLATTR_DOT + ATTR_IRSA_VALUE : value  (for prop.value_)
     // label + DOT + XMLATTR_DOT + attrname : attrvalue  (for elements of
     // prop.attributes_)
 
@@ -259,7 +259,7 @@ void tablator::Table::write_fits(
         }
 
         if (!value.empty()) {
-            fits_write_key_longstr(fits_file, (keyword_base + ATTR_VALUE).c_str(),
+            fits_write_key_longstr(fits_file, (keyword_base + ATTR_IRSA_VALUE).c_str(),
                                    value.c_str(), comment.c_str(), &status);
         }
 

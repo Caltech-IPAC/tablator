@@ -176,10 +176,11 @@ for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/f
             ${tablator_bin} $STREAM_INTERMEDIATE test.$ending temp.tbl
         fi
 
-        if [ $? -eq 0 ]; then
+        let output=$?
+        if [[ output -eq 0 ]]; then
             echo "PASS: $table -> $ending II"
         else
-            echo "FAIL: $table -> $ending II"
+            echo "FAIL: $table -> $ending II: $output"
         fi
 
         rm -f test.$ending temp.tbl
@@ -338,9 +339,16 @@ else
     echo "FAIL: Convert VOTable with null elements to IPAC Table"
 fi
 
+#################################################################
+# Test one-way conversions
+#################################################################
+
+${tablator_bin}  test/fits_medium.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium.vot temp.vot
+
 
 ###########################################################
 # Test round-trip conversions
+###########################################################
 
 ${tablator_bin} --output-format=fits test/back_and_forth_tables/one_row_int_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/one_row_int_array.json5 temp.json5
 if [ $? -eq 0 ]; then
@@ -511,7 +519,7 @@ else
     echo "FAIL: Convert VOTable translated from FITS to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot out.fits &&  ${tablator_bin}  out.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot out.fits &&  ${tablator_bin}  out.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with unorthodox INFO property value to FITS and back"
     rm -f temp.vot
@@ -631,11 +639,9 @@ else
 fi
 
 
-
 #################################################################
 # not straight conversions
 #################################################################
-
 
 ${tablator_bin} --static=1 --row-list="0 2 3" test/multi temp.tbl && diff -w test/multi_row_023.tbl temp.tbl
 if [ $? -eq 0 ]; then
@@ -647,10 +653,10 @@ fi
 
 ${tablator_bin} --static=1 --row-list="0 2 1 2 0" test/back_and_forth_tables/multi_row.json5 temp.tbl && diff -w test/back_and_forth_tables/multi_row_02120.tbl temp.tbl
 if [ $? -eq 0 ]; then
-    echo "PASS: Write subtable with selected rows in IPAC Table format"
+    echo "PASS: Write subtable with repeated selected rows in IPAC Table format"
     rm -f temp_file
 else
-    echo "FAIL: Write subtable with selected rows in IPAC Table format"
+    echo "FAIL: Write subtable with repeated selected rows in IPAC Table format"
 fi
 
 ${tablator_bin}  --row-count=3 --start-row 1 test/multi temp.tbl && diff -w test/multi_row_123.tbl temp.tbl
