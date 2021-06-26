@@ -102,7 +102,7 @@ void write_hdf5_columns(const std::vector<Column> &columns,
 
         strings.emplace_back();
         std::vector<const char *> &links_vector = *strings.rbegin();
-        for (auto &a : field_properties.get_links()) {
+        for (auto &a : field_properties.get_hdf5_links()) {
             links_vector.push_back(a.first.c_str());
             links_vector.push_back(a.second.c_str());
         }

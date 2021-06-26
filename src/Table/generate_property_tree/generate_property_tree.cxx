@@ -9,31 +9,35 @@
 #include "../../Resource_Element.hxx"
 #include "../../Utils/Vector_Utils.hxx"
 
-
 namespace tablator {
 
+
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const std::string &label, const Property &property);
+                          const std::string &label, const Property &property,
+                          bool allow_dups);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::string &col_label, const Column &column,
-                          const Data_Type &active_datatype);
+                          const Data_Type &active_datatype, bool allow_dups);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const std::string &col_label, const Column &column);
+                          const std::string &col_label, const Column &column,
+                          bool allow_dups);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const Group_Element &group);
+                          const Group_Element &group, bool allow_dups);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
-                          const std::vector<Data_Type> &datatypes_for_writing);
+                          const std::vector<Data_Type> &datatypes_for_writing,
+                          bool allow_dups);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           const std::vector<std::string> &comments,
-                          const Labeled_Properties &table_labeled_properties);
+                          const Labeled_Properties &table_labeled_properties,
+                          bool allow_dups);
 
 
 }  // namespace tablator
@@ -48,7 +52,7 @@ boost::property_tree::ptree tablator::Table::generate_property_tree() const {
 /**********************************************************/
 
 boost::property_tree::ptree tablator::Table::generate_property_tree(
-        const std::vector<Data_Type> &datatypes_for_writing) const {
+        const std::vector<Data_Type> &datatypes_for_writing, bool allow_dups) const {
     boost::property_tree::ptree outermost_tree;
 
     auto &votable_tree = outermost_tree.add(VOTABLE, "");
@@ -83,12 +87,12 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     }
 
     for (const auto &param : get_params()) {
-        tablator::add_to_property_tree(votable_tree, PARAM, param);
+        tablator::add_to_property_tree(votable_tree, PARAM, param, allow_dups);
     }
 
 
     for (const auto &group : get_group_elements()) {
-        add_to_property_tree(votable_tree, group);
+        add_to_property_tree(votable_tree, group, allow_dups);
     }
 
     if (get_resource_elements().empty()) {
@@ -98,14 +102,15 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     for (const auto &resource_element : get_resource_elements()) {
         if (resource_element.is_results_resource()) {
             add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
-                                 get_comments(), get_labeled_properties());
+                                 get_comments(), get_labeled_properties(), allow_dups);
         } else {
-            add_to_property_tree(votable_tree, resource_element, datatypes_for_writing);
+            add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
+                                 allow_dups);
         }
     }
 
     for (const auto &info : get_trailing_info_list()) {
-        add_to_property_tree(votable_tree, INFO, info);
+        add_to_property_tree(votable_tree, INFO, info, allow_dups);
     }
 
     return outermost_tree;

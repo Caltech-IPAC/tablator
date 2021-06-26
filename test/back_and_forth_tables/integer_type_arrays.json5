@@ -9,63 +9,64 @@
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE":
-        {
-            "INFO":
+        "RESOURCE_ARRAY":
+        [
             {
-                "<xmlattr>":
-                {
-                    "name": "DATETIME",
-                    "value": "2018-07-19 10:44:39"
-                }
-            },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
-                    "name": "ORIGIN",
-                    "value": "TEST TABLE"
-                }
-            },
-            "TABLE":
-            {
-                "DESCRIPTION": "big_uint64s (ulong)\n___ array of uint64s of which one is too big for int64\nlittle_uint64s (ulong)\n ___ array of uint64s each of which fits in an int64\nany_uint32s (uint)\n___ array of uint32s",
-                "FIELD":
-                {
-                    "<xmlattr>":
+                "INFO_ARRAY":
+                [
                     {
-                        "name": "big_uint64s",
-                        "datatype": "ulong",
-                        "arraysize": "3",
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "DATETIME",
+                            "value": "2018-07-19 10:44:39"
+                        }
+                    },
                     {
-                        "name": "little_uint64s",
-                        "datatype": "ulong",
-                        "arraysize": "*",
+                        "<xmlattr>":
+                        {
+                            "name": "ORIGIN",
+                            "value": "TEST TABLE"
+                        }
                     }
-                },
-                "FIELD":
+                ],
+                "TABLE":
                 {
-                    "<xmlattr>":
+                    "DESCRIPTION": "big_uint64s (ulong)\n___ array of uint64s of which one is too big for int64\nlittle_uint64s (ulong)\n ___ array of uint64s each of which fits in an int64\nany_uint32s (uint)\n___ array of uint32s",
+                    "FIELD_ARRAY":
+                    [
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "big_uint64s",
+                                "datatype": "ulong",
+                                "arraysize": "*"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "little_uint64s",
+                                "datatype": "ulong",
+                                "arraysize": "*"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "any_uint32s",
+                                "datatype": "uint",
+                                "arraysize": "*"
+                            }
+                        }
+                    ],
+                    "DATA":
                     {
-                        "name": "any_uint32s",
-                        "datatype": "uint",
-                        "arraysize": "4",
-                    }
-                },
-                "DATA":
-                {
-                    "TABLEDATA":
+                        "TABLEDATA":
                     [
                         [
                             "17876521098765432109 18210987654321098765 4321098765432109876",
                             "41269035000000002 432109876543210 2109876543210 1 2",
                             "8 76543210 323232323 47"
-
                         ],
                         [
                             "41269035000000002 4321098765432109876 2109876543210987654",
@@ -73,8 +74,9 @@
                             "12690350 21098765 2765 98769876"
                         ]
                     ]
+                    }
                 }
             }
-        }
+        ]
     }
 }

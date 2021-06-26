@@ -19,6 +19,13 @@ class Table_Element;
 class Table;
 
 
+//===============================================================================
+// property_trees read by the top-level
+// read_property_tree_as_votable() function are assumed to be in
+// VOTable format as defined here:
+// https://www.ivoa.net/documents/VOTable/20191021/REC-VOTable-1.4-20191021.html.
+// ===============================================================================
+
 namespace ptree_readers {
 
 ATTRIBUTES extract_attributes(const boost::property_tree::ptree &node);
@@ -66,6 +73,7 @@ boost::property_tree::ptree read_xml_string_as_property_tree(
         const std::string &ptree_xml);
 void add_params_from_xml_string(std::vector<Field> &params,
                                 const std::string &params_xml);
+
 
 }  // namespace ptree_readers
 }  // namespace tablator

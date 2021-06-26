@@ -1,9 +1,17 @@
 #include "../ptree_readers.hxx"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "../Common.hxx"
 #include "../Group_Element.hxx"
+#include "Utils.hxx"
 
-tablator::Group_Element tablator::ptree_readers::read_group_element(
+namespace tablator {
+namespace ptree_readers {
+
+//==========================================
+
+tablator::Group_Element read_group_element(
         const boost::property_tree::ptree &group_tree) {
     auto child = group_tree.begin();
     auto end = group_tree.end();
@@ -24,13 +32,23 @@ tablator::Group_Element tablator::ptree_readers::read_group_element(
     std::vector<Field> params;
     std::vector<ATTRIBUTES> field_refs;
     std::vector<ATTRIBUTES> param_refs;
+
     while (child != end) {
         if (child->first == FIELDREF) {
-            field_refs.emplace_back(extract_attributes(child->second));
+            load_attributes_singleton(field_refs, child->second);
+        } else if (child->first == FIELDREF_ARRAY) {
+            load_attributes_array(field_refs, child->second);
+
         } else if (child->first == PARAMREF) {
-            param_refs.emplace_back(extract_attributes(child->second));
+            load_attributes_singleton(param_refs, child->second);
+        } else if (child->first == PARAMREF_ARRAY) {
+            load_attributes_array(param_refs, child->second);
+
         } else if (child->first == PARAM) {
-            params.emplace_back(read_field(child->second).get_field());
+            load_field_singleton(params, child->second);
+        } else if (child->first == PARAM_ARRAY) {
+            load_field_array(params, child->second);
+
         } else if (child->first == GROUP) {
             //            read_group_element(GROUP, child->second);  // JTODO recurse
         } else {
@@ -45,3 +63,6 @@ tablator::Group_Element tablator::ptree_readers::read_group_element(
             .add_field_refs(field_refs)
             .build();
 }
+
+}  // namespace ptree_readers
+}  // namespace tablator

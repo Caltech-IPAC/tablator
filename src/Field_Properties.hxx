@@ -3,6 +3,7 @@
 #include <map>
 
 #include "Common.hxx"
+#include "Property.hxx"
 #include "Values.hxx"
 
 namespace tablator {
@@ -15,35 +16,6 @@ public:
 
 private:
     struct Options {
-        Options() = default;
-
-        // Add all these constructors to support old-style Field_Properties
-        // constructors, which are called from query_server.
-        Options(const ATTRIBUTES &attributes) : attributes_(attributes) {}
-        Options(const std::initializer_list<std::pair<const std::string, std::string>>
-                        &attributes)
-                : attributes_(attributes) {}
-        Options(const std::string &description) : description_(description) {}
-
-
-        Options(const std::string &description, const ATTRIBUTES &attributes)
-                : attributes_(attributes), description_(description) {}
-
-        Options(const std::string &description,
-                const std::initializer_list<std::pair<const std::string, std::string>>
-                        &attributes)
-                : attributes_(attributes), description_(description) {}
-
-
-        Options(const std::string &description, const ATTRIBUTES &attributes,
-                const Values &v,
-                const std::vector<std::pair<std::string, std::string>> &links)
-                : attributes_(attributes),
-                  description_(description),
-                  values_(v),
-                  links_(links) {}
-
-
         void set_attributes(
                 const std::initializer_list<std::pair<const std::string, std::string>>
                         attributes) {
@@ -66,23 +38,27 @@ private:
 
         void set_values(const Values &values) { values_ = values; }
 
-        void set_links(const std::vector<std::pair<std::string, std::string>> &links) {
-            links_ = links;
+        void add_hdf5_links(
+                const std::vector<std::pair<std::string, std::string>> &hdf5_links) {
+            hdf5_links_.insert(hdf5_links_.end(), hdf5_links.begin(), hdf5_links.end());
+            ;
         }
 
-        void add_links(const std::vector<std::pair<std::string, std::string>> &links) {
+        void set_links(const std::vector<Labeled_Property> &links) { links_ = links; }
+
+        void add_links(const std::vector<Labeled_Property> &links) {
             links_.insert(links_.end(), links.begin(), links.end());
+            ;
         }
 
-        void add_link(const std::pair<std::string, std::string> &link) {
-            links_.emplace_back(link);
-        }
+        void add_link(const Labeled_Property &link) { links_.emplace_back(link); }
 
 
         ATTRIBUTES attributes_;
         std::string description_;
         Values values_;
-        std::vector<std::pair<std::string, std::string>> links_;
+        std::vector<std::pair<std::string, std::string>> hdf5_links_;
+        std::vector<Labeled_Property> links_;
     };
 
 public:
@@ -122,13 +98,18 @@ public:
             return *this;
         }
 
-        Builder &add_links(
-                const std::vector<std::pair<std::string, std::string>> &links) {
+        Builder &add_hdf5_links(
+                const std::vector<std::pair<std::string, std::string>> &hdf5_links) {
+            options_.add_hdf5_links(hdf5_links);
+            return *this;
+        }
+
+        Builder &add_links(const std::vector<Labeled_Property> &links) {
             options_.add_links(links);
             return *this;
         }
 
-        Builder &add_link(const std::pair<std::string, std::string> &link) {
+        Builder &add_link(const Labeled_Property &link) {
             options_.add_link(link);
             return *this;
         }
@@ -141,34 +122,40 @@ public:
     Field_Properties() = default;
 
     // JTODO query_server uses these constructors extensively.
-    Field_Properties(const ATTRIBUTES &attributes) : options_(attributes) {}
+
+    Field_Properties(const ATTRIBUTES &attributes) {
+        Builder().add_attributes(attributes).build();
+    }
 
     Field_Properties(
             const std::initializer_list<std::pair<const std::string, std::string>>
-                    &attributes)
-            : options_(attributes) {}
+                    &attributes) {
+        Builder().add_attributes(attributes).build();
+    }
 
-
-    Field_Properties(const std::string &description) : options_(description) {}
+    Field_Properties(const std::string &description) {
+        Builder().add_description(description).build();
+    }
 
     Field_Properties(
             const std::string &description,
             const std::initializer_list<std::pair<const std::string, std::string>>
-                    &attributes)
-            : options_(description, attributes) {}
+                    &attributes) {
+        Builder().add_description(description).add_attributes(attributes).build();
+    }
 
     Field_Properties(const std::string &description, const ATTRIBUTES &attributes) {
         Builder().add_description(description).add_attributes(attributes).build();
     }
 
-
     Field_Properties(const std::string &description, const ATTRIBUTES &attributes,
-                     const Values &v,
-                     const std::vector<std::pair<std::string, std::string>> &links) {
-        set_description(description);
-        set_attributes(attributes);
-        set_values(v);
-        set_links(links);
+                     const Values &v, const std::vector<Labeled_Property> &links) {
+        Builder()
+                .add_description(description)
+                .add_attributes(attributes)
+                .add_values(v)
+                .add_links(links)
+                .build();
     }
 
 
@@ -180,12 +167,14 @@ public:
     const Values &get_values() const { return options_.values_; }
     Values &get_values() { return options_.values_; }
 
-    const std::vector<std::pair<std::string, std::string>> &get_links() const {
-        return options_.links_;
+    const std::vector<std::pair<std::string, std::string>> &get_hdf5_links() const {
+        return options_.hdf5_links_;
     }
-    std::vector<std::pair<std::string, std::string>> &get_links() {
-        return options_.links_;
+    std::vector<std::pair<std::string, std::string>> &get_hdf5_links() {
+        return options_.hdf5_links_;
     }
+    const std::vector<Labeled_Property> &get_links() const { return options_.links_; }
+    std::vector<Labeled_Property> &get_links() { return options_.links_; }
 
 
     void set_attributes(const ATTRIBUTES &attrs) { options_.set_attributes(attrs); }
@@ -201,21 +190,21 @@ public:
     void set_description(const std::string &desc) { options_.set_description(desc); }
 
     void set_values(const Values &values) { options_.set_values(values); }
-    void set_links(const std::vector<std::pair<std::string, std::string>> &links) {
+
+
+    void add_hdf5_links(
+            const std::vector<std::pair<std::string, std::string>> &hdf5_links) {
+        options_.add_hdf5_links(hdf5_links);
+    }
+
+    void set_links(const std::vector<Labeled_Property> &links) {
         options_.set_links(links);
     }
-    void add_links(const std::vector<std::pair<std::string, std::string>> &links) {
+    void add_links(const std::vector<Labeled_Property> &links) {
         options_.add_links(links);
     }
 
-    void add_link(const std::pair<std::string, std::string> &link_pair) {
-        options_.add_link(link_pair);
-    }
-
-    void add_link(const std::string &name, const std::string &value) {
-        add_link(std::make_pair(name, value));
-    }
-
+    void add_link(const Labeled_Property &link_pair) { options_.add_link(link_pair); }
 
 private:
     Field_Properties(Options &options) : options_(options) {}

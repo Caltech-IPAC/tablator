@@ -18,9 +18,13 @@
   </RESOURCE>
   <RESOURCE type="results">
     <INFO name="QUERY_STATUS" value="OK"/>
+    <LINK content-role="type" href="http://purl.org/astronomy/vocab/PhysicalQuantities/Distance"/>
+    <LINK content-role="type2" href="http://purl.org/astronomy/vocab/OtherPhysicalQuantities/Distance"/>
     <TABLE>
       <FIELD name="oid" datatype="long" ID="col_0" ucd="meta.id;src;meta.main">
         <DESCRIPTION>Unique object identifier</DESCRIPTION>
+        <LINK content-role="field_type" href="http://purl.org/astronomy/vocab/FieldPhysicalQuantities/Distance"/>
+        <LINK content-role="field_type2" href="http://purl.org/astronomy/vocab/OtherFieldPhysicalQuantities/Distance"/>
       </FIELD>
       <DATA>
         <TABLEDATA>

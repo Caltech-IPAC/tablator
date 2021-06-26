@@ -13,30 +13,30 @@
         {
             "TABLE":
             {
-                "FIELD":
-                {
-                    "<xmlattr>":
+                "FIELD_ARRAY":
+                [
                     {
-                        "name": "ulong_int1",
-                        "datatype": "ulong",
-                        "arraysize": "2"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "ulong_int1",
+                            "datatype": "ulong",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "ulong_int2",
-                        "datatype": "ulong",
-                        "arraysize": "3"
+                        "<xmlattr>":
+                        {
+                            "name": "ulong_int2",
+                            "datatype": "ulong",
+                            "arraysize": "*"
+                        }
                     }
-                },
+                ],
                 "DATA":
                 {
                     "TABLEDATA":
                     [
                         [
-
                             "16446744073709551616 1",
                             "6446744073709 551616123 987"
                         ],

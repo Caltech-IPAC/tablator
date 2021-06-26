@@ -1,6 +1,8 @@
 #include "../../../ptree_readers.hxx"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
+
 
 namespace tablator {
 Values read_values(const boost::property_tree::ptree &values);
@@ -24,6 +26,66 @@ tablator::Data_Type string_to_Type(const std::string &s) {
         throw std::runtime_error("Unimplemented data type: " + s);
     throw std::runtime_error("Unknown data type: " + s);
 }
+
+
+// Unlike other classes with "links" elements, Field_Properties has
+// both "links" and "hdf5_links", which are both represented in
+// VOTables as LINK elements and must be disentangled here.
+
+void load_link_singleton(
+        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        std::vector<std::pair<std::string, std::string>> &hdf5_links,
+        const boost::property_tree::ptree &node) {
+    const auto attrs = tablator::ptree_readers::extract_attributes(node);
+
+    if (attrs.size() == 1) {
+        const auto &name = attrs.begin()->first;
+        if (boost::starts_with(name, tablator::HDF5_LINK)) {
+            hdf5_links.emplace_back(std::make_pair(
+                    name.substr(tablator::HDF5_LINK.size()), attrs.begin()->second));
+            return;
+        }
+    }
+
+    labeled_properties.emplace_back(
+            std::make_pair(tablator::LINK, tablator::Property(attrs)));
+}
+
+void load_link_array(
+        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        std::vector<std::pair<std::string, std::string>> &hdf5_links,
+        const boost::property_tree::ptree &array_tree) {
+    for (const auto &elt : array_tree) {
+        load_link_singleton(labeled_properties, hdf5_links, elt.second);
+    }
+}
+
+
+boost::property_tree::ptree::const_iterator read_links_section(
+        std::vector<std::pair<std::string, tablator::Property>> &links,
+        std::vector<std::pair<std::string, std::string>> &hdf5_links,
+        boost::property_tree::ptree::const_iterator &start,
+        boost::property_tree::ptree::const_iterator &end, const std::string &next_tag) {
+    boost::property_tree::ptree::const_iterator &iter = start;
+
+    while (iter != end) {
+        if (iter->first == tablator::LINK) {
+            load_link_singleton(links, hdf5_links, iter->second);
+        } else if (iter->first == tablator::LINK_ARRAY) {
+            load_link_array(links, hdf5_links, iter->second);
+        } else if (iter->first == next_tag) {
+            break;
+        } else {
+            throw std::runtime_error(std::string("Expected LINK or TABLE tag, "
+                                                 "but found ") +
+                                     iter->first);
+        }
+        ++iter;
+    }
+    return iter;
+}
+
+
 }  // namespace
 
 tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
@@ -72,22 +134,12 @@ tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
         field_properties.set_values(read_values(child->second));
         ++child;
     }
-    if (child != end && child->first == LINK) {
-        for (auto &link_child : child->second) {
-            if (link_child.first == XMLATTR) {
-                for (auto &attribute : link_child.second) {
-                    field_properties.add_link(
-                            attribute.first, attribute.second.get_value<std::string>());
-                }
-            } else {
-                throw std::runtime_error(
-                        "Expected only attributes inside "
-                        "LINK elements, but found: " +
-                        link_child.first);
-            }
-        }
-        ++child;
-    }
+
+    Labeled_Properties &links = field_properties.get_links();
+    std::vector<std::pair<std::string, std::string>> &hdf5_links =
+            field_properties.get_hdf5_links();
+    child = read_links_section(links, hdf5_links, child, end, TABLE);
+
     return Field_And_Flag(Field(name, type, array_size, field_properties),
                           is_array_dynamic_f);
 }
