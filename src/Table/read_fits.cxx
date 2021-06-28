@@ -114,7 +114,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     //(We can't yet convert to FITS format VOTables with more than one RESOURCE.
     // 07Dec20)
 
-    std::vector<std::pair<std::string, Property>> combined_labeled_properties;
+    Labeled_Properties combined_labeled_properties;
     std::string prev_keyword = "";
     std::string prev_label = "";
     Property prop;
@@ -212,7 +212,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     // Distribute the labeled_properties between assorted class members at assorted
     // levels.
-    std::vector<std::pair<std::string, Property>> resource_element_labeled_properties;
+    Labeled_Properties resource_element_labeled_properties;
     std::vector<Property> resource_element_trailing_infos;
     ATTRIBUTES resource_element_attributes;
     std::vector<Property> table_element_trailing_infos;

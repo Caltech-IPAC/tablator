@@ -101,7 +101,7 @@ private:
         ATTRIBUTES attributes_;
         std::string description_;
         std::vector<Field> params_;
-        std::vector<std::pair<std::string, Property>> labeled_properties_;
+        Labeled_Properties labeled_properties_;
         std::vector<Group_Element> group_elements_;
         std::vector<Table_Element> table_elements_;
         std::vector<Property> trailing_info_list_;
@@ -136,16 +136,14 @@ private:
 
         void add_param(const Field &param) { params_.emplace_back(param); }
 
-        void add_labeled_properties(const std::vector<std::pair<std::string, Property>>
-                                            &labeled_properties) {
+        void add_labeled_properties(const Labeled_Properties &labeled_properties) {
             labeled_properties_.insert(labeled_properties_.end(),
                                        labeled_properties.begin(),
                                        labeled_properties.end());
             ;
         }
 
-        void add_labeled_property(
-                const std::pair<std::string, Property> &labeled_property) {
+        void add_labeled_property(const Labeled_Property &labeled_property) {
             labeled_properties_.emplace_back(labeled_property);
         }
 
@@ -235,15 +233,12 @@ public:
             return *this;
         }
 
-        Builder &add_labeled_properties(
-                const std::vector<std::pair<std::string, Property>>
-                        &labeled_properties) {
+        Builder &add_labeled_properties(const Labeled_Properties &labeled_properties) {
             options_.add_labeled_properties(labeled_properties);
             return *this;
         }
 
-        Builder &add_labeled_property(
-                const std::pair<std::string, Property> &labeled_property) {
+        Builder &add_labeled_property(const Labeled_Property &labeled_property) {
             options_.add_labeled_property(labeled_property);
             return *this;
         }
@@ -298,11 +293,10 @@ public:
     const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
     const std::string &get_description() const { return options_.description_; }
     const std::vector<Field> &get_params() const { return options_.params_; }
-    std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
+    Labeled_Properties &get_labeled_properties() {
         return options_.labeled_properties_;
     }
-    const std::vector<std::pair<std::string, Property>> &get_labeled_properties()
-            const {
+    const Labeled_Properties &get_labeled_properties() const {
         return options_.labeled_properties_;
     }
     const std::vector<Group_Element> &get_group_elements() const {
@@ -335,13 +329,11 @@ public:
 
     void add_param(const Field &param) { options_.add_param(param); }
 
-    void add_labeled_properties(
-            const std::vector<std::pair<std::string, Property>> &labeled_properties) {
+    void add_labeled_properties(const Labeled_Properties &labeled_properties) {
         options_.add_labeled_properties(labeled_properties);
     }
 
-    void add_labeled_property(
-            const std::pair<std::string, Property> &labeled_property) {
+    void add_labeled_property(const Labeled_Property &labeled_property) {
         options_.add_labeled_property(labeled_property);
     }
 
