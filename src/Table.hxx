@@ -43,7 +43,7 @@ private:
         std::vector<std::string> comments_;
         std::vector<Field> params_;
         //        boost::property_tree::ptree params_ptree_;
-        std::vector<std::pair<std::string, Property>> labeled_properties_;
+        Labeled_Properties labeled_properties_;
         std::vector<Group_Element> group_elements_;
         std::vector<Property> trailing_info_list_;
 
@@ -85,8 +85,7 @@ private:
 
         void add_param(const Field &param) { params_.emplace_back(param); }
 
-        void add_labeled_properties(const std::vector<std::pair<std::string, Property>>
-                                            &labeled_properties) {
+        void add_labeled_properties(const Labeled_Properties &labeled_properties) {
             labeled_properties_.insert(labeled_properties_.end(),
                                        labeled_properties.begin(),
                                        labeled_properties.end());
@@ -95,8 +94,7 @@ private:
 
         // For backward compatibility, Table implements its analogue of
         // this function itself rather than delegating to Options.
-        void add_labeled_property(
-                const std::pair<std::string, Property> &labeled_property) {
+        void add_labeled_property(const Labeled_Property &labeled_property) {
             labeled_properties_.emplace_back(labeled_property);
         }
 
@@ -167,9 +165,7 @@ public:
             return *this;
         }
 
-        Builder &add_labeled_properties(
-                const std::vector<std::pair<std::string, Property>>
-                        &labeled_properties) {
+        Builder &add_labeled_properties(const Labeled_Properties &labeled_properties) {
             options_.add_labeled_properties(labeled_properties);
             return *this;
         }
@@ -519,10 +515,10 @@ public:
         set_column_info(get_columns(), get_offsets(), dsv);
     };
 
-    size_t read_ipac_header(
-            std::istream &ipac_file, std::array<std::vector<std::string>, 4> &Columns,
-            std::vector<size_t> &ipac_table_offsets,
-            std::vector<std::pair<std::string, Property>> &labeled_resource_properties);
+    size_t read_ipac_header(std::istream &ipac_file,
+                            std::array<std::vector<std::string>, 4> &Columns,
+                            std::vector<size_t> &ipac_table_offsets,
+                            Labeled_Properties &labeled_resource_properties);
 
     void create_types_from_ipac_headers(
             std::array<std::vector<std::string>, 4> &Columns,
@@ -650,7 +646,7 @@ public:
 
     // This function is not used internally.
     static std::vector<std::pair<std::string, std::string>> flatten_properties(
-            const std::vector<std::pair<std::string, Property>> &properties);
+            const Labeled_Properties &properties);
 
 
     // getters for Optional elements
@@ -667,11 +663,10 @@ public:
     const std::vector<Field> &get_params() const { return options_.params_; }
 
 
-    std::vector<std::pair<std::string, Property>> &get_labeled_properties() {
+    Labeled_Properties &get_labeled_properties() {
         return options_.labeled_properties_;
     }
-    const std::vector<std::pair<std::string, Property>> &get_labeled_properties()
-            const {
+    const Labeled_Properties &get_labeled_properties() const {
         return options_.labeled_properties_;
     }
 
@@ -726,13 +721,11 @@ public:
         return get_results_resource_element().get_offsets();
     }
 
-    std::vector<std::pair<std::string, Property>>
-            &get_resource_element_labeled_properties() {
+    Labeled_Properties &get_resource_element_labeled_properties() {
         return get_results_resource_element().get_labeled_properties();
     }
 
-    const std::vector<std::pair<std::string, Property>>
-            &get_resource_element_labeled_properties() const {
+    const Labeled_Properties &get_resource_element_labeled_properties() const {
         return get_results_resource_element().get_labeled_properties();
     }
 
@@ -799,19 +792,17 @@ public:
 
     void add_param(const Field &param) { options_.add_param(param); }
 
-    void set_labeled_properties(
-            const std::vector<std::pair<std::string, Property>> &labeled_props) {
+    void set_labeled_properties(const Labeled_Properties &labeled_props) {
         options_.labeled_properties_ = labeled_props;
     }
 
-    void add_labeled_properties(
-            const std::vector<std::pair<std::string, Property>> &labeled_props) {
+    void add_labeled_properties(const Labeled_Properties &labeled_props) {
         options_.add_labeled_properties(labeled_props);
     }
 
     // Temporarily implemented so as to support backward compatibility; not just a
     // wrapper.
-    void add_labeled_property(const std::pair<std::string, Property> &label_and_prop);
+    void add_labeled_property(const Labeled_Property &label_and_prop);
     void add_labeled_property(const std::string &label, const Property &prop) {
         add_labeled_property(std::make_pair(label, prop));
     }
@@ -871,8 +862,7 @@ public:
         get_results_resource_element().add_attribute(attr_pair);
     }
 
-    void add_resource_element_labeled_property(
-            const std::pair<std::string, Property> &label_and_prop) {
+    void add_resource_element_labeled_property(const Labeled_Property &label_and_prop) {
         get_results_resource_element().add_labeled_property(label_and_prop);
     }
 
@@ -945,15 +935,12 @@ private:
                     &label_prop_pairs);
 
 
-    const std::vector<std::pair<std::string, Property>>
-    combine_trailing_info_lists_all_levels() const;
+    const Labeled_Properties combine_trailing_info_lists_all_levels() const;
 
-    const std::vector<std::pair<std::string, Property>>
-    combine_labeled_properties_all_levels() const;
+    const Labeled_Properties combine_labeled_properties_all_levels() const;
 
     // Called by write_hdf5_attributes() and write_fits().
-    const std::vector<std::pair<std::string, Property>> combine_attributes_all_levels()
-            const;
+    const Labeled_Properties combine_attributes_all_levels() const;
 
 
     // JTODO terminology for table that has been constructed but not loaded.
@@ -968,22 +955,21 @@ private:
     bool stash_trailing_info_labeled_by_element(
             std::vector<Property> &resource_element_infos,
             std::vector<Property> &table_element_infos,
-            const std::pair<std::string, Property> &label_and_prop);
+            const Labeled_Property &label_and_prop);
 
-    bool stash_attributes_labeled_by_element(
-            ATTRIBUTES &resource_element_attributes,
-            ATTRIBUTES &table_element_attributes,
-            const std::pair<std::string, Property> &label_and_prop);
-
-
-    void stash_resource_element_labeled_property(
-            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
-            const std::pair<std::string, Property> &label_and_prop);
+    bool stash_attributes_labeled_by_element(ATTRIBUTES &resource_element_attributes,
+                                             ATTRIBUTES &table_element_attributes,
+                                             const Labeled_Property &label_and_prop);
 
 
     void stash_resource_element_labeled_property(
-            std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
-            const std::string &label, const Property &prop) {
+            Labeled_Properties &resource_labeled_properties,
+            const Labeled_Property &label_and_prop);
+
+
+    void stash_resource_element_labeled_property(
+            Labeled_Properties &resource_labeled_properties, const std::string &label,
+            const Property &prop) {
         stash_resource_element_labeled_property(resource_labeled_properties,
                                                 std::make_pair(label, prop));
     }

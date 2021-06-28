@@ -4,9 +4,8 @@
 #include "../HDF5_Property.hxx"
 
 namespace tablator {
-std::vector<std::pair<std::string, Property> > read_metadata(
-        const H5::DataSet &dataset) {
-    std::vector<std::pair<std::string, Property> > result;
+std::vector<Labeled_Property> read_metadata(const H5::DataSet &dataset) {
+    std::vector<Labeled_Property> result;
     if (dataset.attrExists("METADATA")) {
         auto metadata = dataset.openAttribute("METADATA");
 

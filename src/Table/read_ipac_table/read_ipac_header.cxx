@@ -29,7 +29,7 @@ void check_bar_position(const std::vector<size_t> &bar_offsets, const std::strin
 size_t tablator::Table::read_ipac_header(
         std::istream &ipac_file, std::array<std::vector<std::string>, 4> &columns,
         std::vector<size_t> &ipac_column_offsets,
-        std::vector<std::pair<std::string, Property>> &labeled_resource_properties) {
+        std::vector<Labeled_Property> &labeled_resource_properties) {
     size_t line_num = 0;
     char first_character = ipac_file.peek();
 

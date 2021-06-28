@@ -22,8 +22,7 @@ const std::string read_description(const H5::DataSet &dataset,
 ////
 
 namespace tablator {
-std::vector<std::pair<std::string, Property> > read_metadata(
-        const H5::DataSet &dataset);
+std::vector<Labeled_Property> read_metadata(const H5::DataSet &dataset);
 
 std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                                          const std::string &section);
@@ -54,7 +53,7 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
 
     // Distribute the mishmash of labeled_properties stored as metadata
     // between assorted class members at assorted levels.
-    std::vector<std::pair<std::string, Property> > resource_element_labeled_properties;
+    std::vector<Labeled_Property> resource_element_labeled_properties;
     std::vector<Property> resource_element_trailing_infos;
     ATTRIBUTES resource_element_attributes;
     std::vector<Property> table_element_trailing_infos;
