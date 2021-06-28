@@ -25,7 +25,7 @@ void tablator::Table::write_html(std::ostream &os) const {
                      "border-collapse:separate;\n"
                      "border-spacing: 0.2em;\n"
                      "margin: 1em 1em 1em 4em;\n"
-                     "white-space: nowrap;\n"
+                     "white-space: wrap;\n"
                      "}\n"
                      "td {\n"
                      "margin: 0.25em;\n"
