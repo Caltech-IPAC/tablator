@@ -64,4 +64,7 @@ private:
     ATTRIBUTES attributes_;
     std::string value_;
 };
+
+using Labeled_Property = std::pair<std::string, Property>;
+using Labeled_Properties = std::vector<Labeled_Property>;
 }  // namespace tablator

@@ -25,7 +25,7 @@ tablator::Resource_Element tablator::ptree_readers::read_resource_element(
         ++child;
     }
 
-    std::vector<std::pair<std::string, Property>> labeled_properties;
+    Labeled_Properties labeled_properties;
     while (child != end && child->first == INFO) {
         labeled_properties.emplace_back(
                 std::make_pair(child->first, read_property(child->second)));

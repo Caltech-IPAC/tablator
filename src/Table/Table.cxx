@@ -66,7 +66,7 @@ Table::Table(const std::vector<Column> &columns,
 
 
 Table::Table(const std::vector<Column> &columns,
-             const std::vector<std::pair<std::string, Property>> &property_pair_vec)
+             const Labeled_Properties &property_pair_vec)
         : results_resource_idx_(0) {
     add_resource_element(load_columns_and_offsets(columns));
 
@@ -180,9 +180,8 @@ void Table::read_json(std::istream &input_stream) {
 
 //===========================================================
 
-const std::vector<std::pair<std::string, Property>>
-Table::combine_trailing_info_lists_all_levels() const {
-    std::vector<std::pair<std::string, Property>> combined_list;
+const Labeled_Properties Table::combine_trailing_info_lists_all_levels() const {
+    Labeled_Properties combined_list;
     append_info_list_with_label(combined_list, get_trailing_info_list(),
                                 VOTABLE_DOT + END_INFO_MARKER);
     append_info_list_with_label(combined_list,
@@ -198,9 +197,8 @@ Table::combine_trailing_info_lists_all_levels() const {
 //===========================================================
 
 // Called by write_fits().
-const std::vector<std::pair<std::string, Property>>
-Table::combine_attributes_all_levels() const {
-    std::vector<std::pair<std::string, Property>> combined_list;
+const Labeled_Properties Table::combine_attributes_all_levels() const {
+    Labeled_Properties combined_list;
     append_attributes_with_label(combined_list, get_attributes(), VOTABLE_XMLATTR);
     append_attributes_with_label(combined_list,
                                  get_results_resource_element().get_attributes(),
@@ -214,15 +212,12 @@ Table::combine_attributes_all_levels() const {
 
 //===========================================================
 
-const std::vector<std::pair<std::string, Property>>
-Table::combine_labeled_properties_all_levels() const {
-    std::vector<std::pair<std::string, Property>> combined_labeled_props(
-            get_labeled_properties());
+const Labeled_Properties Table::combine_labeled_properties_all_levels() const {
+    Labeled_Properties combined_labeled_props(get_labeled_properties());
     const auto &resource_labeled_props = get_resource_element_labeled_properties();
     std::transform(resource_labeled_props.begin(), resource_labeled_props.end(),
                    std::back_inserter(combined_labeled_props),
-                   [](const std::pair<std::string, Property> &nppair)
-                           -> std::pair<std::string, Property> {
+                   [](const Labeled_Property &nppair) -> Labeled_Property {
                        return std::make_pair(VOTABLE_RESOURCE_DOT + nppair.first,
                                              nppair.second);
                    });
@@ -241,14 +236,12 @@ Table::combine_labeled_properties_all_levels() const {
 // arguments to this function, which are then used as arguments to the
 // relevant constructors.
 
-void Table::distribute_metadata(
-        std::vector<std::pair<std::string, Property>>
-                &resource_element_labeled_properties,
-        std::vector<Property> &resource_element_trailing_infos,
-        ATTRIBUTES &resource_element_attributes,
-        std::vector<Property> &table_element_trailing_infos,
-        ATTRIBUTES &table_element_attributes,
-        const std::vector<std::pair<std::string, Property>> &label_prop_pairs) {
+void Table::distribute_metadata(Labeled_Properties &resource_element_labeled_properties,
+                                std::vector<Property> &resource_element_trailing_infos,
+                                ATTRIBUTES &resource_element_attributes,
+                                std::vector<Property> &table_element_trailing_infos,
+                                ATTRIBUTES &table_element_attributes,
+                                const Labeled_Properties &label_prop_pairs) {
     for (const auto &label_and_prop : label_prop_pairs) {
         if (label_and_prop.second.empty()) {
             continue;
@@ -274,7 +267,7 @@ void Table::distribute_metadata(
 bool Table::stash_trailing_info_labeled_by_element(
         std::vector<Property> &resource_element_infos,
         std::vector<Property> &table_element_infos,
-        const std::pair<std::string, Property> &label_and_prop) {
+        const Labeled_Property &label_and_prop) {
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
     if (boost::equals(label, VOTABLE_RESOURCE_TABLE_DOT + END_INFO_MARKER)) {
@@ -296,7 +289,7 @@ bool Table::stash_trailing_info_labeled_by_element(
 
 bool Table::stash_attributes_labeled_by_element(
         ATTRIBUTES &resource_element_attributes, ATTRIBUTES &table_element_attributes,
-        const std::pair<std::string, Property> &label_and_prop) {
+        const Labeled_Property &label_and_prop) {
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
     const auto &prop_attrs = prop.get_attributes();
@@ -319,8 +312,7 @@ bool Table::stash_attributes_labeled_by_element(
 
 // Call this version to add labeled_property to initialized(?) table
 // (one with a non-empty <resource_elements_> member).
-void Table::add_labeled_property(
-        const std::pair<std::string, Property> &label_and_prop) {
+void Table::add_labeled_property(const Labeled_Property &label_and_prop) {
     const auto &label = label_and_prop.first;
     const auto &prop = label_and_prop.second;
     if (is_property_style_label(label)) {
@@ -346,8 +338,8 @@ void Table::add_labeled_property(
 // This version is to be called e.g. by a read_XXX() function at a time when
 // Table's <resource_elements_> vector is still empty.
 void Table::stash_resource_element_labeled_property(
-        std::vector<std::pair<std::string, Property>> &resource_labeled_properties,
-        const std::pair<std::string, Property> &label_and_prop) {
+        Labeled_Properties &resource_labeled_properties,
+        const Labeled_Property &label_and_prop) {
     const auto &label = label_and_prop.first;
 
     const auto &prop = label_and_prop.second;

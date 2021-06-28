@@ -29,12 +29,11 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing);
 
-void add_to_property_tree(
-        boost::property_tree::ptree &parent_tree,
-        const Resource_Element &resource_element,
-        const std::vector<Data_Type> &datatypes_for_writing,
-        const std::vector<std::string> &comments,
-        const std::vector<std::pair<std::string, Property>> &table_labeled_properties);
+void add_to_property_tree(boost::property_tree::ptree &parent_tree,
+                          const Resource_Element &resource_element,
+                          const std::vector<Data_Type> &datatypes_for_writing,
+                          const std::vector<std::string> &comments,
+                          const Labeled_Properties &table_labeled_properties);
 
 
 }  // namespace tablator

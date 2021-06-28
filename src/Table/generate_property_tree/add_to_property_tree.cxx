@@ -72,9 +72,8 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 
 //==============================================================
 //*** Labeled_Properties
-void add_to_property_tree(
-        boost::property_tree::ptree &parent_tree,
-        const std::vector<std::pair<std::string, Property>> &labeled_properties) {
+void add_to_property_tree(boost::property_tree::ptree &parent_tree,
+                          const Labeled_Properties &labeled_properties) {
     for (const auto &labeled_list : labeled_properties) {
         const auto &label = labeled_list.first;
         add_to_property_tree(parent_tree, label, labeled_list.second);
@@ -227,12 +226,11 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 //==============================================================
 //*** Resource_Element
 
-void add_to_property_tree(
-        boost::property_tree::ptree &parent_tree,
-        const Resource_Element &resource_element,
-        const std::vector<Data_Type> &datatypes_for_writing,
-        const std::vector<std::string> &comments,
-        const std::vector<std::pair<std::string, Property>> &table_labeled_properties) {
+void add_to_property_tree(boost::property_tree::ptree &parent_tree,
+                          const Resource_Element &resource_element,
+                          const std::vector<Data_Type> &datatypes_for_writing,
+                          const std::vector<std::string> &comments,
+                          const Labeled_Properties &table_labeled_properties) {
     boost::property_tree::ptree &resource_tree = parent_tree.add(RESOURCE, "");
 
     for (const auto &pair : resource_element.get_attributes()) {
@@ -281,9 +279,7 @@ void add_to_property_tree(
 //*** Resource_Element
 
 static const std::vector<std::string> DEFAULT_COMMENTS = std::vector<std::string>();
-static const std::vector<std::pair<std::string, Property>>
-        DEFAULT_TABLE_LABELED_PROPERTIES =
-                std::vector<std::pair<std::string, Property>>();
+static const Labeled_Properties DEFAULT_TABLE_LABELED_PROPERTIES = Labeled_Properties();
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,

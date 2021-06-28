@@ -24,7 +24,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::array<std::vector<std::string>, 4> ipac_columns;
     std::vector<size_t> ipac_column_offsets;
 
-    std::vector<std::pair<std::string, Property>> labeled_resource_properties;
+    Labeled_Properties labeled_resource_properties;
     size_t current_line_num =
             read_ipac_header(input_stream, ipac_columns, ipac_column_offsets,
                              labeled_resource_properties);
