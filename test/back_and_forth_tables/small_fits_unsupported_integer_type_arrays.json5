@@ -13,78 +13,73 @@
         {
             "TABLE":
             {
-                "FIELD":
-                {
-                    "<xmlattr>":
+                "FIELD_ARRAY":
+                [
                     {
-                        "name": "bools",
-                        "datatype": "boolean",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "bools",
+                            "datatype": "boolean",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "ubools",
-                        "datatype": "unsignedByte",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "ubools",
+                            "datatype": "unsignedByte",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "small_shorts",
-                        "datatype": "short",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "small_shorts",
+                            "datatype": "short",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "small_ushorts",
-                        "datatype": "ushort",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "small_ushorts",
+                            "datatype": "ushort",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "small_int32s",
-                        "datatype": "int",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "small_int32s",
+                            "datatype": "int",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "small_uint32s",
-                        "datatype": "uint",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "small_uint32s",
+                            "datatype": "uint",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "small_longs",
-                        "datatype": "long",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "small_longs",
+                            "datatype": "long",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "small_ulongs",
-                        "datatype": "ulong",
-                        "arraysize": "*"
+                        "<xmlattr>":
+                        {
+                            "name": "small_ulongs",
+                            "datatype": "ulong",
+                            "arraysize": "*"
+                        }
                     }
-                },
+                ],
                 "DATA":
                 {
                     "TABLEDATA":
@@ -109,7 +104,6 @@
                             "11 22 43 56",
                             "11 22 43 56"
                         ]
-
                     ]
                 }
             }

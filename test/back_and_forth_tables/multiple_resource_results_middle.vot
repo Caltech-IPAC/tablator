@@ -38,4 +38,20 @@
       </DATA>
     </TABLE>
   </RESOURCE>
+  <RESOURCE type="afterthought" utype="adhoc:service">
+    <DESCRIPTION>Link to ZTF light curve for ztf_dr1</DESCRIPTION>
+    <GROUP name="inputParams">
+      <PARAM name="oid" datatype="char" arraysize="*" ref="col_0" value="">
+        <DESCRIPTION>identifier of a ztf object.</DESCRIPTION>
+      </PARAM>
+      <PARAM name="bad_catflags_mask" datatype="int" value="">
+        <DESCRIPTION>Bitmask used to exclude lightcurve points with at least one of the indicated catflag bits set. Default is 0.</DESCRIPTION>
+      </PARAM>
+      <PARAM name="time" datatype="char" arraysize="*" value="">
+        <DESCRIPTION>Date-time range for which lightcurve data is to be retrieved, unlimited by default. Space-separated range endpoint(s) are interpreted as Modified Julian Dates (MJD).</DESCRIPTION>
+      </PARAM>
+    </GROUP>
+    <PARAM name="standardID" datatype="char" arraysize="*" value="ivo://ivoa.net/std/DataLink#links-1.0"/>
+    <PARAM name="accessURL" datatype="char" arraysize="*" value="https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?collection=ztf_dr1"/>
+  </RESOURCE>
 </VOTABLE>

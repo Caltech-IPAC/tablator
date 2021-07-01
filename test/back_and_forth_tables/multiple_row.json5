@@ -13,42 +13,37 @@
         {
             "TABLE":
             {
-                "FIELD":
-                {
-                    "<xmlattr>":
+                "FIELD_ARRAY":
+                [
                     {
-                        "name": "ubools",
-                        "datatype": "unsignedByte",
-                        "arraysize": "2"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "ubools",
+                            "datatype": "unsignedByte"
+                        }
+                    },
                     {
-                        "name": "small_int32s",
-                        "datatype": "int",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "small_int32s",
+                            "datatype": "int"
+                        }
+                    },
                     {
-                        "name": "small_uint32s",
-                        "datatype": "uint",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "small_uint32s",
+                            "datatype": "uint"
+                        }
+                    },
                     {
-                        "name": "small_longs",
-                        "datatype": "long",
-                        "arraysize": "*"
+                        "<xmlattr>":
+                        {
+                            "name": "small_longs",
+                            "datatype": "long"
+                        }
                     }
-                },
+                ],
                 "DATA":
                 {
                     "TABLEDATA":
@@ -57,7 +52,7 @@
                             "0x4",
                             "88",
                             "65",
-                            "32",
+                            "32"
                         ],
                         [
                             "0x2",

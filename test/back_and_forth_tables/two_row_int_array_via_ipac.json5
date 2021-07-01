@@ -9,61 +9,62 @@
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE":
-        {
-            "INFO":
+        "RESOURCE_ARRAY":
+        [
             {
-                "<xmlattr>":
-                {
-                    "name": "ORIGIN",
-                    "value": "necessity"
-                }
-            },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
-                    "name": "ucd",
-                    "value": "cool.resource"
-                }
-            },
-            "TABLE":
-            {
-                "FIELD":
-                {
-                    "<xmlattr>":
+                "INFO_ARRAY":
+                [
                     {
-                        "name": "ints_0",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "ORIGIN",
+                            "value": "necessity"
+                        }
+                    },
                     {
-                        "name": "ints_1",
-                        "datatype": "int"
+                        "<xmlattr>":
+                        {
+                            "name": "ucd",
+                            "value": "cool.resource"
+                        }
                     }
-                },
-                "FIELD":
+                ],
+                "TABLE":
                 {
-                    "<xmlattr>":
+                    "FIELD_ARRAY":
+                    [
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "ints_0",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "ints_1",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "ints_2",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "ints_3",
+                                "datatype": "int"
+                            }
+                        }
+                    ],
+                    "DATA":
                     {
-                        "name": "ints_2",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "ints_3",
-                        "datatype": "int"
-                    }
-                },
-                "DATA":
-                {
-                    "TABLEDATA":
+                        "TABLEDATA":
                     [
                         [
                             "11111",
@@ -78,8 +79,9 @@
                             "-4444"
                         ]
                     ]
+                    }
                 }
             }
-        }
+        ]
     }
 }

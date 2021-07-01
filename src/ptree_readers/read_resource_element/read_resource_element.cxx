@@ -20,6 +20,9 @@ boost::property_tree::ptree::const_iterator read_top_info_section(
         if (iter->first == tablator::INFO) {
             tablator::ptree_readers::load_labeled_properties_singleton(
                     labeled_properties, tablator::INFO, iter->second);
+        } else if (iter->first == tablator::INFO_ARRAY) {
+            tablator::ptree_readers::load_labeled_properties_array(
+                    labeled_properties, tablator::INFO, iter->second);
         } else {
             break;
         }
@@ -47,9 +50,16 @@ boost::property_tree::ptree::const_iterator read_pre_links_section(
 
         } else if (iter->first == tablator::PARAM) {
             tablator::ptree_readers::load_field_singleton(params, iter->second);
+        } else if (iter->first == tablator::PARAM_ARRAY) {
+            tablator::ptree_readers::load_field_array(params, iter->second);
+
         } else if (iter->first == tablator::GROUP) {
             tablator::ptree_readers::load_group_element_singleton(group_elements,
                                                                   iter->second);
+        } else if (iter->first == tablator::GROUP_ARRAY) {
+            tablator::ptree_readers::load_group_element_array(group_elements,
+                                                              iter->second);
+
         } else if (boost::starts_with(iter->first, tablator::INFO)) {
             // JTODO INFO might possibly be allowable here if there is no
             // table and this is a trailer

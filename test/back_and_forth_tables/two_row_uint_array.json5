@@ -9,38 +9,42 @@
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE":
-        {
-            "INFO":
+        "RESOURCE_ARRAY":
+        [
             {
-                "<xmlattr>":
-                {
-                    "name": "ORIGIN",
-                    "value": "necessity"
-                }
-            },
-            "INFO":
-            {
-                "<xmlattr>":
-                {
-                    "name": "ucd",
-                    "value": "cool.resource"
-                }
-            },
-            "TABLE":
-            {
-                "FIELD":
-                {
-                    "<xmlattr>":
+                "INFO_ARRAY":
+                [
                     {
-                        "name": "uints",
-                        "datatype": "uint",
-                        "arraysize": "*"
+                        "<xmlattr>":
+                        {
+                            "name": "ORIGIN",
+                            "value": "necessity"
+                        }
+                    },
+                    {
+                        "<xmlattr>":
+                        {
+                            "name": "ucd",
+                            "value": "cool.resource"
+                        }
                     }
-                },
-                "DATA":
+                ],
+                "TABLE":
                 {
-                    "TABLEDATA":
+                    "FIELD_ARRAY":
+                    [
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "uints",
+                                "datatype": "uint",
+                                "arraysize": "*"
+                            }
+                        }
+                    ],
+                    "DATA":
+                    {
+                        "TABLEDATA":
                     [
                         [
                             "11111 22222 33333 44444"
@@ -49,8 +53,9 @@
                             "1111 2222 3333 4444"
                         ]
                     ]
+                    }
                 }
             }
-        }
+        ]
     }
 }

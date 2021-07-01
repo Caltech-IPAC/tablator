@@ -32,6 +32,29 @@ void Option_to_xml(boost::property_tree::ptree &tree, const tablator::Option &op
         for (auto &o : option.options) Option_to_xml(option_tree, o);
     }
 }
+
+
+// If allow_dups is true, add a subtree with label <label> whether or
+// not a subtree already exists with that label.  Otherwise,
+// find---or, if none exists, create---a tree with label <label>_ARRAY
+// and add an un-labeled subtree to that.
+boost::property_tree::ptree &find_or_add_tree(boost::property_tree::ptree &parent_tree,
+                                              const std::string &label,
+                                              bool allow_dups) {
+    if (allow_dups) {
+        return parent_tree.add(label, "");
+    }
+
+    boost::optional<boost::property_tree::ptree &> array_tree_opt =
+            parent_tree.get_child_optional(label + tablator::ARRAY_TAIL);
+    boost::property_tree::ptree &array_tree =
+            array_tree_opt ? array_tree_opt.get()
+                           : parent_tree.add(label + tablator::ARRAY_TAIL, "");
+    array_tree.push_back(std::make_pair("", boost::property_tree::ptree()));
+    boost::property_tree::ptree &new_tree = array_tree.back().second;
+    return new_tree;
+}
+
 }  // namespace
 
 namespace tablator {
@@ -48,11 +71,15 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 //==============================================================
 //*** Property
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const std::string &label, const Property &property) {
+                          const std::string &label, const Property &property,
+                          bool allow_dups) {
     const auto &value = property.get_value();
     const auto &attributes = property.get_attributes();
     if (is_property_style_label(label)) {
-        auto &label_tree = parent_tree.add(label, value);
+        auto &label_tree = find_or_add_tree(parent_tree, label, allow_dups);
+        if (!value.empty()) {
+            label_tree.put_value(value);
+        }
         add_to_property_tree(label_tree, attributes);
     } else if (label.empty()) {
         // JTODO ignore value?  Error if there is a value?
@@ -73,10 +100,11 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 //==============================================================
 //*** Labeled_Properties
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const Labeled_Properties &labeled_properties) {
+                          const Labeled_Properties &labeled_properties,
+                          bool allow_dups) {
     for (const auto &labeled_list : labeled_properties) {
         const auto &label = labeled_list.first;
-        add_to_property_tree(parent_tree, label, labeled_list.second);
+        add_to_property_tree(parent_tree, label, labeled_list.second, allow_dups);
     }
 }
 
@@ -85,8 +113,9 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 //*** Column
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::string &col_label, const Column &column,
-                          const Data_Type &active_datatype) {
-    boost::property_tree::ptree &field_tree = parent_tree.add(col_label, "");
+                          const Data_Type &active_datatype, bool allow_dups) {
+    auto &field_tree = find_or_add_tree(parent_tree, col_label, allow_dups);
+
     field_tree.add(XMLATTR_NAME, column.get_name());
     std::string datatype = to_xml_string(active_datatype);
     field_tree.add(XMLATTR_DATATYPE, datatype);
@@ -133,7 +162,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     }
 
     if (!field_properties.get_hdf5_links().empty()) {
-        auto &link_tree = parent_tree.add(LINK, "");
+        auto &link_tree = find_or_add_tree(field_tree, LINK, allow_dups);
         for (auto &link : field_properties.get_hdf5_links()) {
             link_tree.add(XMLATTR_DOT + "hdf5.link." + link.first, link.second);
         }
@@ -141,23 +170,25 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 
     // Add as Labeled_Properties
     if (!field_properties.get_links().empty()) {
-        add_to_property_tree(field_tree, field_properties.get_links());
+        add_to_property_tree(field_tree, field_properties.get_links(), allow_dups);
     }
 }
 
 //==============================================================
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const std::string &col_label, const Column &column) {
-    add_to_property_tree(parent_tree, col_label, column, column.get_type());
+                          const std::string &col_label, const Column &column,
+                          bool allow_dups) {
+    add_to_property_tree(parent_tree, col_label, column, column.get_type(), allow_dups);
 }
 
 
 //==============================================================
 //*** Group_Element
-void add_to_property_tree(boost::property_tree::ptree &tree,
-                          const Group_Element &group_element) {
-    boost::property_tree::ptree &group_tree = tree.add(GROUP, "");
+void add_to_property_tree(boost::property_tree::ptree &parent_tree,
+                          const Group_Element &group_element, bool allow_dups) {
+    auto &group_tree = find_or_add_tree(parent_tree, GROUP, allow_dups);
+
     for (const auto &pair : group_element.get_attributes()) {
         group_tree.add(XMLATTR_DOT + pair.first, pair.second);
     }
@@ -166,7 +197,7 @@ void add_to_property_tree(boost::property_tree::ptree &tree,
     }
 
     for (const auto &param : group_element.get_params()) {
-        add_to_property_tree(group_tree, PARAM, param);
+        add_to_property_tree(group_tree, PARAM, param, allow_dups);
     }
 
     for (const auto &attr_map : group_element.get_field_refs()) {
@@ -183,7 +214,7 @@ void add_to_property_tree(boost::property_tree::ptree &tree,
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Table_Element &table_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
-                          const std::vector<std::string> &comments) {
+                          const std::vector<std::string> &comments, bool allow_dups) {
     boost::property_tree::ptree &table_tree = parent_tree.add(TABLE, "");
 
     for (const auto &pair : table_element.get_attributes()) {
@@ -206,24 +237,25 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     }
 
     for (const auto &group : table_element.get_group_elements()) {
-        add_to_property_tree(table_tree, group);
+        add_to_property_tree(table_tree, group, allow_dups);
     }
 
     for (auto &param : table_element.get_params()) {
-        add_to_property_tree(table_tree, PARAM, param);
+        add_to_property_tree(table_tree, PARAM, param, allow_dups);
     }
 
     const auto columns = table_element.get_columns();
 
     // Skip null_bitfield_flag
     for (size_t i = 1; i < columns.size(); ++i) {
-        add_to_property_tree(table_tree, FIELD, columns[i], datatypes_for_writing[i]);
+        add_to_property_tree(table_tree, FIELD, columns[i], datatypes_for_writing[i],
+                             allow_dups);
     }
 
     // We don't add tabledata directly because it is not in ptree format.
     table_tree.add(DATA_TABLEDATA, TABLEDATA_PLACEHOLDER);
     for (const auto &info : table_element.get_trailing_info_list()) {
-        add_to_property_tree(table_tree, INFO, info);
+        add_to_property_tree(table_tree, INFO, info, allow_dups);
     }
 }
 
@@ -234,8 +266,9 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           const std::vector<std::string> &comments,
-                          const Labeled_Properties &table_labeled_properties) {
-    boost::property_tree::ptree &resource_tree = parent_tree.add(RESOURCE, "");
+                          const Labeled_Properties &table_labeled_properties,
+                          bool allow_dups) {
+    auto &resource_tree = find_or_add_tree(parent_tree, RESOURCE, allow_dups);
 
     for (const auto &pair : resource_element.get_attributes()) {
         resource_tree.add(XMLATTR_DOT + pair.first, pair.second);
@@ -250,31 +283,33 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         const auto &prop = name_and_prop.second;
         if (boost::starts_with(name, VOTABLE_RESOURCE_DOT)) {
             add_to_property_tree(resource_tree,
-                                 name.substr(VOTABLE_RESOURCE_DOT.size() + 1), prop);
+                                 name.substr(VOTABLE_RESOURCE_DOT.size() + 1), prop,
+                                 allow_dups);
         }
     }
 
     if (!resource_element.get_labeled_properties().empty()) {
-        add_to_property_tree(resource_tree, resource_element.get_labeled_properties());
+        add_to_property_tree(resource_tree, resource_element.get_labeled_properties(),
+                             allow_dups);
     }
 
     for (const auto &group : resource_element.get_group_elements()) {
-        add_to_property_tree(resource_tree, group);
+        add_to_property_tree(resource_tree, group, allow_dups);
     }
 
     for (const auto &param : resource_element.get_params()) {
-        add_to_property_tree(resource_tree, PARAM, param);
+        add_to_property_tree(resource_tree, PARAM, param, allow_dups);
     }
 
     if (resource_element.is_results_resource()) {
         // write only one table_element
         const auto &table_element = resource_element.get_main_table_element();
         add_to_property_tree(resource_tree, table_element, datatypes_for_writing,
-                             comments);
+                             comments, allow_dups);
     }
 
     for (const auto &info : resource_element.get_trailing_info_list()) {
-        add_to_property_tree(resource_tree, INFO, info);
+        add_to_property_tree(resource_tree, INFO, info, allow_dups);
     }
 }
 
@@ -287,9 +322,11 @@ static const Labeled_Properties DEFAULT_TABLE_LABELED_PROPERTIES = Labeled_Prope
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
-                          const std::vector<Data_Type> &datatypes_for_writing) {
+                          const std::vector<Data_Type> &datatypes_for_writing,
+                          bool allow_dups) {
     add_to_property_tree(parent_tree, resource_element, datatypes_for_writing,
-                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES);
+                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES,
+                         allow_dups);
 }
 
 

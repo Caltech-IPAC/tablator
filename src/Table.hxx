@@ -922,7 +922,8 @@ private:
 
 
     boost::property_tree::ptree generate_property_tree(
-            const std::vector<Data_Type> &datatypes_for_writing) const;
+            const std::vector<Data_Type> &datatypes_for_writing,
+            bool allow_dups = true) const;
 
     void distribute_metadata(
             std::vector<std::pair<std::string, tablator::Property>>

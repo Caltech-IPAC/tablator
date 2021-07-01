@@ -24,6 +24,25 @@ bool load_resource_element_singleton(
     return is_results_resource;
 }
 
+bool load_resource_element_array(
+        std::vector<tablator::Resource_Element> &resource_elements,
+        const boost::property_tree::ptree &array_tree,
+        bool &already_loaded_results_resource, size_t start_resource_idx,
+        size_t &results_resource_idx) {
+    bool contains_results_resource = false;
+    size_t curr_resource_idx = start_resource_idx;
+    for (const auto &elt : array_tree) {
+        bool is_results_resource = load_resource_element_singleton(
+                resource_elements, elt.second, already_loaded_results_resource);
+        if (is_results_resource) {
+            results_resource_idx = curr_resource_idx;
+            contains_results_resource = true;
+        }
+        ++curr_resource_idx;
+    }
+    return contains_results_resource;
+}
+
 
 // Helper function which handles the part of the property_tree corresponding to
 // the section of a VOTable preceding the RESOURCE element per the IVOA spec.
@@ -41,11 +60,22 @@ boost::property_tree::ptree::const_iterator populate_pre_resource_section(
             (iter->first == tablator::INFO)) {
             tablator::ptree_readers::load_labeled_properties_singleton(
                     labeled_properties, tablator::INFO, iter->second);
+        } else if (iter->first == tablator::INFO_ARRAY) {
+            tablator::ptree_readers::load_labeled_properties_array(
+                    labeled_properties, tablator::INFO, iter->second);
+
         } else if (iter->first == tablator::PARAM) {
             tablator::ptree_readers::load_field_singleton(params, iter->second);
+        } else if (iter->first == tablator::PARAM_ARRAY) {
+            tablator::ptree_readers::load_field_array(params, iter->second);
+
         } else if (iter->first == tablator::GROUP) {
             tablator::ptree_readers::load_group_element_singleton(group_elements,
                                                                   iter->second);
+        } else if (iter->first == tablator::GROUP_ARRAY) {
+            tablator::ptree_readers::load_group_element_array(group_elements,
+                                                              iter->second);
+
         } else {
             throw std::runtime_error(
                     "In VOTABLE, expected COOSYS, TIMESYS, GROUP, "
@@ -108,12 +138,23 @@ void tablator::ptree_readers::read_property_tree_as_votable(
     auto &resource_elements = table.get_resource_elements();
     bool found_results_resource = false;
     size_t curr_resource_idx = 0;
+    size_t results_resource_idx = 0;
 
-    while (child != end && (child->first == RESOURCE)) {
-        bool is_results_resource = load_resource_element_singleton(
-                resource_elements, child->second, found_results_resource);
-        if (is_results_resource) {
-            table.set_results_resource_idx(curr_resource_idx);
+    while (child != end &&
+           (child->first == RESOURCE || child->first == RESOURCE_ARRAY)) {
+        if (child->first == RESOURCE) {
+            bool is_results_resource = load_resource_element_singleton(
+                    resource_elements, child->second, found_results_resource);
+            if (is_results_resource) {
+                table.set_results_resource_idx(curr_resource_idx);
+            }
+        } else {
+            bool contains_results_resource = load_resource_element_array(
+                    resource_elements, child->second, found_results_resource,
+                    curr_resource_idx, results_resource_idx);
+            if (contains_results_resource) {
+                table.set_results_resource_idx(results_resource_idx);
+            }
         }
         ++curr_resource_idx;
         ++child;

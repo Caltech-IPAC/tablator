@@ -140,12 +140,10 @@ public:
         set_attributes(attributes);
     }
 
-
     Field_Properties(const std::string &description, const ATTRIBUTES &attributes) {
         set_description(description);
         set_attributes(attributes);
     }
-
 
     Field_Properties(const std::string &description, const ATTRIBUTES &attributes,
                      const Values &v, const std::vector<Labeled_Property> &links) {
@@ -193,6 +191,7 @@ public:
     void set_description(const std::string &desc) { options_.set_description(desc); }
 
     void set_values(const Values &values) { options_.set_values(values); }
+
 
     void add_hdf5_links(
             const std::vector<std::pair<std::string, std::string>> &hdf5_links) {
