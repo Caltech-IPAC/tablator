@@ -115,11 +115,13 @@ static const std::string DATA_TABLEDATA(DATA + DOT + TABLEDATA);
 
 static const std::string TABLEDATA_PLACEHOLDER("TaBlEdAtA_PlAcEhOlDeR");
 
+static const std::string HDF5_LINK("hdf5.link.");
+
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;
 static constexpr size_t PLACEHOLDER_RIGHT_MARGIN = 5;
 
 // No complicated sub-elements, only attributes and/or string value.
-static std::vector<std::string> PROPERTY_STYLE_LABELS = {COOSYS, INFO, TIMESYS};
+static std::vector<std::string> PROPERTY_STYLE_LABELS = {COOSYS, INFO, TIMESYS, LINK};
 inline bool is_property_style_label(const std::string &label) {
     return (std::find(PROPERTY_STYLE_LABELS.begin(), PROPERTY_STYLE_LABELS.end(),
                       label) != PROPERTY_STYLE_LABELS.end());
