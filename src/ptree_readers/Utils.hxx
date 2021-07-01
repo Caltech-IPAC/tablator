@@ -17,14 +17,13 @@ void load_field_array(std::vector<tablator::Field> &params,
                       const boost::property_tree::ptree &array_tree);
 
 
-void load_labeled_properties_singleton(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        const std::string &element_label, const boost::property_tree::ptree &node);
+void load_labeled_properties_singleton(tablator::Labeled_Properties &labeled_properties,
+                                       const std::string &element_label,
+                                       const boost::property_tree::ptree &node);
 
-void load_labeled_properties_array(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        const std::string &element_label,
-        const boost::property_tree::ptree &array_tree);
+void load_labeled_properties_array(tablator::Labeled_Properties &labeled_properties,
+                                   const std::string &element_label,
+                                   const boost::property_tree::ptree &array_tree);
 
 
 void load_attributes_singleton(std::vector<tablator::ATTRIBUTES> &attrs,
@@ -42,7 +41,7 @@ void load_group_element_array(std::vector<tablator::Group_Element> &group_elemen
 
 
 boost::property_tree::ptree::const_iterator read_links_section(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        tablator::Labeled_Properties &labeled_properties,
         boost::property_tree::ptree::const_iterator &start,
         boost::property_tree::ptree::const_iterator &end, const std::string &next_tag);
 

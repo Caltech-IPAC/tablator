@@ -192,8 +192,7 @@ public:
           const std::map<std::string, std::string> &property_map);
 
     Table(const std::vector<Column> &Columns,
-          const std::vector<std::pair<std::string, tablator::Property>>
-                  &property_pair_vec);
+          const tablator::Labeled_Properties &property_pair_vec);
     Table(const std::vector<Column> &Columns)
             : Table(Columns, std::map<std::string, std::string>()) {}
 
@@ -926,14 +925,12 @@ private:
             bool allow_dups = true) const;
 
     void distribute_metadata(
-            std::vector<std::pair<std::string, tablator::Property>>
-                    &resource_element_labeled_properties,
+            tablator::Labeled_Properties &resource_element_labeled_properties,
             std::vector<tablator::Property> &resource_element_trailing_infos,
             tablator::ATTRIBUTES &resource_element_attributes,
             std::vector<tablator::Property> &table_element_trailing_infos,
             tablator::ATTRIBUTES &table_element_attributes,
-            const std::vector<std::pair<std::string, tablator::Property>>
-                    &label_prop_pairs);
+            const tablator::Labeled_Properties &label_prop_pairs);
 
 
     const Labeled_Properties combine_trailing_info_lists_all_levels() const;

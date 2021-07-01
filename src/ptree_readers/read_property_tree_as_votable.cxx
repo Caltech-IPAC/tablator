@@ -48,7 +48,7 @@ bool load_resource_element_array(
 // the section of a VOTable preceding the RESOURCE element per the IVOA spec.
 
 boost::property_tree::ptree::const_iterator populate_pre_resource_section(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        tablator::Labeled_Properties &labeled_properties,
         std::vector<tablator::Field> &params,
         std::vector<tablator::Group_Element> &group_elements,
         boost::property_tree::ptree::const_iterator &start,
