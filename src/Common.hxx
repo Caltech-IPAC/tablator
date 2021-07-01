@@ -115,6 +115,17 @@ static const std::string DATA_TABLEDATA(DATA + DOT + TABLEDATA);
 
 static const std::string TABLEDATA_PLACEHOLDER("TaBlEdAtA_PlAcEhOlDeR");
 
+static const std::string ARRAY_TAIL("_ARRAY");
+
+static const std::string FIELD_ARRAY(FIELD + ARRAY_TAIL);
+static const std::string FIELDREF_ARRAY(FIELDREF + ARRAY_TAIL);
+static const std::string GROUP_ARRAY(GROUP + ARRAY_TAIL);
+static const std::string INFO_ARRAY(INFO + ARRAY_TAIL);
+static const std::string LINK_ARRAY(LINK + ARRAY_TAIL);
+static const std::string PARAM_ARRAY(PARAM + ARRAY_TAIL);
+static const std::string PARAMREF_ARRAY(PARAMREF + ARRAY_TAIL);
+static const std::string RESOURCE_ARRAY(RESOURCE + ARRAY_TAIL);
+
 static const std::string HDF5_LINK("hdf5.link.");
 
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;

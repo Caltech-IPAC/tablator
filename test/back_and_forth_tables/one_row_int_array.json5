@@ -25,29 +25,33 @@
                 "value": "cool.votable"
             }
         },
-        "RESOURCE":
-        {
-            "TABLE":
+        "RESOURCE_ARRAY":
+        [
             {
-                "FIELD":
+                "TABLE":
                 {
-                    "<xmlattr>":
+                    "FIELD_ARRAY":
+                    [
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "ints",
+                                "datatype": "int",
+                                "arraysize": "*"
+                            }
+                        }
+                    ],
+                    "DATA":
                     {
-                        "name": "ints",
-                        "datatype": "int",
-                        "arraysize": "*"
-                    }
-                },
-                "DATA":
-                {
-                    "TABLEDATA":
+                        "TABLEDATA":
                     [
                         [
                             "1 2 3 4"
                         ]
                     ]
+                    }
                 }
             }
-        }
+        ]
     }
 }

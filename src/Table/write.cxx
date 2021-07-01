@@ -36,7 +36,6 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
     // List of cols whose types must be adjusted for writing due
     // to restrictions from <format>.
     std::vector<Data_Type> datatypes_for_writing;
-
     switch (format.enum_format) {
         case Format::Enums::FITS:
             datatypes_for_writing = Data_Type_Adjuster(*this).get_datatypes_for_writing(
@@ -51,10 +50,11 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
         case Format::Enums::VOTABLE: {
             datatypes_for_writing = Data_Type_Adjuster(*this).get_datatypes_for_writing(
                     format.enum_format);
-            boost::property_tree::ptree tree(
-                    generate_property_tree(datatypes_for_writing));
-            std::stringstream ss;
             bool is_json(format.enum_format != Format::Enums::VOTABLE);
+            boost::property_tree::ptree tree(
+                    generate_property_tree(datatypes_for_writing, !is_json));
+            std::stringstream ss;
+
             if (is_json) {
                 boost::property_tree::write_json(ss, tree, true);
             } else {

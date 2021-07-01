@@ -74,5 +74,6 @@ boost::property_tree::ptree read_xml_string_as_property_tree(
 void add_params_from_xml_string(std::vector<Field> &params,
                                 const std::string &params_xml);
 
+
 }  // namespace ptree_readers
 }  // namespace tablator

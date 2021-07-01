@@ -13,42 +13,41 @@
         {
             "TABLE":
             {
-                "FIELD":
-                {
-                    "<xmlattr>":
+                "FIELD_ARRAY":
+                [
                     {
-                        "name": "bools",
-                        "datatype": "boolean",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "bools",
+                            "datatype": "boolean",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "ints",
-                        "datatype": "int",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "ints",
+                            "datatype": "int",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "uints",
-                        "datatype": "uint",
-                        "arraysize": "*"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
+                        "<xmlattr>":
+                        {
+                            "name": "uints",
+                            "datatype": "uint",
+                            "arraysize": "*"
+                        }
+                    },
                     {
-                        "name": "longs",
-                        "datatype": "long",
-                        "arraysize": "*"
+                        "<xmlattr>":
+                        {
+                            "name": "longs",
+                            "datatype": "long",
+                            "arraysize": "*"
+                        }
                     }
-                },
+                ],
                 "DATA":
                 {
                     "TABLEDATA":

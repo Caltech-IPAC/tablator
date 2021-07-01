@@ -344,6 +344,19 @@ fi
 #################################################################
 
 ${tablator_bin}  test/fits_medium.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert FITS file to VOTable"
+else
+    echo "FAIL: Convert FITS file to VOTable"
+fi
+
+
+${tablator_bin} test/int_types_with_duplicate_keys.json5 out.json5 && diff -w test/int_types.json5 out.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert duplicate keys in JSON5 format to array"
+else
+    echo "FAIL: Convert duplicate keys in JSON5 format to array"
+fi
 
 
 ###########################################################
@@ -611,7 +624,7 @@ ${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/col_descri
 ${tablator_bin} --input-format=ipac_table temp.out temp.vot && diff -w test/back_and_forth_tables/col_descriptions_with_newlines.round_trip.xml temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with newlines in column descriptions to IPAC Table and back"
-    rm -f temp.out
+    rm -f temp.vot
     rm -f temp.tbl
 else
     echo "FAIL: Convert VOTable with newlines in column descriptions to IPAC Table and back"
@@ -639,6 +652,38 @@ else
 fi
 
 
+${tablator_bin} test/back_and_forth_tables/multiple_group_example.vot temp.json5 &&
+${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_group_example.vot out.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with multiple group metadata from VOTable to JSON5 and back"
+    rm -f temp_json5
+    rm -f out.vot
+else
+    echo "FAIL: Convert table with multiple group metadata from VOTable to JSON5 and back"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multiple_resource_results_last.vot temp.json5 &&
+${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_resource_results_last.vot out.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with multiple resource elements from VOTable to JSON5 and back"
+    rm -f temp_json5
+    rm -f out.vot
+else
+    echo "FAIL: Convert table with multiple resource elements from VOTable to JSON5 and back"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multiple_resource_results_middle.vot temp.json5 &&
+${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_resource_results_middle.vot out.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with resource element in the middle from VOTable to JSON5 and back"
+    rm -f temp_json5
+    rm -f out.vot
+else
+    echo "FAIL: Convert table with resource element in the middle from VOTable to JSON5 and back"
+fi
+
+
+
 #################################################################
 # not straight conversions
 #################################################################
@@ -651,7 +696,7 @@ else
     echo "FAIL: Write subtable with selected rows in IPAC Table format"
 fi
 
-${tablator_bin} --static=1 --row-list="0 2 1 2 0" test/back_and_forth_tables/multi_row.json5 temp.tbl && diff -w test/back_and_forth_tables/multi_row_02120.tbl temp.tbl
+${tablator_bin} --static=1 --row-list="0 2 1 2 0" test/back_and_forth_tables/multiple_row.json5 temp.tbl && diff -w test/back_and_forth_tables/multiple_row_02120.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with repeated selected rows in IPAC Table format"
     rm -f temp_file
@@ -953,8 +998,11 @@ if [ $? -eq 0 ]; then
     echo "PASS: Table with multiple group metadata"
     rm -f temp_file
 else
-    echo "FAIL: Table with multiple group metadata"
+    echo "FAIL: Table with  multiple group metadata"
 fi
+
+
+
 
 ${tablator_bin} test/back_and_forth_tables/multiple_resource_results_first.vot temp.vot && diff test/back_and_forth_tables/multiple_resource_results_first_rearranged.vot temp.vot
 if [ $? -eq 0 ]; then
@@ -972,6 +1020,14 @@ else
     echo "FAIL: Table with results resource last"
 fi
 
+${tablator_bin} test/back_and_forth_tables/multiple_resource_results_last.vot temp.json5 && diff test/back_and_forth_tables/multiple_resource_results_last.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with multiple resources to JSON5"
+    rm -f temp.json5
+else
+    echo "FAIL: Convert table with multiple resources to JSON5"
+fi
+
 
 ${tablator_bin} test/back_and_forth_tables/multiple_info_example.vot temp.vot && diff test/back_and_forth_tables/multiple_info_example_rearranged.vot temp.vot
 if [ $? -eq 0 ]; then
@@ -980,3 +1036,4 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: Table with multiple infos"
 fi
+

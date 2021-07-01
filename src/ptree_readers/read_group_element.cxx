@@ -7,6 +7,7 @@
 namespace tablator {
 namespace ptree_readers {
 
+
 //==========================================
 
 tablator::Group_Element read_group_element(
@@ -34,10 +35,19 @@ tablator::Group_Element read_group_element(
     while (child != end) {
         if (child->first == FIELDREF) {
             load_attributes_singleton(field_refs, child->second);
+        } else if (child->first == FIELDREF_ARRAY) {
+            load_attributes_array(field_refs, child->second);
+
         } else if (child->first == PARAMREF) {
             load_attributes_singleton(param_refs, child->second);
+        } else if (child->first == PARAMREF_ARRAY) {
+            load_attributes_array(param_refs, child->second);
+
         } else if (child->first == PARAM) {
             load_field_singleton(params, child->second);
+        } else if (child->first == PARAM_ARRAY) {
+            load_field_array(params, child->second);
+
         } else if (child->first == GROUP) {
             //            read_group_element(GROUP, child->second);  // JTODO recurse
         } else {

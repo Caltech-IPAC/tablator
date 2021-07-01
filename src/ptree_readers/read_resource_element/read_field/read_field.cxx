@@ -3,6 +3,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
 
+
 namespace tablator {
 Values read_values(const boost::property_tree::ptree &values);
 }
@@ -50,6 +51,15 @@ void load_link_singleton(
             std::make_pair(tablator::LINK, tablator::Property(attrs)));
 }
 
+void load_link_array(
+        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        std::vector<std::pair<std::string, std::string>> &hdf5_links,
+        const boost::property_tree::ptree &array_tree) {
+    for (const auto &elt : array_tree) {
+        load_link_singleton(labeled_properties, hdf5_links, elt.second);
+    }
+}
+
 
 boost::property_tree::ptree::const_iterator read_links_section(
         std::vector<std::pair<std::string, tablator::Property>> &links,
@@ -61,6 +71,9 @@ boost::property_tree::ptree::const_iterator read_links_section(
     while (iter != end) {
         if (iter->first == tablator::LINK) {
             load_link_singleton(links, hdf5_links, iter->second);
+        } else if (iter->first == tablator::LINK_ARRAY) {
+            load_link_array(links, hdf5_links, iter->second);
+
         } else if (iter->first == next_tag) {
             break;
         } else {

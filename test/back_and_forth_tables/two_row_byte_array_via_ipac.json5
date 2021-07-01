@@ -9,77 +9,73 @@
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE":
-        {
-            "TABLE":
+        "RESOURCE_ARRAY":
+        [
             {
-                "FIELD":
+                "TABLE":
                 {
-                    "<xmlattr>":
+                    "FIELD_ARRAY":
+                    [
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_0",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_1",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_2",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_3",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_4",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_5",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_6",
+                                "datatype": "int"
+                            }
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "bytes_7",
+                                "datatype": "int"
+                            }
+                        }
+                    ],
+                    "DATA":
                     {
-                        "name": "bytes_0",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "bytes_1",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "bytes_2",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "bytes_3",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "bytes_4",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "bytes_5",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "bytes_6",
-                        "datatype": "int"
-                    }
-                },
-                "FIELD":
-                {
-                    "<xmlattr>":
-                    {
-                        "name": "bytes_7",
-                        "datatype": "int"
-                    }
-                },
-                "DATA":
-                {
-                    "TABLEDATA":
+                        "TABLEDATA":
                     [
                         [
                             "1",
@@ -102,8 +98,9 @@
                             "52"
                         ]
                     ]
+                    }
                 }
             }
-        }
+        ]
     }
 }

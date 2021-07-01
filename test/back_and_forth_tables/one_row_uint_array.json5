@@ -9,29 +9,33 @@
             "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
             "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
         },
-        "RESOURCE":
-        {
-            "TABLE":
+        "RESOURCE_ARRAY":
+        [
             {
-                "FIELD":
+                "TABLE":
                 {
-                    "<xmlattr>":
+                    "FIELD_ARRAY":
+                    [
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "uints",
+                                "datatype": "uint",
+                                "arraysize": "*"
+                            }
+                        }
+                    ],
+                    "DATA":
                     {
-                        "name": "uints",
-                        "datatype": "uint",
-                        "arraysize": "*"
-                    }
-                },
-                "DATA":
-                {
-                    "TABLEDATA":
+                        "TABLEDATA":
                     [
                         [
                             "1 2 3 4"
                         ]
                     ]
+                    }
                 }
             }
-        }
+        ]
     }
 }

@@ -16,6 +16,14 @@ void load_field_and_flag_singleton(
     field_flag_pairs.emplace_back(tablator::ptree_readers::read_field(node));
 }
 
+void load_field_and_flag_array(
+        std::vector<tablator::ptree_readers::Field_And_Flag> &field_flag_pairs,
+        const boost::property_tree::ptree &array_tree) {
+    for (const auto &elt : array_tree) {
+        load_field_and_flag_singleton(field_flag_pairs, elt.second);
+    }
+}
+
 
 // Helper function which handles the part of the property_tree corresponding to
 // the section of a VOTable TABLE element preceding its DATA element per the IVOA spec.
@@ -30,12 +38,23 @@ boost::property_tree::ptree::const_iterator load_pre_data_section(
     while (iter != end) {
         if (iter->first == tablator::FIELD) {
             load_field_and_flag_singleton(field_flag_pairs, iter->second);
+        } else if (iter->first == tablator::FIELD_ARRAY) {
+            load_field_and_flag_array(field_flag_pairs, iter->second);
+
         } else if (iter->first == tablator::PARAM) {
             tablator::ptree_readers::load_field_singleton(params, iter->second);
+        } else if (iter->first == tablator::PARAM_ARRAY) {
+            tablator::ptree_readers::load_field_array(params, iter->second);
+
         } else if (iter->first == tablator::GROUP) {
             tablator::ptree_readers::load_group_element_singleton(group_elements,
                                                                   iter->second);
-        } else if ((iter->first == tablator::DATA) || (iter->first == tablator::INFO)) {
+        } else if (iter->first == tablator::GROUP_ARRAY) {
+            tablator::ptree_readers::load_group_element_array(group_elements,
+                                                              iter->second);
+
+        } else if ((iter->first == tablator::DATA) || (iter->first == tablator::INFO) ||
+                   (iter->first == tablator::INFO_ARRAY)) {
             break;
         } else {
             throw std::runtime_error(
