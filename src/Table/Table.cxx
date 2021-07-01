@@ -4,20 +4,19 @@
 #include "../ptree_readers.hxx"
 
 namespace {
-void append_info_list_with_label(
-        std::vector<std::pair<std::string, tablator::Property>> &combined_list,
-        const std::vector<tablator::Property> &info_list, const std::string &label) {
+void append_info_list_with_label(tablator::Labeled_Properties &combined_list,
+                                 const std::vector<tablator::Property> &info_list,
+                                 const std::string &label) {
     std::transform(info_list.begin(), info_list.end(),
                    std::back_inserter(combined_list),
-                   [&](const tablator::Property &prop)
-                           -> std::pair<std::string, tablator::Property> {
+                   [&](const tablator::Property &prop) -> tablator::Labeled_Property {
                        return std::make_pair(label, prop);
                    });
 }
 
-void append_attributes_with_label(
-        std::vector<std::pair<std::string, tablator::Property>> &combined_list,
-        const tablator::ATTRIBUTES &attrs, const std::string &label) {
+void append_attributes_with_label(tablator::Labeled_Properties &combined_list,
+                                  const tablator::ATTRIBUTES &attrs,
+                                  const std::string &label) {
     if (attrs.empty()) {
         return;
     }

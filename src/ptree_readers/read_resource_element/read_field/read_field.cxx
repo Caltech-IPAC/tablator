@@ -32,10 +32,9 @@ tablator::Data_Type string_to_Type(const std::string &s) {
 // both "links" and "hdf5_links", which are both represented in
 // VOTables as LINK elements and must be disentangled here.
 
-void load_link_singleton(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        std::vector<std::pair<std::string, std::string>> &hdf5_links,
-        const boost::property_tree::ptree &node) {
+void load_link_singleton(tablator::Labeled_Properties &labeled_properties,
+                         std::vector<std::pair<std::string, std::string>> &hdf5_links,
+                         const boost::property_tree::ptree &node) {
     const auto attrs = tablator::ptree_readers::extract_attributes(node);
 
     if (attrs.size() == 1) {
@@ -51,10 +50,9 @@ void load_link_singleton(
             std::make_pair(tablator::LINK, tablator::Property(attrs)));
 }
 
-void load_link_array(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        std::vector<std::pair<std::string, std::string>> &hdf5_links,
-        const boost::property_tree::ptree &array_tree) {
+void load_link_array(tablator::Labeled_Properties &labeled_properties,
+                     std::vector<std::pair<std::string, std::string>> &hdf5_links,
+                     const boost::property_tree::ptree &array_tree) {
     for (const auto &elt : array_tree) {
         load_link_singleton(labeled_properties, hdf5_links, elt.second);
     }
@@ -62,7 +60,7 @@ void load_link_array(
 
 
 boost::property_tree::ptree::const_iterator read_links_section(
-        std::vector<std::pair<std::string, tablator::Property>> &links,
+        tablator::Labeled_Properties &links,
         std::vector<std::pair<std::string, std::string>> &hdf5_links,
         boost::property_tree::ptree::const_iterator &start,
         boost::property_tree::ptree::const_iterator &end, const std::string &next_tag) {

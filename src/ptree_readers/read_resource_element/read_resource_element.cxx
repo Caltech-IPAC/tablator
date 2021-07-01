@@ -12,7 +12,7 @@ namespace {
 
 
 boost::property_tree::ptree::const_iterator read_top_info_section(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        tablator::Labeled_Properties &labeled_properties,
         boost::property_tree::ptree::const_iterator &start,
         boost::property_tree::ptree::const_iterator &end) {
     boost::property_tree::ptree::const_iterator &iter = start;
@@ -36,7 +36,7 @@ boost::property_tree::ptree::const_iterator read_top_info_section(
 // the section of a VOTable preceding the LINK element(s) per the IVOA spec.
 
 boost::property_tree::ptree::const_iterator read_pre_links_section(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        tablator::Labeled_Properties &labeled_properties,
         std::vector<tablator::Field> &params,
         std::vector<tablator::Group_Element> &group_elements,
         boost::property_tree::ptree::const_iterator &start,

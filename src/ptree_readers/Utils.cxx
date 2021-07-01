@@ -7,17 +7,15 @@
 namespace {
 
 
-void load_link_singleton(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        const boost::property_tree::ptree &node) {
+void load_link_singleton(tablator::Labeled_Properties &labeled_properties,
+                         const boost::property_tree::ptree &node) {
     labeled_properties.emplace_back(std::make_pair(
             tablator::LINK,
             tablator::Property(tablator::ptree_readers::extract_attributes(node))));
 }
 
-void load_link_array(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        const boost::property_tree::ptree &array_tree) {
+void load_link_array(tablator::Labeled_Properties &labeled_properties,
+                     const boost::property_tree::ptree &array_tree) {
     for (const auto &elt : array_tree) {
         load_link_singleton(labeled_properties, elt.second);
     }
@@ -57,7 +55,7 @@ void load_attributes_array(std::vector<tablator::ATTRIBUTES> &attrs,
 
 
 boost::property_tree::ptree::const_iterator read_links_section(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        tablator::Labeled_Properties &labeled_properties,
         boost::property_tree::ptree::const_iterator &start,
         boost::property_tree::ptree::const_iterator &end, const std::string &next_tag) {
     boost::property_tree::ptree::const_iterator &iter = start;
@@ -92,17 +90,16 @@ void load_field_array(std::vector<tablator::Field> &params,
     }
 }
 
-void load_labeled_properties_singleton(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        const std::string &element_label, const boost::property_tree::ptree &node) {
+void load_labeled_properties_singleton(tablator::Labeled_Properties &labeled_properties,
+                                       const std::string &element_label,
+                                       const boost::property_tree::ptree &node) {
     labeled_properties.emplace_back(std::make_pair(
             element_label, tablator::ptree_readers::read_property(node)));
 }
 
-void load_labeled_properties_array(
-        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
-        const std::string &element_label,
-        const boost::property_tree::ptree &array_tree) {
+void load_labeled_properties_array(tablator::Labeled_Properties &labeled_properties,
+                                   const std::string &element_label,
+                                   const boost::property_tree::ptree &array_tree) {
     for (const auto &elt : array_tree) {
         load_labeled_properties_singleton(labeled_properties, element_label,
                                           elt.second);
