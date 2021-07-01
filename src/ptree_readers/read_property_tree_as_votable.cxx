@@ -1,8 +1,65 @@
-#include "../Table.hxx"
-
 #include "../ptree_readers.hxx"
 
+#include "../Table.hxx"
+#include "Utils.hxx"
+
 // This only parses VOTable v1.3.  // JTODO 1.4 now?
+
+namespace {
+
+bool load_resource_element_singleton(
+        std::vector<tablator::Resource_Element> &resource_elements,
+        const boost::property_tree::ptree &node,
+        bool &already_loaded_results_resource) {
+    bool is_results_resource = false;
+    resource_elements.emplace_back(
+            tablator::ptree_readers::read_resource_element(node, is_results_resource));
+
+    if (is_results_resource) {
+        if (already_loaded_results_resource) {
+            throw std::runtime_error("TABLE element is allowed in only one RESOURCE.");
+        }
+        already_loaded_results_resource = true;
+    }
+    return is_results_resource;
+}
+
+
+// Helper function which handles the part of the property_tree corresponding to
+// the section of a VOTable preceding the RESOURCE element per the IVOA spec.
+
+boost::property_tree::ptree::const_iterator populate_pre_resource_section(
+        std::vector<std::pair<std::string, tablator::Property>> &labeled_properties,
+        std::vector<tablator::Field> &params,
+        std::vector<tablator::Group_Element> &group_elements,
+        boost::property_tree::ptree::const_iterator &start,
+        boost::property_tree::ptree::const_iterator &end) {
+    boost::property_tree::ptree::const_iterator &iter = start;
+
+    while (iter != end && !boost::starts_with(iter->first, tablator::RESOURCE)) {
+        if ((iter->first == tablator::COOSYS) || (iter->first == tablator::TIMESYS) ||
+            (iter->first == tablator::INFO)) {
+            tablator::ptree_readers::load_labeled_properties_singleton(
+                    labeled_properties, tablator::INFO, iter->second);
+        } else if (iter->first == tablator::PARAM) {
+            tablator::ptree_readers::load_field_singleton(params, iter->second);
+        } else if (iter->first == tablator::GROUP) {
+            tablator::ptree_readers::load_group_element_singleton(group_elements,
+                                                                  iter->second);
+        } else {
+            throw std::runtime_error(
+                    "In VOTABLE, expected COOSYS, TIMESYS, GROUP, "
+                    "PARAM, INFO, RESOURCE, or a comment, but got: " +
+                    iter->first);
+        }
+        ++iter;
+    }
+    return iter;
+}
+
+}  // namespace
+
+//==============================================================
 
 void tablator::ptree_readers::read_property_tree_as_votable(
         tablator::Table &table, const boost::property_tree::ptree &tree) {
@@ -32,68 +89,39 @@ void tablator::ptree_readers::read_property_tree_as_votable(
         ++child;
     }
     if (child != end && child->first == DEFINITIONS) {
-        /// Deliberately ignore DEFINITIONS.  They are duplicated by the
-        /// information in RESOURCE and deprecated since version 1.1.
+        // Deliberately ignore DEFINITIONS.  They are duplicated by the
+        // information in RESOURCE and deprecated since version 1.1.
         ++child;
     }
 
-    while (child != end && child->first != RESOURCE) {
-        if ((child->first == COOSYS) || (child->first == INFO)) {
-            table.add_labeled_property(child->first,
-                                       ptree_readers::read_property(child->second));
-        } else if (child->first == PARAM) {
-            table.add_param(ptree_readers::read_field(child->second).get_field());
-        } else if (child->first == GROUP) {
-            table.add_group_element(ptree_readers::read_group_element(child->second));
-        } else {
-            throw std::runtime_error(
-                    "In VOTABLE, expected COOSYS, GROUP, "
-                    "PARAM, INFO, RESOURCE, or a comment, but got: " +
-                    child->first);
-        }
-        ++child;
-    }
+    auto &labeled_properties = table.get_labeled_properties();
+    auto &params = table.get_params();
+    auto &group_elements = table.get_group_elements();
 
+    child = populate_pre_resource_section(labeled_properties, params, group_elements,
+                                          child, end);
     if (child == end) {
         throw std::runtime_error("Missing RESOURCE in VOTABLE");
     }
 
     // read resources
+    auto &resource_elements = table.get_resource_elements();
     bool found_results_resource = false;
     size_t curr_resource_idx = 0;
 
-    while (child != end && child->first == RESOURCE) {
-        bool is_results_resource = false;
-        table.add_resource_element(ptree_readers::read_resource_element(
-                child->second, is_results_resource));
-
+    while (child != end && (child->first == RESOURCE)) {
+        bool is_results_resource = load_resource_element_singleton(
+                resource_elements, child->second, found_results_resource);
         if (is_results_resource) {
-            if (found_results_resource) {
-                throw std::runtime_error(
-                        "TABLE element is supported only in only one RESOURCE.");
-            }
-            found_results_resource = true;
             table.set_results_resource_idx(curr_resource_idx);
         }
-
         ++curr_resource_idx;
         ++child;
     }
-
     if (!found_results_resource) {
         throw std::runtime_error("Missing results RESOURCE.");
     }
 
-    while (child != end) {
-        if (child->first == INFO) {
-            auto curr_attributes = ptree_readers::extract_attributes(child->second);
-            table.add_trailing_info(Property(curr_attributes));
-        } else {
-            throw std::runtime_error(
-                    "In VOTABLE, expected INFO tag, if anything, "
-                    "but got: " +
-                    child->first);
-        }
-        ++child;
-    }
+    std::vector<Property> &trailing_info_list = table.get_trailing_info_list();
+    child = read_trailing_info_section(trailing_info_list, child, end);
 }

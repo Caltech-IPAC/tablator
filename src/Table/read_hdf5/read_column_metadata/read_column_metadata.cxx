@@ -74,7 +74,7 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                         .add_description(hdf5_field_properties.description)
                         .add_attributes(attributes)
                         .add_values(values)
-                        .add_links(links)
+                        .add_hdf5_links(links)
                         .build();
 
         result.emplace_back(hdf5_column.name, string_to_Data_Type(hdf5_column.type),

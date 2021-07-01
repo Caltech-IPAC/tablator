@@ -111,7 +111,6 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         if (added_arraysize && boost::equals(a.first, "arraysize")) {
             continue;
         }
-
         field_tree.add(XMLATTR_DOT + a.first, a.second);
     }
 
@@ -133,11 +132,16 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         for (auto &o : v.options) Option_to_xml(values, o);
     }
 
-    if (!field_properties.get_links().empty()) {
-        boost::property_tree::ptree &link_tree = field_tree.add("LINK", "");
-        for (auto &link : field_properties.get_links()) {
-            link_tree.add(XMLATTR_DOT + link.first, link.second);
+    if (!field_properties.get_hdf5_links().empty()) {
+        auto &link_tree = parent_tree.add(LINK, "");
+        for (auto &link : field_properties.get_hdf5_links()) {
+            link_tree.add(XMLATTR_DOT + "hdf5.link." + link.first, link.second);
         }
+    }
+
+    // Add as Labeled_Properties
+    if (!field_properties.get_links().empty()) {
+        add_to_property_tree(field_tree, field_properties.get_links());
     }
 }
 
