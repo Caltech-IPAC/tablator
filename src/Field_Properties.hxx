@@ -30,7 +30,7 @@ private:
             attributes_.insert(attributes.begin(), attributes.end());
         }
 
-        void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+        void add_attribute(const STRING_PAIR &attr_pair) {
             attributes_.emplace(attr_pair);
         }
 
@@ -40,8 +40,7 @@ private:
 
         void set_values(const Values &values) { values_ = values; }
 
-        void add_hdf5_links(
-                const std::vector<std::pair<std::string, std::string>> &hdf5_links) {
+        void add_hdf5_links(const std::vector<STRING_PAIR> &hdf5_links) {
             hdf5_links_.insert(hdf5_links_.end(), hdf5_links.begin(), hdf5_links.end());
             ;
         }
@@ -58,7 +57,7 @@ private:
         ATTRIBUTES attributes_;
         std::string description_;
         Values values_;
-        std::vector<std::pair<std::string, std::string>> hdf5_links_;
+        std::vector<STRING_PAIR> hdf5_links_;
         std::vector<Labeled_Property> links_;
     };
 
@@ -79,7 +78,7 @@ public:
             return *this;
         }
 
-        Builder &add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+        Builder &add_attribute(const STRING_PAIR &attr_pair) {
             options_.add_attribute(attr_pair);
             return *this;
         }
@@ -99,8 +98,7 @@ public:
             return *this;
         }
 
-        Builder &add_hdf5_links(
-                const std::vector<std::pair<std::string, std::string>> &hdf5_links) {
+        Builder &add_hdf5_links(const std::vector<STRING_PAIR> &hdf5_links) {
             options_.add_hdf5_links(hdf5_links);
             return *this;
         }
@@ -162,12 +160,10 @@ public:
     const Values &get_values() const { return options_.values_; }
     Values &get_values() { return options_.values_; }
 
-    const std::vector<std::pair<std::string, std::string>> &get_hdf5_links() const {
+    const std::vector<STRING_PAIR> &get_hdf5_links() const {
         return options_.hdf5_links_;
     }
-    std::vector<std::pair<std::string, std::string>> &get_hdf5_links() {
-        return options_.hdf5_links_;
-    }
+    std::vector<STRING_PAIR> &get_hdf5_links() { return options_.hdf5_links_; }
     const std::vector<Labeled_Property> &get_links() const { return options_.links_; }
     std::vector<Labeled_Property> &get_links() { return options_.links_; }
 
@@ -180,7 +176,7 @@ public:
         options_.set_attributes(attrs);
     }
 
-    void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
+    void add_attribute(const STRING_PAIR &attr_pair) {
         options_.add_attribute(attr_pair);
     }
 
@@ -193,8 +189,7 @@ public:
     void set_values(const Values &values) { options_.set_values(values); }
 
 
-    void add_hdf5_links(
-            const std::vector<std::pair<std::string, std::string>> &hdf5_links) {
+    void add_hdf5_links(const std::vector<STRING_PAIR> &hdf5_links) {
         options_.add_hdf5_links(hdf5_links);
     }
 

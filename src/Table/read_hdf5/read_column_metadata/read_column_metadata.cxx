@@ -62,7 +62,7 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
         Values values(min, max, hdf5_values.ID, hdf5_values.type, hdf5_values.null,
                       hdf5_values.ref, options);
 
-        std::vector<std::pair<std::string, std::string> > links;
+        std::vector<STRING_PAIR> links;
         hvl_t &hdf5_links(hdf5_column.field_properties.links);
         for (size_t idx = 0; idx < hdf5_links.len; ++idx) {
             HDF5_Attribute &a(reinterpret_cast<HDF5_Attribute *>(hdf5_links.p)[idx]);

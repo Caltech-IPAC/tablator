@@ -22,9 +22,8 @@ public:
             : attributes_(Attributes), value_(Value) {}
 
     // Called internally, directly or otherwise, only by flatten_properties().
-    std::vector<std::pair<std::string, std::string>> flatten(
-            const std::string &key) const {
-        std::vector<std::pair<std::string, std::string>> result;
+    std::vector<STRING_PAIR> flatten(const std::string &key) const {
+        std::vector<STRING_PAIR> result;
         result.push_back(std::make_pair(key, value_));
         for (auto &a : attributes_)
             result.push_back(
@@ -43,9 +42,7 @@ public:
         attributes_.insert(attrs.begin(), attrs.end());
     }
 
-    void add_attribute(const std::pair<std::string, std::string> &attr_pair) {
-        attributes_.emplace(attr_pair);
-    }
+    void add_attribute(const STRING_PAIR &attr_pair) { attributes_.emplace(attr_pair); }
 
     void add_attribute(const std::string &name, const std::string &value) {
         add_attribute(std::make_pair(name, value));

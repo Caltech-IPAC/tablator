@@ -33,7 +33,7 @@ tablator::Data_Type string_to_Type(const std::string &s) {
 // VOTables as LINK elements and must be disentangled here.
 
 void load_link_singleton(tablator::Labeled_Properties &labeled_properties,
-                         std::vector<std::pair<std::string, std::string>> &hdf5_links,
+                         std::vector<tablator::STRING_PAIR> &hdf5_links,
                          const boost::property_tree::ptree &node) {
     const auto attrs = tablator::ptree_readers::extract_attributes(node);
 
@@ -51,7 +51,7 @@ void load_link_singleton(tablator::Labeled_Properties &labeled_properties,
 }
 
 void load_link_array(tablator::Labeled_Properties &labeled_properties,
-                     std::vector<std::pair<std::string, std::string>> &hdf5_links,
+                     std::vector<tablator::STRING_PAIR> &hdf5_links,
                      const boost::property_tree::ptree &array_tree) {
     for (const auto &elt : array_tree) {
         load_link_singleton(labeled_properties, hdf5_links, elt.second);
@@ -61,7 +61,7 @@ void load_link_array(tablator::Labeled_Properties &labeled_properties,
 
 boost::property_tree::ptree::const_iterator read_links_section(
         tablator::Labeled_Properties &links,
-        std::vector<std::pair<std::string, std::string>> &hdf5_links,
+        std::vector<tablator::STRING_PAIR> &hdf5_links,
         boost::property_tree::ptree::const_iterator &start,
         boost::property_tree::ptree::const_iterator &end, const std::string &next_tag) {
     boost::property_tree::ptree::const_iterator &iter = start;
@@ -135,8 +135,7 @@ tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
     }
 
     Labeled_Properties &links = field_properties.get_links();
-    std::vector<std::pair<std::string, std::string>> &hdf5_links =
-            field_properties.get_hdf5_links();
+    std::vector<STRING_PAIR> &hdf5_links = field_properties.get_hdf5_links();
     child = read_links_section(links, hdf5_links, child, end, TABLE);
 
     return Field_And_Flag(Field(name, type, array_size, field_properties),

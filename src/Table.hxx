@@ -57,7 +57,7 @@ private:
             attributes_.insert(attributes.begin(), attributes.end());
         }
 
-        void add_attribute(const std::pair<std::string, std::string> attr_pair) {
+        void add_attribute(const STRING_PAIR attr_pair) {
             attributes_.emplace(attr_pair);
         }
 
@@ -140,7 +140,7 @@ public:
             return *this;
         }
 
-        Builder &add_attribute(const std::pair<std::string, std::string> attr_pair) {
+        Builder &add_attribute(const STRING_PAIR attr_pair) {
             options_.add_attribute(attr_pair);
             return *this;
         }
@@ -308,7 +308,7 @@ public:
 
     // This function is not used internally.
 
-    std::vector<std::pair<std::string, std::string>> flatten_properties() const {
+    std::vector<STRING_PAIR> flatten_properties() const {
         return flatten_properties(get_labeled_properties());
     }
 
@@ -424,13 +424,11 @@ public:
                                 const std::string &point_column_name,
                                 const std::string &polygon_column_name) const;
     void write_sql_inserts(std::ostream &os, const std::string &table_name) const {
-        write_sql_inserts(os, table_name, std::pair<std::string, std::string>(),
-                          std::vector<std::pair<std::string, std::string>>());
+        write_sql_inserts(os, table_name, STRING_PAIR(), std::vector<STRING_PAIR>());
     }
     void write_sql_inserts(std::ostream &os, const std::string &table_name,
-                           const std::pair<std::string, std::string> &point_input_names,
-                           const std::vector<std::pair<std::string, std::string>>
-                                   &polygon_input_names) const;
+                           const STRING_PAIR &point_input_names,
+                           const std::vector<STRING_PAIR> &polygon_input_names) const;
     void write_sql_insert(std::ostream &os, const std::string &quoted_table_name,
                           const size_t &row_offset, const bool &has_point,
                           const std::pair<std::pair<size_t, Data_Type>,
@@ -644,7 +642,7 @@ public:
 
 
     // This function is not used internally.
-    static std::vector<std::pair<std::string, std::string>> flatten_properties(
+    static std::vector<STRING_PAIR> flatten_properties(
             const Labeled_Properties &properties);
 
 
@@ -856,8 +854,7 @@ public:
         get_results_resource_element().add_attribute(name, value);
     }
 
-    void add_resource_element_attribute(
-            const std::pair<std::string, std::string> &attr_pair) {
+    void add_resource_element_attribute(const STRING_PAIR &attr_pair) {
         get_results_resource_element().add_attribute(attr_pair);
     }
 
