@@ -139,4 +139,5 @@ inline bool is_property_style_label(const std::string &label) {
 }
 
 typedef std::map<std::string, std::string> ATTRIBUTES;
+typedef std::pair<std::string, std::string> STRING_PAIR;
 }  // namespace tablator

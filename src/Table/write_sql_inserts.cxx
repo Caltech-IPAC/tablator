@@ -27,7 +27,7 @@ std::pair<size_t, tablator::Data_Type> get_offsets_and_types(
 std::pair<std::pair<size_t, tablator::Data_Type>,
           std::pair<size_t, tablator::Data_Type>>
 get_offsets_and_types(const tablator::Table &table,
-                      const std::pair<std::string, std::string> &names) {
+                      const tablator::STRING_PAIR &names) {
     return std::make_pair(get_offsets_and_types(table, names.first),
                           get_offsets_and_types(table, names.second));
 }
@@ -36,9 +36,8 @@ get_offsets_and_types(const tablator::Table &table,
 
 void tablator::Table::write_sql_inserts(
         std::ostream &os, const std::string &table_name,
-        const std::pair<std::string, std::string> &point_input_names,
-        const std::vector<std::pair<std::string, std::string>> &polygon_input_names)
-        const {
+        const tablator::STRING_PAIR &point_input_names,
+        const std::vector<tablator::STRING_PAIR> &polygon_input_names) const {
     std::string quoted_table_name(
             quote_sql_string(table_name, '"', Quote_SQL::IF_NEEDED));
     std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>> point_input;
