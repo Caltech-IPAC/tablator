@@ -52,7 +52,7 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                     format.enum_format);
             bool is_json(format.enum_format != Format::Enums::VOTABLE);
             boost::property_tree::ptree tree(
-                    generate_property_tree(datatypes_for_writing, !is_json));
+                    generate_property_tree(datatypes_for_writing, is_json));
             std::stringstream ss;
 
             if (is_json) {

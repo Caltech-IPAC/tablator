@@ -540,6 +540,14 @@ else
     echo "FAIL: Convert VOTable with unorthodox INFO property value to FITS and back"
 fi
 
+${tablator_bin} --output-format=json test/back_and_forth_tables/fits_medium_modified_with_value.vot out.json &&  ${tablator_bin}  out.json temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with unorthodox INFO property value to JSON and back"
+    rm -f temp.vot
+else
+    echo "FAIL: Convert VOTable with unorthodox INFO property value to JSON and back"
+fi
+
 
 # JTODO: Field-level INFO section would still not survive the round trip via fits.
 ${tablator_bin} --output-format=fits test/back_and_forth_tables/small_integer_type_arrays.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/small_integer_type_arrays.json5 temp.json5

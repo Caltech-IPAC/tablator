@@ -46,13 +46,13 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 // call get_datatypes_for_writing() instead of using original
 // datatypes?  Who outside this repo actually calls this function?
 boost::property_tree::ptree tablator::Table::generate_property_tree() const {
-    return generate_property_tree(get_original_datatypes());
+    return generate_property_tree(get_original_datatypes(), false /* json_prep */);
 }
 
 /**********************************************************/
 
 boost::property_tree::ptree tablator::Table::generate_property_tree(
-        const std::vector<Data_Type> &datatypes_for_writing, bool allow_dups) const {
+        const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const {
     boost::property_tree::ptree outermost_tree;
 
     auto &votable_tree = outermost_tree.add(VOTABLE, "");
@@ -87,12 +87,12 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     }
 
     for (const auto &param : get_params()) {
-        tablator::add_to_property_tree(votable_tree, PARAM, param, allow_dups);
+        tablator::add_to_property_tree(votable_tree, PARAM, param, json_prep);
     }
 
 
     for (const auto &group : get_group_elements()) {
-        add_to_property_tree(votable_tree, group, allow_dups);
+        add_to_property_tree(votable_tree, group, json_prep);
     }
 
     if (get_resource_elements().empty()) {
@@ -102,15 +102,15 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     for (const auto &resource_element : get_resource_elements()) {
         if (resource_element.is_results_resource()) {
             add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
-                                 get_comments(), get_labeled_properties(), allow_dups);
+                                 get_comments(), get_labeled_properties(), json_prep);
         } else {
             add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
-                                 allow_dups);
+                                 json_prep);
         }
     }
 
     for (const auto &info : get_trailing_info_list()) {
-        add_to_property_tree(votable_tree, INFO, info, allow_dups);
+        add_to_property_tree(votable_tree, INFO, info, json_prep);
     }
 
     return outermost_tree;
