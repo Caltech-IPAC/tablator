@@ -66,6 +66,7 @@ static const std::string TIMESYS("TIMESYS");
 static const std::string TYPE("type");
 static const std::string UNIT("unit");
 static const std::string UTYPE("utype");
+static const std::string VALUE("VALUE");
 static const std::string VALUES("VALUES");
 static const std::string VOTABLE("VOTABLE");
 

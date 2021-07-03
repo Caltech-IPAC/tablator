@@ -57,7 +57,7 @@ private:
             attributes_.insert(attributes.begin(), attributes.end());
         }
 
-        void add_attribute(const STRING_PAIR attr_pair) {
+        void add_attribute(const STRING_PAIR &attr_pair) {
             attributes_.emplace(attr_pair);
         }
 
@@ -129,7 +129,7 @@ public:
 
         Builder &set_attributes(
                 const std::initializer_list<std::pair<const std::string, std::string>>
-                        attributes) {
+                        &attributes) {
             options_.set_attributes(attributes);
             return *this;
         }
@@ -140,7 +140,7 @@ public:
             return *this;
         }
 
-        Builder &add_attribute(const STRING_PAIR attr_pair) {
+        Builder &add_attribute(const STRING_PAIR &attr_pair) {
             options_.add_attribute(attr_pair);
             return *this;
         }
@@ -762,7 +762,7 @@ public:
 
     void set_attributes(
             const std::initializer_list<std::pair<const std::string, std::string>>
-                    attributes) {
+                    &attributes) {
         options_.set_attributes(attributes);
     }
 
@@ -918,8 +918,7 @@ private:
 
 
     boost::property_tree::ptree generate_property_tree(
-            const std::vector<Data_Type> &datatypes_for_writing,
-            bool allow_dups = true) const;
+            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const;
 
     void distribute_metadata(
             tablator::Labeled_Properties &resource_element_labeled_properties,
