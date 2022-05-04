@@ -2,10 +2,12 @@
 #include "../Table.hxx"
 #include "../quote_sql_string.hxx"
 
-void tablator::Table::write_sql_create_table(
-        std::ostream &os, const std::string &table_name, const Format::Enums &sql_type,
-        const std::string &point_column_name,
-        const std::string &polygon_column_name) const {
+void tablator::Table::write_sql_create_table(std::ostream &os,
+                                             const std::string &table_name,
+                                             const Format::Enums &sql_type,
+                                             const std::string &point_column_name,
+                                             const std::string &polygon_column_name,
+                                             bool is_nologging) const {
     std::string quoted_table_name(
             quote_sql_string(table_name, '"', Quote_SQL::IF_NEEDED));
     os << "CREATE TABLE " << quoted_table_name << " (\n";
@@ -46,4 +48,7 @@ void tablator::Table::write_sql_create_table(
         os << "\n";
     }
     os << ")\n";
+    if (is_nologging) {
+        os << "NOLOGGING\n";
+    }
 }

@@ -421,8 +421,24 @@ public:
     }
     void write_sql_create_table(std::ostream &os, const std::string &table_name,
                                 const Format::Enums &sql_type,
+                                bool is_nologging) const {
+        using namespace std::string_literals;
+        write_sql_create_table(os, table_name, sql_type, ""s, ""s, is_nologging);
+    }
+    void write_sql_create_table(std::ostream &os, const std::string &table_name,
+                                const Format::Enums &sql_type,
                                 const std::string &point_column_name,
-                                const std::string &polygon_column_name) const;
+                                const std::string &polygon_column_name) const {
+        write_sql_create_table(os, table_name, sql_type, point_column_name,
+                               polygon_column_name, false);
+    }
+
+    void write_sql_create_table(std::ostream &os, const std::string &table_name,
+                                const Format::Enums &sql_type,
+                                const std::string &point_column_name,
+                                const std::string &polygon_column_name,
+                                bool is_nologging) const;
+
     void write_sql_inserts(std::ostream &os, const std::string &table_name) const {
         write_sql_inserts(os, table_name, STRING_PAIR(), std::vector<STRING_PAIR>());
     }
