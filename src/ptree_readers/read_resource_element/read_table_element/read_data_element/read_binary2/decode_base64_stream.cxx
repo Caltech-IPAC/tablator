@@ -4,6 +4,7 @@
 #include <boost/iterator/filter_iterator.hpp>
 
 #include <cctype>
+#include <vector>
 
 namespace {
 struct is_not_space {
