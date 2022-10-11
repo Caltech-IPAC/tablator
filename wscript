@@ -13,7 +13,7 @@ def build(bld):
     if bld.options.debug:
         default_flags=['-Wall', '-Wextra', '-g']
     else:
-        default_flags=['-Wall', '-Wextra', '-g', '-Ofast', '-DNDEBUG']
+        default_flags=['-Wall', '-Wextra', '-g', '-Ofast', '-DNDEBUG', '-DBOOST_BIND_GLOBAL_PLACEHOLDERS']
 
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser', 'sqlite3', 'vsqlitepp']
