@@ -46,7 +46,6 @@ std::string tablator::Format::content_type() const {
         default:
             throw std::runtime_error(
                     "INTERNAL ERROR: Unknown format when "
-                    "generating content type: " +
-                    std::to_string(static_cast<int>(enum_format)));
+                    "generating content type.");
     }
 }
