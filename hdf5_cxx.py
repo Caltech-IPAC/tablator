@@ -84,6 +84,6 @@ def configure(conf):
         except conf.errors.ConfigurationError:
             continue
         else:
-            found_hdf5_c=True
-    if not found_hdf5_c:
+            found_hdf5_cxx=True
+    if not found_hdf5_cxx:
         conf.fatal("Could not find HDF5 C++ libraries")
