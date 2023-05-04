@@ -123,6 +123,7 @@ static const std::string FIELDREF_ARRAY(FIELDREF + ARRAY_TAIL);
 static const std::string GROUP_ARRAY(GROUP + ARRAY_TAIL);
 static const std::string INFO_ARRAY(INFO + ARRAY_TAIL);
 static const std::string LINK_ARRAY(LINK + ARRAY_TAIL);
+static const std::string OPTION_ARRAY(OPTION + ARRAY_TAIL);
 static const std::string PARAM_ARRAY(PARAM + ARRAY_TAIL);
 static const std::string PARAMREF_ARRAY(PARAMREF + ARRAY_TAIL);
 static const std::string RESOURCE_ARRAY(RESOURCE + ARRAY_TAIL);

@@ -20,24 +20,10 @@ void Min_Max_to_xml(boost::property_tree::ptree &tree, const std::string &min_ma
     }
 }
 
-void Option_to_xml(boost::property_tree::ptree &tree, const tablator::Option &option) {
-    if (!option.empty()) {
-        boost::property_tree::ptree &option_tree = tree.add("OPTION", "");
-        if (!option.name.empty()) {
-            option_tree.add(tablator::XMLATTR_NAME, option.name);
-        }
-        if (!option.value.empty()) {
-            option_tree.add(tablator::XMLATTR_VALUE, option.value);
-        }
-        for (auto &o : option.options) Option_to_xml(option_tree, o);
-    }
-}
-
-
-// If json_prep is true, add a subtree with label <label> whether or
-// not a subtree already exists with that label.  Otherwise,
-// find (or, if none exists, create) a tree with label <label>_ARRAY
-// and add an un-labeled subtree to that.
+// If json_prep is true, find (or, if none exists, create) a tree with
+// label <label>_ARRAY, add an un-labeled subtree to that, and return
+// the subtree.  Otherwise, add and return a subtree with label
+// <label> whether or not a subtree already exists with that label.
 boost::property_tree::ptree &find_or_add_tree(boost::property_tree::ptree &parent_tree,
                                               const std::string &label,
                                               bool json_prep) {
@@ -58,6 +44,25 @@ boost::property_tree::ptree &find_or_add_tree(boost::property_tree::ptree &paren
 }  // namespace
 
 namespace tablator {
+
+//==============================================================
+//*** Option
+void add_to_property_tree(boost::property_tree::ptree &parent_tree,
+                          const Option &option, bool json_prep) {
+    if (!option.empty()) {
+        auto &option_tree = find_or_add_tree(parent_tree, "OPTION", json_prep);
+        if (!option.name.empty()) {
+            option_tree.add(tablator::XMLATTR_NAME, option.name);
+        }
+        if (!option.value.empty()) {
+            option_tree.add(tablator::XMLATTR_VALUE, option.value);
+        }
+
+        for (auto &suboption : option.options) {
+            add_to_property_tree(option_tree, suboption, json_prep);
+        }
+    }
+}
 
 //==============================================================
 //*** ATTRIBUTES
@@ -138,11 +143,10 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         // that does not happen.
 
         // FIXME: This error is thrown a bit too late to be useful.
-        if (a.first.empty())
-
+        if (a.first.empty()) {
             throw std::runtime_error("Empty attribute in field " + column.get_name() +
                                      " which has type " + to_string(column.get_type()));
-
+        }
         if (added_arraysize && boost::equals(a.first, "arraysize")) {
             continue;
         }
@@ -154,17 +158,19 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         field_tree.add(DESCRIPTION, desc);
     }
 
-    auto &v(field_properties.get_values());
-    if (!v.empty_except_null()) {
-        boost::property_tree::ptree &values = field_tree.add("VALUES", "");
-        if (!v.ID.empty()) values.add(XMLATTR_ID, v.ID);
-        if (!v.type.empty()) values.add(XMLATTR_TYPE, v.type);
-        if (!v.ref.empty()) values.add(XMLATTR_REF, v.ref);
+    auto &values(field_properties.get_values());
+    if (!values.empty_except_null()) {
+        boost::property_tree::ptree &values_tree = field_tree.add("VALUES", "");
+        if (!values.ID.empty()) values_tree.add(XMLATTR_ID, values.ID);
+        if (!values.type.empty()) values_tree.add(XMLATTR_TYPE, values.type);
+        if (!values.ref.empty()) values_tree.add(XMLATTR_REF, values.ref);
 
-        Min_Max_to_xml(values, "MIN", v.min);
-        Min_Max_to_xml(values, "MAX", v.max);
+        Min_Max_to_xml(values_tree, "MIN", values.min);
+        Min_Max_to_xml(values_tree, "MAX", values.max);
 
-        for (auto &o : v.options) Option_to_xml(values, o);
+        for (auto &option : values.options) {
+            add_to_property_tree(values_tree, option, json_prep);
+        }
     }
 
     if (!field_properties.get_hdf5_links().empty()) {
@@ -331,6 +337,12 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           bool json_prep) {
     add_to_property_tree(parent_tree, resource_element, datatypes_for_writing,
+                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES, json_prep);
+}
+
+void add_to_property_tree(boost::property_tree::ptree &parent_tree,
+                          const Resource_Element &resource_element, bool json_prep) {
+    add_to_property_tree(parent_tree, resource_element, {} /* datatypes_for_writing */,
                          DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES, json_prep);
 }
 

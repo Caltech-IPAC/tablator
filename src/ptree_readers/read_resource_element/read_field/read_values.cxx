@@ -18,7 +18,7 @@ tablator::Min_Max read_min_max(const boost::property_tree::ptree &min_max) {
         }
         ++child;
     }
-    /// Ignore extra invalid elements
+    // Ignore extra invalid elements
     return result;
 }
 
@@ -36,14 +36,35 @@ tablator::Option read_option(const boost::property_tree::ptree &option) {
         }
         ++child;
     }
-    while (child != end && child->first == tablator::OPTION) {
-        read_option(child->second);
-        result.options.emplace_back(read_option(child->second));
+
+    while (child != end) {
+        if (child->first == tablator::OPTION) {
+            result.options.emplace_back(read_option(child->second));
+        } else if (child->first == tablator::OPTION_ARRAY) {
+            for (const auto &elt : child->second) {
+                result.options.emplace_back(read_option(elt.second));
+            }
+        }
         ++child;
     }
-    /// Ignore extra invalid elements
+
+    // Ignore extra invalid elements
     return result;
 }
+
+void load_option_singleton(std::vector<tablator::Option> &options,
+                           const boost::property_tree::ptree &node) {
+    options.emplace_back(read_option(node));
+}
+
+void load_option_array(std::vector<tablator::Option> &options,
+                       const boost::property_tree::ptree &array_tree) {
+    for (const auto &elt : array_tree) {
+        load_option_singleton(options, elt.second);
+    }
+}
+
+
 }  // namespace
 
 namespace tablator {
@@ -54,15 +75,15 @@ Values read_values(const boost::property_tree::ptree &values) {
     if (child != end && child->first == XMLATTR) {
         for (auto &attribute : child->second) {
             if (attribute.first == ID) {
-                result.ID = child->second.get_value<std::string>();
+                result.ID = attribute.second.get_value<std::string>();
             } else if (attribute.first == TYPE) {
-                result.type = child->second.get_value<std::string>();
+                result.type = attribute.second.get_value<std::string>();
             } else if (attribute.first == "null") {
-                result.null = child->second.get_value<std::string>();
+                result.null = attribute.second.get_value<std::string>();
             } else if (attribute.first == REF) {
-                result.ref = child->second.get_value<std::string>();
+                result.ref = attribute.second.get_value<std::string>();
             }
-            /// Ignore extra invalid elements
+            // Ignore extra invalid elements
         }
         ++child;
     }
@@ -74,11 +95,15 @@ Values read_values(const boost::property_tree::ptree &values) {
         result.max = read_min_max(child->second);
         ++child;
     }
-    while (child != end && child->first == OPTION) {
-        result.options.emplace_back(read_option(child->second));
+    while (child != end) {
+        if (child->first == tablator::OPTION) {
+            load_option_singleton(result.options, child->second);
+        } else if (child->first == tablator::OPTION_ARRAY) {
+            load_option_array(result.options, child->second);
+        }
         ++child;
     }
-    /// Ignore extra invalid elements
+    // Ignore extra invalid elements
     return result;
 }
 }  // namespace tablator

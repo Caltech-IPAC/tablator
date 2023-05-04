@@ -11,7 +11,6 @@
 
 namespace tablator {
 
-
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::string &label, const Property &property,
                           bool allow_dups);
@@ -33,6 +32,9 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           bool allow_dups);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
+                          const Resource_Element &resource_element, bool allow_dups);
+
+void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           const std::vector<std::string> &comments,
@@ -42,9 +44,20 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 
 }  // namespace tablator
 
-// JTODO Called for JSON, JSON5, VOTABLE.  Pick a default format and
-// call get_datatypes_for_writing() instead of using original
-// datatypes?  Who outside this repo actually calls this function?
+// The generate_property_tree() functions are called for JSON, JSON5, VOTABLE.
+
+/**********************************************************/
+
+// Called by query_server to generate meta resource.
+boost::property_tree::ptree tablator::Resource_Element::generate_property_tree(
+        bool json_prep) const {
+    boost::property_tree::ptree outermost_tree;
+    add_to_property_tree(outermost_tree, *this, json_prep);
+    return outermost_tree;
+}
+
+/**********************************************************/
+
 boost::property_tree::ptree tablator::Table::generate_property_tree() const {
     return generate_property_tree(get_original_datatypes(), false /* json_prep */);
 }
@@ -115,3 +128,5 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
 
     return outermost_tree;
 }
+
+// JTODO Modify elements to write themselves.
