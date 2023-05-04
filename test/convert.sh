@@ -39,6 +39,7 @@ while getopts ":b:h" opt; do
 done
 shift $((OPTIND-1))
 
+
 ###########################################################
 
 for table in test/bad_ipac_tables/* test/bad_votables/*; do
@@ -691,6 +692,25 @@ else
 fi
 
 
+${tablator_bin} test/back_and_forth_tables/meta_resource_with_options.vot temp.json5 &&
+${tablator_bin} temp.json5 temp.vot &&
+diff test/back_and_forth_tables/meta_resource_with_options.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with multiple options from VOTable to JSON5 and back"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with multiple options from VOTable to JSON5 and back"
+fi
+
+${tablator_bin} test/back_and_forth_tables/meta_resource_with_options.json5 temp.vot &&
+${tablator_bin} temp.vot temp.json5 &&
+diff test/back_and_forth_tables/meta_resource_with_options.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with multiple options from JSON5 to VOTable and back"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with multiple options from JSON5 to VOTable and back"
+fi
 
 #################################################################
 # not straight conversions
@@ -1045,3 +1065,20 @@ else
     echo "FAIL: Table with multiple infos"
 fi
 
+
+
+${tablator_bin} test/back_and_forth_tables/meta_resource_with_options.vot temp.vot && diff test/back_and_forth_tables/meta_resource_with_options.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: VOTable with multiple options"
+    rm -f temp_file
+else
+    echo "FAIL: VOTable with multiple options"
+fi
+
+${tablator_bin} test/back_and_forth_tables/meta_resource_with_options.json5 temp.json5 && diff test/back_and_forth_tables/meta_resource_with_options.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Json5 Table with multiple options"
+    rm -f temp_file
+else
+    echo "FAIL: Json5 Table with multiple options"
+fi

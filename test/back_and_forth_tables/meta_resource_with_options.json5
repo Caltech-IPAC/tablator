@@ -1,0 +1,172 @@
+{
+    "VOTABLE":
+    {
+        "<xmlattr>":
+        {
+            "version": "1.3",
+            "xmlns:xsi": "http:\/\/www.w3.org\/2001\/XMLSchema-instance",
+            "xmlns": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3",
+            "xmlns:stc": "http:\/\/www.ivoa.net\/xml\/STC\/v1.30",
+            "xsi:schemaLocation": "http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/VOTable\/v1.3 http:\/\/www.ivoa.net\/xml\/STC\/v1.30 http:\/\/www.ivoa.net\/xml\/STC\/v1.30"
+        },
+        "RESOURCE_ARRAY":
+        [
+            {
+                "<xmlattr>":
+                {
+                    "type": "meta",
+                    "utype": "adhoc:this"
+                },
+                "DESCRIPTION": "Self description and list of supported parameters",
+                "GROUP_ARRAY":
+                [
+                    {
+                        "<xmlattr>":
+                        {
+                            "name": "inputParams"
+                        },
+                        "PARAM_ARRAY":
+                        [
+                            {
+                                "<xmlattr>":
+                                {
+                                    "name": "BAND",
+                                    "datatype": "double",
+                                    "arraysize": "*",
+                                    "unit": "m",
+                                    "xtype": "interval"
+                                },
+                                "DESCRIPTION": "Specify energy bounds"
+                            },
+                            {
+                                "<xmlattr>":
+                                {
+                                    "name": "CALIB",
+                                    "datatype": "int",
+                                    "arraysize": "*"
+                                },
+                                "DESCRIPTION": "Specify calibration level",
+                                "VALUES":
+                                {
+                                    "<xmlattr>":
+                                    {
+                                        "type": "actual"
+                                    },
+                                    "OPTION_ARRAY":
+                                    [
+                                        {
+                                            "<xmlattr>":
+                                            {
+                                                "value": "1"
+                                            }
+                                        },
+                                        {
+                                            "<xmlattr>":
+                                            {
+                                                "value": "2"
+                                            }
+                                        },
+                                        {
+                                            "<xmlattr>":
+                                            {
+                                                "value": "3"
+                                            }
+                                        },
+                                        {
+                                            "<xmlattr>":
+                                            {
+                                                "value": "4"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "PARAM_ARRAY":
+                [
+                    {
+                        "<xmlattr>":
+                        {
+                            "name": "standardID",
+                            "datatype": "char",
+                            "arraysize": "*",
+                            "value": "ivo:\/\/ivoa.net\/std\/SIA#query-2.0"
+                        }
+                    },
+                    {
+                        "<xmlattr>":
+                        {
+                            "name": "accessURL",
+                            "datatype": "char",
+                            "arraysize": "*",
+                            "value": "irsadev.ipac.caltech.edu\/SIA"
+                        }
+                    },
+                    {
+                        "<xmlattr>":
+                        {
+                            "name": "resourceIdentifier",
+                            "datatype": "char",
+                            "arraysize": "*",
+                            "value": "ivo:\/\/irsa.ipac\/SIA"
+                        }
+                    }
+                ]
+            },
+            {
+                "<xmlattr>":
+                {
+                    "type": "results"
+                },
+                "INFO_ARRAY":
+                [
+                    {
+                        "<xmlattr>":
+                        {
+                            "name": "QUERY_STATUS",
+                            "value": "OVERFLOW"
+                        }
+                    }
+                ],
+                "TABLE":
+                {
+                    "FIELD_ARRAY":
+                    [
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "s_ra",
+                                "datatype": "double",
+                                "ucd": "pos.eq.ra",
+                                "unit": "deg",
+                                "utype": "obscore:char.spatialaxis.coverage.location.coord.position2d.value2.c1",
+                                "xtype": "adql:DOUBLE"
+                            },
+                            "DESCRIPTION": "Central Spatial Position in ICRS Right ascension"
+                        },
+                        {
+                            "<xmlattr>":
+                            {
+                                "name": "s_dec",
+                                "datatype": "double",
+                                "ucd": "pos.eq.dec",
+                                "unit": "deg",
+                                "utype": "obscore:char.spatialaxis.coverage.location.coord.position2d.value2.c2",
+                                "xtype": "adql:DOUBLE"
+                            },
+                            "DESCRIPTION": "Central Spatial Position in ICRS Declination"
+                        }
+                    ],
+                    "DATA":
+                    {
+                        "TABLEDATA":
+                    [
+                    ]
+                    }
+                }
+            }
+        ]
+    }
+}

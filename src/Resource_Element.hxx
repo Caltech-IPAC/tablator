@@ -9,6 +9,7 @@
 #include "Group_Element.hxx"
 #include "Property.hxx"
 #include "Table_Element.hxx"
+#include "ptree_readers.hxx"
 
 namespace tablator {
 
@@ -286,6 +287,8 @@ public:
         get_table_elements().emplace_back(table_element);
     }
 
+    Resource_Element() : resource_type_(Resource_Type::META) {}
+
     size_t num_rows() const { return get_main_table_element().num_rows(); }
 
     // accessors for Optional elements
@@ -416,6 +419,15 @@ public:
     bool is_results_resource() const {
         return (resource_type_ == Resource_Type::RESULTS);
     }
+
+    static Resource_Element read_property_tree_as_resource(
+            const boost::property_tree::ptree &resource_tree,
+            bool &is_results_resource) {
+        return ptree_readers::read_resource_element(resource_tree, is_results_resource);
+    }
+
+    // This function is defined in generate_property_tree.cxx. JTODO Refactor.
+    boost::property_tree::ptree generate_property_tree(bool json_prep) const;
 
 
 private:
