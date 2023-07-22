@@ -41,6 +41,13 @@ std::ostream &write_escaped_string(std::ostream &os, const std::string &s,
 }  // namespace
 
 void tablator::Table::write_dsv(std::ostream &os, const char &separator) const {
+    // Write comments.
+    const auto &comments = get_comments();
+    for (const auto comment : comments) {
+        os << "# " << comment << "\n";
+    }
+
+    // Write body of table.
     const auto &columns = get_columns();
     const auto &offsets = get_offsets();
     const auto &data = get_data();

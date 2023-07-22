@@ -712,6 +712,19 @@ else
     echo "FAIL: Convert table with multiple options from JSON5 to VOTable and back"
 fi
 
+
+${tablator_bin} test/back_and_forth_tables/multi_with_hex_and_comments.csv temp.tbl &&
+${tablator_bin} temp.tbl temp.csv &&
+diff test/back_and_forth_tables/multi_with_comments.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with comments from csv to IPAC table and back"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with comments from csv to IPAC table and back"
+fi
+
+
+
 #################################################################
 # not straight conversions
 #################################################################
@@ -1081,4 +1094,20 @@ if [ $? -eq 0 ]; then
     rm -f temp_file
 else
     echo "FAIL: Json5 Table with multiple options"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multi_with_hex_and_comments.csv temp.csv&& diff test/back_and_forth_tables/multi_with_hex_and_comments.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: csv table with hex and comments"
+    rm -f temp_file
+else
+    echo "FAIL: csv table with hex and comments"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multi_with_hex_and_comments_and_blank_line.csv temp.csv&& diff test/back_and_forth_tables/multi_with_hex_and_comments.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: csv table with hex, comments, and blank line"
+    rm -f temp_file
+else
+    echo "FAIL: csv table with hex, comments, and blank line"
 fi
