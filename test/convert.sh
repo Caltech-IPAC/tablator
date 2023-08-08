@@ -724,6 +724,48 @@ else
 fi
 
 
+${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.csv temp.tbl &&
+${tablator_bin} --write-null-string temp.tbl temp.csv &&
+diff test/back_and_forth_tables/various_with_null_strings.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings from csv to IPAC table and back"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with null strings from csv to IPAC table and back"
+fi
+
+${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.tsv temp.tbl &&
+${tablator_bin} --write-null-string temp.tbl temp.tsv &&
+diff test/back_and_forth_tables/various_with_null_strings.tsv temp.tsv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings from tsv to IPAC table and back"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with null strings from tsv to IPAC table and back"
+fi
+
+
+${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.csv temp.tsv &&
+${tablator_bin} --write-null-string temp.tsv temp.csv &&
+diff test/back_and_forth_tables/various_with_null_strings_and_hex.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings from csv to tsv and back, preserving null strings"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with null strings from csv to tsv and back, preserving null strings"
+fi
+
+${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.tsv temp.csv &&
+${tablator_bin} --write-null-string temp.csv temp.tsv &&
+diff test/back_and_forth_tables/various_with_null_strings_and_hex.tsv temp.tsv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings from tsv to csv and back, preserving null strings"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with null strings from tsv to csv and back, preserving null strings"
+fi
+
+
 
 #################################################################
 # not straight conversions
@@ -1110,4 +1152,24 @@ if [ $? -eq 0 ]; then
     rm -f temp_file
 else
     echo "FAIL: csv table with hex, comments, and blank line"
+fi
+
+${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.csv temp.tbl &&
+${tablator_bin} temp.tbl temp.csv &&
+diff test/back_and_forth_tables/various_with_nulls.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings from csv to IPAC table and back, losing null strings"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with null strings from csv to IPAC table and back, losing null strings"
+fi
+
+${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.tsv temp.tbl &&
+${tablator_bin} temp.tbl temp.tsv &&
+diff test/back_and_forth_tables/various_with_nulls.tsv temp.tsv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings from tsv to IPAC table and back, losing null strings"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with null strings from tsv to IPAC table and back, losing null strings"
 fi

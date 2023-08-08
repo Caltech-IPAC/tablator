@@ -5,8 +5,8 @@
 #include "../Data_Type_Adjuster.hxx"
 #include "../Table.hxx"
 
-void tablator::Table::write(const boost::filesystem::path &path,
-                            const Format &format) const {
+void tablator::Table::write(const boost::filesystem::path &path, const Format &format,
+                            bool write_null_string_f) const {
     const bool use_stdout(path.string() == "-");
     if (format.is_fits()) {
         // List of cols whose types must be adjusted for writing due
@@ -23,16 +23,16 @@ void tablator::Table::write(const boost::filesystem::path &path,
     } else if (format.is_sqlite_db()) {
         write_sqlite_db(path);
     } else if (use_stdout) {
-        write(std::cout, "stdout", format);
+        write(std::cout, "stdout", format, write_null_string_f);
     } else {
         boost::filesystem::ofstream file_output;
         file_output.open(path);
-        write(file_output, path.stem().native(), format);
+        write(file_output, path.stem().native(), format, write_null_string_f);
     }
 }
 
 void tablator::Table::write(std::ostream &os, const std::string &table_name,
-                            const Format &format) const {
+                            const Format &format, bool write_null_string_f) const {
     // List of cols whose types must be adjusted for writing due
     // to restrictions from <format>.
     std::vector<Data_Type> datatypes_for_writing;
@@ -67,10 +67,10 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                                        num_spaces);
         } break;
         case Format::Enums::CSV:
-            write_dsv(os, ',');
+            write_dsv(os, ',', write_null_string_f);
             break;
         case Format::Enums::TSV:
-            write_dsv(os, '\t');
+            write_dsv(os, '\t', write_null_string_f);
             break;
         case Format::Enums::IPAC_TABLE:
         case Format::Enums::TEXT:

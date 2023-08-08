@@ -312,9 +312,10 @@ public:
         return flatten_properties(get_labeled_properties());
     }
 
-    void write(std::ostream &os, const std::string &table_name,
-               const Format &format) const;
-    void write(const boost::filesystem::path &path, const Format &format) const;
+    void write(std::ostream &os, const std::string &table_name, const Format &format,
+               bool write_null_string_f = false) const;
+    void write(const boost::filesystem::path &path, const Format &format,
+               bool write_null_string_f = false) const;
     void write(const boost::filesystem::path &path) const { write(path, Format(path)); }
     void write_hdf5(std::ostream &os) const;
     void write_hdf5(const boost::filesystem::path &p) const;
@@ -413,7 +414,8 @@ public:
         return Ipac_Table_Writer::to_ipac_string(type);
     }
 
-    void write_dsv(std::ostream &os, const char &separator) const;
+    void write_dsv(std::ostream &os, const char &separator,
+                   bool write_null_string_f = false) const;
     void write_sql_create_table(std::ostream &os, const std::string &table_name,
                                 const Format::Enums &sql_type) const {
         using namespace std::string_literals;

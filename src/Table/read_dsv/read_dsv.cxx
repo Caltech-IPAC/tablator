@@ -39,7 +39,6 @@ void Table::read_dsv(std::istream &input_stream, const Format &format) {
     std::vector<Column> columns;
     std::vector<size_t> offsets = {0};
     set_column_info(columns, offsets, dsv);
-
     add_resource_element(Table_Element::Builder(columns, offsets,
                                                 read_dsv_rows(columns, offsets, dsv))
                                  .build());

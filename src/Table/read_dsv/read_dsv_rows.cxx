@@ -15,7 +15,7 @@ std::vector<uint8_t> tablator::Table::read_dsv_rows(
         row_string.set_zero();
         for (size_t column = 1; column < columns.size(); ++column) {
             const std::string &element(dsv_row[column - 1]);
-            if (element.empty()) {
+            if (element.empty() || element == "null") {
                 row_string.set_null(columns[column].get_type(),
                                     columns[column].get_array_size(), column,
                                     offsets[column], offsets[column + 1]);
