@@ -9,9 +9,9 @@ namespace tablator {
 Data_Type get_best_data_type(const Data_Type &current_type,
                              const std::string &element) {
     Data_Type result(current_type);
-    /// This uses fallthrough to progressively promote the type when
-    /// the conversion fails
-    if (!element.empty()) {
+    // This uses fallthrough to progressively promote the type when
+    // the conversion fails.
+    if (!element.empty() && element != "null") {
         switch (result) {
             case Data_Type::INT8_LE:
                 if (element == "0" || element == "1" ||

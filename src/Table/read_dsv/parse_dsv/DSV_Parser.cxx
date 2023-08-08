@@ -1,19 +1,19 @@
-/// This program is free software: you can redistribute it and/or modify
-/// it under the terms of the GNU Lesser General Public License as published by
-/// the Free Software Foundation, version 3 of the License.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, version 3 of the License.
 
-/// This program is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-/// GNU Lesser General Public License for more details.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
 
-/// You should have received a copy of the GNU Lesser General Public License
-/// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/// Originally copied from libcsv++
-/// https://github.com/jainyzau/libcsv-
+// Originally copied from libcsv++
+// https://github.com/jainyzau/libcsv-
 
-/// Exensively modified by Walter Landry
+// Exensively modified by Walter Landry
 
 #include "DSV_Parser.hxx"
 
@@ -56,7 +56,7 @@ DSV_Parser::DSV_Parser(DSV_Document &p_doc, std::istream &input_stream,
                 _post_line_end();
                 break;
             case ParseCompleted:
-                /// Silence a warning about unhandled case.
+                // Silence a warning about unhandled case.
                 break;
         }
     }

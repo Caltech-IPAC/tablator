@@ -210,6 +210,7 @@ int main(int argc, char *argv[]) {
     std::string output_format_str;
     std::string column_to_extract;
     std::string type_str;
+    bool write_null_string_f = false;
     bool idx_lookup = false;
 
     // Declare the supported options.
@@ -253,7 +254,11 @@ int main(int argc, char *argv[]) {
             "return values as strings")(
             "exclude-cols", boost::program_options::value<bool>(&exclude_cols_f),
             "named columns are to be excluded (flag is true) or included (false, "
-            "default)");
+            "default)")("write-null-string",
+                        boost::program_options::bool_switch(&write_null_string_f)
+                                ->default_value(false),
+                        "render null values in tsv/csv tables  as \"null\" rather than "
+                        "as empty string (default false)");
 
     boost::program_options::options_description hidden_options("Hidden options");
     hidden_options.add_options()(
@@ -424,6 +429,12 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
+        if (write_null_string_f &&
+            output_format.enum_format != tablator::Format::Enums::CSV &&
+            output_format.enum_format != tablator::Format::Enums::TSV) {
+            std::cerr << "\"write-null-string\" feature is supported only when writing "
+                         "in CSV or TSV format.";
+        }
 
         /**************/
         /*** Do it! ***/
@@ -481,10 +492,11 @@ int main(int argc, char *argv[]) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
             boost::filesystem::ofstream output_stream(output_path);
-            table.write(output_stream, output_path.stem().native(), output_format);
+            table.write(output_stream, output_path.stem().native(), output_format,
+                        write_null_string_f);
         } else {
             tablator::Table table(input_path, input_format);
-            table.write(output_path, output_format);
+            table.write(output_path, output_format, write_null_string_f);
         }
     } catch (boost::program_options::error &exception) {
         std::cerr << exception.what() << "\n" << usage(visible_options);
