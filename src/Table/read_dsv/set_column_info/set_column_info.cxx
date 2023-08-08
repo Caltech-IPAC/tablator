@@ -35,12 +35,13 @@ void tablator::Table::set_column_info(std::vector<Column> &columns,
     ++row;
 
     for (; row != dsv.end(); ++row) {
-        if (row->size() != names.size())
+        if (row->size() != names.size()) {
             throw std::runtime_error("In line " + std::to_string(line_number) +
                                      ", expected " + std::to_string(names.size()) +
-                                     " elements, but only found " +
+                                     " elements, but found " +
                                      std::to_string(row->size()));
-        std::vector<std::string> row_strings;
+        }
+
         for (size_t elem = 0; elem < row->size(); ++elem) {
             std::string &element((*row)[elem]);
             boost::algorithm::trim(element);
