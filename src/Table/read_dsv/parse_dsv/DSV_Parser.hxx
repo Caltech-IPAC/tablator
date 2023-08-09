@@ -78,5 +78,7 @@ private:
     DSV_Document &document;
     std::istream &dsv_stream;
     const char delimiter;
+
+    char outer_quote_char;
 };
 }  // namespace tablator

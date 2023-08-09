@@ -1,0 +1,9 @@
+str1,object,str2
+"a",'Object position along X, with the scale being 0.15"/px',"efg"
+'b','Object position along Y, with the scale being 0.35"/px','ghi'
+c,"Object position along X, with the scale being 0.45'/px",ijk
+"d","Object position along X, with the scale being 0.45""/px",ijk
+'e','Object position along X, with the scale being 0.45''/px',ijk
+"f","Object position along X, with the scale being 0.45""/px, not 0.54""/px",""ijk""
+"g",'Object position along X, with the scale being 0.45''/px','"ijk"'
+ab"cd",11  <a href='foo' rel='aaa'>O'Malley</a>,"ab"cd

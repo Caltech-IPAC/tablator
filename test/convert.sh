@@ -262,7 +262,7 @@ else
     echo "FAIL: SQLite output"
 fi
 
-${tablator_bin} --output-format=csv test/multi.tbl - | diff -w - test/multi.csv
+${tablator_bin} --output-format=csv test/multi.tbl - | diff -w - test/multi_with_unquoted.csv
 if [ $? -eq 0 ]; then
     echo "PASS: CSV output"
 else
@@ -1172,4 +1172,14 @@ if [ $? -eq 0 ]; then
     rm -f temp_file
 else
     echo "FAIL: Convert table with null strings from tsv to IPAC table and back, losing null strings"
+fi
+
+${tablator_bin} test/back_and_forth_tables/various_with_quotes.csv temp.tbl &&
+${tablator_bin} temp.tbl temp.csv &&
+diff test/back_and_forth_tables/various_with_quotes.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with single and double quotes from csv to IPAC table and back"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with single and double quotes from csv to IPAC table and back"
 fi
