@@ -13,26 +13,20 @@
 
 #include <iomanip>
 
+#include "../Common.hxx"
 #include "../write_type_as_ascii.hxx"
 
 namespace {
 // Copied from libcsv++
 // https://github.com/jainyzau/libcsv-
+
 std::ostream &write_escaped_string(std::ostream &os, const std::string &s,
                                    const char &separator) {
-    auto quote_location(s.find("\""));
-    if (quote_location != std::string::npos) {
-        size_t start(0);
-        os << "\"";
-        while (quote_location != std::string::npos) {
-            os << s.substr(start, quote_location - start) << "\"\"";
-            start = quote_location + 1;
-            quote_location = s.find("\"", start);
-        }
-        os << s.substr(start, quote_location - start) << "\"";
-    } else if (s.find(separator) != std::string::npos ||
-               s.find("\n") != std::string::npos) {
-        os << "\"" << s << "\"";
+    auto quote_location(s.find(tablator::DOUBLE_QUOTE));
+
+    if (quote_location == std::string::npos &&
+        (s.find(separator) != std::string::npos || s.find("\n") != std::string::npos)) {
+        os << tablator::DOUBLE_QUOTE << s << tablator::DOUBLE_QUOTE;
     } else {
         os << s;
     }

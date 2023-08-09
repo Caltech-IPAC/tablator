@@ -70,6 +70,10 @@ static const std::string VALUE("VALUE");
 static const std::string VALUES("VALUES");
 static const std::string VOTABLE("VOTABLE");
 
+static const char DOUBLE_QUOTE('"');
+static const char SINGLE_QUOTE('\'');
+static const char NULL_CHAR('\0');
+
 static const std::string DOT(".");
 static const std::string VOTABLE_DOT(VOTABLE + DOT);
 static const std::string RESOURCE_DOT(RESOURCE + DOT);
