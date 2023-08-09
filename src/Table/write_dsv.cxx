@@ -13,26 +13,20 @@
 
 #include <iomanip>
 
+#include "../Common.hxx"
 #include "../write_type_as_ascii.hxx"
 
 namespace {
 // Copied from libcsv++
 // https://github.com/jainyzau/libcsv-
+
 std::ostream &write_escaped_string(std::ostream &os, const std::string &s,
-                                   const char &separator) {
-    auto quote_location(s.find("\""));
-    if (quote_location != std::string::npos) {
-        size_t start(0);
-        os << "\"";
-        while (quote_location != std::string::npos) {
-            os << s.substr(start, quote_location - start) << "\"\"";
-            start = quote_location + 1;
-            quote_location = s.find("\"", start);
-        }
-        os << s.substr(start, quote_location - start) << "\"";
-    } else if (s.find(separator) != std::string::npos ||
-               s.find("\n") != std::string::npos) {
-        os << "\"" << s << "\"";
+                                   const char &separator,
+                                   const char &outer_quote_char) {
+    auto quote_location(s.find(outer_quote_char));
+    if (quote_location == std::string::npos &&
+        (s.find(separator) != std::string::npos || s.find("\n") != std::string::npos)) {
+        os << outer_quote_char << s << outer_quote_char;
     } else {
         os << s;
     }
@@ -56,7 +50,8 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
     if (num_columns == 0) return;
     // Skip null_bitfield_flags
     for (int i = 1; i < num_columns; ++i) {
-        write_escaped_string(os, columns[i].get_name(), separator);
+        write_escaped_string(os, columns[i].get_name(), separator,
+                             tablator::DOUBLE_QUOTE);
         os << (i == num_columns - 1 ? '\n' : separator);
     }
 
@@ -71,7 +66,11 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
                 // Leave null entries blank by default, unlike in IPAC_TABLE format.
                 ss << "null";
             }
-            write_escaped_string(os, ss.str(), separator);
+            char outer_quote_char = '\"';
+            if (!ss.str().empty() && ss.str()[0] == '\'') {
+                outer_quote_char = '\'';
+            }
+            write_escaped_string(os, ss.str(), separator, outer_quote_char);
             os << (i == num_columns - 1 ? '\n' : separator);
         }
 }

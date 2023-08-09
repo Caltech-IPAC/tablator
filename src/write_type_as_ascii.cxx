@@ -95,9 +95,9 @@ void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
                << *reinterpret_cast<const double *>(data);
             break;
         case Data_Type::CHAR:
-            /// The characters in the type can be shorter than the
-            /// number of allowed bytes.  So add a .c_str() that
-            /// will terminate the string at the first null.
+            // The number of characters in the type can be less than
+            // the number of allowed bytes, so add a .c_str() that
+            // will terminate the string at the first null.
             os << std::string(reinterpret_cast<const char *>(data), array_size).c_str();
             break;
     }

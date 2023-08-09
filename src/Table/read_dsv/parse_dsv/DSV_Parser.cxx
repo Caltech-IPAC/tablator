@@ -13,13 +13,27 @@
 // Originally copied from libcsv++
 // https://github.com/jainyzau/libcsv-
 
-// Exensively modified by Walter Landry
+// Extensively modified by Walter Landry
 
 #include "DSV_Parser.hxx"
 
 #include <sstream>
 #include <stdexcept>
+
+#include "../../../Common.hxx"
+
 namespace tablator {
+
+// NOTE: This parser expects any DOUBLE_QUOTE character (") inside a
+// string which is itself enclosed in DOUBLE_QUOTE characters to be
+// represented by two consecutive DOUBLE_QUOTE characters (""), and
+// similarly for SINGLE_QUOTE characters inside SINGLE_QUOTEd strings.
+// Much of the complexity below stems from the necessity to establish
+// whether a XXX_QUOTE character encountered in a loop through an
+// XXX_QUOTEd string represents the end of the string or rather serves
+// as an escape character for the XXX_QUOTE character immediately
+// following it.
+
 DSV_Parser::DSV_Parser(DSV_Document &p_doc, std::istream &input_stream,
                        const char &Delimiter)
         : document(p_doc), dsv_stream(input_stream), delimiter(Delimiter) {
@@ -76,15 +90,11 @@ void DSV_Parser::_post_field_start() {
         field_end = idx;
         _field_end();
         _line_end();
-    } else if (_curr_char() == '\"') {
-        if (field_beg != idx) {
-            throw std::runtime_error("Syntax error: quote symbol in unenclosed field.");
-        }
     }
 }
 
 void DSV_Parser::_post_front_quote() {
-    if (_curr_char() == '"') {
+    if (_curr_char() == outer_quote_char) {
         _escape_on();
     } else if (_curr_char() == '\n') {
         _append_another_line_from_file();
@@ -95,21 +105,17 @@ void DSV_Parser::_post_escape_on() {
     if (_curr_char() == delimiter) {
         _back_quote();
         _field_end();
-    } else if (_curr_char() == '"') {
+    } else if (_curr_char() == outer_quote_char) {
         _escape_off();
     } else if (_curr_char() == '\n') {
         _back_quote();
         _field_end();
         _line_end();
-    } else {
-        throw std::runtime_error(
-                "Syntax error: quote symbol in front of "
-                "character which is not quote symbol.");
     }
 }
 
 void DSV_Parser::_post_escape_off() {
-    if (_curr_char() == '"') {
+    if (_curr_char() == outer_quote_char) {
         _escape_on();
     } else if (_curr_char() == '\n') {
         _append_another_line_from_file();
@@ -121,7 +127,8 @@ void DSV_Parser::_post_back_quote() {}
 void DSV_Parser::_post_field_end() {
     _field_start();
 
-    if (_curr_char() == '"') {
+    if (_curr_char() == DOUBLE_QUOTE || _curr_char() == SINGLE_QUOTE) {
+        outer_quote_char = _curr_char();
         _front_quote();
     } else if (_curr_char() == delimiter) {
         _field_end();
@@ -135,7 +142,8 @@ void DSV_Parser::_post_line_end() {
     _line_start();
     _field_start();
 
-    if (_curr_char() == '"') {
+    if (_curr_char() == DOUBLE_QUOTE || _curr_char() == SINGLE_QUOTE) {
+        outer_quote_char = _curr_char();
         _front_quote();
     } else if (_curr_char() == delimiter) {
         _field_end();
@@ -191,23 +199,23 @@ void DSV_Parser::_field_start() {
     elem.clear();
     field_beg = field_end = idx;
     state = FieldStart;
+    outer_quote_char = NULL_CHAR;
 }
 
 void DSV_Parser::_escape_on() { state = EscapeOn; }
 
 void DSV_Parser::_escape_off() {
-    elem.append(row_str.c_str() + field_beg, idx - field_beg);
+    elem.append(row_str.c_str() + field_beg, idx + 1 - field_beg);
     field_beg = idx + 1;
     state = EscapeOff;
 }
 
-void DSV_Parser::_front_quote() {
-    ++field_beg;
-    state = FrontQuote;
-}
+void DSV_Parser::_front_quote() { state = FrontQuote; }
 
 void DSV_Parser::_back_quote() {
-    field_end = idx - 1;
+    field_end = idx;
+
+    // Note: FrontQuote (not BackQuote) is in the original libcsv++.
     state = FrontQuote;
 }
 
