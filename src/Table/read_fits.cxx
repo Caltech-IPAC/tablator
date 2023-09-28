@@ -57,25 +57,17 @@ void get_keyword_value_as_string(std::string &value_str,
     }
 }
 
-template <typename T>
-void read_scalar_column(uint8_t *position, CCfits::Column &c, const size_t &rows,
-                        const size_t &row_size) {
-    std::vector<T> v;
-    c.read(v, 1, rows);
-    uint8_t *current = position;
-    for (auto &element : v) {
-        *reinterpret_cast<T *>(current) = element;
-        current += row_size;
-    }
-}
 
 template <typename T>
-void read_vector_column(fitsfile *fits_file, uint8_t *position, CCfits::Column &c,
-                        const size_t &rows, const size_t &row_size) {
+void read_column(fitsfile *fits_file, std::vector<uint8_t> &data, size_t offset,
+                 CCfits::Column &c, size_t array_size, const size_t &rows,
+                 const size_t &row_size) {
+    uint8_t *position = data.data() + offset;
+
     // Use the C api because the C++ api (Column::readArrays) is
     // horrendously slow.
     int status(0), anynul(0);
-    std::vector<T> temp_array(c.repeat());
+    std::vector<T> temp_array(array_size);
 
     auto get_matched_datatype = CCfits::FITSUtil::MatchType<T>();
     uint8_t *current = position;
@@ -83,23 +75,15 @@ void read_vector_column(fitsfile *fits_file, uint8_t *position, CCfits::Column &
         uint8_t *element_start = current;
 
         fits_read_col(fits_file, get_matched_datatype(), c.index(), row + 1, 1,
-                      c.repeat(), NULL, temp_array.data(), &anynul, &status);
+                      array_size, NULL /* void *nulval */, temp_array.data(), &anynul,
+                      &status);
 
-        for (size_t offset = 0; offset < c.repeat(); ++offset) {
-            *reinterpret_cast<T *>(current) = temp_array[offset];
+        for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
+            *reinterpret_cast<T *>(current) = temp_array[array_offset];
             current += sizeof(T);
         }
         current = element_start + row_size;
     }
-}
-
-template <typename T>
-void read_column(fitsfile *fits_file, uint8_t *position, CCfits::Column &c,
-                 const bool &is_array, const size_t &rows, const size_t &row_size) {
-    if (!is_array)
-        read_scalar_column<T>(position, c, rows, row_size);
-    else
-        read_vector_column<T>(fits_file, position, c, rows, row_size);
 }
 
 }  // namespace
@@ -366,10 +350,10 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             size_t offset(offsets[tab_col_idx]);
 
             CCfits::Column &c = ccfits_table->column(fits_col_idx);
-            bool is_array = (get_array_size(c) > 1);
+            size_t array_size = get_array_size(c);
             switch (abs(c.type())) {
                 case CCfits::Tlogical: {
-                    if (!is_array) {
+                    if (array_size == 1) {
                         std::vector<int> v;
                         c.read(v, 1, ccfits_table->rows());
                         size_t element_offset = offset;
@@ -395,37 +379,37 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 } break;
 
                 case CCfits::Tbyte: {
-                    read_column<uint8_t>(fits_pointer, data.data() + offset, c,
-                                         is_array, ccfits_table->rows(), row_size);
+                    read_column<uint8_t>(fits_pointer, data, offset, c, array_size,
+                                         ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tshort: {
-                    read_column<int16_t>(fits_pointer, data.data() + offset, c,
-                                         is_array, ccfits_table->rows(), row_size);
+                    read_column<int16_t>(fits_pointer, data, offset, c, array_size,
+                                         ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tushort: {
-                    read_column<uint16_t>(fits_pointer, data.data() + offset, c,
-                                          is_array, ccfits_table->rows(), row_size);
+                    read_column<uint16_t>(fits_pointer, data, offset, c, array_size,
+                                          ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tuint:
                 case CCfits::Tulong: {
-                    read_column<uint32_t>(fits_pointer, data.data() + offset, c,
-                                          is_array, ccfits_table->rows(), row_size);
+                    read_column<uint32_t>(fits_pointer, data, offset, c, array_size,
+                                          ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tint:
                 case CCfits::Tlong: {
-                    read_column<int32_t>(fits_pointer, data.data() + offset, c,
-                                         is_array, ccfits_table->rows(), row_size);
+                    read_column<int32_t>(fits_pointer, data, offset, c, array_size,
+                                         ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tlonglong: {
-                    read_column<int64_t>(fits_pointer, data.data() + offset, c,
-                                         is_array, ccfits_table->rows(), row_size);
+                    read_column<int64_t>(fits_pointer, data, offset, c, array_size,
+                                         ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tfloat: {
-                    read_column<float>(fits_pointer, data.data() + offset, c, is_array,
+                    read_column<float>(fits_pointer, data, offset, c, array_size,
                                        ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tdouble: {
-                    read_column<double>(fits_pointer, data.data() + offset, c, is_array,
+                    read_column<double>(fits_pointer, data, offset, c, array_size,
                                         ccfits_table->rows(), row_size);
                 } break;
                 case CCfits::Tstring: {
