@@ -7,9 +7,9 @@
 #include "../Table_Utils.hxx"
 
 namespace tablator {
-void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,
-                         const size_t &column, const std::string &element,
-                         const size_t &offset, const size_t &offset_end, Row &row) {
+void insert_ascii_in_row(const Data_Type &data_type, size_t array_size, size_t col_idx,
+                         const std::string &element, size_t offset, size_t offset_end,
+                         Row &row) {
     if (array_size != 1 && data_type != Data_Type::CHAR) {
         std::vector<std::string> elements;
         boost::split(elements, element, boost::is_any_of(" "));
@@ -20,7 +20,7 @@ void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,
         auto element_offset = offset;
         auto element_size = data_size(data_type);
         for (auto &e : elements) {
-            insert_ascii_in_row(data_type, 1, column, e, element_offset,
+            insert_ascii_in_row(data_type, 1, col_idx, e, element_offset,
                                 element_offset + element_size, row);
             element_offset += element_size;
         }
@@ -28,7 +28,7 @@ void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,
         switch (data_type) {
             case Data_Type::INT8_LE:
                 if (element == "?" || element == " " || element[0] == '\0') {
-                    row.set_null(data_type, array_size, column, offset, offset_end);
+                    row.set_null(data_type, array_size, col_idx, offset, offset_end);
                 } else {
                     bool result = (boost::iequals(element, "true") ||
                                    boost::iequals(element, "t") || element == "1");

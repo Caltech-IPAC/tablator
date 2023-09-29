@@ -12,7 +12,7 @@ std::vector<uint8_t> tablator::Table::read_dsv_rows(
             skipped = true;
             continue;
         }
-        row_string.set_zero();
+        row_string.fill_with_zeros();
         for (size_t column = 1; column < columns.size(); ++column) {
             const std::string &element(dsv_row[column - 1]);
             if (element.empty() || element == "null") {

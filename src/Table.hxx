@@ -25,7 +25,15 @@
 #include "Resource_Element.hxx"
 #include "Row.hxx"
 #include "Table_Element.hxx"
+#include "Utils/Null_Utils.hxx"
 #include "Utils/Table_Utils.hxx"
+
+// backward compatibility
+template <typename T>
+inline void unsafe_copy_to_row(const T &element, const size_t &offset,
+                               char *data_array) {
+    tablator::unsafe_copy_to_data_array(data_array, element, offset);
+}
 
 namespace tablator {
 
@@ -292,7 +300,7 @@ public:
     }
 
     void append_row(const Row &row) {
-        assert(row.data.size() == row_size());
+        assert(row.size() == row_size());
         tablator::append_row(get_data(), row);
     }
 

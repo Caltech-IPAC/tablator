@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdexcept>
+
+#include "Data_Type.hxx"
 #include "to_string.hxx"
 
 namespace tablator {

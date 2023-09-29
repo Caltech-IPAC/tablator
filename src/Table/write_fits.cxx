@@ -8,15 +8,20 @@
 #include "../Utils/Vector_Utils.hxx"
 #include "../to_string.hxx"
 
-// JTODO Descriptions and field-level attributes get lost in conversion to and from
+// Note: Descriptions and field-level attributes get lost in conversion to and from
 // fits.
+
+
+// FIXME: Support null values.
 
 namespace {
 template <typename data_type>
+
+
 void write_column(fitsfile *fits_file, int fits_type, int col_id, const uint8_t *data,
                   hsize_t array_size, size_t row) {
     int status = 0;
-    fits_write_col(fits_file, fits_type, col_id + 1, row, 1, array_size,
+    fits_write_col(fits_file, fits_type, col_id, row, 1, array_size,
                    reinterpret_cast<data_type *>(const_cast<uint8_t *>(data)), &status);
     if (status != 0) throw CCfits::FitsError(status);
 }
@@ -119,7 +124,9 @@ void tablator::Table::write_fits(
     // equal to the n-th field name.
     std::vector<const char *> ttype, tunit;
     const auto &columns = get_columns();
-    for (size_t column_idx = 0; column_idx < columns.size(); ++column_idx) {
+
+    // Skip null_bitfield_flags column.
+    for (size_t column_idx = 1; column_idx < columns.size(); ++column_idx) {
         auto &column = columns[column_idx];
         ttype.push_back(column.get_name().c_str());
         std::string array_size_str(std::to_string(column.get_array_size()));
@@ -176,6 +183,7 @@ void tablator::Table::write_fits(
                         to_string(column.get_type()));
                 break;
         }
+
         fits_types.push_back(array_size_str + fits_type);
 
         const auto col_attrs = column.get_field_properties().get_attributes();
@@ -284,10 +292,10 @@ void tablator::Table::write_fits(
     const uint8_t *row_pointer(get_data().data());
     const size_t number_of_rows(num_rows());
     for (size_t row = 1; row <= number_of_rows; ++row) {
-        for (size_t i = 0; i < columns.size(); ++i) {
+        // Skip null_bitfield_flags column.
+        for (size_t i = 1; i < columns.size(); ++i) {
             auto &column = columns[i];
             const uint8_t *offset_data = row_pointer + offsets[i];
-
             switch (datatypes_for_writing[i]) {
                 case Data_Type::INT8_LE:
 
@@ -353,7 +361,7 @@ void tablator::Table::write_fits(
                         }
                     }
                     char *temp_chars = const_cast<char *>(temp_string.c_str());
-                    fits_write_col(fits_file, TSTRING, i + 1, row, 1, 1, &temp_chars,
+                    fits_write_col(fits_file, TSTRING, i, row, 1, 1, &temp_chars,
                                    &status);
                     if (status != 0) throw CCfits::FitsError(status);
                 } break;

@@ -3,6 +3,8 @@
 #include <CCfits/CCfits>
 
 #include "../Table.hxx"
+#include "../Utils/Null_Utils.hxx"
+#include "../Utils/Table_Utils.hxx"
 #include "../fits_keyword_ucd_mapping.hxx"
 
 // JTODO Descriptions and field-level attributes get lost in conversion to and from
@@ -59,32 +61,89 @@ void get_keyword_value_as_string(std::string &value_str,
 
 
 template <typename T>
-void read_column(fitsfile *fits_file, std::vector<uint8_t> &data, size_t offset,
-                 CCfits::Column &c, size_t array_size, const size_t &rows,
-                 const size_t &row_size) {
+void read_column(fitsfile *fits_file, std::vector<uint8_t> &data, size_t col_idx,
+                 size_t offset, size_t next_offset, CCfits::Column &c,
+                 size_t array_size, const size_t &num_rows, const size_t &row_size,
+                 tablator::Data_Type type) {
     uint8_t *position = data.data() + offset;
 
     // Use the C api because the C++ api (Column::readArrays) is
     // horrendously slow.
-    int status(0), anynul(0);
+
+    int status = 0;
+    int anynul = 0;
+
     std::vector<T> temp_array(array_size);
-
     auto get_matched_datatype = CCfits::FITSUtil::MatchType<T>();
+
+    T T_null;
+    bool got_null = c.getNullValue(&T_null);
+
     uint8_t *current = position;
-    for (size_t row = 0; row < rows; ++row) {
+    void *nulval = NULL;
+    for (size_t row = 0; row < num_rows; ++row) {
         uint8_t *element_start = current;
-
         fits_read_col(fits_file, get_matched_datatype(), c.index(), row + 1, 1,
-                      array_size, NULL /* void *nulval */, temp_array.data(), &anynul,
-                      &status);
+                      array_size, nulval, temp_array.data(), &anynul, &status);
 
-        for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
-            *reinterpret_cast<T *>(current) = temp_array[array_offset];
+        for (size_t array_offset = 0; array_offset < array_size /* c.repeat() */;
+             ++array_offset) {
+            if (anynul || (got_null && temp_array[array_offset] == T_null)) {
+                // Note: As of 13Oct23, I have never seen any anynul value
+                // except 0.  The second condition of this if-block does
+                // return true when appropriate.
+                tablator::set_null(data, row_size * row, type, 1, col_idx, offset,
+                                   next_offset);
+            } else {
+                *reinterpret_cast<T *>(current) = temp_array[array_offset];
+            }
             current += sizeof(T);
         }
         current = element_start + row_size;
     }
 }
+
+// Note: FITS thinks of elements of Tstring columns as strings---or
+// possibly arrays of strings---but tablator thinks of each such
+// element as a single character array, not an array of arrays.
+// This function does not check whether individual elements of that
+// single array are undefined/null.
+void read_string_column(fitsfile *fits_file, std::vector<uint8_t> &data, size_t col_idx,
+                        size_t offset, size_t next_offset, CCfits::Column &c,
+                        const size_t &num_rows, const size_t &row_size) {
+    uint8_t *position = data.data() + offset;
+
+    // Use the C api because the C++ api (Column::readArrays) is
+    // horrendously slow.
+    int status(0), anynul(0);
+
+    // fits_read_col_str() wants a char** argument.
+    std::vector<char> data_vec(row_size);
+    std::vector<char *> ptr_vec;
+    ptr_vec.emplace_back(data_vec.data());
+    char **data_str = ptr_vec.data();
+
+    tablator::Data_Type type = tablator::Data_Type::CHAR;
+    char nulstr[] = "";
+
+    uint8_t *current = position;
+    for (size_t row = 0; row < num_rows; ++row) {
+        fits_read_col_str(fits_file, c.index(), row + 1, 1, c.repeat(), nulstr,
+                          data_str, &anynul, &status);
+
+        if (anynul) {
+            tablator::set_null(data, row_size * row, type, 1, col_idx, offset,
+                               next_offset);
+        } else {
+            char *element = data_str[0];
+            for (int j = 0; j < c.width(); ++j) {
+                *(current + j) = *(element + j);
+            }
+        }
+        current += row_size;
+    }
+}
+
 
 }  // namespace
 
@@ -142,13 +201,13 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         std::string name(keyword);
 
         // Used to undo write_fits() hackery.
-        static std::regex attr_expr{"^(.*)\\." + XMLATTR + "\\." + "(.*)$"};
-        static std::regex info_expr{"^((?:.*\\.)?" + INFO + ")" + "\\." + "(.*)$"};
+        static std::regex attr_regex{"^(.*)\\." + XMLATTR + "\\." + "(.*)$"};
+        static std::regex info_regex{"^((?:.*\\.)?" + INFO + ")" + "\\." + "(.*)$"};
 
         bool convert_value_to_attr = false;
 
         std::smatch attr_match;
-        if (std::regex_search(keyword, attr_match, attr_expr)) {
+        if (std::regex_search(keyword, attr_match, attr_regex)) {
             // Undo write_fits() hackery: extract keyword and attrname from
             // "keyword.XMLATTR.name".
             keyword.assign(attr_match[1]);
@@ -158,7 +217,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             // If keyword indicates that we are looking at an INFO element,
             // further undo hackery by dropping everything past INFO from label.
             std::smatch info_match;
-            if (std::regex_search(keyword, info_match, info_expr)) {
+            if (std::regex_search(keyword, info_match, info_regex)) {
                 label.assign(info_match[1]);
             } else {
                 // Otherwise, prepare for an attribute at the level of e.g. RESOURCE or
@@ -227,26 +286,33 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         table_element_trailing_infos, table_element_attributes,
                         combined_labeled_properties);
 
-    // Tablator columns are 0-based and FITS columns are 1-based.  The
-    // tablator table has a null_bitfield_flags column in the 0th
-    // place.  The FITS file might have a null_bitfield_flags column
-    // as its 1st column if it was generated by a previous (misguided)
-    // version of tablator.
+
+    // Create null_bitfield_flags column for internal use.
+    tablator::append_column(columns, offsets, null_bitfield_flags_name,
+                            Data_Type::UINT8_LE,
+                            bits_to_bytes(ccfits_table->column().size()),
+                            Field_Properties(null_bitfield_flags_description, {}));
+
+
+    // Check whether the FITS file already has a null_bitfield_flag
+    // column and if so, prepare to skip it; we'll populate the column
+    // we just created instead.  (The FITS file would have this column
+    // only if the file had been generated by an earlier (misguided)
+    // version of tablator.)
 
     const bool has_null_bitfield_flags(ccfits_table->column().size() > 0 &&
                                        ccfits_table->column(1).name() ==
                                                null_bitfield_flags_name &&
                                        ccfits_table->column(1).type() == CCfits::Tbyte);
 
-    if (!has_null_bitfield_flags) {
-        tablator::append_column(columns, offsets, null_bitfield_flags_name,
-                                Data_Type::UINT8_LE,
-                                bits_to_bytes(ccfits_table->column().size()),
-                                Field_Properties(null_bitfield_flags_description, {}));
-    }
+    // ccfits column indices are 1-based
+    for (size_t fits_col_idx = 1; fits_col_idx < ccfits_table->column().size() + 1;
+         ++fits_col_idx) {
+        if (fits_col_idx == 1 && has_null_bitfield_flags) {
+            // Skip the null_bitfield_flags column, if it exists.
+            continue;
+        }
 
-    for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
-        size_t fits_col_idx = i + 1;
         CCfits::Column &c = ccfits_table->column(fits_col_idx);
         size_t array_size = get_array_size(c);
 
@@ -311,7 +377,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 break;
             default:
                 throw std::runtime_error(
-                        "Appending columns, unsupported data type in the fits file for "
+                        "Appending columns, unsupported data type in the FITS file for "
                         "column '" +
                         c.name() + "'");
         }
@@ -319,114 +385,121 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     // ccfits_table->rows () returns an int, so there may be issues with more
     // than 2^32 rows
-
-    std::vector<uint8_t> data;
     size_t row_size = tablator::row_size(offsets);
-    data.resize(ccfits_table->rows() * row_size);
+    size_t total_data_size = ccfits_table->rows() * row_size;
 
+    // FIXME: We have to use vector<uint8_t> here because
+    // Table_Element expects it.  The Row class, on the other hand,
+    // uses vector<char>.
+    std::vector<uint8_t> data(total_data_size, 0);
 
     // CCfits dies in read_column() if there is no data in the table. :(
-    if (!data.empty()) {
+    if (total_data_size > 0) {
         fitsfile *fits_pointer = fits.fitsPointer();
-
         // Tablator columns are 0-based and FITS columns are 1-based.
         // The tablator table has a null_bitfield_flags column in the
-        // 0th place.  The code that follows allows for the unlikely
-        // possibility that the FITS table has a null_bitfield_flags
-        // column in the 1st place.  In that case, the index of each
-        // column of the FITS table is 1 more than the index of its
-        // counterpart in the tablator table.  if the FITS file does
-        // not have a null_bitfield_flags column, then the indices of
+        // 0th place.  If it was generated by a previous (erroneous)
+        // version of tablator, The FITS file might have a
+        // null_bitfield_flags column as its 1st column. If it does,
+        // we'll skip it.
+
+		// In that case, the index of each column of the FITS table is
+        // 1 more than the index of its counterpart in the tablator
+        // table.  if the FITS file does not have a
+        // null_bitfield_flags column, then the indices of
         // corresponding columns in the two tables are the same.
 
-        // Warning: This code does not properly handle nulls.
+        int col_id_adjuster = (has_null_bitfield_flags) ? -1 : 0;
 
-        size_t col_idx_adjuster = (has_null_bitfield_flags) ? 0 : 1;
-
-        //  We'll populate the tablator table column by column.
-        for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
-            size_t fits_col_idx = i + 1;
-            size_t tab_col_idx = i + col_idx_adjuster;
+        //  We'll populate the tablator table one column at a time,
+        // starting with the first FITS column.  The tablator table's
+        // null_bitfield_flags column will be populated as a side effect.
+        for (size_t fits_col_idx = 1; fits_col_idx < ccfits_table->column().size() + 1;
+             ++fits_col_idx) {
+            if (fits_col_idx == 1 && has_null_bitfield_flags) {
+                // Skip the null_bitfield_flags column, if it exists.
+                continue;
+            }
+            size_t tab_col_idx = fits_col_idx + col_id_adjuster;
             size_t offset(offsets[tab_col_idx]);
+            size_t next_offset(offsets[tab_col_idx + 1]);
 
             CCfits::Column &c = ccfits_table->column(fits_col_idx);
+
             size_t array_size = get_array_size(c);
             switch (abs(c.type())) {
                 case CCfits::Tlogical: {
-                    if (array_size == 1) {
-                        std::vector<int> v;
-                        c.read(v, 1, ccfits_table->rows());
-                        size_t element_offset = offset;
-                        for (auto &element : v) {
-                            data[element_offset] = element;
-                            element_offset += row_size;
-                        }
-                    } else {
-                        // FIXME: Use the C api because Column::readArrays is
-                        // horrendously slow.
-                        std::vector<std::valarray<int>> v;
-                        c.readArrays(v, 1, ccfits_table->rows());
-                        size_t start_offset_within_row = offset;
-                        for (auto &array : v) {
-                            auto element_offset = start_offset_within_row;
-                            for (auto &element : array) {
-                                data[element_offset] = element;
-                                ++element_offset;
-                            }
-                            start_offset_within_row += row_size;
-                        }
-                    }
+                    // std::cout << "Logical" << std::endl;
+                    // Use template type uint8_t here; FITS doesn't support int8_t.
+                    read_column<uint8_t>(fits_pointer, data, tab_col_idx, offset,
+                                         next_offset, c, array_size,
+                                         ccfits_table->rows(), row_size,
+                                         tablator::Data_Type::INT8_LE);
                 } break;
 
                 case CCfits::Tbyte: {
-                    read_column<uint8_t>(fits_pointer, data, offset, c, array_size,
-                                         ccfits_table->rows(), row_size);
+                    read_column<uint8_t>(fits_pointer, data, tab_col_idx, offset,
+                                         next_offset, c, array_size,
+                                         ccfits_table->rows(), row_size,
+                                         tablator::Data_Type::UINT8_LE);
                 } break;
                 case CCfits::Tshort: {
-                    read_column<int16_t>(fits_pointer, data, offset, c, array_size,
-                                         ccfits_table->rows(), row_size);
+                    read_column<int16_t>(fits_pointer, data, tab_col_idx, offset,
+                                         next_offset, c, array_size,
+                                         ccfits_table->rows(), row_size,
+                                         Data_Type::INT16_LE);
                 } break;
                 case CCfits::Tushort: {
-                    read_column<uint16_t>(fits_pointer, data, offset, c, array_size,
-                                          ccfits_table->rows(), row_size);
+                    read_column<uint16_t>(fits_pointer, data, tab_col_idx, offset,
+                                          next_offset, c, array_size,
+                                          ccfits_table->rows(), row_size,
+                                          Data_Type::UINT16_LE);
                 } break;
                 case CCfits::Tuint:
                 case CCfits::Tulong: {
-                    read_column<uint32_t>(fits_pointer, data, offset, c, array_size,
-                                          ccfits_table->rows(), row_size);
+                    read_column<uint32_t>(fits_pointer, data, tab_col_idx, offset,
+                                          next_offset, c, array_size,
+                                          ccfits_table->rows(), row_size,
+                                          Data_Type::UINT32_LE);
                 } break;
                 case CCfits::Tint:
                 case CCfits::Tlong: {
-                    read_column<int32_t>(fits_pointer, data, offset, c, array_size,
-                                         ccfits_table->rows(), row_size);
+                    // std::cout << "Tint/Tlong" << std::endl;
+                    read_column<int32_t>(fits_pointer, data, tab_col_idx, offset,
+                                         next_offset, c, array_size,
+                                         ccfits_table->rows(), row_size,
+                                         Data_Type::INT32_LE);
+
                 } break;
                 case CCfits::Tlonglong: {
-                    read_column<int64_t>(fits_pointer, data, offset, c, array_size,
-                                         ccfits_table->rows(), row_size);
+                    read_column<int64_t>(fits_pointer, data, tab_col_idx, offset,
+                                         next_offset, c, array_size,
+                                         ccfits_table->rows(), row_size,
+                                         Data_Type::INT64_LE);
                 } break;
                 case CCfits::Tfloat: {
-                    read_column<float>(fits_pointer, data, offset, c, array_size,
-                                       ccfits_table->rows(), row_size);
+                    read_column<float>(fits_pointer, data, tab_col_idx, offset,
+                                       next_offset, c, array_size, ccfits_table->rows(),
+                                       row_size, Data_Type::FLOAT32_LE);
                 } break;
                 case CCfits::Tdouble: {
-                    read_column<double>(fits_pointer, data, offset, c, array_size,
-                                        ccfits_table->rows(), row_size);
+                    read_column<double>(fits_pointer, data, tab_col_idx, offset,
+                                        next_offset, c, array_size,
+                                        ccfits_table->rows(), row_size,
+                                        Data_Type::FLOAT64_LE);
                 } break;
                 case CCfits::Tstring: {
-                    std::vector<std::string> v;
-                    c.read(v, 1, ccfits_table->rows());
-                    size_t element_offset = offset;
-                    for (auto &element : v) {
-                        for (size_t j = 0; j < element.size(); ++j)
-                            data[element_offset + j] = element[j];
-                        for (int j = element.size(); j < c.width(); ++j)
-                            data[element_offset + j] = '\0';
-                        element_offset += row_size;
-                    }
+                    // std::cout << "Tstring" << std::endl;
+
+                    // read_column() calls fits_read_col(), which is not
+                    // supported for CCfits::Tstring.
+                    read_string_column(fits_pointer, data, tab_col_idx, offset,
+                                       next_offset, c, ccfits_table->rows(), row_size);
+
                 } break;
                 default:
                     throw std::runtime_error(
-                            "Loading columns, unsupported data type in the fits file "
+                            "Loading columns, unsupported data type in the FITS file "
                             "for "
                             "column " +
                             c.name());

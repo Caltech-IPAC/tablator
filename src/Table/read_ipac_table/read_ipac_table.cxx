@@ -43,40 +43,40 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::vector<uint8_t> data;
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
-            row_string.set_zero();
-            for (size_t column = 1; column < ipac_columns[0].size(); ++column) {
-                if (line[ipac_column_offsets[column - 1]] != ' ')
+            row_string.fill_with_zeros();
+            for (size_t col_idx = 1; col_idx < ipac_columns[0].size(); ++col_idx) {
+                if (line[ipac_column_offsets[col_idx - 1]] != ' ')
                     throw std::runtime_error(
                             "Non-space found at a delimiter location on line " +
-                            std::to_string(current_line_num) + ", column " +
-                            std::to_string(ipac_column_offsets[column - 1]) +
-                            " between the fields '" + columns[column - 1].get_name() +
-                            "' and '" + columns[column].get_name() +
+                            std::to_string(current_line_num) + ", col_idx " +
+                            std::to_string(ipac_column_offsets[col_idx - 1]) +
+                            " between the fields '" + columns[col_idx - 1].get_name() +
+                            "' and '" + columns[col_idx].get_name() +
                             "'.  Is a field not wide enough?");
 
-                std::string element = line.substr(ipac_column_offsets[column - 1] + 1,
-                                                  ipac_column_widths[column]);
+                std::string element = line.substr(ipac_column_offsets[col_idx - 1] + 1,
+                                                  ipac_column_widths[col_idx]);
                 boost::algorithm::trim(element);
-                minimum_column_widths[column] =
-                        std::max(minimum_column_widths[column], element.size());
-                if ((!ipac_columns[3][column].empty() &&
-                     element == ipac_columns[3][column]) ||
-                    (ipac_columns[3][column].empty() &&
-                     columns[column].get_type() != Data_Type::CHAR &&
+                minimum_column_widths[col_idx] =
+                        std::max(minimum_column_widths[col_idx], element.size());
+                if ((!ipac_columns[3][col_idx].empty() &&
+                     element == ipac_columns[3][col_idx]) ||
+                    (ipac_columns[3][col_idx].empty() &&
+                     columns[col_idx].get_type() != Data_Type::CHAR &&
                      element.empty())) {
-                    row_string.set_null(columns[column].get_type(),
-                                        columns[column].get_array_size(), column,
-                                        offsets[column], offsets[column + 1]);
+                    row_string.set_null(columns[col_idx].get_type(),
+                                        columns[col_idx].get_array_size(), col_idx,
+                                        offsets[col_idx], offsets[col_idx + 1]);
                 } else {
                     try {
-                        insert_ascii_in_row(columns[column].get_type(),
-                                            columns[column].get_array_size(), column,
-                                            element, offsets[column],
-                                            offsets[column + 1], row_string);
+                        insert_ascii_in_row(columns[col_idx].get_type(),
+                                            columns[col_idx].get_array_size(), col_idx,
+                                            element, offsets[col_idx],
+                                            offsets[col_idx + 1], row_string);
                     } catch (std::exception &error) {
                         throw std::runtime_error(
-                                "Invalid " + to_string(columns[column].get_type()) +
-                                " for field '" + columns[column].get_name() +
+                                "Invalid " + to_string(columns[col_idx].get_type()) +
+                                " for field '" + columns[col_idx].get_name() +
                                 "' in line " + std::to_string(current_line_num + 1) +
                                 ".  Found '" + element + "'");
                     }
