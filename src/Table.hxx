@@ -334,11 +334,12 @@ public:
         Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids);
     }
 
-    void write_ipac_subtable_by_column_and_row(
-            std::ostream &os, const std::vector<size_t> &column_ids,
-            std::vector<size_t> requested_row_ids) const {
-        Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids,
-                                                            requested_row_ids);
+    void write_ipac_subtable_by_column_and_row(std::ostream &os,
+                                               const std::vector<size_t> &column_ids,
+                                               std::vector<size_t> requested_row_ids,
+                                               bool skip_comments = false) const {
+        Ipac_Table_Writer::write_subtable_by_column_and_row(
+                *this, os, column_ids, requested_row_ids, skip_comments);
     }
 
     void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
@@ -348,16 +349,17 @@ public:
 
     void write_ipac_subtable_by_column_and_row(std::ostream &os,
                                                const std::vector<size_t> &column_ids,
-                                               size_t start_row,
-                                               size_t row_count) const {
-        Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids,
-                                                            start_row, row_count);
+                                               size_t start_row, size_t row_count,
+                                               bool skip_comments = false) const {
+        Ipac_Table_Writer::write_subtable_by_column_and_row(
+                *this, os, column_ids, start_row, row_count, skip_comments);
     }
 
-    void write_ipac_subtable_by_column_and_row(
-            std::ostream &os, const std::vector<size_t> &column_ids) const {
+    void write_ipac_subtable_by_column_and_row(std::ostream &os,
+                                               const std::vector<size_t> &column_ids,
+                                               bool skip_comments = false) const {
         Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids, 0,
-                                                            num_rows());
+                                                            num_rows(), skip_comments);
     }
 
     void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
@@ -403,7 +405,7 @@ public:
     }
 
     void write_ipac_table_header(std::ostream &os) const {
-        Ipac_Table_Writer::write_header(*this, os);
+        Ipac_Table_Writer::write_keywords_and_comments(*this, os);
     }
 
     void write_ipac_column_headers(std::ostream &os) const {

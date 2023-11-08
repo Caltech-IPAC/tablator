@@ -53,11 +53,14 @@ void tablator::Ipac_Table_Writer::write_subtable_by_row(
         const Table& table, std::ostream& os,
         const std::vector<size_t>& requested_row_ids,
         const std::vector<size_t>& ipac_column_widths,
-        const std::vector<Data_Type>& datatypes_for_writing) {
+        const std::vector<Data_Type>& datatypes_for_writing, bool skip_comments) {
     validate_row_ids(requested_row_ids, table.num_rows());
 
-    // Write table-level header.
-    tablator::Ipac_Table_Writer::write_header(table, os, requested_row_ids.size());
+    if (!skip_comments) {
+        // Write table-level header.
+        tablator::Ipac_Table_Writer::write_keywords_and_comments(
+                table, os, requested_row_ids.size());
+    }
 
     // Write column names, types, units, etc.
     tablator::Ipac_Table_Writer::write_column_headers(table, os, ipac_column_widths,
@@ -73,7 +76,7 @@ void tablator::Ipac_Table_Writer::write_subtable_by_row(
 void tablator::Ipac_Table_Writer::write_subtable_by_row(
         const Table& table, std::ostream& os, size_t start_row, size_t row_count,
         const std::vector<size_t>& ipac_column_widths,
-        const std::vector<Data_Type>& datatypes_for_writing) {
+        const std::vector<Data_Type>& datatypes_for_writing, bool skip_comments) {
     size_t num_table_rows = table.num_rows();
 
     size_t true_row_count = 0;
@@ -81,8 +84,11 @@ void tablator::Ipac_Table_Writer::write_subtable_by_row(
         true_row_count = std::min(num_table_rows - start_row, row_count);
     }
 
-    // Write table-level header.
-    tablator::Ipac_Table_Writer::write_header(table, os, true_row_count);
+    if (!skip_comments) {
+        // Write table-level header.
+        tablator::Ipac_Table_Writer::write_keywords_and_comments(table, os,
+                                                                 true_row_count);
+    }
 
     // Write column names, types, units, etc.
     tablator::Ipac_Table_Writer::write_column_headers(table, os, ipac_column_widths,
@@ -102,11 +108,14 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
         const std::vector<size_t>& included_column_ids,
         const std::vector<size_t>& requested_row_ids,
         const std::vector<size_t>& ipac_column_widths,
-        const std::vector<Data_Type>& datatypes_for_writing) {
+        const std::vector<Data_Type>& datatypes_for_writing, bool skip_comments) {
     validate_row_ids(requested_row_ids, table.num_rows());
 
-    // Write table-level header.
-    tablator::Ipac_Table_Writer::write_header(table, os, requested_row_ids.size());
+    if (!skip_comments) {
+        // Write table-level header.
+        tablator::Ipac_Table_Writer::write_keywords_and_comments(
+                table, os, requested_row_ids.size());
+    }
 
     // Write column names, types, units, etc.
     tablator::Ipac_Table_Writer::write_column_headers(
@@ -124,7 +133,7 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
         const Table& table, std::ostream& os,
         const std::vector<size_t>& included_column_ids, size_t start_row,
         size_t row_count, const std::vector<size_t>& ipac_column_widths,
-        const std::vector<Data_Type>& datatypes_for_writing) {
+        const std::vector<Data_Type>& datatypes_for_writing, bool skip_comments) {
     size_t num_table_rows = table.num_rows();
 
     size_t true_row_count = 0;
@@ -132,8 +141,12 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
         true_row_count = std::min(num_table_rows - start_row, row_count);
     }
 
-    // Write table-level header.
-    tablator::Ipac_Table_Writer::write_header(table, os, true_row_count);
+    if (!skip_comments) {
+        // Write table-level header.
+        tablator::Ipac_Table_Writer::write_keywords_and_comments(table, os,
+                                                                 true_row_count);
+    }
+
     // Write column names, types, units, etc.
     tablator::Ipac_Table_Writer::write_column_headers(
             table, os, included_column_ids, ipac_column_widths, datatypes_for_writing);
