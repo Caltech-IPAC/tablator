@@ -25,7 +25,7 @@ void ptree_readers::append_data_from_stream(
     size_t position(0);
     Row row(row_size(offsets));
     for (size_t r = 0; r < num_rows; ++r) {
-        row.set_zero();
+        row.fill_with_zeros();
         size_t row_offset(position);
         position += null_flags_size;
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {

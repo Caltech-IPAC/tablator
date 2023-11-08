@@ -58,11 +58,10 @@ void get_keyword_value_as_string(std::string &value_str,
 }
 
 template <typename T>
-void read_element_given_column_and_row(fitsfile *fits_file, std::vector<uint8_t> &data,
+void read_element_given_column_and_row(fitsfile *fits_file, std::vector<char> &data,
                                        size_t col_offset_within_row, CCfits::Column &c,
-                                       size_t array_size, size_t offset_to_row_start,
-                                       size_t &fits_row_idx) {
-    uint8_t *position = data.data() + offset_to_row_start + col_offset_within_row;
+                                       size_t array_size, size_t &fits_row_idx) {
+    char *start_pos = data.data() + col_offset_within_row;
 
     // Use the C api because the C++ api (Column::readArrays) is
     // horrendously slow.
@@ -70,15 +69,15 @@ void read_element_given_column_and_row(fitsfile *fits_file, std::vector<uint8_t>
     std::vector<T> temp_array(array_size);
 
     auto get_matched_datatype = CCfits::FITSUtil::MatchType<T>();
-    uint8_t *current = position;
+    char *curr_pos = start_pos;
 
     fits_read_col(fits_file, get_matched_datatype(), c.index(), fits_row_idx, 1,
                   array_size, NULL /* void *nulval */, temp_array.data(), &anynul,
                   &status);
 
     for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
-        *reinterpret_cast<T *>(current) = temp_array[array_offset];
-        current += sizeof(T);
+        *reinterpret_cast<T *>(curr_pos) = temp_array[array_offset];
+        curr_pos += sizeof(T);
     }
 }
 }  // namespace
@@ -315,15 +314,17 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     // ccfits_table->rows () returns an int, so there may be issues with more
     // than 2^32 rows
 
-    std::vector<uint8_t> data;
     size_t row_size = tablator::row_size(offsets);
     size_t num_rows = ccfits_table->rows();
-    data.resize(num_rows * row_size);
 
+    // Row by row, we'll populate <curr_row> and append it to <data>.
+    Row curr_row(row_size);
+    std::vector<uint8_t> data;
+    // JTODO  Row::data is vector<char> and Data_Element::data is vector<uint8_t>.
 
     // CCfits dies in read_element_given_column_and_row() if there is no data in the
     // table. :(
-    if (!data.empty()) {
+    if (row_size > 0 && num_rows > 0) {
         fitsfile *fits_pointer = fits.fitsPointer();
 
         // Tablator columns are 0-based and FITS columns are 1-based.
@@ -340,12 +341,11 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
         size_t col_idx_adjuster = (has_null_bitfield_flags) ? 0 : 1;
 
-        //  We'll populate the tablator table row by row.
         for (size_t j = 0; j < num_rows; ++j) {
             size_t fits_row_idx = j + 1;
-            size_t tab_row_idx = j;
 
-            size_t offset_to_row_start = tab_row_idx * row_size;
+            curr_row.fill_with_zeros();
+            auto &curr_row_data = curr_row.get_data();
 
             for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
                 size_t fits_col_idx = i + 1;
@@ -359,73 +359,72 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         if (array_size == 1) {
                             std::vector<int> v(1);
                             c.read(v, fits_row_idx, fits_row_idx);
-                            size_t element_offset = offset_to_row_start + offset;
                             auto &element = v.at(0);
-                            data[element_offset] = element;
+                            curr_row_data[offset] = element;
                         } else {
                             // FIXME: Use the C api because Column::readArrays is
                             // horrendously slow.
                             std::valarray<int> array_vals;
                             c.read(array_vals, fits_row_idx);
-                            auto element_offset = offset_to_row_start + offset;
+                            auto element_offset = offset;
                             for (auto &element : array_vals) {
-                                data[element_offset] = element;
+                                curr_row_data[element_offset] = element;
                                 ++element_offset;
                             }
                         }
                     } break;
-
                     case CCfits::Tbyte: {
                         read_element_given_column_and_row<uint8_t>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tshort: {
                         read_element_given_column_and_row<int16_t>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tushort: {
                         read_element_given_column_and_row<uint16_t>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tuint:
                     case CCfits::Tulong: {
                         read_element_given_column_and_row<uint32_t>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tint:
                     case CCfits::Tlong: {
                         read_element_given_column_and_row<int32_t>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tlonglong: {
                         read_element_given_column_and_row<int64_t>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tfloat: {
                         read_element_given_column_and_row<float>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tdouble: {
                         read_element_given_column_and_row<double>(
-                                fits_pointer, data, offset, c, array_size,
-                                offset_to_row_start, fits_row_idx);
+                                fits_pointer, curr_row_data, offset, c, array_size,
+                                fits_row_idx);
                     } break;
                     case CCfits::Tstring: {
                         std::vector<std::string> v;
                         c.read(v, fits_row_idx, fits_row_idx);
-                        size_t element_offset = offset_to_row_start + offset;
                         auto &element = v.at(0);
-                        for (size_t j = 0; j < element.size(); ++j)
-                            data[element_offset + j] = element[j];
-                        for (int j = element.size(); j < c.width(); ++j)
-                            data[element_offset + j] = '\0';
+                        for (size_t j = 0; j < element.size(); ++j) {
+                            curr_row_data[offset + j] = element[j];
+                        }
+                        for (int j = element.size(); j < c.width(); ++j) {
+                            curr_row_data[offset + j] = '\0';
+                        }
                     } break;
                     default:
                         throw std::runtime_error(
@@ -442,6 +441,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                             {{"unit", c.unit()}});
                 }
             }
+            tablator::append_row(data, curr_row);
         }
     }
     const auto table_element =

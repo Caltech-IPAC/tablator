@@ -43,7 +43,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::vector<uint8_t> data;
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
-            row_string.set_zero();
+            row_string.fill_with_zeros();
             for (size_t column = 1; column < ipac_columns[0].size(); ++column) {
                 if (line[ipac_column_offsets[column - 1]] != ' ')
                     throw std::runtime_error(
