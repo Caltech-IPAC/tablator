@@ -1,4 +1,4 @@
-/// A simple converter program to test out the tablator library.
+// A simple converter program based on the tablator library.
 
 #include <json5_parser.h>
 #include <CCfits/CCfits>
@@ -150,8 +150,8 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
                                 const tablator::Table &table,
                                 const std::vector<size_t> &column_id_list,
                                 const std::vector<size_t> &row_id_list, size_t row_id,
-                                size_t start_row, size_t row_count,
-                                bool call_static_f) {
+                                size_t start_row, size_t row_count, bool call_static_f,
+                                bool skip_headers_f) {
     static size_t MAX_SIZE_T = std::numeric_limits<size_t>::max();
 
     const std::vector<size_t> *active_column_id_ptr = &column_id_list;
@@ -182,10 +182,12 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
 
     if (call_static_f) {
         tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
-                table, output_stream, *active_column_id_ptr, *active_row_id_ptr);
+                table, output_stream, *active_column_id_ptr, *active_row_id_ptr,
+                skip_headers_f);
     } else {
-        table.write_ipac_subtable_by_column_and_row(
-                output_stream, *active_column_id_ptr, *active_row_id_ptr);
+        table.write_ipac_subtable_by_column_and_row(output_stream,
+                                                    *active_column_id_ptr,
+                                                    *active_row_id_ptr, skip_headers_f);
     }
 }
 
@@ -205,6 +207,7 @@ int main(int argc, char *argv[]) {
     std::string row_string;
     bool call_static_f = false;
     bool exclude_cols_f = false;
+    bool skip_headers_f = false;
     bool as_string_f = false;
     std::string input_format_str;
     std::string output_format_str;
@@ -254,6 +257,13 @@ int main(int argc, char *argv[]) {
             "return values as strings")(
             "exclude-cols", boost::program_options::value<bool>(&exclude_cols_f),
             "named columns are to be excluded (flag is true) or included (false, "
+            "default)")(
+            "skip-headers",
+            boost::program_options::value<bool>(&skip_headers_f)->default_value(false),
+            // NOTE: support for implicit_value() is buggy and implicit_value()
+            //       is retired in future (post 1_59(?)) versions of boost.
+            //               ->implicit_value(true),
+            "header comments are to be skipped (flag is true) or included (false, "
             "default)")("write-null-string",
                         boost::program_options::bool_switch(&write_null_string_f)
                                 ->default_value(false),
@@ -334,6 +344,12 @@ int main(int argc, char *argv[]) {
         }
 
         if (option_variables.count("column-ids")) {
+            if (option_variables.count("exclude-cols")) {
+                std::cerr << "The parameters 'column-ids' and 'exclude-cols' are "
+                             "mutually "
+                             "incompatible.\n";
+                return 1;
+            }
             if (option_variables.count("column-to-extract")) {
                 std::cerr << "The parameters 'column-ids' and 'column-to-extract' are "
                              "mutually "
@@ -480,14 +496,16 @@ int main(int argc, char *argv[]) {
                 throw(std::runtime_error(msg));
             } else {
                 handle_write_ipac_subtable(output_stream, table, col_ids, row_list,
-                                           row_id, start_row, row_count, call_static_f);
+                                           row_id, start_row, row_count, call_static_f,
+                                           skip_headers_f);
             }
         } else if (do_subtable) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
             boost::filesystem::ofstream output_stream(output_path);
             handle_write_ipac_subtable(output_stream, table, column_id_list, row_list,
-                                       row_id, start_row, row_count, call_static_f);
+                                       row_id, start_row, row_count, call_static_f,
+                                       skip_headers_f);
         } else if (stream_intermediate) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
