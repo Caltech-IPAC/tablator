@@ -78,7 +78,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
 
     for (size_t current_row = 0; current_row < rows.size(); ++current_row) {
         auto &row(rows[current_row]);
-        row_string.set_zero();
+        row_string.fill_with_zeros();
         for (size_t column = 1; column < num_fields; ++column) {
             auto &element(row[column - 1]);
             if (element.empty()) {
