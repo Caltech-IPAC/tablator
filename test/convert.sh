@@ -212,7 +212,7 @@ else
 fi
 rm -f temp.tbl temp.h5
 
-${tablator_bin} --output-format=votable test/recursive_param.xml - | diff - test/recursive_param.xml
+${tablator_bin} --output-format=votable test/recursive_param.xml - | diff test/recursive_param.xml -
 
 if [ $? -eq 0 ]; then
     echo "PASS: recursive param tabledata"
@@ -220,49 +220,49 @@ else
     echo "FAIL: recursive param tabledata"
 fi
 
-${tablator_bin} --output-format=votable test/recursive_param_binary2.xml  - | diff - test/recursive_param.xml
+${tablator_bin} --output-format=votable test/recursive_param_binary2.xml  - | diff test/recursive_param.xml -
 if [ $? -eq 0 ]; then
     echo "PASS: recursive param binary2"
 else
     echo "FAIL: recursive param binary2"
 fi
 
-${tablator_bin} --output-format=csv test/al.csv - | diff -w - test/al.csv
+${tablator_bin} --output-format=csv test/al.csv - | diff -w test/al.csv -
 if [ $? -eq 0 ]; then
     echo "PASS: CSV implicit float"
 else
     echo "FAIL: CSV implicit float"
 fi
 
-${tablator_bin} --output-format=html test/multi.tbl - | diff -w - test/multi.html
+${tablator_bin} --output-format=html test/multi.tbl - | diff -w test/multi.html -
 if [ $? -eq 0 ]; then
     echo "PASS: HTML retain links"
 else
     echo "FAIL: HTML retain links"
 fi
 
-${tablator_bin} --output-format=postgres test/multi.tbl - | diff -w - test/multi.postgres
+${tablator_bin} --output-format=postgres test/multi.tbl - | diff -w test/multi.postgres -
 if [ $? -eq 0 ]; then
     echo "PASS: Postgres output"
 else
     echo "FAIL: Postgres output"
 fi
 
-${tablator_bin} --output-format=oracle test/multi.tbl - | diff -w - test/multi.oracle
+${tablator_bin} --output-format=oracle test/multi.tbl - | diff -w test/multi.oracle -
 if [ $? -eq 0 ]; then
     echo "PASS: Oracle output"
 else
     echo "FAIL: Oracle output"
 fi
 
-${tablator_bin} --output-format=sqlite test/multi.tbl - | diff -w - test/multi.sqlite
+${tablator_bin} --output-format=sqlite test/multi.tbl - | diff -w test/multi.sqlite -
 if [ $? -eq 0 ]; then
     echo "PASS: SQLite output"
 else
     echo "FAIL: SQLite output"
 fi
 
-${tablator_bin} --output-format=csv test/multi.tbl - | diff -w - test/multi_with_unquoted.csv
+${tablator_bin} --output-format=csv test/multi.tbl - | diff -w test/multi_with_unquoted.csv -
 if [ $? -eq 0 ]; then
     echo "PASS: CSV output"
 else
@@ -733,8 +733,17 @@ else
     echo "FAIL: Convert table with multiple options from JSON5 to VOTable and back"
 fi
 
-
 ${tablator_bin} test/back_and_forth_tables/multi_with_hex_and_comments.csv temp.tbl &&
+${tablator_bin} temp.tbl temp.csv &&
+diff test/back_and_forth_tables/multi_with_comments.csv temp.csv
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with hex and comments from csv to IPAC table and back"
+    rm -f temp_file
+else
+    echo "FAIL: Convert table with hex and comments from csv to IPAC table and back"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multi_with_comments.csv temp.tbl &&
 ${tablator_bin} temp.tbl temp.csv &&
 diff test/back_and_forth_tables/multi_with_comments.csv temp.csv
 if [ $? -eq 0 ]; then
