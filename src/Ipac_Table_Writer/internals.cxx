@@ -38,10 +38,6 @@ void validate_row_ids(const std::vector<size_t>& requested_row_ids,
     }
 }
 
-bool is_valid_col_id(size_t col_id, size_t num_columns) {
-    return ((col_id > 0) && (col_id < num_columns));
-}
-
 };  // namespace
 
 
@@ -112,9 +108,8 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
     validate_row_ids(requested_row_ids, table.num_rows());
 
     if (!skip_comments) {
-        // Write table-level header.
         tablator::Ipac_Table_Writer::write_keywords_and_comments(
-                table, os, requested_row_ids.size());
+                table, os, included_column_ids, requested_row_ids.size());
     }
 
     // Write column names, types, units, etc.
@@ -142,9 +137,8 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
     }
 
     if (!skip_comments) {
-        // Write table-level header.
-        tablator::Ipac_Table_Writer::write_keywords_and_comments(table, os,
-                                                                 true_row_count);
+        tablator::Ipac_Table_Writer::write_keywords_and_comments(
+                table, os, included_column_ids, true_row_count);
     }
 
     // Write column names, types, units, etc.
@@ -285,13 +279,15 @@ void tablator::Ipac_Table_Writer::write_column_headers(
         const std::vector<size_t>& ipac_column_widths,
         const std::vector<Data_Type>& datatypes_for_writing) {
     const auto& columns = table.get_columns();
+    size_t num_columns = columns.size();
+
     size_t total_record_width = 0;
 
     os << "|";
     os << std::right;
 
     // Write column names
-    for (size_t col_id = 1; col_id < columns.size(); ++col_id) {
+    for (size_t col_id = 1; col_id < num_columns; ++col_id) {
         size_t effective_array_size = get_effective_array_size(
                 datatypes_for_writing[col_id], columns[col_id].get_array_size());
         total_record_width += write_column_name(
@@ -300,7 +296,7 @@ void tablator::Ipac_Table_Writer::write_column_headers(
     os << "\n|";
 
     // Write column types
-    for (size_t col_id = 1; col_id < columns.size(); ++col_id) {
+    for (size_t col_id = 1; col_id < num_columns; ++col_id) {
         write_column_type(table, os, datatypes_for_writing, col_id,
                           ipac_column_widths[col_id]);
     }
@@ -308,7 +304,7 @@ void tablator::Ipac_Table_Writer::write_column_headers(
     os << "\n|";
 
     // Write column units
-    for (size_t col_id = 1; col_id < columns.size(); ++col_id) {
+    for (size_t col_id = 1; col_id < num_columns; ++col_id) {
         size_t effective_array_size = get_effective_array_size(
                 datatypes_for_writing[col_id], columns[col_id].get_array_size());
         write_column_unit(table, os, col_id, ipac_column_widths[col_id],
@@ -317,7 +313,7 @@ void tablator::Ipac_Table_Writer::write_column_headers(
     os << "\n|";
 
     // Write column null property
-    for (size_t col_id = 1; col_id < columns.size(); ++col_id) {
+    for (size_t col_id = 1; col_id < num_columns; ++col_id) {
         size_t effective_array_size = get_effective_array_size(
                 datatypes_for_writing[col_id], columns[col_id].get_array_size());
         write_column_null(table, os, col_id, ipac_column_widths[col_id],
@@ -334,19 +330,19 @@ void tablator::Ipac_Table_Writer::write_column_headers(
         const std::vector<size_t>& ipac_column_widths,
         const std::vector<Data_Type>& datatypes_for_writing) {
     const auto& columns = table.get_columns();
-    size_t total_record_width = 0;
+    size_t num_columns = columns.size();
 
-    std::vector<size_t>::const_iterator cols_begin = included_column_ids.begin();
+    size_t total_record_width = 0;
 
     os << "|";
     os << std::right;
 
     // Write column names
-
+    std::vector<size_t>::const_iterator cols_begin = included_column_ids.begin();
     for (std::vector<size_t>::const_iterator cols_iter = cols_begin;
          cols_iter != included_column_ids.end(); ++cols_iter) {
         auto col_id = *cols_iter;
-        if (is_valid_col_id(col_id, columns.size())) {
+        if (is_valid_col_id(col_id, num_columns)) {
             size_t effective_array_size = get_effective_array_size(
                     datatypes_for_writing[col_id], columns[col_id].get_array_size());
             total_record_width +=
@@ -360,7 +356,7 @@ void tablator::Ipac_Table_Writer::write_column_headers(
     for (std::vector<size_t>::const_iterator cols_iter = cols_begin;
          cols_iter != included_column_ids.end(); ++cols_iter) {
         auto col_id = *cols_iter;
-        if (is_valid_col_id(col_id, columns.size())) {
+        if (is_valid_col_id(col_id, num_columns)) {
             write_column_type(table, os, datatypes_for_writing, col_id,
                               ipac_column_widths[col_id]);
         }
@@ -372,7 +368,7 @@ void tablator::Ipac_Table_Writer::write_column_headers(
     for (std::vector<size_t>::const_iterator cols_iter = cols_begin;
          cols_iter != included_column_ids.end(); ++cols_iter) {
         auto col_id = *cols_iter;
-        if (is_valid_col_id(col_id, columns.size())) {
+        if (is_valid_col_id(col_id, num_columns)) {
             size_t effective_array_size = get_effective_array_size(
                     datatypes_for_writing[col_id], columns[col_id].get_array_size());
             write_column_unit(table, os, col_id, ipac_column_widths[col_id],
@@ -385,7 +381,7 @@ void tablator::Ipac_Table_Writer::write_column_headers(
     for (std::vector<size_t>::const_iterator cols_iter = cols_begin;
          cols_iter != included_column_ids.end(); ++cols_iter) {
         auto col_id = *cols_iter;
-        if (is_valid_col_id(col_id, columns.size())) {
+        if (is_valid_col_id(col_id, num_columns)) {
             size_t effective_array_size = get_effective_array_size(
                     datatypes_for_writing[col_id], columns[col_id].get_array_size());
             write_column_null(table, os, col_id, ipac_column_widths[col_id],

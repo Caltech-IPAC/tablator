@@ -243,7 +243,6 @@ public:
         return get_offsets().at(col_id);
     }
 
-
     std::vector<size_t> find_column_ids(
             const std::vector<std::string> &col_names) const {
         std::vector<size_t> col_ids;

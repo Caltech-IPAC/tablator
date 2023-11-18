@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
             "Output file format (json,json5,votable,csv,tsv,fits,ipac_table,"
             "text,html,hdf5)")(
             "column-ids", boost::program_options::value<std::string>(&column_id_string),
-            "list of ids of columns to write (output-format ipac_table only)")(
+            "list of 1-based ids of columns to write (output-format ipac_table only)")(
             "column-names",
             boost::program_options::value<std::string>(&column_name_string),
             "list names of columns to write (output-format ipac_table only) "
