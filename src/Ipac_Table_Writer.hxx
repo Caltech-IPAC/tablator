@@ -70,9 +70,34 @@ public:
     static std::vector<size_t> get_column_widths(const Table &table);
 
 
+    /*******************************************/
+    /* Helper function  */
+    /*******************************************/
+
+
+    static bool is_valid_col_id(size_t col_id, size_t num_columns) {
+        return ((col_id > 0) && (col_id < num_columns));
+    }
+
+
 private:
+    static const std::vector<size_t> get_all_nonzero_col_ids(size_t num_cols) {
+        std::vector<size_t> all_col_ids(num_cols - 1);
+        std::iota(all_col_ids.begin(), all_col_ids.end(), 1);
+        return all_col_ids;
+    }
+
+
+    static void write_header(const Table &table, std::ostream &os,
+                             const std::vector<size_t> &included_col_ids,
+                             size_t num_rows_to_report);
+
     static void write_header(const Table &table, std::ostream &os,
                              size_t num_rows_to_report);
+
+
+    static void write_header(const Table &table, std::ostream &os,
+                             const std::vector<size_t> &included_column_ids);
 
     static void write_column_headers(
             const Table &table, std::ostream &os,
