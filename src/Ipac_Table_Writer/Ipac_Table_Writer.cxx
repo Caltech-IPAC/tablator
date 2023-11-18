@@ -78,7 +78,7 @@ std::vector<size_t> tablator::Ipac_Table_Writer::get_column_widths(const Table &
             const size_t buffer_size(7);
             widths.push_back(
                     std::max(header_size,
-                             std::numeric_limits<double>::max_digits10 + buffer_size));
+							 std::numeric_limits<double>::max_digits10 + buffer_size));
         }
     }
     return widths;
@@ -288,6 +288,7 @@ void write_comment_lines(std::ostream &os, const std::vector<std::string> &comme
 
 void generate_and_write_default_comments(
         const tablator::Table &table, std::ostream &os,
+        const std::vector<size_t> &included_column_ids,
         const std::vector<std::string> &json_comments) {
     const auto &columns = table.get_columns();
     const auto &comments = table.get_comments();
@@ -299,50 +300,73 @@ void generate_and_write_default_comments(
     std::vector<std::string> description_vec;
     boost::split(description_vec, table_element_description, boost::is_any_of("\n"));
 
-    for (size_t i = 1; i < columns.size(); ++i) {
-        const auto &field_props = columns[i].get_field_properties();
-        const auto field_prop_attributes = field_props.get_attributes();
-        if (!field_prop_attributes.empty() || !field_props.get_description().empty()) {
-            std::string col_comment(columns[i].get_name());
-            const auto unit = field_prop_attributes.find(tablator::UNIT);
-            if (unit != field_prop_attributes.end() && !unit->second.empty()) {
-                col_comment.append(" (").append(unit->second).append(")");
-                boost::replace_if(col_comment, boost::is_any_of(tablator::NEWLINES),
-                                  ' ');
-            }
-
-            if (find(comments.begin(), comments.end(), col_comment) != comments.end() ||
-                find(json_comments.begin(), json_comments.end(), col_comment) !=
-                        json_comments.end() ||
-                find(description_vec.begin(), description_vec.end(), col_comment) !=
-                        description_vec.end()) {
-                continue;
-            }
-
-            os << "\\ " << col_comment << "\n";
-            const auto &desc = field_props.get_description();
-            if (!desc.empty()) {
-                size_t start = desc.find_first_not_of(tablator::WHITESPACE);
-                if (start != std::string::npos) {
-                    std::ostream_iterator<char> out_iter(os);
-                    os << "\\ ___ ";
-                    boost::replace_copy_if(desc.substr(start), out_iter,
-                                           boost::is_any_of(tablator::NEWLINES), ' ');
-                    os << "\n";
+    for (size_t col_id : included_column_ids) {
+        if (tablator::Ipac_Table_Writer::is_valid_col_id(col_id, columns.size())) {
+            const auto &field_props = columns[col_id].get_field_properties();
+            const auto field_prop_attributes = field_props.get_attributes();
+            if (!field_prop_attributes.empty() ||
+                !field_props.get_description().empty()) {
+                std::string col_comment(columns[col_id].get_name());
+                const auto unit = field_prop_attributes.find(tablator::UNIT);
+                if (unit != field_prop_attributes.end() && !unit->second.empty()) {
+                    col_comment.append(" (").append(unit->second).append(")");
+                    boost::replace_if(col_comment, boost::is_any_of(tablator::NEWLINES),
+                                      ' ');
                 }
+
+                if (find(comments.begin(), comments.end(), col_comment) !=
+                            comments.end() ||
+                    find(json_comments.begin(), json_comments.end(), col_comment) !=
+                            json_comments.end() ||
+                    find(description_vec.begin(), description_vec.end(), col_comment) !=
+                            description_vec.end()) {
+                    continue;
+                }
+
+                os << "\\ " << col_comment << "\n";
+                const auto &desc = field_props.get_description();
+                if (!desc.empty()) {
+                    size_t start = desc.find_first_not_of(tablator::WHITESPACE);
+                    if (start != std::string::npos) {
+                        std::ostream_iterator<char> out_iter(os);
+                        os << "\\ ___ ";
+                        boost::replace_copy_if(desc.substr(start), out_iter,
+                                               boost::is_any_of(tablator::NEWLINES),
+                                               ' ');
+                        os << "\n";
+                    }
+                }
+                // FIXME: Write out description attributes
             }
-            // FIXME: Write out description attributes
         }
     }
 }
 }  // namespace
 
+
 void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream &os) {
-    write_header(table, os, table.num_rows());
+    write_header(table, os, get_all_nonzero_col_ids(table.get_columns().size()),
+                 table.num_rows());
 }
+
 
 void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream &os,
                                                size_t num_requested_rows) {
+    write_header(table, os, get_all_nonzero_col_ids(table.get_columns().size()),
+                 num_requested_rows);
+}
+
+
+void tablator::Ipac_Table_Writer::write_header(
+        const Table &table, std::ostream &os,
+        const std::vector<size_t> &included_column_ids) {
+    write_header(table, os, included_column_ids, table.num_rows());
+}
+
+
+void tablator::Ipac_Table_Writer::write_header(
+        const Table &table, std::ostream &os,
+        const std::vector<size_t> &included_column_ids, size_t num_requested_rows) {
     static constexpr char const *FIXLEN_STRING = "fixlen = T";
     static constexpr char const *JSON_DESC_LABEL = "RESOURCE.TABLE.DESCRIPTION";
 
@@ -439,5 +463,5 @@ void tablator::Ipac_Table_Writer::write_header(const Table &table, std::ostream 
 
     // Add default comments (column name with unit and description) if they aren't
     // present already.
-    generate_and_write_default_comments(table, os, json_comments);
+    generate_and_write_default_comments(table, os, included_column_ids, json_comments);
 }
