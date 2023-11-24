@@ -1,7 +1,7 @@
+#include "../Ascii_Writer.hxx"
 #include "../Data_Type_to_SQL.hxx"
 #include "../Table.hxx"
 #include "../quote_sql_string.hxx"
-#include "../write_type_as_ascii.hxx"
 
 namespace {
 void write_point(std::ostream &os,
@@ -9,11 +9,11 @@ void write_point(std::ostream &os,
                                  std::pair<size_t, tablator::Data_Type> > &point_input,
                  const uint8_t *row_start) {
     os << "ST_MakePoint(";
-    write_type_as_ascii(os, point_input.first.second, 1,
-                        row_start + point_input.first.first);
+    tablator::Ascii_Writer::write_type_as_ascii(os, point_input.first.second, 1,
+                                                row_start + point_input.first.first);
     os << ", ";
-    write_type_as_ascii(os, point_input.second.second, 1,
-                        row_start + point_input.second.first);
+    tablator::Ascii_Writer::write_type_as_ascii(os, point_input.second.second, 1,
+                                                row_start + point_input.second.first);
     os << "),\n";
 }
 
@@ -44,17 +44,19 @@ void tablator::Table::write_sql_insert(
         } else {
             if (columns[column].get_type() == Data_Type::CHAR) {
                 std::stringstream ss;
-                write_type_as_ascii(ss, columns[column].get_type(),
-                                    columns[column].get_array_size(),
-                                    data.data() + row_offset + offsets[column], ' ');
+                tablator::Ascii_Writer::write_type_as_ascii(
+                        ss, columns[column].get_type(),
+                        columns[column].get_array_size(),
+                        data.data() + row_offset + offsets[column], ' ');
                 os << quote_sql_string(ss.str(), '\'');
             } else {
                 if (columns[column].get_array_size() != 1) {
                     os << "'{";
                 }
-                write_type_as_ascii(os, columns[column].get_type(),
-                                    columns[column].get_array_size(),
-                                    data.data() + row_offset + offsets[column], ',');
+                tablator::Ascii_Writer::write_type_as_ascii(
+                        os, columns[column].get_type(),
+                        columns[column].get_array_size(),
+                        data.data() + row_offset + offsets[column], ',');
                 if (columns[column].get_array_size() != 1) {
                     os << "}'";
                 }

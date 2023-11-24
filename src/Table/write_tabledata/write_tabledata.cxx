@@ -2,10 +2,10 @@
 #include <iomanip>
 #include <limits>
 
+#include "../../Ascii_Writer.hxx"
 #include "../../Data_Type_Adjuster.hxx"
 #include "../../Table.hxx"
 #include "../../to_string.hxx"
-#include "../../write_type_as_ascii.hxx"
 
 namespace tablator {
 std::string decode_links(const std::string &encoded);
@@ -61,9 +61,9 @@ void Table::write_tabledata(std::ostream &os,
             std::stringstream td;
             // Leave null entries blank, unlike in IPAC_TABLE format.
             if (!is_null(row_offset, i)) {
-                write_type_as_ascii(td, columns[i].get_type(),
-                                    columns[i].get_array_size(),
-                                    data.data() + row_offset + offsets[i]);
+                Ascii_Writer::write_type_as_ascii(
+                        td, columns[i].get_type(), columns[i].get_array_size(),
+                        data.data() + row_offset + offsets[i]);
             }
             os << td_prefix;
             switch (output_format) {
