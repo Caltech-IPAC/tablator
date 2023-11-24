@@ -13,8 +13,8 @@
 
 #include <iomanip>
 
+#include "../Ascii_Writer.hxx"
 #include "../Common.hxx"
-#include "../write_type_as_ascii.hxx"
 
 namespace {
 // Copied from libcsv++
@@ -60,8 +60,9 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
             size_t offset = offsets[i] + row_offset;
             std::stringstream ss;
             if (!is_null(row_offset, i)) {
-                write_type_as_ascii(ss, columns[i].get_type(),
-                                    columns[i].get_array_size(), data.data() + offset);
+                tablator::Ascii_Writer::write_type_as_ascii(ss, columns[i].get_type(),
+                                                            columns[i].get_array_size(),
+                                                            data.data() + offset);
             } else if (options.write_null_strings_) {
                 // Leave null entries blank by default, unlike in IPAC_TABLE format.
                 ss << "null";
