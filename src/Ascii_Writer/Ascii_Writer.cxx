@@ -1,12 +1,17 @@
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <sstream>
 
-#include "data_size.hxx"
-#include "write_type_as_ascii.hxx"
+#include "../Ascii_Writer.hxx"
+#include "../data_size.hxx"
 
 namespace tablator {
+
+// Define static constexpr class members.
+constexpr const char Ascii_Writer::DEFAULT_SEPARATOR;
+constexpr const char Ascii_Writer::IPAC_COLUMN_SEPARATOR;
 
 /*********************************************************************
 TODO This function doesn't check for nulls, and calling functions
@@ -16,9 +21,9 @@ check only is_null(), which is column-level (not column/array-element-level).
 // The usual way to write a column value in ascii.  If the value is an
 // array, individual elements are delimited by the single char
 // specified in the <separator> argument.
-void write_type_as_ascii(std::ostream &os, const Data_Type &type,
-                         const size_t &array_size, const uint8_t *data,
-                         const char &separator) {
+void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
+                                       const size_t &array_size, const uint8_t *data,
+                                       const char &separator) {
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
             write_array_unit_as_ascii(os, type, 1, data + n * data_size(type));
@@ -34,9 +39,11 @@ void write_type_as_ascii(std::ostream &os, const Data_Type &type,
 
 // Called by write_single_ipac_record() as it expands a column of array
 // type to multiple columns.
-void write_type_as_ascii(std::ostream &os, const Data_Type &type,
-                         const size_t &array_size, const uint8_t *data,
-                         size_t col_width) {
+void Ascii_Writer::write_type_as_ascii_expand_array(std::ostream &os,
+                                                    const Data_Type &type,
+                                                    const size_t &array_size,
+                                                    const uint8_t *data,
+                                                    size_t col_width) {
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
             os << std::setw(col_width);
@@ -51,8 +58,9 @@ void write_type_as_ascii(std::ostream &os, const Data_Type &type,
     }
 }
 
-void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
-                               const size_t &array_size, const uint8_t *data) {
+void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
+                                             const size_t &array_size,
+                                             const uint8_t *data) {
     if (type != Data_Type::CHAR && array_size != 1) {
         throw std::runtime_error(
                 "write_array_unit_as_ascii() requires array_size == 1 if type is not "
@@ -85,15 +93,15 @@ void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
         case Data_Type::UINT64_LE: {
             os << *reinterpret_cast<const uint64_t *>(data);
         } break;
-        case Data_Type::FLOAT32_LE:
+        case Data_Type::FLOAT32_LE: {
             // JNOTE: This might yield more digits than are warranted.
             os << std::setprecision(std::numeric_limits<float>::max_digits10)
                << *reinterpret_cast<const float *>(data);
-            break;
-        case Data_Type::FLOAT64_LE:
+        } break;
+        case Data_Type::FLOAT64_LE: {
             os << std::setprecision(std::numeric_limits<double>::max_digits10)
                << *reinterpret_cast<const double *>(data);
-            break;
+        } break;
         case Data_Type::CHAR:
             // The number of characters in the type can be less than
             // the number of allowed bytes, so add a .c_str() that
