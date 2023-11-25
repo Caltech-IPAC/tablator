@@ -399,7 +399,7 @@ public:
     std::vector<size_t> get_column_widths() const {
         return Ipac_Table_Writer::get_column_widths(*this);
     }
-    // G2P calls this function, so can't simply rename it.  :-(
+    // JTODO: G2P calls this function, so can't simply rename it.  :-(
     [[deprecated]] std::vector<size_t> get_column_width() const {
         return get_column_widths();
     }
@@ -477,10 +477,6 @@ public:
     void write_fits(const boost::filesystem::path &filename) const;
 
     void write_fits(fitsfile *fits_file) const;
-
-    void splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
-                                    Format::Enums enum_format, uint num_spaces_left,
-                                    uint num_spaces_right) const;
 
     void write_tabledata(std::ostream &os, const Format::Enums &output_format) const;
 
@@ -942,6 +938,10 @@ private:
 
     void write_html(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing) const;
+
+    void splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
+                                    Format::Enums enum_format, uint num_spaces_left,
+                                    uint num_spaces_right) const;
 
 
     boost::property_tree::ptree generate_property_tree(

@@ -6,6 +6,7 @@
 
 namespace tablator {
 
+
 class Ascii_Writer {
 public:
     static constexpr const char DEFAULT_SEPARATOR = ' ';
@@ -21,7 +22,13 @@ public:
                                                  const size_t &array_size,
                                                  const uint8_t *data, size_t col_width);
 
+    // Called by Ipac_Table_Writer::compute_max_column_width_for_double().
+    static size_t get_adjusted_string_length_for_double(double dub_var);
+
 private:
+    // Called by Ascii_Writer::write_array_unit_as_ascii().
+    static const std::string trim_overly_precise_double_strings(double dub_var);
+
     static void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
                                           const size_t &array_size,
                                           const uint8_t *data);

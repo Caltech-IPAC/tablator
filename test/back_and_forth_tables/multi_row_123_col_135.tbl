@@ -1,0 +1,10 @@
+\fixlen = T
+\RowsRetrieved = 3
+\type = 'results'
+|object|      dec|     htm7|
+|  char|   double|     long|
+|      |         |         |
+|  null|     null|     null|
+ 113368 -29.62225 294967296 
+ 113368 -29.62225 294967296 
+ 113368 -29.62225 294967296 
