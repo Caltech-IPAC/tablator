@@ -6,6 +6,9 @@
 
 namespace tablator {
 
+
+
+
 class Ascii_Writer {
 public:
     static constexpr const char DEFAULT_SEPARATOR = ' ';
@@ -21,7 +24,16 @@ public:
                                                  const size_t &array_size,
                                                  const uint8_t *data, size_t col_width);
 
+
+    static size_t get_adjusted_string_length_for_double(double dub_var);
+
 private:
+    static const std::string truncate_fishy_decimals(double dub_var);
+
+    static std::pair<size_t, bool> get_adjusted_string_length_for_double(
+            const std::string &string_var, size_t point_pos);
+
+
     static void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
                                           const size_t &array_size,
                                           const uint8_t *data);

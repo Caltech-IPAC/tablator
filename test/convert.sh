@@ -179,9 +179,9 @@ for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/f
 
         let output=$?
         if [[ output -eq 0 ]]; then
-            echo "PASS: $table -> $ending II"
+            echo "PASS: $table -> $ending II (-> tbl) "
         else
-            echo "FAIL: $table -> $ending II: $output"
+            echo "FAIL: $table -> $ending II (-> tbl) : $output"
         fi
 
         rm -f test.$ending temp.tbl
