@@ -266,8 +266,18 @@ void tablator::Table::write_fits(
     std::vector<const char *> tunit;
     std::vector<const char *> tform;
 
-    // Helper used to populate tform.
-    std::vector<std::string> fits_format_strings;
+
+    // In the loop below, we'll create and store tunit and tform
+    // values in string form in helper vectors-of-strings so that the
+    // value strings will persist after the loop ends; otherwise they
+    // would be deallocated at the end of the loop. Following the
+    // loop, we'll retrieve the char arrays underlying the elements of
+    // these vectors-of-strings and load them into the
+    // vectors-of-char-pointers needed for the call to
+    // fits_create_tbl().
+
+    std::vector<std::string> tunit_helper;
+    std::vector<std::string> tform_helper;
 
     const auto &columns = get_columns();
 
@@ -277,32 +287,31 @@ void tablator::Table::write_fits(
     for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
         auto &column = columns[col_idx];
 
-        ttype.push_back(column.get_name().c_str());
+        ttype.emplace_back(column.get_name().c_str());
 
         const auto col_attrs = column.get_field_properties().get_attributes();
         auto unit = col_attrs.find(UNIT);
         if (unit == col_attrs.end()) {
-            tunit.push_back("");
+            tunit_helper.emplace_back("");
         } else {
-            tunit.push_back(unit->second.c_str());
+            tunit_helper.emplace_back(unit->second);
         }
 
         auto fits_format_str =
                 get_fits_format(datatypes_for_writing[col_idx], column.get_type(),
                                 column.get_array_size());
-
-        // We store the fits_format_str string in a vector which will
-        // survive past the end of this block, because otherwise the
-        // string, allocated during this block, would be deallocated
-        // when the block ends.  We then retrieve the char array
-        // underlying the vector's copy of the fits_format_str string
-        // and load it into the tform vector for the call to
-        // fits_create_tbl().
-
-        fits_format_strings.emplace_back(fits_format_str);
-
-        tform.push_back(fits_format_strings.back().c_str());
+        tform_helper.emplace_back(fits_format_str);
     }
+
+    // Populate tform and tunit from their respective helpers.
+    for (auto &form_str : tform_helper) {
+        tform.emplace_back(form_str.c_str());
+    }
+
+    for (auto &unit_str : tunit_helper) {
+        tunit.emplace_back(unit_str.c_str());
+    }
+
 
     //********************/
     // Create FITS table.

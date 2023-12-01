@@ -579,12 +579,13 @@ else
     echo "FAIL: Convert Json5 Table with assorted small-valued array cols of types not supported by FITS to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/partial_euclid.tbl - | ${tablator_bin} --input-format=fits - temp.tbl && diff -w test/back_and_forth_tables/partial_euclid.tbl temp.tbl
+
+${tablator_bin} --output-format=fits test/back_and_forth_tables/partial_euclid.vot - | ${tablator_bin} --input-format=fits - temp.vot && diff -w test/back_and_forth_tables/partial_euclid.vot temp.vot
 if [ $? -eq 0 ]; then
-    echo "PASS: Convert IPAC Table with array col of type supported by FITS to FITS and back"
-    rm -f temp.tbl
+    echo "PASS: Convert VOTable with array col of type supported by FITS to FITS and back"
+    rm -f temp.vot
 else
-    echo "FAIL: Convert IPAC Table with array col of type supported by FITS to FITS and back"
+    echo "FAIL: Convert VOTable with array col of type supported by FITS to FITS and back"
 fi
 
 
@@ -597,6 +598,14 @@ else
     echo "FAIL: Convert FITS file with array col to VOTable and back"
 fi
 
+# TODO: comments don't survive round trip via IPAC format.
+${tablator_bin} test/back_and_forth_tables/partial_euclid.fits temp.tbl && diff -w test/back_and_forth_tables/partial_euclid.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert FITS file with array col to IPAC Table"
+    rm -f temp.tbl
+else
+    echo "FAIL: Convert FITS file with array col to IPAC Table"
+fi
 
 
 
