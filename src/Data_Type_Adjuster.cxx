@@ -12,11 +12,14 @@ std::vector<tablator::Data_Type>
 tablator::Data_Type_Adjuster::get_datatypes_for_writing(
         const Format::Enums &enum_format) const {
     const auto &table_columns = table_.get_columns();
+
     std::vector<tablator::Data_Type> adjusted_datatypes;
     adjusted_datatypes.reserve(table_columns.size());
+
     bool format_ipac = (enum_format == Format::Enums::IPAC_TABLE);
     bool format_votable = (enum_format == Format::Enums::VOTABLE);
     bool format_fits = (enum_format == Format::Enums::FITS);
+
     bool adjust_uint64 = (format_ipac || format_votable || format_fits);
 
     for (size_t col = 0; col < table_columns.size(); ++col) {
@@ -51,15 +54,27 @@ tablator::Data_Type_Adjuster::get_datatypes_for_writing(
     return adjusted_datatypes;
 }
 
-bool tablator::Data_Type_Adjuster::contains_large_uint64_val(size_t col) const {
+//====================================================
+
+bool tablator::Data_Type_Adjuster::contains_large_uint64_val(size_t col_idx) const {
     const auto &table_columns = table_.get_columns();
+    auto array_size = table_columns[col_idx].get_array_size();
+
+    const auto &table_offsets = table_.get_offsets();
+    auto col_offset = table_offsets.at(col_idx);
+
     const auto &table_data = table_.get_data();
-    for (size_t table_row_offset(0), row(0);
-         table_row_offset < table_.get_data().size();
-         table_row_offset += table_.row_size(), ++row) {
-        auto curr_ptr =
-                table_data.data() + table_row_offset + table_.get_offsets().at(col);
-        auto array_size = table_columns[col].get_array_size();
+    auto total_data_size = table_data.size();
+
+    auto row_size = table_.row_size();
+
+    // Iterate through the elements of the indicated column and return
+    // true if any of these elements is too large to be represented as
+    // an int64_t; otherwise, return false.
+    for (size_t table_row_offset(0); table_row_offset < total_data_size;
+         table_row_offset += row_size) {
+        auto curr_ptr = table_data.data() + table_row_offset + col_offset;
+
         for (size_t j = 0; j < array_size; ++j) {
             uint64_t val = *reinterpret_cast<const uint64_t *>(curr_ptr);
             if (val > std::numeric_limits<int64_t>::max()) {
