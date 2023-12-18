@@ -329,8 +329,8 @@ public:
         // allocation and deallocation.
         std::vector<char *> ptr_vec;
 
-        std::vector<std::vector<char> > data_vec(num_substrings,
-                                                 std::vector<char>(substring_size + 1));
+        std::vector<std::vector<char>> data_vec(num_substrings,
+                                                std::vector<char>(substring_size + 1));
         for (size_t i = 0; i < num_substrings; ++i) {
             ptr_vec.emplace_back(data_vec.at(i).data());
         }
@@ -371,27 +371,25 @@ private:
 };
 //====================================================
 
-}  // namespace
+// Extract labeled_properties/trailing_info_lists/attributes.
+// If this table was created by write_fits(), those elements
+// would have been converted to labeled_properties and stored as keywords
+// of the form
 
+// ELEMENT.<prop_name>.XMLATTR.<attr_name> : attr_value or
+// ELEMENT.<prop_name>.XMLATTR.ATTR_IRSA_VALUE : prop.value
 
-void tablator::Table::read_fits(const boost::filesystem::path &path) {
-    CCfits::FITS fits(path.string(), CCfits::Read, false);
-    if (fits.extension().empty())
-        throw std::runtime_error("Could not find any extensions in this file: " +
-                                 path.string());
-    CCfits::ExtHDU &table_extension = *(fits.extension().begin()->second);
-    CCfits::BinTable *ccfits_table(dynamic_cast<CCfits::BinTable *>(&table_extension));
+// where <prop_name> is the value of prop's ATTR_NAME attribute and is
+// assumed to be non-empty for INFO elements, of which we might have many.
+//(We can't yet convert to FITS format VOTables with more than one RESOURCE.
+// 07Dec20)
 
-    static std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
-    static const auto keyword_ucd_mapping = fits_keyword_ucd_mapping(false);
+std::vector<std::pair<std::string, tablator::Property>>
+read_keywords_as_labeled_properties(CCfits::ExtHDU &table_extension) {
     table_extension.readAllKeys();
 
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
-
-    //*********************************
-    // Read and store keywords
-    //*********************************
+    static std::vector<std::string> fits_ignored_keywords{{"LONGSTRN"}};
+    static const auto keyword_ucd_mapping = tablator::fits_keyword_ucd_mapping(false);
 
     // Extract labeled_properties/trailing_info_lists/attributes.
     // If this table was created by write_fits(), those elements
@@ -406,10 +404,10 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     //(We can't yet convert to FITS format VOTables with more than one RESOURCE.
     // 07Dec20)
 
-    Labeled_Properties combined_labeled_properties;
-    std::string prev_keyword = "";
-    std::string prev_label = "";
-    Property prop;
+    tablator::Labeled_Properties combined_labeled_properties;
+    std::string prev_prop_identifier = "";
+    std::string prev_prop_label = "";
+    tablator::Property prop;
 
     for (auto &kwd : table_extension.keyWord()) {
         std::string keyword(kwd.first);
@@ -430,8 +428,9 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         std::string name(keyword);
 
         // Used to undo write_fits() hackery.
-        static std::regex attr_regex{"^(.*)\\." + XMLATTR + "\\." + "(.*)$"};
-        static std::regex info_regex{"^((?:.*\\.)?" + INFO + ")" + "\\." + "(.*)$"};
+        static std::regex attr_regex{"^(.*)\\." + tablator::XMLATTR + "\\." + "(.*)$"};
+        static std::regex info_regex{"^((?:.*\\.)?" + tablator::INFO + ")" + "\\." +
+                                     "(.*)$"};
 
         bool convert_value_to_attr = false;
 
@@ -451,7 +450,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             } else {
                 // Otherwise, prepare for an attribute at the level of e.g. RESOURCE or
                 // TABLE.
-                label += DOT + XMLATTR;
+                label += tablator::DOT + tablator::XMLATTR;
             }
 
         } else {
@@ -464,21 +463,21 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             convert_value_to_attr = true;
         }
 
-        if (keyword != prev_keyword) {
+        if (keyword != prev_prop_identifier) {
             // Save the prop-in-progress with the appropriate label and prepare to move
             // on.
-            if (!prev_label.empty() && !prop.empty()) {
+            if (!prev_prop_label.empty() && !prop.empty()) {
                 combined_labeled_properties.emplace_back(
-                        std::make_pair(prev_label, prop));
+                        std::make_pair(prev_prop_label, prop));
                 prop.clear();
             }
 
-            prev_keyword.assign(keyword);
-            prev_label.assign(label);
+            prev_prop_identifier.assign(keyword);
+            prev_prop_label.assign(label);
         }
 
         if (convert_value_to_attr) {
-            prop.add_attribute(ATTR_VALUE, kwd_value);
+            prop.add_attribute(tablator::ATTR_VALUE, kwd_value);
         } else if (name == tablator::ATTR_IRSA_VALUE) {
             // if kwd came from FITS-ified labeled_properties.value_ via write_fits()
             prop.set_value(kwd_value);
@@ -499,12 +498,36 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     }
 
     // Add the final prop, if appropriate.
-    if (!prev_label.empty() && !prop.empty()) {
-        combined_labeled_properties.emplace_back(std::make_pair(prev_label, prop));
+    if (!prev_prop_label.empty() && !prop.empty()) {
+        combined_labeled_properties.emplace_back(std::make_pair(prev_prop_label, prop));
     }
+    return combined_labeled_properties;
+}
 
-    // Distribute the labeled_properties between assorted class members at assorted
-    // levels.
+
+}  // namespace
+
+
+void tablator::Table::read_fits(const boost::filesystem::path &path) {
+    CCfits::FITS fits(path.string(), CCfits::Read, false);
+    if (fits.extension().empty())
+        throw std::runtime_error("Could not find any extensions in this file: " +
+                                 path.string());
+    CCfits::ExtHDU &table_extension = *(fits.extension().begin()->second);
+    CCfits::BinTable *ccfits_table(dynamic_cast<CCfits::BinTable *>(&table_extension));
+
+    //*********************************************************
+    // Retrieve FITS keywords in the form of labeled_properties.
+    //*********************************************************
+
+    const std::vector<std::pair<std::string, Property>> combined_labeled_properties =
+            read_keywords_as_labeled_properties(table_extension);
+
+    //*********************************************************
+    // Distribute the labeled_properties between assorted class
+    // members at assorted levels.
+    //*********************************************************
+
     Labeled_Properties resource_element_labeled_properties;
     std::vector<Property> resource_element_trailing_infos;
     ATTRIBUTES resource_element_attributes;
@@ -520,9 +543,8 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     // Read and store binary data
     //*********************************
 
-    // We make two passes through the FITS file's columns.  The first
-    // pass is to extract column metadata and create tablator columns;
-    // the second pass is to read and store data.
+    std::vector<Column> columns;
+    std::vector<size_t> offsets = {0};
 
     // Create null_bitfield_flags column for internal use.
     tablator::append_column(columns, offsets, null_bitfield_flags_name,
@@ -544,6 +566,14 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
 
     Column_Info_Manager col_info_manager;
+
+    // We make two passes through the FITS file's columns.  The first
+    // pass is to extract column metadata and create tablator columns;
+    // the second pass is to read and store data.
+
+    //*********************************************************
+    // Retrieve column metadata.
+    //*********************************************************
 
     for (size_t fits_col_idx = 1; fits_col_idx <= ccfits_table->column().size();
          ++fits_col_idx) {
