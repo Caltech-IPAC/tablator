@@ -163,6 +163,81 @@ void write_element_given_column_and_row(fitsfile *fits_file, int fits_type,
 /**********************************************************/
 /**********************************************************/
 
+// Labeled_properties are stored as keywords whose values are strings
+// of the form
+
+// label + DOT + XMLATTR_DOT + ATTR_IRSA_VALUE : value  (for prop.value_)
+// label + DOT + XMLATTR_DOT + attrname : attrvalue  (for elements of
+// prop.attributes_)
+
+// where label includes value of prop's ATTR_NAME attribute for
+// uniqueness.
+
+// (We can't yet convert VOTables with more than one RESOURCE to FITS format.
+// 07Dec20)
+
+void write_labeled_properties_as_keywords(
+        fitsfile *fits_file,
+        const std::vector<std::pair<std::string, tablator::Property>>
+                &combined_labeled_properties) {
+    int status = 0;
+    for (const auto &label_and_prop : combined_labeled_properties) {
+        std::string label = label_and_prop.first;
+        const auto &prop = label_and_prop.second;
+        std::string value(prop.get_value());
+        std::string comment;
+
+        // Base for the (distinct) keywords with which we will store each of prop's
+        // value and attributes.
+        auto keyword_base = label + tablator::DOT;
+        const auto &attributes = prop.get_attributes();
+        auto name_iter = attributes.find(tablator::ATTR_NAME);
+
+        // FITS wants keywords to be unique, but there could be many
+        // INFO elements having attributes with the same names.  If label ends in
+        // INFO, we include in each keyword the value of the relevant NAME
+        // attribute as well as the name of the attribute whose value
+        // is being stored.
+
+        // (INFO elements are assumed to have NAME attributes.)
+        if (boost::ends_with(label, tablator::INFO)) {
+            if (name_iter == attributes.end() || (name_iter->second).empty()) {
+                // Shouldn't happen!
+            } else {
+                keyword_base =
+                        label + tablator::DOT + name_iter->second + tablator::DOT;
+            }
+        }
+
+        if (!boost::ends_with(keyword_base, tablator::XMLATTR_DOT)) {
+            keyword_base += tablator::XMLATTR_DOT;
+        }
+
+        if (!value.empty()) {
+            fits_write_key_longstr(fits_file,
+                                   (keyword_base + tablator::ATTR_IRSA_VALUE).c_str(),
+                                   value.c_str(), comment.c_str(), &status);
+        }
+
+        for (auto &attr : prop.get_attributes()) {
+#ifdef FIXED_FITS_COMMENT
+            // This step prepares us to store the comment in a special FITS way,
+            // but as of 13Nov20, comments will be truncated or omitted if
+            // comment.size() + value.size() > 65.
+            if (attr.first == "comment") {
+                comment.assign(attr.second);
+            } else
+#endif
+                fits_write_key_longstr(fits_file, (keyword_base + attr.first).c_str(),
+                                       attr.second.c_str(), comment.c_str(), &status);
+            if (status != 0) {
+                throw CCfits::FitsError(status);
+            }
+        }
+    }
+}
+
+/**********************************************************/
 
 void tablator::Table::write_fits(std::ostream &os) const {
     write_fits(os, Data_Type_Adjuster(*this).get_datatypes_for_writing(
@@ -378,68 +453,7 @@ void tablator::Table::write_fits(
                                        combined_labeled_attributes.begin(),
                                        combined_labeled_attributes.end());
 
-
-    // Labeled_properties are stored as keywords whose values are strings
-    // of the form
-
-    // label + DOT + XMLATTR_DOT + ATTR_IRSA_VALUE : value  (for prop.value_)
-    // label + DOT + XMLATTR_DOT + attrname : attrvalue  (for elements of
-    // prop.attributes_)
-
-    // where label includes value of prop's ATTR_NAME attribute for
-    // uniqueness.
-    for (const auto &label_and_prop : combined_labeled_properties) {
-        std::string label = label_and_prop.first;
-        const auto &prop = label_and_prop.second;
-        std::string value(prop.get_value());
-        std::string comment;
-
-        // Base for the (distinct) keywords with which we will store each of prop's
-        // value and attributes.
-        auto keyword_base = label + DOT;
-        const auto &attributes = prop.get_attributes();
-        auto name_iter = attributes.find(ATTR_NAME);
-
-        // FITS wants keywords to be unique, but there could be many
-        // INFO elements having attributes with the same names.  If label ends in
-        // INFO, we include in each keyword the value of the relevant NAME
-        // attribute as well as the name of the attribute whose value
-        // is being stored.
-
-        // (INFO elements are assumed to have NAME attributes.)
-        if (boost::ends_with(label, INFO)) {
-            if (name_iter == attributes.end() || (name_iter->second).empty()) {
-                // Shouldn't happen!
-            } else {
-                keyword_base = label + DOT + name_iter->second + DOT;
-            }
-        }
-
-        if (!boost::ends_with(keyword_base, XMLATTR_DOT)) {
-            keyword_base += XMLATTR_DOT;
-        }
-
-        if (!value.empty()) {
-            fits_write_key_longstr(fits_file, (keyword_base + ATTR_IRSA_VALUE).c_str(),
-                                   value.c_str(), comment.c_str(), &status);
-        }
-
-        for (auto &attr : prop.get_attributes()) {
-#ifdef FIXED_FITS_COMMENT
-            // This step prepares us to store the comment in a special FITS way,
-            // but as of 13Nov20, comments will be truncated or omitted if
-            // comment.size() + value.size() > 65.
-            if (attr.first == "comment") {
-                comment.assign(attr.second);
-            } else
-#endif
-                fits_write_key_longstr(fits_file, (keyword_base + attr.first).c_str(),
-                                       attr.second.c_str(), comment.c_str(), &status);
-            if (status != 0) {
-                throw CCfits::FitsError(status);
-            }
-        }
-    }
+    write_labeled_properties_as_keywords(fits_file, combined_labeled_properties);
 
     //*******************/
     // Write table data.
