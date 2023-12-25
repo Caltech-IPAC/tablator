@@ -179,9 +179,9 @@ for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/f
 
         let output=$?
         if [[ output -eq 0 ]]; then
-            echo "PASS: $table -> $ending II"
+            echo "PASS: $table -> $ending II (to IPAC_TABLE)"
         else
-            echo "FAIL: $table -> $ending II: $output"
+            echo "FAIL: $table -> $ending II (to IPAC_TABLE): $output"
         fi
 
         rm -f test.$ending temp.tbl
@@ -207,36 +207,40 @@ ${tablator_bin} --input-format=hdf5 --output-format=ipac_table test/h5_as_csv.cs
 ${tablator_bin} --input-format=ipac_table temp.h5 temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Explicit format specified"
+    rm -f temp.h5 temp.tbl
 else
     echo "FAIL: Explicit format specified"
 fi
-rm -f temp.tbl temp.h5
 
-${tablator_bin} --output-format=votable test/recursive_param.xml - | diff test/recursive_param.xml -
 
+${tablator_bin} --output-format=votable test/recursive_param.xml temp.vot && diff test/recursive_param.xml temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: recursive param tabledata"
+    rm -f temp.vot
 else
     echo "FAIL: recursive param tabledata"
 fi
 
-${tablator_bin} --output-format=votable test/recursive_param_binary2.xml  - | diff test/recursive_param.xml -
+${tablator_bin} --output-format=votable test/recursive_param_binary2.xml temp.vot && diff test/recursive_param.xml temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: recursive param binary2"
+    rm -f temp.vot
 else
     echo "FAIL: recursive param binary2"
 fi
 
-${tablator_bin} --output-format=csv test/al.csv - | diff -w test/al.csv -
+${tablator_bin} --output-format=csv test/al.csv temp.csv && diff -w test/al.csv temp.csv
 if [ $? -eq 0 ]; then
     echo "PASS: CSV implicit float"
+    rm -f temp.csv
 else
     echo "FAIL: CSV implicit float"
 fi
 
-${tablator_bin} --output-format=html test/multi.tbl - | diff -w test/multi.html -
+${tablator_bin} --output-format=html test/multi.tbl temp.html && diff -w test/multi.html temp.html
 if [ $? -eq 0 ]; then
     echo "PASS: HTML retain links"
+    rm -f temp.html
 else
     echo "FAIL: HTML retain links"
 fi
@@ -304,21 +308,21 @@ else
     echo "FAIL: Read TSV with no trailing newline"
 fi
 
-${tablator_bin} --input-format=ipac_table --output-format=votable test/int_types.tbl - | diff -w test/int_types.vot -
+${tablator_bin} --input-format=ipac_table --output-format=votable test/int_types.tbl temp.vot && diff -w test/int_types.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert IPAC Table with large uint64 vals to VOTable"
 else
     echo "FAIL: Convert IPAC Table with large uint64 vals to VOTable"
 fi
 
-${tablator_bin} --input-format=ipac_table --output-format=json5 test/int_types.tbl - | diff -w test/int_types.json5 -
+${tablator_bin} --input-format=ipac_table --output-format=json5 test/int_types.tbl temp.json5 && diff -w test/int_types.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert IPAC Table with large uint64 vals to JSON5"
 else
     echo "FAIL: Convert IPAC Table with large uint64 vals to JSON5"
 fi
 
-${tablator_bin} --input-format=json5 --output-format=votable test/back_and_forth_tables/two_row_large_ulong_array.json5 - | diff -w test/back_and_forth_tables/two_row_large_ulong_array_from_json5.vot -
+${tablator_bin} --input-format=json5 --output-format=votable test/back_and_forth_tables/two_row_large_ulong_array.json5 temp.vot && diff -w test/back_and_forth_tables/two_row_large_ulong_array_from_json5.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with large uint64 vals array col to VOTable"
 else
@@ -326,14 +330,14 @@ else
 fi
 
 # JTODO: datatypes and array_sizes do not survive the round trip via votable.
-${tablator_bin} --input-format=json5 --output-format=votable test/back_and_forth_tables/integer_type_arrays.json5 - | diff -w test/back_and_forth_tables/integer_type_arrays_from_json5.vot -
+${tablator_bin} --input-format=json5 --output-format=votable test/back_and_forth_tables/integer_type_arrays.json5 temp.vot && diff -w test/back_and_forth_tables/integer_type_arrays_from_json5.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with assorted array cols to VOTable"
 else
     echo "FAIL: Convert Json5 Table with assorted array cols to VOTable"
 fi
 
-${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/two_row_array_with_nulls.vot - | diff -w test/back_and_forth_tables/two_row_array_with_nulls_from_vot.tbl -
+${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/two_row_array_with_nulls.vot temp.tbl && diff -w test/back_and_forth_tables/two_row_array_with_nulls_from_vot.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with null elements to IPAC Table"
 else
@@ -810,6 +814,17 @@ if [ $? -eq 0 ]; then
     rm -f temp.csv
 else
     echo "FAIL: Convert table with null strings from tsv to csv and back, preserving null strings"
+fi
+
+
+${tablator_bin} test/back_and_forth_tables/coosys_example.vot temp.fits &&
+${tablator_bin} temp.fits temp.vot &&
+diff test/back_and_forth_tables/coosys_example.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with coosys and timesys from vot to FITS and back"
+    rm -f temp.vot temp.fits
+else
+    echo "FAIL: Convert table with coosys and timesys from vot to FITS and back"
 fi
 
 

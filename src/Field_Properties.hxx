@@ -169,6 +169,7 @@ public:
 
 
     void set_attributes(const ATTRIBUTES &attrs) { options_.set_attributes(attrs); }
+    void add_attributes(const ATTRIBUTES &attrs) { options_.add_attributes(attrs); }
 
     void set_attributes(
             const std::initializer_list<std::pair<const std::string, std::string>>

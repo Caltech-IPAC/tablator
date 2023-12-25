@@ -1,18 +1,18 @@
 #pragma once
 
 #include <H5Cpp.h>
+
 #include <CCfits/CCfits>
 #include <array>
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <tuple>
-
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <tuple>
 
 #include "Column.hxx"
 #include "Common.hxx"
@@ -756,6 +756,13 @@ public:
         return get_results_resource_element().get_table_element_params();
     }
 
+    std::vector<Field> &get_table_element_fields() {
+        return get_results_resource_element().get_table_element_fields();
+    }
+    const std::vector<Field> &get_table_element_fields() const {
+        return get_results_resource_element().get_table_element_fields();
+    }
+
     std::vector<uint8_t> &get_data() {
         return get_results_resource_element().get_data();
     }
@@ -953,7 +960,8 @@ private:
     const Labeled_Properties combine_labeled_properties_all_levels() const;
 
     // Called by write_hdf5_attributes() and write_fits().
-    const Labeled_Properties combine_attributes_all_levels() const;
+    const Labeled_Properties combine_attributes_all_levels(
+            bool include_column_attributes_f) const;
 
 
     // JTODO terminology for table that has been constructed but not loaded.

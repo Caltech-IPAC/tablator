@@ -166,11 +166,11 @@ void write_element_given_column_and_row(fitsfile *fits_file, int fits_type,
 // willing to support either a long key or a long value, but not
 // both. ****
 
-// The function write_labeled_properties_as_keywords() stores
-//  labeled_properties as FITs keywords.  value_ elements (if such
-//  exist) of labeled_properties instances are added to their parent's
-//  attributes_ element as the value corresponding to the
-//  ATTR_IRSA_VALUE attribute.
+// The function write_tablator_elements_as_keywords() stores
+//  labeled_properties, PARAMs, and FIELD attributes as FITs keywords.
+//  value_ elements (if such exist) of labeled_properties instances
+//  are added to their parent's attributes_ element as the value
+//  corresponding to the ATTR_IRSA_VALUE attribute.
 
 // Since FITS has better support for long keyword values than for long
 // keys, this function stores names of the aforementioned
@@ -202,7 +202,9 @@ void write_element_given_column_and_row(fitsfile *fits_file, int fits_type,
 //(We can't yet convert VOTables with more than one RESOURCE to FITS format.
 // 07Dec20)
 
-void write_labeled_properties_as_keywords(
+// JTODO PARAMs and FIELDs
+
+void write_tablator_elements_as_keywords(
         fitsfile *fits_file,
         const std::vector<std::pair<std::string, tablator::Property>>
                 &labeled_properties) {
@@ -221,9 +223,9 @@ void write_labeled_properties_as_keywords(
 
         const auto &attributes = prop.get_attributes();
         auto name_iter = attributes.find(tablator::ATTR_NAME);
-
         if (name_iter == attributes.end()) {
-		  //            name_iter = attributes.find(boost::to_upper_copy(tablator::ATTR_NAME));  // JTODO
+            // Some versions of ccfits translate keywords to upper-case.
+            name_iter = attributes.find(boost::to_upper_copy(tablator::ATTR_NAME));
         }
 
         // FITS requires that key values be unique, but there could be
@@ -246,9 +248,12 @@ void write_labeled_properties_as_keywords(
                 prop_label_base = label + tablator::DOT + name_iter->second +
                                   tablator::DOT + tablator::XMLATTR_DOT;
             }
+
         } else if (!boost::ends_with(prop_label_base, tablator::XMLATTR_DOT)) {
-            // e.g. if the table was originally in FITS or IPAC_TABLE format
-            // JTODO standardize?
+            // Could be e.g. (1) the RESOURCE-level "type" attribute,
+            // displayed in VOTable format as <RESOURCE type =
+            // "results"> and in IPAC table format as "\type =
+            // 'results', or (2) PARAM- or FIELD-level attributes.
             prop_label_base += tablator::XMLATTR_DOT;
         }
 
@@ -498,7 +503,9 @@ void tablator::Table::write_fits(
     }
 
     assert(get_resource_elements().size() > 0);
-    const auto combined_labeled_attributes = combine_attributes_all_levels();
+    bool include_column_attributes_f = true;
+    const auto combined_labeled_attributes =
+            combine_attributes_all_levels(include_column_attributes_f);
 
     //*********************************************************************/
     // Combine and write properties and trailing info for all levels
@@ -518,7 +525,7 @@ void tablator::Table::write_fits(
                                        combined_labeled_attributes.begin(),
                                        combined_labeled_attributes.end());
 
-    write_labeled_properties_as_keywords(fits_file, combined_labeled_properties);
+    write_tablator_elements_as_keywords(fits_file, combined_labeled_properties);
 
     //*********************************************************
     // Write column-level metadata and data.

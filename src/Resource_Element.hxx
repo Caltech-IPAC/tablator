@@ -404,6 +404,13 @@ public:
         get_main_table_element().add_params(params);
     }
 
+    std::vector<Field> &get_table_element_fields() {
+        return get_main_table_element().get_fields();
+    }
+    const std::vector<Field> &get_table_element_fields() const {
+        return get_main_table_element().get_fields();
+    }
+
     const std::vector<uint8_t> &get_data() const {
         return get_main_table_element().get_data();
     }
