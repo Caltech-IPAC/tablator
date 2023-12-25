@@ -39,15 +39,26 @@ public:
     inline void set_field_properties(const Field_Properties &fp) {
         field_properties_ = fp;
     }
-
     inline void add_field_property_attribute(const STRING_PAIR &attr_pair) {
         get_field_properties().add_attribute(attr_pair);
     }
-
     inline void add_field_property_attribute(const std::string &name,
                                              const std::string &value) {
         add_field_property_attribute(std::make_pair(name, value));
     }
+    inline void set_field_property_attributes(const ATTRIBUTES &attributes) {
+        get_field_properties().set_attributes(attributes);
+    }
+    inline void add_field_property_attributes(const ATTRIBUTES &attributes) {
+        get_field_properties().add_attributes(attributes);
+    }
+    inline const ATTRIBUTES &get_field_property_attributes() const {
+        return get_field_properties().get_attributes();
+    }
+    inline ATTRIBUTES &get_field_property_attributes() {
+        return get_field_properties().get_attributes();
+    }
+
 
 private:
     std::string name_;

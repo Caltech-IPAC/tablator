@@ -192,6 +192,7 @@ public:
     const std::vector<Group_Element> &get_group_elements() const {
         return options_.group_elements_;
     }
+    std::vector<Field> &get_fields() { return options_.fields_; }
     const std::vector<Field> &get_fields() const { return options_.fields_; }
     const std::vector<Property> &get_trailing_info_list() const {
         return options_.trailing_info_list_;

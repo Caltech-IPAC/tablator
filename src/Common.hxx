@@ -36,6 +36,9 @@ static const std::string XMLCOMMENT("<xmlcomment>");
 // For internal use with hdf5 (JTODO and eventually fits?)
 static const std::string END_INFO_MARKER("END_INFO_MARKER");
 
+static const std::string VOTABLE_KEYWORD_HEAD("VOKW");
+static const std::string LABEL_END_MARKER("<VOEND>");
+
 // JTODO "arraysize" vs. "array_size" (Column, hdf5)
 // lower case vs. upper case
 static const std::string ARRAYSIZE("arraysize");
@@ -79,6 +82,8 @@ static const std::string VOTABLE_DOT(VOTABLE + DOT);
 static const std::string RESOURCE_DOT(RESOURCE + DOT);
 static const std::string TABLE_DOT(TABLE + DOT);
 static const std::string INFO_DOT(INFO + DOT);
+static const std::string FIELD_DOT(FIELD + DOT);
+static const std::string PARAM_DOT(PARAM + DOT);
 
 static const std::string VOTABLE_RESOURCE(VOTABLE_DOT + RESOURCE);
 static const std::string VOTABLE_RESOURCE_DOT(VOTABLE_DOT + RESOURCE_DOT);
@@ -92,6 +97,17 @@ static const std::string VOTABLE_RESOURCE_TABLE_DOT(VOTABLE_RESOURCE_DOT + TABLE
 static const std::string VOTABLE_RESOURCE_TABLE_INFO(VOTABLE_RESOURCE_TABLE_DOT + INFO);
 static const std::string VOTABLE_RESOURCE_TABLE_INFO_DOT(VOTABLE_RESOURCE_TABLE_DOT +
                                                          INFO_DOT);
+
+static const std::string VOTABLE_RESOURCE_TABLE_PARAM(VOTABLE_RESOURCE_TABLE_DOT +
+                                                      PARAM);
+static const std::string VOTABLE_RESOURCE_TABLE_PARAM_DOT(VOTABLE_RESOURCE_TABLE_DOT +
+                                                          PARAM_DOT);
+
+static const std::string VOTABLE_RESOURCE_TABLE_FIELD(VOTABLE_RESOURCE_TABLE_DOT +
+                                                      FIELD);
+static const std::string VOTABLE_RESOURCE_TABLE_FIELD_DOT(VOTABLE_RESOURCE_TABLE_DOT +
+                                                          FIELD_DOT);
+
 
 static const std::string VOTABLE_XMLATTR(VOTABLE_DOT + XMLATTR);
 static const std::string VOTABLE_RESOURCE_XMLATTR(VOTABLE_RESOURCE_DOT + XMLATTR);
