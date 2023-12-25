@@ -1,5 +1,3 @@
-#include "../../Table.hxx"
-
 #include <boost/property_tree/ptree.hpp>
 
 #include "../../Column.hxx"
@@ -138,6 +136,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     }
 
     const auto &field_properties = column.get_field_properties();
+
     for (auto &a : field_properties.get_attributes()) {
         // Empty attributes cause field_tree.add to crash :(, so make sure
         // that does not happen.

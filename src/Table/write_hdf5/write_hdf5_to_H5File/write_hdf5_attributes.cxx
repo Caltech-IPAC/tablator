@@ -33,7 +33,9 @@ void tablator::Table::write_hdf5_attributes(H5::DataSet &table) const {
     auto combined_labeled_properties = combine_labeled_properties_all_levels();
     const auto combined_labeled_trailing_info_lists =
             combine_trailing_info_lists_all_levels();
-    const auto combined_labeled_attributes = combine_attributes_all_levels();
+    bool include_column_attributes_f = false;
+    const auto combined_labeled_attributes =
+            combine_attributes_all_levels(include_column_attributes_f);
 
     combined_labeled_properties.insert(combined_labeled_properties.end(),
                                        combined_labeled_trailing_info_lists.begin(),

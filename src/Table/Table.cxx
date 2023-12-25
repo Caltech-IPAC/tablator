@@ -1,6 +1,7 @@
+#include "../Table.hxx"
+
 #include <fstream>
 
-#include "../Table.hxx"
 #include "../ptree_readers.hxx"
 
 namespace {
@@ -21,6 +22,29 @@ void append_attributes_with_label(tablator::Labeled_Properties &combined_list,
         return;
     }
     combined_list.emplace_back(std::make_pair(label, attrs));
+}
+
+void append_column_attributes_with_label(
+        tablator::Labeled_Properties &combined_list,
+        const std::vector<tablator::Column> &column_list,
+        const std::string &partial_label, bool is_param) {
+    for (const auto &column : column_list) {
+	  auto attrs = column.get_field_properties().get_attributes();
+
+	  if (is_param) {
+		std::ostringstream type_os;
+		type_os << column.get_type();
+		attrs.emplace(std::make_pair("datatype", type_os.str()));
+
+		attrs.emplace(std::make_pair("arraysize", std::to_string(column.get_array_size())));
+	  }
+
+	  if (attrs.empty()) {
+		continue;
+	  }
+
+	  combined_list.emplace_back(std::make_pair(partial_label + column.get_name(), attrs));
+    }
 }
 
 
@@ -196,7 +220,8 @@ const Labeled_Properties Table::combine_trailing_info_lists_all_levels() const {
 //===========================================================
 
 // Called by write_fits().
-const Labeled_Properties Table::combine_attributes_all_levels() const {
+const Labeled_Properties Table::combine_attributes_all_levels(
+        bool include_column_attributes_f) const {
     Labeled_Properties combined_list;
     append_attributes_with_label(combined_list, get_attributes(), VOTABLE_XMLATTR);
     append_attributes_with_label(combined_list,
@@ -205,6 +230,15 @@ const Labeled_Properties Table::combine_attributes_all_levels() const {
     append_attributes_with_label(combined_list,
                                  get_main_table_element().get_attributes(),
                                  VOTABLE_RESOURCE_TABLE_XMLATTR);
+
+    if (include_column_attributes_f) {
+        append_column_attributes_with_label(combined_list, get_table_element_params(),
+                                            VOTABLE_RESOURCE_TABLE_PARAM_DOT, true /* is_param */);
+
+        append_column_attributes_with_label(combined_list, get_table_element_fields(),
+                                            VOTABLE_RESOURCE_TABLE_FIELD_DOT, false /* is_param */);
+    }
+
     return combined_list;
 }
 
@@ -299,6 +333,10 @@ bool Table::stash_attributes_labeled_by_element(
     if (boost::equals(label, VOTABLE_RESOURCE_XMLATTR)) {
         resource_element_attributes.insert(prop_attrs.begin(), prop_attrs.end());
         return true;
+    } else if (boost::starts_with(label, VOTABLE_RESOURCE_DOT)) {
+        // e.g. FIELD or PARAM. Attributes of these elements are
+        // handled in Column code.
+        return false;
     }
     if (boost::ends_with(label, XMLATTR)) {
         add_attributes(prop_attrs);
@@ -340,8 +378,8 @@ void Table::stash_resource_element_labeled_property(
         Labeled_Properties &resource_labeled_properties,
         const Labeled_Property &label_and_prop) {
     const auto &label = label_and_prop.first;
-
     const auto &prop = label_and_prop.second;
+
     if (is_property_style_label(label)) {
         get_labeled_properties().emplace_back(label_and_prop);
     } else if (boost::starts_with(label, VOTABLE_RESOURCE_DOT)) {

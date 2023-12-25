@@ -1,5 +1,3 @@
-#include "../../Table.hxx"
-
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -7,6 +5,7 @@
 #include "../../Common.hxx"
 #include "../../Data_Type_Adjuster.hxx"
 #include "../../Resource_Element.hxx"
+#include "../../Table.hxx"
 #include "../../Utils/Vector_Utils.hxx"
 
 namespace tablator {
