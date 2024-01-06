@@ -36,7 +36,7 @@ ___ big, small, whatever</DESCRIPTION>
         <TABLEDATA>
           <TR>
             <TD>10.684737</TD>
-            <TD>41.269035000000002</TD>
+            <TD>41.269035</TD>
             <TD>8</TD>
             <TD>17876521098765432109</TD>
             <TD>109</TD>
@@ -44,8 +44,8 @@ ___ big, small, whatever</DESCRIPTION>
             <TD>8</TD>
           </TR>
           <TR>
-            <TD>10.685657000000001</TD>
-            <TD>41.269550000000002</TD>
+            <TD>10.685657</TD>
+            <TD>41.26955</TD>
             <TD>65413</TD>
             <TD>18210987654321098765</TD>
             <TD>13</TD>
@@ -54,7 +54,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.686026</TD>
-            <TD>41.269226000000003</TD>
+            <TD>41.269226</TD>
             <TD>1324</TD>
             <TD>4321098765432109876</TD>
             <TD>13</TD>
@@ -62,8 +62,8 @@ ___ big, small, whatever</DESCRIPTION>
             <TD>1324</TD>
           </TR>
           <TR>
-            <TD>10.686014999999999</TD>
-            <TD>41.269629999999999</TD>
+            <TD>10.686015</TD>
+            <TD>41.26963</TD>
             <TD>1342</TD>
             <TD>2109876543210987654</TD>
             <TD>787652109876534213</TD>
@@ -71,8 +71,8 @@ ___ big, small, whatever</DESCRIPTION>
             <TD>1342</TD>
           </TR>
           <TR>
-            <TD>10.683469000000001</TD>
-            <TD>41.268585000000002</TD>
+            <TD>10.683469</TD>
+            <TD>41.268585</TD>
             <TD>13</TD>
             <TD>9432109876543210987</TD>
             <TD>13</TD>
@@ -81,7 +81,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.683465</TD>
-            <TD>41.269675999999997</TD>
+            <TD>41.269676</TD>
             <TD>13</TD>
             <TD>13210987654321098765</TD>
             <TD>13</TD>
@@ -89,8 +89,8 @@ ___ big, small, whatever</DESCRIPTION>
             <TD>13</TD>
           </TR>
           <TR>
-            <TD>10.685836999999999</TD>
-            <TD>41.270598999999997</TD>
+            <TD>10.685837</TD>
+            <TD>41.270599</TD>
             <TD>13</TD>
             <TD>2109876543210987654</TD>
             <TD>13</TD>
@@ -107,8 +107,8 @@ ___ big, small, whatever</DESCRIPTION>
             <TD>10</TD>
           </TR>
           <TR>
-            <TD>10.684029000000001</TD>
-            <TD>41.270901000000002</TD>
+            <TD>10.684029</TD>
+            <TD>41.270901</TD>
             <TD>13</TD>
             <TD>3210987654321098765</TD>
             <TD>13</TD>
@@ -116,8 +116,8 @@ ___ big, small, whatever</DESCRIPTION>
             <TD>13</TD>
           </TR>
           <TR>
-            <TD>10.685269999999999</TD>
-            <TD>41.267124000000003</TD>
+            <TD>10.68527</TD>
+            <TD>41.267124</TD>
             <TD>13</TD>
             <TD>2109876543210987654</TD>
             <TD>13</TD>
@@ -126,7 +126,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.683263</TD>
-            <TD>41.267456000000003</TD>
+            <TD>41.267456</TD>
             <TD>13</TD>
             <TD>2345</TD>
             <TD>13</TD>
@@ -135,7 +135,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.682383</TD>
-            <TD>41.267924999999998</TD>
+            <TD>41.267925</TD>
             <TD>10</TD>
             <TD>345678</TD>
             <TD>10</TD>
@@ -144,7 +144,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.68418</TD>
-            <TD>41.266941000000003</TD>
+            <TD>41.266941</TD>
             <TD>13</TD>
             <TD>2109876543210987654</TD>
             <TD>13</TD>
@@ -152,8 +152,8 @@ ___ big, small, whatever</DESCRIPTION>
             <TD>13</TD>
           </TR>
           <TR>
-            <TD>10.686845999999999</TD>
-            <TD>41.270713999999998</TD>
+            <TD>10.686846</TD>
+            <TD>41.270714</TD>
             <TD>13</TD>
             <TD>3210987654321098765</TD>
             <TD>13</TD>
@@ -162,7 +162,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.687414</TD>
-            <TD>41.267631999999999</TD>
+            <TD>41.267632</TD>
             <TD>13</TD>
             <TD>567890123</TD>
             <TD>13</TD>
@@ -171,7 +171,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.687611</TD>
-            <TD>41.270302000000001</TD>
+            <TD>41.270302</TD>
             <TD>18</TD>
             <TD>2109876543210987654</TD>
             <TD>18</TD>
@@ -180,7 +180,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.683944</TD>
-            <TD>41.266682000000003</TD>
+            <TD>41.266682</TD>
             <TD>13</TD>
             <TD>67890123456789012</TD>
             <TD>13</TD>
@@ -189,7 +189,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.682713</TD>
-            <TD>41.267055999999997</TD>
+            <TD>41.267056</TD>
             <TD>13</TD>
             <TD>567890123</TD>
             <TD>13</TD>
@@ -198,7 +198,7 @@ ___ big, small, whatever</DESCRIPTION>
           </TR>
           <TR>
             <TD>10.686963</TD>
-            <TD>41.266826999999999</TD>
+            <TD>41.266827</TD>
             <TD>65535</TD>
             <TD>18321098765432109876</TD>
             <TD>10</TD>

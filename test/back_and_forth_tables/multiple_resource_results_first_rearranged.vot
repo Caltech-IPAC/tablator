@@ -164,20 +164,20 @@ is returned (rather than all images containing the center).</DESCRIPTION>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w2-int-3.fits</TD>
             <TD>2</TD>
             <TD>image/fits</TD>
-            <TD>257.37688300000002</TD>
-            <TD>22.716667000000001</TD>
+            <TD>257.376883</TD>
+            <TD>22.716667</TD>
             <TD>4095 4095</TD>
             <TD>2048 2048</TD>
-            <TD>257.37688300000002 22.716667000000001</TD>
+            <TD>257.376883 22.716667</TD>
             <TD>SIN</TD>
-            <TD>-0.0003819444391411 0.0003819444391411</TD>
-            <TD>-0.0003819444391411 -0 -0 0.0003819444391411</TD>
+            <TD>-1.9444391411e-06 0.0003819444391411</TD>
+            <TD>-0.4 0 0 0.0003819444391411</TD>
             <TD>W2</TD>
             <TD>4.6e-06</TD>
-            <TD>5.1900000000000003e-06</TD>
-            <TD>4.0199999999999996e-06</TD>
+            <TD>5.19e-06</TD>
+            <TD>4.02e-06</TD>
             <TD>19.5</TD>
-            <TD>0.0070000000000000001</TD>
+            <TD>0.007</TD>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w2-unc-3.fits.gz</TD>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w2-cov-3.fits.gz</TD>
             <TD>2573p227_ac51</TD>
@@ -187,18 +187,18 @@ is returned (rather than all images containing the center).</DESCRIPTION>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w3-int-3.fits</TD>
             <TD>2</TD>
             <TD>image/fits</TD>
-            <TD>257.37688300000002</TD>
-            <TD>22.716667000000001</TD>
+            <TD>257.376883</TD>
+            <TD>22.716667</TD>
             <TD>4095 4095</TD>
             <TD>2048 2048</TD>
-            <TD>257.37688300000002 22.716667000000001</TD>
+            <TD>257.376883 22.716667</TD>
             <TD>SIN</TD>
             <TD>-0.0003819444391411 0.0003819444391411</TD>
-            <TD>-0.0003819444391411 -0 -0 0.0003819444391411</TD>
+            <TD>-3.82e-07 0 0 0.0003819444391411</TD>
             <TD>W3</TD>
-            <TD>1.1559999999999999e-05</TD>
-            <TD>1.6269999999999998e-05</TD>
-            <TD>7.6000000000000001e-06</TD>
+            <TD>1.156e-05</TD>
+            <TD>1.627e-05</TD>
+            <TD>7.6e-06</TD>
             <TD>18</TD>
             <TD>0.012</TD>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w3-unc-3.fits.gz</TD>
@@ -210,20 +210,20 @@ is returned (rather than all images containing the center).</DESCRIPTION>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w1-int-3.fits</TD>
             <TD>2</TD>
             <TD>image/fits</TD>
-            <TD>257.37688300000002</TD>
-            <TD>22.716667000000001</TD>
+            <TD>-257.376883</TD>
+            <TD>22.716667</TD>
             <TD>4095 4095</TD>
             <TD>2048 2048</TD>
-            <TD>257.37688300000002 22.716667000000001</TD>
+            <TD>257.376883 22.716667</TD>
             <TD>SIN</TD>
             <TD>-0.0003819444391411 0.0003819444391411</TD>
-            <TD>-0.0003819444391411 -0 -0 0.0003819444391411</TD>
+            <TD>-0.0003819444391411 0 0 0.0003819444391411</TD>
             <TD>W1</TD>
-            <TD>3.3500000000000001e-06</TD>
-            <TD>3.7799999999999998e-06</TD>
-            <TD>3.1300000000000001e-06</TD>
+            <TD>-3.35e-06</TD>
+            <TD>-3.78e-06</TD>
+            <TD>3.13e-06</TD>
             <TD>20.5</TD>
-            <TD>0.0060000000000000001</TD>
+            <TD>0.006</TD>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w1-unc-3.fits.gz</TD>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w1-cov-3.fits.gz</TD>
             <TD>2573p227_ac51</TD>
@@ -233,18 +233,18 @@ is returned (rather than all images containing the center).</DESCRIPTION>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w4-int-3.fits</TD>
             <TD>2</TD>
             <TD>image/fits</TD>
-            <TD>257.37688300000002</TD>
-            <TD>22.716667000000001</TD>
+            <TD>257.376883</TD>
+            <TD>22.716667</TD>
             <TD>4095 4095</TD>
             <TD>2048 2048</TD>
-            <TD>257.37688300000002 22.716667000000001</TD>
+            <TD>257.376883 22.716667</TD>
             <TD>SIN</TD>
             <TD>-0.0003819444391411 0.0003819444391411</TD>
-            <TD>-0.0003819444391411 -0 -0 0.0003819444391411</TD>
+            <TD>-0.0003819444391411 0 0 0.0003819444391411</TD>
             <TD>W4</TD>
-            <TD>2.209e-05</TD>
-            <TD>2.336e-05</TD>
-            <TD>1.984e-05</TD>
+            <TD>0</TD>
+            <TD>0</TD>
+            <TD>0</TD>
             <TD>13</TD>
             <TD>0.012</TD>
             <TD>https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/25/2573/2573p227_ac51/2573p227_ac51-w4-unc-3.fits.gz</TD>

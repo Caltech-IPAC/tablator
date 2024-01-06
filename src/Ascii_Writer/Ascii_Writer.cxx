@@ -1,15 +1,19 @@
+#include <cassert>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <sstream>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include "../Ascii_Writer.hxx"
+#include "../Decimal_String_Trimmer.hxx"
 #include "../data_size.hxx"
 
 namespace tablator {
-
-// Define static constexpr class members.
+// Declare static constexpr class members.
 constexpr const char Ascii_Writer::DEFAULT_SEPARATOR;
 constexpr const char Ascii_Writer::IPAC_COLUMN_SEPARATOR;
 
@@ -63,8 +67,8 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
                                              const uint8_t *data) {
     if (type != Data_Type::CHAR && array_size != 1) {
         throw std::runtime_error(
-                "write_array_unit_as_ascii() requires array_size == 1 if type is not "
-                "CHAR");
+                "write_array_unit_as_ascii() requires array_size == 1 if type is "
+                "not CHAR");
     }
     switch (type) {
         case Data_Type::INT8_LE:
@@ -99,8 +103,8 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
                << *reinterpret_cast<const float *>(data);
         } break;
         case Data_Type::FLOAT64_LE: {
-            os << std::setprecision(std::numeric_limits<double>::max_digits10)
-               << *reinterpret_cast<const double *>(data);
+            os << Decimal_String_Trimmer::get_decimal_string(
+                    *reinterpret_cast<const double *>(data));
         } break;
         case Data_Type::CHAR:
             // The number of characters in the type can be less than
