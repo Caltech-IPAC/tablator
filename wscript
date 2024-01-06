@@ -88,7 +88,9 @@ def build(bld):
              'src/ptree_readers/read_resource_element/read_table_element/read_data_element/read_binary2/compute_column_array_sizes.cxx',
              'src/ptree_readers/read_resource_element/read_table_element/read_data_element/read_binary2/append_data_from_stream/append_data_from_stream.cxx',
              'src/ptree_readers/read_resource_element/read_table_element/read_data_element/read_binary2/append_data_from_stream/insert_swapped.cxx',
-             'src/Ascii_Writer/Ascii_Writer.cxx']
+             'src/Ascii_Writer/Ascii_Writer.cxx',
+             'src/Decimal_String_Trimmer/Decimal_String_Trimmer.cxx'
+	     ]
 
     bld.shlib(source=sources,
               target='tablator',

@@ -237,7 +237,7 @@ else
     echo "FAIL: CSV implicit float"
 fi
 
-${tablator_bin} --output-format=html test/multi.tbl temp.html && diff -w test/multi.html temp.html
+${tablator_bin} --output-format=html test/multi.tbl temp.html && diff -w test/back_and_forth_tables/multi.html temp.html
 if [ $? -eq 0 ]; then
     echo "PASS: HTML retain links"
     rm -f temp.html
@@ -245,28 +245,28 @@ else
     echo "FAIL: HTML retain links"
 fi
 
-${tablator_bin} --output-format=postgres test/multi.tbl - | diff -w test/multi.postgres -
+${tablator_bin} --output-format=postgres test/multi.tbl - | diff -w test/back_and_forth_tables/multi.postgres -
 if [ $? -eq 0 ]; then
     echo "PASS: Postgres output"
 else
     echo "FAIL: Postgres output"
 fi
 
-${tablator_bin} --output-format=oracle test/multi.tbl - | diff -w test/multi.oracle -
+${tablator_bin} --output-format=oracle test/multi.tbl - | diff -w test/back_and_forth_tables/multi.oracle -
 if [ $? -eq 0 ]; then
     echo "PASS: Oracle output"
 else
     echo "FAIL: Oracle output"
 fi
 
-${tablator_bin} --output-format=sqlite test/multi.tbl - | diff -w test/multi.sqlite -
+${tablator_bin} --output-format=sqlite test/multi.tbl - | diff -w test/back_and_forth_tables/multi.sqlite -
 if [ $? -eq 0 ]; then
     echo "PASS: SQLite output"
 else
     echo "FAIL: SQLite output"
 fi
 
-${tablator_bin} --output-format=csv test/multi.tbl - | diff -w test/multi_with_unquoted.csv -
+${tablator_bin} --output-format=csv test/multi.tbl - | diff -w test/back_and_forth_tables/multi_unquoted.csv -
 if [ $? -eq 0 ]; then
     echo "PASS: CSV output"
 else
@@ -773,7 +773,7 @@ fi
 
 ${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.csv temp.tbl &&
 ${tablator_bin} --write-null-string temp.tbl temp.csv &&
-diff test/back_and_forth_tables/various_with_null_strings.csv temp.csv
+diff test/back_and_forth_tables/various_with_null_strings_rounded.csv temp.csv
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with null strings from csv to IPAC table and back"
     rm -f temp.tbl
@@ -784,7 +784,7 @@ fi
 
 ${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.tsv temp.tbl &&
 ${tablator_bin} --write-null-string temp.tbl temp.tsv &&
-diff test/back_and_forth_tables/various_with_null_strings.tsv temp.tsv
+diff test/back_and_forth_tables/various_with_null_strings_rounded.tsv temp.tsv
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with null strings from tsv to IPAC table and back"
     rm -f temp.tbl
@@ -796,7 +796,7 @@ fi
 
 ${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.csv temp.tsv &&
 ${tablator_bin} --write-null-string temp.tsv temp.csv &&
-diff test/back_and_forth_tables/various_with_null_strings_and_hex.csv temp.csv
+diff test/back_and_forth_tables/various_with_null_strings_and_hex_rounded.csv temp.csv
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with null strings from csv to tsv and back, preserving null strings"
     rm -f temp.tsv
@@ -807,7 +807,7 @@ fi
 
 ${tablator_bin} test/back_and_forth_tables/various_with_null_strings_and_hex.tsv temp.csv &&
 ${tablator_bin} --write-null-string temp.csv temp.tsv &&
-diff test/back_and_forth_tables/various_with_null_strings_and_hex.tsv temp.tsv
+diff test/back_and_forth_tables/various_with_null_strings_and_hex_rounded.tsv temp.tsv
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with null strings from tsv to csv and back, preserving null strings"
     rm -f temp.tsv
@@ -833,7 +833,7 @@ fi
 # not straight conversions
 #################################################################
 
-${tablator_bin} --static=1 --row-list="0 2 3" test/multi temp.tbl && diff -w test/multi_row_023.tbl temp.tbl
+${tablator_bin} --static=1 --row-list="0 2 3" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_023.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected rows in IPAC Table format"
     rm -f temp.tbl
@@ -867,7 +867,7 @@ else
     echo "FAIL: Write subtable with repeated selected rows in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=3 --start-row 1 test/multi temp.tbl && diff -w test/multi_row_123.tbl temp.tbl
+${tablator_bin}  --row-count=3 --start-row 1 test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -875,7 +875,7 @@ else
     echo "FAIL: Write subtable with consecutive rows in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=30 --start-row 1 test/multi temp.tbl && diff -w test/multi_row_123.tbl temp.tbl
+${tablator_bin}  --row-count=30 --start-row 1 test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with reduced number of consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -884,7 +884,7 @@ else
 fi
 
 
-${tablator_bin}  --row-count=3 --start-row 1 --column-ids "1 3 5" test/multi temp.tbl && diff -w test/multi_row_123_col_135.tbl temp.tbl
+${tablator_bin}  --row-count=3 --start-row 1 --column-ids "1 3 5" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123_col_135.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -892,7 +892,7 @@ else
     echo "FAIL: Write subtable with consecutive rows in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 1 3 5" test/multi temp.tbl && diff -w test/multi_row_123_col_135.tbl temp.tbl
+${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 1 3 5" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123_col_135.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected columns and reduced number of consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -900,7 +900,7 @@ else
     echo "FAIL: Write subtable with selected columns and reduced number of consecutive rows in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff -w test/multi_row_123_col_531.tbl temp.tbl
+${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123_col_531.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected columns out of order and reduced number of consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -908,7 +908,7 @@ else
     echo "FAIL: Write subtable with selected columns out of order and reduced number of consecutive rows in IPAC Table format"
 fi
 
-${tablator_bin}   --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff -w test/multi_row_0123_col_531.tbl temp.tbl
+${tablator_bin}   --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected columns out of order and no row restriction in IPAC Table format"
     rm -f temp.tbl
@@ -917,7 +917,7 @@ else
 fi
 
 
-${tablator_bin} --skip-comments 0  --column-names "htm7 dec object" test/multi temp.tbl && diff -w test/multi_row_0123_col_531.tbl temp.tbl
+${tablator_bin} --skip-comments 0  --column-names "htm7 dec object" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with named columns out of order and no row restriction in IPAC Table format"
     rm -f temp.tbl
@@ -925,7 +925,7 @@ else
     echo "FAIL: Write subtable with named columns out of order and no row restriction in IPAC Table format"
 fi
 
-${tablator_bin} --idx-lookup 0  --column-names "htm7 dec object" test/multi temp.tbl && diff -w test/multi_row_0123_col_531.tbl temp.tbl
+${tablator_bin} --idx-lookup 0  --column-names "htm7 dec object" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with named columns out of order and no row restriction in IPAC Table format and explicit !ids_only"
     rm -f temp.tbl
