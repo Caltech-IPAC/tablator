@@ -17,10 +17,12 @@ namespace tablator {
 constexpr const char Ascii_Writer::DEFAULT_SEPARATOR;
 constexpr const char Ascii_Writer::IPAC_COLUMN_SEPARATOR;
 
-/*********************************************************************
-TODO This function doesn't check for nulls, and calling functions
-check only is_null(), which is column-level (not column/array-element-level).
-***********************************************************************/
+
+//======================================================================
+// TODO This function doesn't check for nulls, and calling functions
+// check only is_null(), which is column-level (not
+// column/array-element-level).
+// =====================================================================
 
 // The usual way to write a column value in ascii.  If the value is an
 // array, individual elements are delimited by the single char
@@ -40,6 +42,8 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
         write_array_unit_as_ascii(os, type, array_size, data);
     }
 }
+
+//======================================================================
 
 // Called by write_single_ipac_record() as it expands a column of array
 // type to multiple columns.
@@ -61,6 +65,8 @@ void Ascii_Writer::write_type_as_ascii_expand_array(std::ostream &os,
         write_array_unit_as_ascii(os, type, array_size, data);
     }
 }
+
+//=======================================================================
 
 void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
                                              const size_t &array_size,

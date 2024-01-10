@@ -8,6 +8,9 @@
 
 #include "../Table.hxx"
 
+static constexpr size_t SIZE_T_MAX = std::numeric_limits<size_t>::max();
+
+
 std::string usage(const boost::program_options::options_description &visible_options) {
     std::stringstream ss;
     ss << "Usage: tablator [options] input_file output_file\n" << visible_options;
@@ -152,7 +155,6 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
                                 const std::vector<size_t> &row_id_list, size_t row_id,
                                 size_t start_row, size_t row_count, bool call_static_f,
                                 const tablator::Command_Line_Options &options) {
-    static size_t MAX_SIZE_T = std::numeric_limits<size_t>::max();
     const std::vector<size_t> *active_column_id_ptr = &column_id_list;
     std::vector<size_t> modified_column_id_list;
     if (column_id_list.empty()) {
@@ -164,15 +166,24 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
     const std::vector<size_t> *active_row_id_ptr = &row_id_list;
     std::vector<size_t> modified_row_id_list;
     if (row_id_list.empty()) {
-        if (row_id != MAX_SIZE_T) {
+        if (row_id < table.num_rows()) {
             modified_row_id_list.emplace_back(row_id);
-        } else if (start_row != MAX_SIZE_T) {
-            size_t active_row_count = std::max(
-                    size_t(0), std::min(row_count, table.num_rows() - start_row));
-            modified_row_id_list.resize(active_row_count);
+        } else if (row_id < SIZE_T_MAX) {
+            // row_id == SIZE_T_MAX if user did not specify row-id.
+            std::string msg("Error: row-id value is too large.\n");
+            throw(std::runtime_error(msg));
+        } else if (start_row < table.num_rows()) {
+            size_t modified_row_count =
+                    std::min(row_count, table.num_rows() - start_row);
+            modified_row_id_list.resize(modified_row_count);
             std::iota(modified_row_id_list.begin(), modified_row_id_list.end(),
                       start_row);
+        } else if (start_row < SIZE_T_MAX) {
+            // start_row == SIZE_T_MAX if user did not specify start-row.
+            std::string msg("Error: start-row value is too large.\n");
+            throw(std::runtime_error(msg));
         } else {
+            // User didn't specify constraints, so return all rows.
             modified_row_id_list.resize(table.num_rows());
             std::iota(modified_row_id_list.begin(), modified_row_id_list.end(), 0);
         }
@@ -198,9 +209,9 @@ int main(int argc, char *argv[]) {
     std::string column_id_string;
     std::vector<std::string> column_name_list;
     std::string column_name_string;
-    size_t row_id = std::numeric_limits<size_t>::max();
-    size_t start_row = std::numeric_limits<size_t>::max();
-    size_t row_count = std::numeric_limits<size_t>::max();
+    size_t row_id = SIZE_T_MAX;
+    size_t start_row = SIZE_T_MAX;
+    size_t row_count = SIZE_T_MAX;
     std::vector<size_t> row_list;
     std::string row_string;
     bool call_static_f = false;

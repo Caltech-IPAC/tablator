@@ -9,9 +9,9 @@
 
 namespace {
 
-//=============
+//==============
 // Helper class
-//=============
+//==============
 
 class Trimmability_Packet {
 public:
@@ -60,6 +60,8 @@ public:
         }
         is_trimmable_ = keep_looking;
     }
+
+    //================================================
 
     const std::string get_possibly_trimmed_string() const {
         if (!is_trimmable_) {
@@ -128,6 +130,21 @@ public:
         return sign_str + adjusted_abs_coeff_str;
     }
 
+    //================================================
+
+    size_t get_possibly_trimmed_length() const {
+        if (is_trimmable_) {
+            static const short MAX_EXP_LEN = 4;  // "e-cd"
+            // Don't bother estimating length of possibly adjusted exp_str.
+            size_t max_exp_len = got_exp_ ? MAX_EXP_LEN : 0;
+            short sign_len = is_neg_ ? 1 : 0;
+
+            return sign_len + adjusted_abs_coeff_str_len_ + max_exp_len;
+        }
+        return value_str_.size();
+    }
+
+    //================================================
 
 private:
     size_t find_anchor_pos(const std::string &abs_value_str, size_t coeff_str_len) {
@@ -284,15 +301,22 @@ private:
 
 namespace tablator {
 
+
 // This function checks for a run of 9s or of 0s to the right of the
 // decimal point in the decimal representation of doub_value. If it
 // finds such a run, it rounds up or down accordingly and truncates
 // the string.
 
-const std::string Decimal_String_Trimmer::get_decimal_string(
-        double doub_value) {
+const std::string Decimal_String_Trimmer::get_decimal_string(double doub_value) {
     Trimmability_Packet trim_packet(doub_value);
     return trim_packet.get_possibly_trimmed_string();
+}
+
+// This function returns the length of the string returned by get_decimal_string().
+
+size_t tablator::Decimal_String_Trimmer::get_decimal_string_length(double doub_value) {
+    Trimmability_Packet trim_packet(doub_value);
+    return trim_packet.get_possibly_trimmed_length();
 }
 
 }  // namespace tablator

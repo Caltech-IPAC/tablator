@@ -1,1 +1,1 @@
-A B C   D E F   -   J K L 
+ABC DEF - JKL
