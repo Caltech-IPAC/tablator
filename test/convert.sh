@@ -114,7 +114,7 @@ else
 
 fi
 
-${tablator_bin} --column-names "" --exclude-cols 0  test/multi_row_0123_col_531.tbl temp.txt 2> /dev/null
+${tablator_bin} --column-names "" --exclude-cols 0  test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.txt 2> /dev/null
 if [ $? -eq 0 ]; then
     echo "FAIL: attempt to write IPAC subtable with no columns correctly resulted in error."
     rm -f temp.txt
@@ -122,7 +122,7 @@ else
     echo "PASS: attempt to write IPAC subtable with no columns correctly resulted in error."
 fi
 
-${tablator_bin} --column-names "object htm7 dec" --exclude-cols 1  test/multi_row_0123_col_531.tbl temp.txt 2> /dev/null
+${tablator_bin} --column-names "object htm7 dec" --exclude-cols 1  test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.txt 2> /dev/null
 if [ $? -eq 0 ]; then
     echo "FAIL: attempt to write IPAC subtable with no columns via exclude-cols correctly resulted in error."
 else
@@ -179,9 +179,9 @@ for table in test/multi test/dos_ending.csv test/multi.csv test/multi.tsv test/f
 
         let output=$?
         if [[ output -eq 0 ]]; then
-            echo "PASS: $table -> $ending II (to IPAC_TABLE)"
+            echo "PASS: $table -> $ending II (-> tbl) "
         else
-            echo "FAIL: $table -> $ending II (to IPAC_TABLE): $output"
+            echo "FAIL: $table -> $ending II (-> tbl) : $output"
         fi
 
         rm -f test.$ending temp.tbl
@@ -237,7 +237,7 @@ else
     echo "FAIL: CSV implicit float"
 fi
 
-${tablator_bin} --output-format=html test/multi.tbl temp.html && diff -w test/back_and_forth_tables/multi.html temp.html
+${tablator_bin} --output-format=html test/multi.tbl temp.html && diff test/back_and_forth_tables/multi.html temp.html
 if [ $? -eq 0 ]; then
     echo "PASS: HTML retain links"
     rm -f temp.html
@@ -833,7 +833,7 @@ fi
 # not straight conversions
 #################################################################
 
-${tablator_bin} --static=1 --row-list="0 2 3" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_023.tbl temp.tbl
+${tablator_bin} --static=1 --row-list="0 2 3" test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_023.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected rows in IPAC Table format"
     rm -f temp.tbl
@@ -841,7 +841,7 @@ else
     echo "FAIL: Write subtable with selected rows in IPAC Table format"
 fi
 
-${tablator_bin} --skip-comments 1 --row-list="0 2 3" test/multi temp.tbl && diff -w test/multi_row_023_no_headers.tbl temp.tbl
+${tablator_bin} --skip-comments 1 --row-list="0 2 3" test/multi temp.tbl && diff test/multi_row_023_no_headers.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected rows and no headers in IPAC Table format"
     rm -f temp.tbl
@@ -849,7 +849,7 @@ else
     echo "FAIL: Write subtable with selected rows and no headers in IPAC Table format"
 fi
 
-${tablator_bin} --static=1 --skip-comments 1 --row-list="0 2 3" test/multi temp.tbl && diff -w test/multi_row_023_no_headers.tbl temp.tbl
+${tablator_bin} --static=1 --skip-comments 1 --row-list="0 2 3" test/multi temp.tbl && diff test/multi_row_023_no_headers.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with static=1 and selected rows and no headers in IPAC Table format"
     rm -f temp.tbl
@@ -858,8 +858,7 @@ else
 fi
 
 
-
-${tablator_bin} --static=1 --row-list="0 2 1 2 0" test/back_and_forth_tables/multiple_row.json5 temp.tbl && diff -w test/back_and_forth_tables/multiple_row_02120.tbl temp.tbl
+${tablator_bin} --static=1 --row-list="0 2 1 2 0" test/back_and_forth_tables/multiple_row.json5 temp.tbl && diff test/back_and_forth_tables/multiple_row_02120.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with repeated selected rows in IPAC Table format"
     rm -f temp.tbl
@@ -867,7 +866,7 @@ else
     echo "FAIL: Write subtable with repeated selected rows in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=3 --start-row 1 test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123.tbl temp.tbl
+${tablator_bin}  --row-count=3 --start-row 1 test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -875,7 +874,7 @@ else
     echo "FAIL: Write subtable with consecutive rows in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=30 --start-row 1 test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123.tbl temp.tbl
+${tablator_bin}  --row-count=30 --start-row 1 test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with reduced number of consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -884,15 +883,16 @@ else
 fi
 
 
-${tablator_bin}  --row-count=3 --start-row 1 --column-ids "1 3 5" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123_col_135.tbl temp.tbl
+${tablator_bin}  --row-count=3 --start-row 1 --column-ids "1 3 5" test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_123_col_135.tbl temp.tbl
 if [ $? -eq 0 ]; then
-    echo "PASS: Write subtable with consecutive rows in IPAC Table format"
+    echo "PASS: Write subtable with consecutive rows and alternate columns in IPAC Table format"
+    rm -f temp_file
     rm -f temp.tbl
 else
-    echo "FAIL: Write subtable with consecutive rows in IPAC Table format"
+    echo "FAIL: Write subtable with consecutive rows and alternate columns in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 1 3 5" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123_col_135.tbl temp.tbl
+${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 1 3 5" test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_123_col_135.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected columns and reduced number of consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -900,7 +900,7 @@ else
     echo "FAIL: Write subtable with selected columns and reduced number of consecutive rows in IPAC Table format"
 fi
 
-${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_123_col_531.tbl temp.tbl
+${tablator_bin}  --row-count=30 --start-row 1 --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_123_col_531.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected columns out of order and reduced number of consecutive rows in IPAC Table format"
     rm -f temp.tbl
@@ -908,7 +908,7 @@ else
     echo "FAIL: Write subtable with selected columns out of order and reduced number of consecutive rows in IPAC Table format"
 fi
 
-${tablator_bin}   --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
+${tablator_bin}   --column-ids "0 5 3 0 27 1 0" test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with selected columns out of order and no row restriction in IPAC Table format"
     rm -f temp.tbl
@@ -917,7 +917,8 @@ else
 fi
 
 
-${tablator_bin} --skip-comments 0  --column-names "htm7 dec object" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
+${tablator_bin} --skip-comments 0  --column-names "htm7 dec object" test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
+
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with named columns out of order and no row restriction in IPAC Table format"
     rm -f temp.tbl
@@ -925,7 +926,7 @@ else
     echo "FAIL: Write subtable with named columns out of order and no row restriction in IPAC Table format"
 fi
 
-${tablator_bin} --idx-lookup 0  --column-names "htm7 dec object" test/multi temp.tbl && diff -w test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
+${tablator_bin} --idx-lookup 0  --column-names "htm7 dec object" test/multi temp.tbl && diff test/back_and_forth_tables/multi_row_0123_col_531.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Write subtable with named columns out of order and no row restriction in IPAC Table format and explicit !ids_only"
     rm -f temp.tbl
@@ -946,7 +947,7 @@ fi
 
 
 # extract single value
-${tablator_bin}  --row-id=1 --column-to-extract big_uint64s --type UINT64_LE test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint64_val.txt temp.txt
+${tablator_bin}  --row-id=1 --column-to-extract big_uint64s --type UINT64_LE test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint64_val.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint64 value"
     rm -f temp.txt
@@ -954,7 +955,7 @@ else
     echo "FAIL: Extract uint64 value"
 fi
 
-${tablator_bin}  --row-id=1 --column-to-extract small_int32s --type INT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_int32_val.txt temp.txt
+${tablator_bin}  --row-id=1 --column-to-extract small_int32s --type INT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_int32_val.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract int32 value"
     rm -f temp.txt
@@ -962,7 +963,7 @@ else
     echo "FAIL: Extract int32 value"
 fi
 
-${tablator_bin}  --row-id=0 --column-to-extract small_uint32s --type UINT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint32_val.txt temp.txt
+${tablator_bin}  --row-id=0 --column-to-extract small_uint32s --type UINT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint32_val.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint32 value"
     rm -f temp.txt
@@ -970,7 +971,7 @@ else
     echo "FAIL: Extract uint32 value"
 fi
 
-${tablator_bin}  --row-id=1 --column-to-extract ubools --type UINT8_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_ubool_val.txt temp.txt
+${tablator_bin}  --row-id=1 --column-to-extract ubools --type UINT8_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_ubool_val.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint8 value"
     rm -f temp.txt
@@ -978,7 +979,7 @@ else
     echo "FAIL: Extract uint8 value"
 fi
 
-${tablator_bin}  --row-id=3 --column-to-extract ra --type FLOAT64_LE test/multi temp.txt && diff -w test/double_from_multi.txt temp.txt && diff -w test/back_and_forth_tables/extracted_double_val.txt temp.txt
+${tablator_bin}  --row-id=3 --column-to-extract ra --type FLOAT64_LE test/multi temp.txt && diff test/double_from_multi.txt temp.txt && diff test/back_and_forth_tables/extracted_double_val.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract double value"
     rm -f temp.txt
@@ -988,7 +989,7 @@ fi
 
 
 # extract single value as string
-${tablator_bin}  --row-id=1 --column-to-extract big_uint64s --as-string 1 test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint64_val.txt temp.txt
+${tablator_bin}  --row-id=1 --column-to-extract big_uint64s --as-string 1 test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint64_val_str.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint64 value as string"
     rm -f temp.txt
@@ -996,7 +997,7 @@ else
     echo "FAIL: Extract uint64 value as string"
 fi
 
-${tablator_bin}  --row-id=1 --column-to-extract small_int32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_int32_val.txt temp.txt
+${tablator_bin}  --row-id=1 --column-to-extract small_int32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_int32_val_str.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract int32 value as string"
     rm -f temp.txt
@@ -1004,7 +1005,7 @@ else
     echo "FAIL: Extract int32 value as string"
 fi
 
-${tablator_bin}  --row-id=0 --column-to-extract small_uint32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint32_val.txt temp.txt
+${tablator_bin}  --row-id=0 --column-to-extract small_uint32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint32_val_str.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint32 value as string"
     rm -f temp.txt
@@ -1012,7 +1013,7 @@ else
     echo "FAIL: Extract uint32 value as string"
 fi
 
-${tablator_bin}  --row-id=1 --column-to-extract ubools --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_ubool_val_as_string.txt temp.txt
+${tablator_bin}  --row-id=1 --column-to-extract ubools --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_ubool_val_as_string.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint8 value as string"
     rm -f temp.txt
@@ -1020,7 +1021,7 @@ else
     echo "FAIL: Extract uint8 value as string"
 fi
 
-${tablator_bin}  --row-id=3 --column-to-extract ra --as-string 1  test/multi temp.txt && diff -w test/back_and_forth_tables/extracted_double_val_precision.txt temp.txt
+${tablator_bin}  --row-id=3 --column-to-extract ra --as-string 1  test/multi temp.txt && diff test/back_and_forth_tables/extracted_double_val_precision.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract double value as string"
     rm -f temp.txt
@@ -1028,7 +1029,7 @@ else
     echo "FAIL: Extract double value as string"
 fi
 
-${tablator_bin} --row-id=1 --column-to-extract chars2 --as-string 1 test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt && diff -w test/back_and_forth_tables/extracted_char_val.txt temp.txt
+${tablator_bin} --row-id=1 --column-to-extract chars2 --as-string 1 test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt && diff test/back_and_forth_tables/extracted_char_val.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract char value as string"
     rm -f temp.txt
@@ -1037,7 +1038,7 @@ else
 fi
 
 # extract column
-${tablator_bin} --column-to-extract big_uint64s --type UINT64_LE test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint64_col.txt temp.txt
+${tablator_bin} --column-to-extract big_uint64s --type UINT64_LE test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint64_col.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint64 column"
     rm -f temp.txt
@@ -1045,7 +1046,7 @@ else
     echo "FAIL: Extract uint64 column"
 fi
 
-${tablator_bin}  --column-to-extract small_int32s --type INT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_int32_col.txt temp.txt
+${tablator_bin}  --column-to-extract small_int32s --type INT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_int32_col.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract int32 column"
     rm -f temp.txt
@@ -1053,7 +1054,7 @@ else
     echo "FAIL: Extract int32 column"
 fi
 
-${tablator_bin}  --column-to-extract small_uint32s --type UINT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint32_col.txt temp.txt
+${tablator_bin}  --column-to-extract small_uint32s --type UINT32_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint32_col.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint32 column"
     rm -f temp.txt
@@ -1061,7 +1062,7 @@ else
     echo "FAIL: Extract uint32 column"
 fi
 
-${tablator_bin}  --column-to-extract ubools --type UINT8_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_ubool_col.txt temp.txt
+${tablator_bin}  --column-to-extract ubools --type UINT8_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_ubool_col.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint8 column"
     rm -f temp.txt
@@ -1069,7 +1070,7 @@ else
     echo "FAIL: Extract uint8 column"
 fi
 
-${tablator_bin}  --column-to-extract ra --type FLOAT64_LE test/multi temp.txt && diff -w test/back_and_forth_tables/extracted_double_col.txt temp.txt
+${tablator_bin}  --column-to-extract ra --type FLOAT64_LE test/multi temp.txt && diff test/back_and_forth_tables/extracted_double_col.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract double column"
     rm -f temp.txt
@@ -1079,7 +1080,7 @@ fi
 
 
 #extract column as string
-${tablator_bin} --column-to-extract shtm3 --as-string 1 test/multi temp_file && diff -w test/multi_shtm3_col temp_file
+${tablator_bin} --column-to-extract shtm3 --as-string 1 test/multi temp_file && diff test/multi_shtm3_col temp_file
 if [ $? -eq 0 ]; then
     echo "PASS: Extract int16 column as strings"
     rm -f temp_file
@@ -1088,7 +1089,7 @@ else
 fi
 
 
-${tablator_bin} --column-to-extract big_uint64s --as-string 1 test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint64_col.txt temp.txt
+${tablator_bin} --column-to-extract big_uint64s --as-string 1 test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint64_col_str.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint64 column as strings"
     rm -f temp.txt
@@ -1096,7 +1097,7 @@ else
     echo "FAIL: Extract uint64 column as strings"
 fi
 
-${tablator_bin} --column-to-extract chars --as-string 1 test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt && diff -w test/back_and_forth_tables/extracted_char_col.txt temp.txt
+${tablator_bin} --column-to-extract chars --as-string 1 test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt && diff test/back_and_forth_tables/extracted_char_col.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract char column as strings"
     rm -f temp.txt
@@ -1104,7 +1105,7 @@ else
     echo "FAIL: Extract char column as strings"
 fi
 
-${tablator_bin}  --column-to-extract small_int32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_int32_col.txt temp.txt
+${tablator_bin}  --column-to-extract small_int32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_int32_col_str.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract int32 column as strings"
     rm -f temp.txt
@@ -1112,7 +1113,7 @@ else
     echo "FAIL: Extract int32 column as strings"
 fi
 
-${tablator_bin}  --column-to-extract small_uint32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_uint32_col.txt temp.txt
+${tablator_bin}  --column-to-extract small_uint32s --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint32_col_str.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint32 column as strings"
     rm -f temp.txt
@@ -1120,7 +1121,7 @@ else
     echo "FAIL: Extract uint32 column as strings"
 fi
 
-${tablator_bin}  --column-to-extract ubools --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff -w test/back_and_forth_tables/extracted_ubool_col_hex.txt temp.txt
+${tablator_bin}  --column-to-extract ubools --as-string 1 test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_ubool_col_hex.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint8 column as strings"
     rm -f temp.txt
@@ -1128,7 +1129,7 @@ else
     echo "FAIL: Extract uint8 column as strings"
 fi
 
-${tablator_bin}  --column-to-extract ra --as-string 1 test/multi temp.txt && diff -w test/back_and_forth_tables/extracted_double_col_precision.txt temp.txt
+${tablator_bin}  --column-to-extract ra --as-string 1 test/multi temp.txt && diff test/back_and_forth_tables/extracted_double_col_precision.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract double column as strings"
     rm -f temp.txt
@@ -1210,6 +1211,14 @@ if [ $? -eq 0 ]; then
     rm -f temp.vot
 else
     echo "FAIL: Table with multiple infos"
+fi
+
+${tablator_bin} test/back_and_forth_tables/multiple_info_example_rearranged.vot temp.vot && diff test/back_and_forth_tables/multiple_info_example_rearranged.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Table with multiple infos already in order"
+    rm -f temp_file
+else
+    echo "FAIL: Table with multiple infos already in order"
 fi
 
 

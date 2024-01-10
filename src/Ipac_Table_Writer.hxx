@@ -70,24 +70,15 @@ public:
     static std::string to_ipac_string(const Data_Type &type);
     static std::vector<size_t> get_column_widths(const Table &table);
 
-
     /*******************************************/
     /* Helper function  */
     /*******************************************/
 
-
-    static bool is_valid_col_id(size_t col_id, size_t num_columns) {
-        return ((col_id > 0) && (col_id < num_columns));
-    }
-
+    static bool is_valid_col_idx(const Table &table, size_t col_idx);
 
 private:
-    static const std::vector<size_t> get_all_nonzero_col_ids(size_t num_cols) {
-        std::vector<size_t> all_col_ids(num_cols - 1);
-        std::iota(all_col_ids.begin(), all_col_ids.end(), 1);
-        return all_col_ids;
-    }
-
+    static size_t get_true_row_count(const Table &table, size_t start_row,
+                                     size_t requested_row_count);
 
     static void write_keywords_and_comments(const Table &table, std::ostream &os,
                                             const std::vector<size_t> &included_col_ids,
@@ -99,6 +90,14 @@ private:
     static void write_keywords_and_comments(
             const Table &table, std::ostream &os,
             const std::vector<size_t> &included_column_ids);
+
+    static size_t get_single_column_width(const Table &table,
+                                          const std::vector<size_t> &requested_row_ids,
+                                          size_t col_idx);
+
+    static std::vector<size_t> get_column_widths(
+            const Table &table, const std::vector<size_t> &requested_row_ids,
+            const std::vector<size_t> &requested_col_ids);
 
     static void write_column_headers(
             const Table &table, std::ostream &os,
