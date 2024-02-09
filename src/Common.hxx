@@ -162,4 +162,15 @@ inline bool is_property_style_label(const std::string &label) {
 
 typedef std::map<std::string, std::string> ATTRIBUTES;
 typedef std::pair<std::string, std::string> STRING_PAIR;
+
+struct Options_Packet {
+    Options_Packet() : write_null_strings_(false), skip_comments_(false) {}
+    Options_Packet(bool wns, bool sk) : write_null_strings_(wns), skip_comments_(sk) {}
+
+    bool write_null_strings_;
+    bool skip_comments_;
+};
+
+static const Options_Packet default_options = Options_Packet();
+
 }  // namespace tablator

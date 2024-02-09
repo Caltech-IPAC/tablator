@@ -35,7 +35,7 @@ std::ostream &write_escaped_string(std::ostream &os, const std::string &s,
 }  // namespace
 
 void tablator::Table::write_dsv(std::ostream &os, const char &separator,
-                                bool write_null_string_f) const {
+                                const Options_Packet &options) const {
     // Write comments.
     const auto &comments = get_comments();
     for (const auto comment : comments) {
@@ -62,7 +62,7 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
             if (!is_null(row_offset, i)) {
                 write_type_as_ascii(ss, columns[i].get_type(),
                                     columns[i].get_array_size(), data.data() + offset);
-            } else if (write_null_string_f) {
+            } else if (options.write_null_strings_) {
                 // Leave null entries blank by default, unlike in IPAC_TABLE format.
                 ss << "null";
             }
