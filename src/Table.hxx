@@ -313,9 +313,9 @@ public:
     }
 
     void write(std::ostream &os, const std::string &table_name, const Format &format,
-               bool write_null_string_f = false) const;
+               const Command_Line_Options &options = default_options) const;
     void write(const boost::filesystem::path &path, const Format &format,
-               bool write_null_string_f = false) const;
+               const Command_Line_Options &options = default_options) const;
     void write(const boost::filesystem::path &path) const { write(path, Format(path)); }
     void write_hdf5(std::ostream &os) const;
     void write_hdf5(const boost::filesystem::path &p) const;
@@ -334,12 +334,12 @@ public:
         Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids);
     }
 
-    void write_ipac_subtable_by_column_and_row(std::ostream &os,
-                                               const std::vector<size_t> &column_ids,
-                                               std::vector<size_t> requested_row_ids,
-                                               bool skip_comments = false) const {
-        Ipac_Table_Writer::write_subtable_by_column_and_row(
-                *this, os, column_ids, requested_row_ids, skip_comments);
+    void write_ipac_subtable_by_column_and_row(
+            std::ostream &os, const std::vector<size_t> &column_ids,
+            std::vector<size_t> requested_row_ids,
+            const Command_Line_Options options = default_options) const {
+        Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids,
+                                                            requested_row_ids, options);
     }
 
     void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
@@ -347,19 +347,18 @@ public:
         Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count);
     }
 
-    void write_ipac_subtable_by_column_and_row(std::ostream &os,
-                                               const std::vector<size_t> &column_ids,
-                                               size_t start_row, size_t row_count,
-                                               bool skip_comments = false) const {
+    void write_ipac_subtable_by_column_and_row(
+            std::ostream &os, const std::vector<size_t> &column_ids, size_t start_row,
+            size_t row_count, const Command_Line_Options options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_column_and_row(
-                *this, os, column_ids, start_row, row_count, skip_comments);
+                *this, os, column_ids, start_row, row_count, options);
     }
 
-    void write_ipac_subtable_by_column_and_row(std::ostream &os,
-                                               const std::vector<size_t> &column_ids,
-                                               bool skip_comments = false) const {
+    void write_ipac_subtable_by_column_and_row(
+            std::ostream &os, const std::vector<size_t> &column_ids,
+            const Command_Line_Options options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids, 0,
-                                                            num_rows(), skip_comments);
+                                                            num_rows(), options);
     }
 
     void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
@@ -417,7 +416,7 @@ public:
     }
 
     void write_dsv(std::ostream &os, const char &separator,
-                   bool write_null_string_f = false) const;
+                   const Command_Line_Options &options = default_options) const;
     void write_sql_create_table(std::ostream &os, const std::string &table_name,
                                 const Format::Enums &sql_type) const {
         using namespace std::string_literals;
