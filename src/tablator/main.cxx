@@ -151,9 +151,8 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
                                 const std::vector<size_t> &column_id_list,
                                 const std::vector<size_t> &row_id_list, size_t row_id,
                                 size_t start_row, size_t row_count, bool call_static_f,
-                                bool skip_comments_f) {
+                                const tablator::Command_Line_Options &options) {
     static size_t MAX_SIZE_T = std::numeric_limits<size_t>::max();
-
     const std::vector<size_t> *active_column_id_ptr = &column_id_list;
     std::vector<size_t> modified_column_id_list;
     if (column_id_list.empty()) {
@@ -183,11 +182,10 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
     if (call_static_f) {
         tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
                 table, output_stream, *active_column_id_ptr, *active_row_id_ptr,
-                skip_comments_f);
+                options);
     } else {
         table.write_ipac_subtable_by_column_and_row(
-                output_stream, *active_column_id_ptr, *active_row_id_ptr,
-                skip_comments_f);
+                output_stream, *active_column_id_ptr, *active_row_id_ptr, options);
     }
 }
 
@@ -213,7 +211,7 @@ int main(int argc, char *argv[]) {
     std::string output_format_str;
     std::string column_to_extract;
     std::string type_str;
-    bool write_null_string_f = false;
+    bool write_null_strings_f = false;
     bool idx_lookup = false;
 
     // Declare the supported options.
@@ -265,7 +263,7 @@ int main(int argc, char *argv[]) {
             //               ->implicit_value(true),
             "header comments are to be skipped (flag is true) or included (false, "
             "default)")("write-null-string",
-                        boost::program_options::bool_switch(&write_null_string_f)
+                        boost::program_options::bool_switch(&write_null_strings_f)
                                 ->default_value(false),
                         "render null values in tsv/csv tables  as \"null\" rather than "
                         "as empty string (default false)");
@@ -444,7 +442,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        if (write_null_string_f &&
+        if (write_null_strings_f &&
             output_format.enum_format != tablator::Format::Enums::CSV &&
             output_format.enum_format != tablator::Format::Enums::TSV) {
             std::cerr << "\"write-null-string\" feature is supported only when writing "
@@ -454,6 +452,8 @@ int main(int argc, char *argv[]) {
         /**************/
         /*** Do it! ***/
         /**************/
+
+        tablator::Command_Line_Options options(write_null_strings_f, skip_comments_f);
 
         if (extract_single_value) {
             handle_extract_single_value(input_path, input_format, output_path,
@@ -496,7 +496,7 @@ int main(int argc, char *argv[]) {
             } else {
                 handle_write_ipac_subtable(output_stream, table, col_ids, row_list,
                                            row_id, start_row, row_count, call_static_f,
-                                           skip_comments_f);
+                                           options);
             }
         } else if (do_subtable) {
             boost::filesystem::ifstream input_stream(input_path);
@@ -504,16 +504,16 @@ int main(int argc, char *argv[]) {
             boost::filesystem::ofstream output_stream(output_path);
             handle_write_ipac_subtable(output_stream, table, column_id_list, row_list,
                                        row_id, start_row, row_count, call_static_f,
-                                       skip_comments_f);
+                                       options);
         } else if (stream_intermediate) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
             boost::filesystem::ofstream output_stream(output_path);
             table.write(output_stream, output_path.stem().native(), output_format,
-                        write_null_string_f);
+                        options);
         } else {
             tablator::Table table(input_path, input_format);
-            table.write(output_path, output_format, write_null_string_f);
+            table.write(output_path, output_format, options);
         }
     } catch (boost::program_options::error &exception) {
         std::cerr << exception.what() << "\n" << usage(visible_options);
