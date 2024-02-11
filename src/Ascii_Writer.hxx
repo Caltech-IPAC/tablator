@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "Command_Line_Options.hxx"
 #include "Data_Type.hxx"
 
 namespace tablator {
@@ -11,27 +12,30 @@ public:
     static constexpr const char DEFAULT_SEPARATOR = ' ';
     static constexpr const char IPAC_COLUMN_SEPARATOR = ' ';
 
-    static void write_type_as_ascii(std::ostream &os, const Data_Type &type,
-                                    const size_t &array_size, const uint8_t *data,
-                                    const char &separator = DEFAULT_SEPARATOR);
+    static void write_type_as_ascii(
+            std::ostream &os, const Data_Type &type, const size_t &array_size,
+            const uint8_t *data, const char &separator = DEFAULT_SEPARATOR,
+            const Command_Line_Options &options = default_options);
 
     // Called by Ipac_Table_Writer when splitting array column into several columns.
-    static void write_type_as_ascii_expand_array(std::ostream &os,
-                                                 const Data_Type &type,
-                                                 const size_t &array_size,
-                                                 const uint8_t *data, size_t col_width);
+    static void write_type_as_ascii_expand_array(
+            std::ostream &os, const Data_Type &type, const size_t &array_size,
+            const uint8_t *data, size_t col_width,
+            const Command_Line_Options &options = default_options);
 
 private:
-    static void write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
-                                          const size_t &array_size,
-                                          const uint8_t *data);
+    static void write_array_unit_as_ascii(
+            std::ostream &os, const Data_Type &type, const size_t &array_size,
+            const uint8_t *data, const Command_Line_Options &options = default_options);
 };
 
 // For backward compatibility
-inline void write_type_as_ascii(
-        std::ostream &os, const Data_Type &type, const size_t &array_size,
-        const uint8_t *data, const char &separator = Ascii_Writer::DEFAULT_SEPARATOR) {
-    return Ascii_Writer::write_type_as_ascii(os, type, array_size, data, separator);
+inline void write_type_as_ascii(std::ostream &os, const Data_Type &type,
+                                const size_t &array_size, const uint8_t *data,
+                                const char &separator = Ascii_Writer::DEFAULT_SEPARATOR,
+                                const Command_Line_Options &options = default_options) {
+    return Ascii_Writer::write_type_as_ascii(os, type, array_size, data, separator,
+                                             options);
 }
 
 }  // namespace tablator

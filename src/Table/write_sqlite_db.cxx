@@ -5,7 +5,8 @@
 #include <sqlite/connection.hpp>
 #include <sqlite/execute.hpp>
 
-void tablator::Table::write_sqlite_db(const boost::filesystem::path &path) const {
+void tablator::Table::write_sqlite_db(const boost::filesystem::path &path,
+                                      const Command_Line_Options &options) const {
     // Remove file at that location, if any; else sqlite will error out.
     boost::filesystem::remove(path);
 
@@ -23,7 +24,7 @@ void tablator::Table::write_sqlite_db(const boost::filesystem::path &path) const
     for (size_t row_offset = 0; row_offset < get_data().size();
          row_offset += row_size()) {
         sql_stream.str("");
-        write_sql_insert(sql_stream, table_name, row_offset);
+        write_sql_insert(sql_stream, table_name, row_offset, options);
         sqlite::execute(connection, sql_stream.str(), true);
     }
 }

@@ -21,7 +21,7 @@ void tablator::Table::write(const boost::filesystem::path &path, const Format &f
             write_hdf5(path);
         }
     } else if (format.is_sqlite_db()) {
-        write_sqlite_db(path);
+        write_sqlite_db(path, options);
     } else if (use_stdout) {
         write(std::cout, "stdout", format, options);
     } else {
@@ -32,7 +32,8 @@ void tablator::Table::write(const boost::filesystem::path &path, const Format &f
 }
 
 void tablator::Table::write(std::ostream &os, const std::string &table_name,
-                            const Format &format, const Command_Line_Options &options) const {
+                            const Format &format,
+                            const Command_Line_Options &options) const {
     // List of cols whose types must be adjusted for writing due
     // to restrictions from <format>.
     std::vector<Data_Type> datatypes_for_writing;
@@ -64,7 +65,7 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
             }
             uint num_spaces = is_json ? 2 : 0;
             splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,
-                                       num_spaces);
+                                       num_spaces, options);
         } break;
         case Format::Enums::CSV:
             write_dsv(os, ',', options);
@@ -74,15 +75,15 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
             break;
         case Format::Enums::IPAC_TABLE:
         case Format::Enums::TEXT:
-            write_ipac_table(os);
+            write_ipac_table(os, options);
             break;
         case Format::Enums::HTML:
-            write_html(os);
+            write_html(os, options);
             break;
         case Format::Enums::POSTGRES_SQL:
         case Format::Enums::ORACLE_SQL:
         case Format::Enums::SQLITE_SQL:
-            write_sql(os, table_name, format.enum_format);
+            write_sql(os, table_name, format.enum_format, options);
             break;
         case Format::Enums::SQLITE_DB:
             throw std::runtime_error("SQLITE_DB output to a stream not implemented");

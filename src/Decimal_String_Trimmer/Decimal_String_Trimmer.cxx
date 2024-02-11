@@ -15,9 +15,8 @@ namespace {
 
 class Trimmability_Packet {
 public:
-    static constexpr size_t MIN_RUN_LENGTH_FOR_ADJUSTING = 5;
-
-    Trimmability_Packet(double value_doub) {
+    Trimmability_Packet(double value_doub, ushort min_run_length_for_trim)
+            : min_run_length_for_trim_(min_run_length_for_trim) {
         // Check for negative value.
         value_doub_ = value_doub;
         is_neg_ = (value_doub < 0);
@@ -174,7 +173,7 @@ private:
 
     bool is_candidate_for_adjustment(size_t anchor_pos, size_t coeff_str_len) {
         return (anchor_pos != std::string::npos &&
-                anchor_pos + 1 + MIN_RUN_LENGTH_FOR_ADJUSTING < coeff_str_len);
+                anchor_pos + 1 + min_run_length_for_trim_ < coeff_str_len);
     }
 
     //==============================================
@@ -221,7 +220,7 @@ private:
                 run_len = 0;
             }
 
-            if (run_len == MIN_RUN_LENGTH_FOR_ADJUSTING) {
+            if (run_len == min_run_length_for_trim_) {
                 adjusted_str_len = run_start_pos;
                 if (adjusted_str_len == anchor_pos + 1) {
                     // Retain at least one digit after the decimal point.
@@ -273,6 +272,7 @@ private:
 
     //==============================================
 
+    const ushort min_run_length_for_trim_;
     double value_doub_;
     bool is_neg_;
 
@@ -307,15 +307,17 @@ namespace tablator {
 // finds such a run, it rounds up or down accordingly and truncates
 // the string.
 
-const std::string Decimal_String_Trimmer::get_decimal_string(double doub_value) {
-    Trimmability_Packet trim_packet(doub_value);
+const std::string Decimal_String_Trimmer::get_decimal_string(
+        double doub_value, ushort min_run_length_for_trim) {
+    Trimmability_Packet trim_packet(doub_value, min_run_length_for_trim);
     return trim_packet.get_possibly_trimmed_string();
 }
 
 // This function returns the length of the string returned by get_decimal_string().
 
-size_t tablator::Decimal_String_Trimmer::get_decimal_string_length(double doub_value) {
-    Trimmability_Packet trim_packet(doub_value);
+size_t tablator::Decimal_String_Trimmer::get_decimal_string_length(
+        double doub_value, ushort min_run_length_for_trim) {
+    Trimmability_Packet trim_packet(doub_value, min_run_length_for_trim);
     return trim_packet.get_possibly_trimmed_length();
 }
 

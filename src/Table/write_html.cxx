@@ -10,7 +10,8 @@
 
 /**********************************************************/
 
-void tablator::Table::write_html(std::ostream &os) const {
+void tablator::Table::write_html(std::ostream &os,
+                                 const Command_Line_Options &options) const {
     boost::property_tree::ptree tree;
     boost::property_tree::ptree &html = tree.add("html", "");
     boost::property_tree::ptree &style =
@@ -78,5 +79,5 @@ void tablator::Table::write_html(std::ostream &os) const {
             boost::property_tree::xml_writer_settings<char>(' ', 2));
 
     splice_tabledata_and_write(os, ss, Format::Enums::HTML, PLACEHOLDER_LEFT_MARGIN,
-                               PLACEHOLDER_RIGHT_MARGIN);
+                               PLACEHOLDER_RIGHT_MARGIN, options);
 }

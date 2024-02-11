@@ -20,22 +20,29 @@ public:
     /* Table-writer functions */
     /*******************************************/
 
-    static void write(const Table &table, std::ostream &os);
+    // No need for write_null_strings_f; that's just for dsv.
+
+    static void write(const Table &table, std::ostream &os,
+                      const Command_Line_Options &options);
 
     static void write_keywords_and_comments(const Table &table, std::ostream &os);
 
-    static void write_column_headers(const Table &table, std::ostream &os);
-    static void write_subtable_by_row(const Table &table, std::ostream &os,
-                                      const std::vector<size_t> &requested_row_ids,
-                                      const Command_Line_Options &options = default_options);
+    static void write_column_headers(const Table &table, std::ostream &os,
+                                     const Command_Line_Options &options);
+    static void write_subtable_by_row(
+            const Table &table, std::ostream &os,
+            const std::vector<size_t> &requested_row_ids,
+            const Command_Line_Options &options = default_options);
+
     static void write_subtable_by_column_and_row(
             const Table &table, std::ostream &os, const std::vector<size_t> &column_ids,
             const std::vector<size_t> &requested_row_ids,
             const Command_Line_Options &options = default_options);
 
-    static void write_subtable_by_row(const Table &table, std::ostream &os,
-                                      size_t start_row, size_t row_count,
-                                      const Command_Line_Options &options = default_options);
+    static void write_subtable_by_row(
+            const Table &table, std::ostream &os, size_t start_row, size_t row_count,
+            const Command_Line_Options &options = default_options);
+
     static void write_subtable_by_column_and_row(
             const Table &table, std::ostream &os, const std::vector<size_t> &column_ids,
             size_t start_row, size_t row_count,
@@ -46,29 +53,37 @@ public:
             const Command_Line_Options &options = default_options);
 
     static void write_single_record(const Table &table, std::ostream &os,
-                                    size_t row_idx);
+                                    size_t row_idx,
+                                    const Command_Line_Options &options);
+
     static void write_single_record(const Table &table, std::ostream &os,
                                     const std::vector<size_t> &column_ids,
-                                    size_t row_idx);
+                                    size_t row_idx,
+                                    const Command_Line_Options &options);
 
     static void write_consecutive_records(const Table &table, std::ostream &os,
-                                          size_t start_row, size_t row_count);
+                                          size_t start_row, size_t row_count,
+                                          const Command_Line_Options &options);
     static void write_consecutive_records(const Table &table, std::ostream &os,
                                           const std::vector<size_t> &column_ids,
-                                          size_t start_row, size_t row_count);
+                                          size_t start_row, size_t row_count,
+                                          const Command_Line_Options &options);
     static void write_selected_records(const Table &table, std::ostream &os,
-                                       const std::vector<size_t> &requested_row_ids);
+                                       const std::vector<size_t> &requested_row_ids,
+                                       const Command_Line_Options &options);
 
     static void write_selected_records(const Table &table, std::ostream &os,
                                        const std::vector<size_t> &column_ids,
-                                       const std::vector<size_t> &requested_row_ids);
+                                       const std::vector<size_t> &requested_row_ids,
+                                       const Command_Line_Options &options);
 
     /*******************************************/
     /* Auxiliary functions exposed through Table */
     /*******************************************/
 
     static std::string to_ipac_string(const Data_Type &type);
-    static std::vector<size_t> get_column_widths(const Table &table);
+    static std::vector<size_t> get_column_widths(const Table &table,
+                                                 const Command_Line_Options &options);
 
     /*******************************************/
     /* Helper function  */
@@ -93,11 +108,13 @@ private:
 
     static size_t get_single_column_width(const Table &table,
                                           const std::vector<size_t> &requested_row_ids,
-                                          size_t col_idx);
+                                          size_t col_idx,
+                                          const Command_Line_Options &options);
 
     static std::vector<size_t> get_column_widths(
             const Table &table, const std::vector<size_t> &requested_row_ids,
-            const std::vector<size_t> &requested_col_ids);
+            const std::vector<size_t> &requested_col_ids,
+            const Command_Line_Options &options);
 
     static void write_column_headers(
             const Table &table, std::ostream &os,
@@ -139,57 +156,67 @@ private:
             const std::vector<Data_Type> &datatypes_for_writing,
             const Command_Line_Options &options = default_options);
 
-    static void write_single_record(
-            const Table &table, std::ostream &os, size_t row_offset,
-            const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
 
-    static void write_single_record(
-            const Table &table, std::ostream &os,
-            const std::vector<size_t> &included_column_ids, size_t row_offset,
-            const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
+    static void write_single_record(const Table &table, std::ostream &os,
+                                    size_t row_offset,
+                                    const std::vector<size_t> &ipac_column_widths,
+                                    const std::vector<Data_Type> &datatypes_for_writing,
+                                    const Command_Line_Options &options);
+
+    static void write_single_record(const Table &table, std::ostream &os,
+                                    const std::vector<size_t> &included_column_ids,
+                                    size_t row_offset,
+                                    const std::vector<size_t> &ipac_column_widths,
+                                    const std::vector<Data_Type> &datatypes_for_writing,
+                                    const Command_Line_Options &options);
 
     static void write_consecutive_records(
             const Table &table, std::ostream &os, size_t start_row, size_t row_count,
             const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
+            const std::vector<Data_Type> &datatypes_for_writing,
+            const Command_Line_Options &options);
 
     static void write_consecutive_records(
             const Table &table, std::ostream &os,
             const std::vector<size_t> &included_column_ids, size_t start_row,
             size_t row_count, const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
+            const std::vector<Data_Type> &datatypes_for_writing,
+            const Command_Line_Options &options);
 
     static void write_selected_records(
             const Table &table, std::ostream &os,
             const std::vector<size_t> &requested_row_ids,
             const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
+            const std::vector<Data_Type> &datatypes_for_writing,
+            const Command_Line_Options &options);
 
     static void write_selected_records(
             const Table &table, std::ostream &os,
             const std::vector<size_t> &included_column_ids,
             const std::vector<size_t> &requested_row_ids,
             const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
+            const std::vector<Data_Type> &datatypes_for_writing,
+            const Command_Line_Options &options);
 
 
     // The functions below have no public counterpart.
     static void write_single_value(const Table &table, std::ostream &os,
                                    size_t column_id, size_t row_offset, size_t width,
-                                   const std::vector<Data_Type> &datatypes_for_writing);
+                                   const std::vector<Data_Type> &datatypes_for_writing,
+                                   const Command_Line_Options &options);
 
     static void write_single_record_by_offset(
             const Table &table, std::ostream &os, size_t row_offset,
             const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
+            const std::vector<Data_Type> &datatypes_for_writing,
+            const Command_Line_Options &options);
 
     static void write_single_record_by_offset(
             const Table &table, std::ostream &os,
             const std::vector<size_t> &included_column_ids, size_t row_offset,
             const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing);
+            const std::vector<Data_Type> &datatypes_for_writing,
+            const Command_Line_Options &options);
 
     static size_t write_column_name(const Table &table, std::ostream &os, size_t col_id,
                                     size_t col_width, size_t effective_array_size);

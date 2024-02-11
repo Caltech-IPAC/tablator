@@ -1,10 +1,12 @@
 // A simple converter program based on the tablator library.
+#include <iostream>
+#include <sstream>
 
 #include <json5_parser.h>
 #include <CCfits/CCfits>
+
+#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
-#include <iostream>
-#include <sstream>
 
 #include "../Table.hxx"
 
@@ -200,6 +202,35 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
     }
 }
 
+
+ushort parse_trim_decimal_runs(const std::string &trim_str) {
+    static const std::string dec_run_error(
+            "Error: value of trim-decimal-runs must be \"0\", \"1\", or \"1:N\" where "
+            "3 <= N. Trimming will not take place for N >= 25. \n");
+    bool dec_error = false;
+    ushort min_run_length = tablator::MIN_RUN_LENGTH_FOR_TRIMMING;
+    if (trim_str == "0") {
+        min_run_length = tablator::SIGNAL_NO_TRIMMING;
+    } else if (boost::starts_with(trim_str, "1:")) {
+        std::string min_run_str = trim_str.substr(2);
+        try {
+            min_run_length = (ushort)std::stoi(min_run_str);
+        } catch (std::exception &e) {
+            throw(std::runtime_error(dec_run_error));
+        }
+        if (min_run_length < 3) {
+            dec_error = true;
+        }
+    } else if (trim_str != "1") {
+        dec_error = true;
+    }
+
+    if (dec_error) {
+        throw(std::runtime_error(dec_run_error));
+    }
+    return min_run_length;
+}
+
 /////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[]) {
@@ -224,6 +255,7 @@ int main(int argc, char *argv[]) {
     std::string type_str;
     bool write_null_strings_f = false;
     bool idx_lookup = false;
+    std::string trim_decimal_runs = "1";
 
     // Declare the supported options.
     boost::program_options::options_description visible_options("Options");
@@ -277,7 +309,13 @@ int main(int argc, char *argv[]) {
                         boost::program_options::bool_switch(&write_null_strings_f)
                                 ->default_value(false),
                         "render null values in tsv/csv tables  as \"null\" rather than "
-                        "as empty string (default false)");
+                        "as empty string (default false)")(
+            "trim-decimal-runs",
+            boost::program_options::value<std::string>(&trim_decimal_runs),
+            "check for and round round up/down decimal runs of length N of 9s or of 0s "
+            "in string "
+            "representations of doubles (valid values \"0\", \"1\", \"1:N\"; \"1\" "
+            "gets default run length; default \"1\".)");
 
     boost::program_options::options_description hidden_options("Hidden options");
     hidden_options.add_options()(
@@ -460,11 +498,13 @@ int main(int argc, char *argv[]) {
                          "in CSV or TSV format.";
         }
 
+        ushort min_run_length = parse_trim_decimal_runs(trim_decimal_runs);
+        tablator::Command_Line_Options options(min_run_length, write_null_strings_f,
+                                               skip_comments_f);
+
         /**************/
         /*** Do it! ***/
         /**************/
-
-        tablator::Command_Line_Options options(write_null_strings_f, skip_comments_f);
 
         if (extract_single_value) {
             handle_extract_single_value(input_path, input_format, output_path,
@@ -476,14 +516,14 @@ int main(int argc, char *argv[]) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
             std::string value =
-                    table.extract_value_as_string(column_to_extract, row_id);
+                    table.extract_value_as_string(column_to_extract, row_id, options);
             boost::filesystem::ofstream output_stream(output_path);
             output_stream << value;
         } else if (extract_column_as_string) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);
             std::vector<std::string> col_values =
-                    table.extract_column_values_as_strings(column_to_extract);
+                    table.extract_column_values_as_strings(column_to_extract, options);
             boost::filesystem::ofstream output_stream(output_path);
             std::copy(col_values.begin(), col_values.end(),
                       std::ostream_iterator<std::string>(output_stream, "\n"));
@@ -516,6 +556,7 @@ int main(int argc, char *argv[]) {
             handle_write_ipac_subtable(output_stream, table, column_id_list, row_list,
                                        row_id, start_row, row_count, call_static_f,
                                        options);
+
         } else if (stream_intermediate) {
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table table(input_stream, input_format);

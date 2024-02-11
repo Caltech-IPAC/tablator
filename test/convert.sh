@@ -147,6 +147,15 @@ else
 
 fi
 
+${tablator_bin}  --trim-decimal-runs=3:10 --row-count=3 --start-row 1 test/back_and_forth_tables/multi_untrimmed.tbl temp.tbl 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: invalid argument to trim-decimal-runs"
+else
+    echo "PASS: invalid argument to trim-decimal-runs"
+    rm -f temp.tbl
+fi
+
+
 
 ###########################################################
 
@@ -1286,4 +1295,29 @@ if [ $? -eq 0 ]; then
 
 else
     echo "FAIL: Convert table with single and double quotes from csv to IPAC table and back"
+fi
+
+
+${tablator_bin}  --trim-decimal-runs=0 --row-count=3 --start-row 1 test/back_and_forth_tables/multi_untrimmed.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123_untrimmed.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with consecutive rows in IPAC Table format, no trimming"
+    rm -f temp.tbl
+else
+    echo "FAIL: Write subtable with consecutive rows in IPAC Table format, no trimming"
+fi
+
+${tablator_bin}  --trim-decimal-runs=1 --row-count=3 --start-row 1 test/back_and_forth_tables/multi_untrimmed.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with consecutive rows in IPAC Table format, default trimming"
+    rm -f temp.tbl
+else
+    echo "FAIL: Write subtable with consecutive rows in IPAC Table format, default trimming"
+fi
+
+${tablator_bin}  --trim-decimal-runs=1:10 --row-count=3 --start-row 1 test/back_and_forth_tables/multi_untrimmed.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123_untrimmed.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Write subtable with consecutive rows in IPAC Table format, trim with N=10"
+    rm -f temp.tbl
+else
+    echo "FAIL: Write subtable with consecutive rows in IPAC Table format, trim with N=10"
 fi

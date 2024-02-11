@@ -37,7 +37,8 @@ get_offsets_and_types(const tablator::Table &table,
 void tablator::Table::write_sql_inserts(
         std::ostream &os, const std::string &table_name,
         const tablator::STRING_PAIR &point_input_names,
-        const std::vector<tablator::STRING_PAIR> &polygon_input_names) const {
+        const std::vector<tablator::STRING_PAIR> &polygon_input_names,
+        const Command_Line_Options &options) const {
     std::string quoted_table_name(
             quote_sql_string(table_name, '"', Quote_SQL::IF_NEEDED));
     std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>> point_input;
@@ -53,6 +54,7 @@ void tablator::Table::write_sql_inserts(
     for (size_t row_offset = 0; row_offset < get_data().size();
          row_offset += row_size()) {
         write_sql_insert(os, quoted_table_name, row_offset,
-                         !point_input_names.first.empty(), point_input, polygon_input);
+                         !point_input_names.first.empty(), point_input, polygon_input,
+                         options);
     }
 }
