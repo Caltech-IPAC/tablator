@@ -15,7 +15,9 @@
 #include <H5Cpp.h>
 #include <CCfits/CCfits>
 
+#include "Ascii_Writer.hxx"
 #include "Column.hxx"
+#include "Command_Line_Options.hxx"
 #include "Common.hxx"
 #include "Data_Element.hxx"
 #include "Field_Properties.hxx"
@@ -315,22 +317,28 @@ public:
                const Command_Line_Options &options = default_options) const;
     void write(const boost::filesystem::path &path, const Format &format,
                const Command_Line_Options &options = default_options) const;
-    void write(const boost::filesystem::path &path) const { write(path, Format(path)); }
+    void write(const boost::filesystem::path &path,
+               const Command_Line_Options &options = default_options) const {
+        write(path, Format(path), options);
+    }
     void write_hdf5(std::ostream &os) const;
     void write_hdf5(const boost::filesystem::path &p) const;
     void write_hdf5_to_H5File(H5::H5File &outfile) const;
     void write_hdf5_attributes(H5::DataSet &table) const;
 
-    void write_ipac_table(std::ostream &os) const {
-        Ipac_Table_Writer::write(*this, os);
+    void write_ipac_table(std::ostream &os,
+                          const Command_Line_Options &options = default_options) const {
+        Ipac_Table_Writer::write(*this, os, options);
     }
-    void write_ipac_table(const boost::filesystem::path &p) const {
+    void write_ipac_table(const boost::filesystem::path &p,
+                          const Command_Line_Options &options = default_options) const {
         boost::filesystem::ofstream os(p);
-        write_ipac_table(os);
+        write_ipac_table(os, options);
     }
     void write_ipac_subtable_by_row(std::ostream &os,
-                                    std::vector<size_t> requested_row_ids) const {
-        Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids);
+                                    std::vector<size_t> requested_row_ids,
+                                    const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids, options);
     }
 
     void write_ipac_subtable_by_column_and_row(
@@ -342,13 +350,16 @@ public:
     }
 
     void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
-                                    size_t row_count) const {
-        Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count);
+                                    size_t row_count,
+                                    const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count,
+                                                 options);
     }
 
     void write_ipac_subtable_by_column_and_row(
             std::ostream &os, const std::vector<size_t> &column_ids, size_t start_row,
-            size_t row_count, const Command_Line_Options options = default_options) const {
+            size_t row_count,
+            const Command_Line_Options options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_column_and_row(
                 *this, os, column_ids, start_row, row_count, options);
     }
@@ -360,54 +371,65 @@ public:
                                                             num_rows(), options);
     }
 
-    void write_single_ipac_record(std::ostream &os, size_t row_idx) const {
-        Ipac_Table_Writer::write_single_record(*this, os, row_idx);
+    void write_single_ipac_record(std::ostream &os, size_t row_idx,
+                                  const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_single_record(*this, os, row_idx, options);
     }
 
     void write_single_ipac_record(std::ostream &os,
                                   const std::vector<size_t> &included_column_ids,
-                                  size_t row_idx) const {
-        Ipac_Table_Writer::write_single_record(*this, os, included_column_ids, row_idx);
+                                  size_t row_idx,
+                                  const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_single_record(*this, os, included_column_ids, row_idx,
+                                               options);
     }
 
     void write_consecutive_ipac_records(std::ostream &os, size_t start_row,
-                                        size_t row_count) const {
-        Ipac_Table_Writer::write_consecutive_records(*this, os, start_row, row_count);
+                                        size_t row_count,
+                                        const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_consecutive_records(*this, os, start_row, row_count,
+                                                     options);
     }
 
     void write_consecutive_ipac_records(std::ostream &os,
                                         const std::vector<size_t> &included_column_ids,
-                                        size_t start_row, size_t row_count) const {
+                                        size_t start_row, size_t row_count,
+                                        const Command_Line_Options &options) const {
         Ipac_Table_Writer::write_consecutive_records(*this, os, included_column_ids,
-                                                     start_row, row_count);
+                                                     start_row, row_count, options);
     }
 
-    void write_selected_ipac_records(
-            std::ostream &os, std::vector<size_t> const &requested_row_ids) const {
-        Ipac_Table_Writer::write_selected_records(*this, os, requested_row_ids);
+    void write_selected_ipac_records(std::ostream &os,
+                                     std::vector<size_t> const &requested_row_ids,
+                                     const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_selected_records(*this, os, requested_row_ids,
+                                                  options);
     }
 
-    void write_selected_ipac_records(
-            std::ostream &os, const std::vector<size_t> &included_column_ids,
-            std::vector<size_t> const &requested_row_ids) const {
+    void write_selected_ipac_records(std::ostream &os,
+                                     const std::vector<size_t> &included_column_ids,
+                                     std::vector<size_t> const &requested_row_ids,
+                                     const Command_Line_Options &options) const {
         Ipac_Table_Writer::write_selected_records(*this, os, included_column_ids,
-                                                  requested_row_ids);
+                                                  requested_row_ids, options);
     }
 
-    std::vector<size_t> get_column_widths() const {
-        return Ipac_Table_Writer::get_column_widths(*this);
+    std::vector<size_t> get_column_widths(const Command_Line_Options &options) const {
+        return Ipac_Table_Writer::get_column_widths(*this, options);
     }
     // JTODO: G2P calls this function, so can't simply rename it.  :-(
-    [[deprecated]] std::vector<size_t> get_column_width() const {
-        return get_column_widths();
+    [[deprecated]] std::vector<size_t> get_column_width(
+            const Command_Line_Options &options) const {
+        return get_column_widths(options);
     }
 
     void write_ipac_table_header(std::ostream &os) const {
         Ipac_Table_Writer::write_keywords_and_comments(*this, os);
     }
 
-    void write_ipac_column_headers(std::ostream &os) const {
-        Ipac_Table_Writer::write_column_headers(*this, os);
+    void write_ipac_column_headers(std::ostream &os,
+                                   const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_column_headers(*this, os, options);
     }
 
     std::string to_ipac_string(const Data_Type &type) const {
@@ -416,6 +438,7 @@ public:
 
     void write_dsv(std::ostream &os, const char &separator,
                    const Command_Line_Options &options = default_options) const;
+
     void write_sql_create_table(std::ostream &os, const std::string &table_name,
                                 const Format::Enums &sql_type) const {
         using namespace std::string_literals;
@@ -441,34 +464,46 @@ public:
                                 const std::string &polygon_column_name,
                                 bool is_nologging) const;
 
-    void write_sql_inserts(std::ostream &os, const std::string &table_name) const {
-        write_sql_inserts(os, table_name, STRING_PAIR(), std::vector<STRING_PAIR>());
+    void write_sql_inserts(
+            std::ostream &os, const std::string &table_name,
+            const Command_Line_Options &options = default_options) const {
+        write_sql_inserts(os, table_name, STRING_PAIR(), std::vector<STRING_PAIR>(),
+                          options);
     }
+
     void write_sql_inserts(std::ostream &os, const std::string &table_name,
                            const STRING_PAIR &point_input_names,
-                           const std::vector<STRING_PAIR> &polygon_input_names) const;
+                           const std::vector<STRING_PAIR> &polygon_input_names,
+                           const Command_Line_Options &options) const;
+
+    void write_sql_insert(
+            std::ostream &os, const std::string &quoted_table_name,
+            const size_t &row_offset, const bool &has_point,
+            const std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>
+                    &point_input,
+            const std::vector<std::pair<std::pair<size_t, Data_Type>,
+                                        std::pair<size_t, Data_Type>>> &polygon_input,
+            const Command_Line_Options &options) const;
+
     void write_sql_insert(std::ostream &os, const std::string &quoted_table_name,
-                          const size_t &row_offset, const bool &has_point,
-                          const std::pair<std::pair<size_t, Data_Type>,
-                                          std::pair<size_t, Data_Type>> &point_input,
-                          const std::vector<std::pair<std::pair<size_t, Data_Type>,
-                                                      std::pair<size_t, Data_Type>>>
-                                  &polygon_input) const;
-    void write_sql_insert(std::ostream &os, const std::string &quoted_table_name,
-                          const size_t &row_offset) const {
+                          const size_t &row_offset,
+                          const Command_Line_Options &options) const {
         write_sql_insert(
                 os, quoted_table_name, row_offset, false,
                 std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>(),
                 std::vector<std::pair<std::pair<size_t, Data_Type>,
-                                      std::pair<size_t, Data_Type>>>());
+                                      std::pair<size_t, Data_Type>>>(),
+                options);
     }
     void write_sql(std::ostream &os, const std::string &table_name,
-                   const Format::Enums &sql_type) const {
+                   const Format::Enums &sql_type,
+                   const Command_Line_Options &options) const {
         write_sql_create_table(os, table_name, sql_type);
         os << ";\n";
-        write_sql_inserts(os, table_name);
+        write_sql_inserts(os, table_name, options);
     }
-    void write_sqlite_db(const boost::filesystem::path &path) const;
+    void write_sqlite_db(const boost::filesystem::path &path,
+                         const Command_Line_Options &options) const;
 
     void write_fits(std::ostream &os) const;
 
@@ -476,9 +511,10 @@ public:
 
     void write_fits(fitsfile *fits_file) const;
 
-    void write_tabledata(std::ostream &os, const Format::Enums &output_format) const;
+    void write_tabledata(std::ostream &os, const Format::Enums &output_format,
+                         const Command_Line_Options &options) const;
 
-    void write_html(std::ostream &os) const;
+    void write_html(std::ostream &os, const Command_Line_Options &options) const;
 
     boost::property_tree::ptree generate_property_tree() const;
 
@@ -548,12 +584,17 @@ public:
                                           column_widths);
     };
 
-    std::string extract_value_as_string(const std::string &col_name,
-                                        size_t row_id) const;
-    std::string extract_value_as_string(size_t col_id, size_t row_id) const;
+    std::string extract_value_as_string(
+            const std::string &col_name, size_t row_id,
+            const Command_Line_Options &options = default_options) const;
+
+    std::string extract_value_as_string(
+            size_t col_id, size_t row_id,
+            const Command_Line_Options &options = default_options) const;
 
     std::vector<std::string> extract_column_values_as_strings(
-            const std::string &colname) const;
+            const std::string &colname,
+            const Command_Line_Options &options = default_options) const;
 
     template <typename T>
     std::vector<T> extract_value(const std::string &col_name, size_t row_id) {
@@ -601,6 +642,7 @@ public:
         }
     }
 
+
     template <typename T>
     std::vector<T> extract_column(const std::string &col_name) {
         auto col_id = column_index(col_name);
@@ -626,6 +668,7 @@ public:
         }
         return col_vec;
     }
+
 
     size_t row_size() const { return tablator::row_size(get_offsets()); }
     size_t num_rows() const { return get_data().size() / row_size(); }
@@ -935,11 +978,13 @@ private:
                     const std::vector<Data_Type> &datatypes_for_writing) const;
 
     void write_html(std::ostream &os,
-                    const std::vector<Data_Type> &datatypes_for_writing) const;
+                    const std::vector<Data_Type> &datatypes_for_writing,
+                    const Command_Line_Options &options) const;
 
     void splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
                                     Format::Enums enum_format, uint num_spaces_left,
-                                    uint num_spaces_right) const;
+                                    uint num_spaces_right,
+                                    const Command_Line_Options &options) const;
 
 
     boost::property_tree::ptree generate_property_tree(

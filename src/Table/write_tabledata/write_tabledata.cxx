@@ -12,17 +12,18 @@ std::string decode_links(const std::string &encoded);
 
 void Table::splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
                                        Format::Enums enum_format, uint num_spaces_left,
-                                       uint num_spaces_right) const {
+                                       uint num_spaces_right,
+                                       const Command_Line_Options &options) const {
     std::string s(ss.str());
     size_t tabledata_offset(s.find(TABLEDATA_PLACEHOLDER));
     os << s.substr(0, tabledata_offset - num_spaces_left);
 
-    write_tabledata(os, enum_format);
+    write_tabledata(os, enum_format, options);
     os << s.substr(tabledata_offset + TABLEDATA_PLACEHOLDER.size() + num_spaces_right);
 }
 
-void Table::write_tabledata(std::ostream &os,
-                            const Format::Enums &output_format) const {
+void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format,
+                            const Command_Line_Options &options) const {
     std::string tr_prefix, tr_suffix, td_prefix, td_suffix;
     std::string tabledata_indent = "                    ";
     const bool is_json(output_format == Format::Enums::JSON ||
@@ -53,6 +54,7 @@ void Table::write_tabledata(std::ostream &os,
     const auto &columns = get_columns();
     const auto &offsets = get_offsets();
     const auto &data = get_data();
+
     for (size_t row_offset = 0; row_offset < data.size(); row_offset += row_size()) {
         os << tr_prefix;
 
@@ -63,7 +65,8 @@ void Table::write_tabledata(std::ostream &os,
             if (!is_null(row_offset, i)) {
                 Ascii_Writer::write_type_as_ascii(
                         td, columns[i].get_type(), columns[i].get_array_size(),
-                        data.data() + row_offset + offsets[i]);
+                        data.data() + row_offset + offsets[i],
+                        Ascii_Writer::DEFAULT_SEPARATOR, options);
             }
             os << td_prefix;
             switch (output_format) {
