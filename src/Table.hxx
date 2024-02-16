@@ -337,7 +337,7 @@ public:
     }
     void write_ipac_subtable_by_row(std::ostream &os,
                                     std::vector<size_t> requested_row_ids,
-                                    const Command_Line_Options &options) const {
+                                    const Command_Line_Options &options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids, options);
     }
 
@@ -351,7 +351,7 @@ public:
 
     void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
                                     size_t row_count,
-                                    const Command_Line_Options &options) const {
+                                    const Command_Line_Options &options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count,
                                                  options);
     }
