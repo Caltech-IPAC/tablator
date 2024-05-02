@@ -21,7 +21,7 @@
                             {
                                 "name": "uints",
                                 "datatype": "uint",
-                                "arraysize": "*"
+                                "arraysize": "4"
                             }
                         }
                     ],

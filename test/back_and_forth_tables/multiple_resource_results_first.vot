@@ -101,22 +101,22 @@ is returned (rather than all images containing the center).</DESCRIPTION>
       <FIELD name="sia_dec" datatype="double" ucd="POS_EQ_DEC_MAIN" unit="deg">
         <DESCRIPTION>ICRS declination of the image center.</DESCRIPTION>
       </FIELD>
-      <FIELD name="sia_naxis" datatype="int" arraysize="*" ucd="VOX:Image_Naxis">
+      <FIELD name="sia_naxis" datatype="int" arraysize="2" ucd="VOX:Image_Naxis">
         <DESCRIPTION>The image size in pixels along each axis</DESCRIPTION>
       </FIELD>
-      <FIELD name="sia_crpix" datatype="double" arraysize="*" ucd="VOX:WCS_CoordRefPixel" unit="pix">
+      <FIELD name="sia_crpix" datatype="double" arraysize="2" ucd="VOX:WCS_CoordRefPixel" unit="pix">
         <DESCRIPTION>Image pixel coordinates of the WCS reference pixel.</DESCRIPTION>
       </FIELD>
-      <FIELD name="sia_crval" datatype="double" arraysize="*" ucd="VOX:WCS_CoordRefValue" unit="deg">
+      <FIELD name="sia_crval" datatype="double" arraysize="2" ucd="VOX:WCS_CoordRefValue" unit="deg">
         <DESCRIPTION>World coordinates of the WCS reference pixel.</DESCRIPTION>
       </FIELD>
       <FIELD name="sia_proj" datatype="char" arraysize="*" ucd="VOX:WCS_CoordProjection">
         <DESCRIPTION>three character celestial projection code</DESCRIPTION>
       </FIELD>
-      <FIELD name="sia_scale" datatype="double" arraysize="*" ucd="VOX:Image_Scale" unit="deg/pix">
+      <FIELD name="sia_scale" datatype="double" arraysize="2" ucd="VOX:Image_Scale" unit="deg/pix">
         <DESCRIPTION>The scale of each image axis in degrees per pixel</DESCRIPTION>
       </FIELD>
-      <FIELD name="sia_cd" datatype="double" arraysize="*" ucd="VOX:WCS_CDMatrix" unit="deg/pix">
+      <FIELD name="sia_cd" datatype="double" arraysize="4" ucd="VOX:WCS_CDMatrix" unit="deg/pix">
         <DESCRIPTION>WCS CD matrix.</DESCRIPTION>
       </FIELD>
       <FIELD name="sia_bp_id" datatype="char" arraysize="*" ucd="VOX:BandPass_ID">

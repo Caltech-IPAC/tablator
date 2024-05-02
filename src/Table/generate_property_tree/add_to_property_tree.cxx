@@ -125,18 +125,30 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Data_Type &active_datatype, bool json_prep) {
     auto &field_tree = find_or_add_tree(parent_tree, col_label, json_prep);
 
+    // Attributes first, starting with those that do not (ordinarily)
+    // come from column.field_properties.attributes, namely name,
+    // datatype, and arraysize.
     field_tree.add(XMLATTR_NAME, column.get_name());
+
     std::string datatype = to_xml_string(active_datatype);
     field_tree.add(XMLATTR_DATATYPE, datatype);
 
-    bool added_arraysize =
-            (active_datatype == Data_Type::CHAR || column.get_array_size() != 1);
-    if (added_arraysize) {
+    size_t col_array_size = column.get_array_size();
+    bool early_arraysize_f = false;
+    if (active_datatype == Data_Type::CHAR) {
         field_tree.add(XMLATTR_ARRAYSIZE, "*");
+        early_arraysize_f = true;
+    } else if (col_array_size != 1) {
+        // VOTable spec says not to show arraysize when value == 1.
+        field_tree.add(XMLATTR_ARRAYSIZE,
+                       (col_array_size == std::numeric_limits<size_t>::max())
+                               ? "*"
+                               : std::to_string(col_array_size));
+        early_arraysize_f = true;
     }
 
+    // On to attributes from field_properties.attributes.
     const auto &field_properties = column.get_field_properties();
-
     for (auto &a : field_properties.get_attributes()) {
         // Empty attributes cause field_tree.add to crash :(, so make sure
         // that does not happen.
@@ -146,8 +158,15 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
             throw std::runtime_error("Empty attribute in field " + column.get_name() +
                                      " which has type " + to_string(column.get_type()));
         }
-        if (added_arraysize && boost::equals(a.first, "arraysize")) {
-            continue;
+        if (boost::equals(a.first, "arraysize")) {
+            if (early_arraysize_f) {
+                continue;
+            }
+            // For certain endpoints (e.g. SSA and SIA), query_server
+            // sends arraysize as an attribute.  This is helpful when
+            // the result set is empty, in which case the column might
+            // have been constructed with arraysize == 1 as a default.
+            // JTODO handle this case better in query_server.
         }
         field_tree.add(XMLATTR_DOT + a.first, a.second);
     }

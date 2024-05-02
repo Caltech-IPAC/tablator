@@ -11,8 +11,8 @@ little_uint64s (ulong)
 any_uint32s (uint)
 ___ array of uint32s</DESCRIPTION>
       <FIELD name="big_uint64s" datatype="char" arraysize="*"/>
-      <FIELD name="little_uint64s" datatype="long" arraysize="*"/>
-      <FIELD name="any_uint32s" datatype="long" arraysize="*"/>
+      <FIELD name="little_uint64s" datatype="long" arraysize="5"/>
+      <FIELD name="any_uint32s" datatype="long" arraysize="4"/>
       <DATA>
         <TABLEDATA>
           <TR>

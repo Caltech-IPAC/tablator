@@ -21,7 +21,7 @@
                             {
                                 "name": "bools",
                                 "datatype": "boolean",
-                                "arraysize": "*"
+                                "arraysize": "19"
                             }
                         }
                     ],
