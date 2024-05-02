@@ -36,7 +36,7 @@
       <FIELD name="blended_prob" datatype="float"/>
       <FIELD name="concentration" datatype="float"/>
       <FIELD name="concentration_err" datatype="float"/>
-      <FIELD name="deblended_companions" datatype="long" arraysize="*"/>
+      <FIELD name="deblended_companions" datatype="long" arraysize="5"/>
       <FIELD name="deblended_flag" datatype="int"/>
       <FIELD name="declination" datatype="double"/>
       <FIELD name="det_quality_flag" datatype="int"/>

@@ -39,7 +39,7 @@
                             {
                                 "name": "big_uint64s",
                                 "datatype": "ulong",
-                                "arraysize": "*"
+                                "arraysize": "3"
                             }
                         },
                         {
@@ -47,7 +47,7 @@
                             {
                                 "name": "little_uint64s",
                                 "datatype": "ulong",
-                                "arraysize": "*"
+                                "arraysize": "5"
                             }
                         },
                         {
@@ -55,7 +55,7 @@
                             {
                                 "name": "any_uint32s",
                                 "datatype": "uint",
-                                "arraysize": "*"
+                                "arraysize": "4"
                             }
                         }
                     ],

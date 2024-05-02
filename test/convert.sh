@@ -338,7 +338,7 @@ else
     echo "FAIL: Convert Json5 Table with large uint64 vals array col to VOTable"
 fi
 
-# JTODO: datatypes and array_sizes do not survive the round trip via votable.
+# JTODO: datatypes do not survive the round trip via votable.
 ${tablator_bin} --input-format=json5 --output-format=votable test/back_and_forth_tables/integer_type_arrays.json5 temp.vot && diff -w test/back_and_forth_tables/integer_type_arrays_from_json5.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with assorted array cols to VOTable"

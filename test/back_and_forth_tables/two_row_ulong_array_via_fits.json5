@@ -21,7 +21,7 @@
                             {
                                 "name": "ulong1",
                                 "datatype": "long",
-                                "arraysize": "*"
+                                "arraysize": "4"
                             }
                         }
                     ],

@@ -20,7 +20,7 @@
                         {
                             "name": "bools",
                             "datatype": "boolean",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     },
                     {
@@ -28,7 +28,7 @@
                         {
                             "name": "ubools",
                             "datatype": "unsignedByte",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     },
                     {
@@ -36,7 +36,7 @@
                         {
                             "name": "small_shorts",
                             "datatype": "short",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     },
                     {
@@ -44,7 +44,7 @@
                         {
                             "name": "small_ushorts",
                             "datatype": "ushort",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     },
                     {
@@ -52,7 +52,7 @@
                         {
                             "name": "small_int32s",
                             "datatype": "int",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     },
                     {
@@ -60,7 +60,7 @@
                         {
                             "name": "small_uint32s",
                             "datatype": "uint",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     },
                     {
@@ -68,7 +68,7 @@
                         {
                             "name": "small_longs",
                             "datatype": "long",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     },
                     {
@@ -76,7 +76,7 @@
                         {
                             "name": "small_ulongs",
                             "datatype": "ulong",
-                            "arraysize": "*"
+                            "arraysize": "4"
                         }
                     }
                 ],
