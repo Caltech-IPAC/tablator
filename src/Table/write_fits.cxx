@@ -208,6 +208,7 @@ void write_tablator_elements_as_keywords(
                 &labeled_properties) {
     int status = 0;
     uint kwd_idx = 0;
+    bool got_fits_keyword = false;
 
     for (const auto &label_and_prop : labeled_properties) {
         std::string label = label_and_prop.first;
@@ -219,12 +220,16 @@ void write_tablator_elements_as_keywords(
         // value and attributes.
         auto prop_label_base = label + tablator::DOT;
 
-        const auto &attributes = prop.get_attributes();
-        auto name_iter = attributes.find(tablator::ATTR_NAME);
-        if (name_iter == attributes.end()) {
+        const auto &prop_attributes = prop.get_attributes();
+        auto name_iter = prop_attributes.find(tablator::ATTR_NAME);
+        if (name_iter == prop_attributes.end()) {
             // Some versions of ccfits translate keywords to upper-case.
-            name_iter = attributes.find(boost::to_upper_copy(tablator::ATTR_NAME));
+            name_iter = prop_attributes.find(boost::to_upper_copy(tablator::ATTR_NAME));
         }
+
+        const auto value_iter = prop_attributes.find(tablator::ATTR_VALUE);
+        const auto comment_iter = prop_attributes.find(tablator::ATTR_COMMENT);
+        const auto ucd_iter = prop_attributes.find(tablator::ATTR_UCD);
 
         // FITS requires that key values be unique, but there could be
         // many INFO elements having attributes with the same names.
@@ -239,13 +244,36 @@ void write_tablator_elements_as_keywords(
         // components of the attributes_ element, must contain
         // XMLATTR_DOT.
         if (boost::ends_with(label, tablator::INFO)) {
-            if (name_iter == attributes.end() || (name_iter->second).empty()) {
+            if (name_iter == prop_attributes.end() || (name_iter->second).empty()) {
                 // Shouldn't happen!
                 // std::cout << "*** Oops, couldn't find NAME. ***" << std::endl;
                 continue;
             } else {
-                prop_label_base = label + tablator::DOT + name_iter->second +
-                                  tablator::DOT + tablator::XMLATTR_DOT;
+                // If this labeled_property originated as a FITS
+                // keyword, it will have at most three attributes:
+                // value, comment, and ucd.
+                if (boost::starts_with(prop_label_base,
+                                       tablator::VOTABLE_RESOURCE_DOT) &&
+                    (!boost::starts_with(prop_label_base,
+                                         tablator::VOTABLE_RESOURCE_TABLE_DOT)) &&
+                    value_iter != prop_attributes.end() &&
+                    prop_attributes.size() ==
+                            static_cast<uint>(
+                                    1 +
+                                    (comment_iter == prop_attributes.end() ? 0 : 1) +
+                                    (ucd_iter == prop_attributes.end() ? 0 : 1))) {
+                    // Prepare to write it as a plain FITS keyword
+                    // without the trappings used for translated
+                    // VOTable elements.
+                    got_fits_keyword = true;
+                    prop_label_base = prop_label_base.substr(
+                            tablator::VOTABLE_RESOURCE_DOT.size());
+                    prop_label_base =
+                            prop_label_base.substr(0, prop_label_base.size() - 1);
+                } else {
+                    prop_label_base = label + tablator::DOT + name_iter->second +
+                                      tablator::DOT + tablator::XMLATTR_DOT;
+                }
             }
 
         } else if (!boost::ends_with(prop_label_base, tablator::XMLATTR_DOT)) {
@@ -253,7 +281,22 @@ void write_tablator_elements_as_keywords(
             // displayed in VOTable format as <RESOURCE type =
             // "results"> and in IPAC table format as "\type =
             // 'results', or (2) PARAM- or FIELD-level attributes.
-            prop_label_base += tablator::XMLATTR_DOT;
+            if (boost::starts_with(prop_label_base, tablator::VOTABLE_RESOURCE_DOT) &&
+                (!boost::starts_with(prop_label_base,
+                                     tablator::VOTABLE_RESOURCE_TABLE_DOT)) &&
+                value_iter != prop_attributes.end() &&
+                prop_attributes.size() ==
+                        static_cast<uint>(
+                                1 + (comment_iter == prop_attributes.end() ? 0 : 1) +
+                                (ucd_iter == prop_attributes.end() ? 0 : 1))) {
+                // Prepare to write it as a plain FITS keyword.
+                got_fits_keyword = true;
+                prop_label_base =
+                        prop_label_base.substr(tablator::VOTABLE_RESOURCE_DOT.size());
+                prop_label_base = prop_label_base.substr(0, prop_label_base.size() - 1);
+            } else {
+                prop_label_base += tablator::XMLATTR_DOT;
+            }
         }
 
         // Deal first with <value>, if non-empty (it is empty for INFO elements).
@@ -274,26 +317,40 @@ void write_tablator_elements_as_keywords(
         }
 
         // On to attributes
-        for (auto &attr : prop.get_attributes()) {
-            std::string idx_label(tablator::VOTABLE_KEYWORD_HEAD);
-            idx_label.append(std::to_string(kwd_idx));
-#ifdef FIXED_FITS_COMMENT
-            // This step prepares us to store the comment in a special FITS way,
-            // but as of 13Nov20, comments will be truncated or omitted if
-            // comment.size() + value.size() > 65.
-            if (attr.first == "comment") {
-                comment.assign(attr.second);
-            } else
-#endif
-                fits_write_key_longstr(fits_file, idx_label.c_str(),
-                                       (prop_label_base + attr.first +
-                                        tablator::LABEL_END_MARKER + attr.second)
-                                               .c_str(),
-                                       comment.c_str(), &status);
+        if (got_fits_keyword) {
+            // JTODO: figure out how to handle ucd for FITS files
+            // in both write_fits() and read_fits().
+            value.assign(value_iter->second);
+            if (comment_iter != prop_attributes.end()) {
+                comment.assign(comment_iter->second);
+            }
+            fits_write_key_longstr(fits_file, prop_label_base.c_str(), value.c_str(),
+                                   comment.c_str(), &status);
             if (status != 0) {
                 throw CCfits::FitsError(status);
             }
-            ++kwd_idx;
+        } else {
+            for (auto &attr : prop_attributes) {
+                std::string idx_label(tablator::VOTABLE_KEYWORD_HEAD);
+                idx_label.append(std::to_string(kwd_idx));
+#ifdef FIXED_FITS_COMMENT
+                // This step prepares us to store the comment in a special FITS way,
+                // but as of 13Nov20, comments will be truncated or omitted if
+                // comment.size() + value.size() > 65.
+                if (attr.first == "comment") {
+                    comment.assign(attr.second);
+                } else
+#endif
+                    fits_write_key_longstr(fits_file, idx_label.c_str(),
+                                           (prop_label_base + attr.first +
+                                            tablator::LABEL_END_MARKER + attr.second)
+                                                   .c_str(),
+                                           comment.c_str(), &status);
+                if (status != 0) {
+                    throw CCfits::FitsError(status);
+                }
+                ++kwd_idx;
+            }
         }
     }
 }
@@ -518,7 +575,6 @@ void tablator::Table::write_fits(
     combined_labeled_properties.insert(combined_labeled_properties.end(),
                                        combined_labeled_trailing_info_lists.begin(),
                                        combined_labeled_trailing_info_lists.end());
-
 
     combined_labeled_properties.insert(combined_labeled_properties.end(),
                                        combined_labeled_attributes.begin(),
