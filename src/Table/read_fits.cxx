@@ -76,10 +76,21 @@ public:
     // from those elements are stored in the value part of the (key,
     // value) keyword pair.
 
-    std::tuple<std::vector<std::pair<std::string, tablator::Property>>,
-               std::vector<tablator::Field>,
+    std::tuple<tablator::Labeled_Properties, std::vector<tablator::Field>,
                std::map<std::string, tablator::ATTRIBUTES>>
-    read_keywords_as_tablator_elements(CCfits::ExtHDU &table_extension) {
+    read_keywords_as_tablator_elements(CCfits::HDU &table_extension,
+                                       const std::string &extname_keyword,
+                                       const std::string &extension_name) {
+        static constexpr char const *DEFAULT_EXTNAME = "Table";
+
+        if (!extension_name.empty() &&
+            !boost::iequals(extension_name, DEFAULT_EXTNAME)) {
+            tablator::Property extname_prop;
+            extname_prop.add_attribute(tablator::ATTR_VALUE, extension_name);
+            combined_labeled_properties_.emplace_back(
+                    tablator::Labeled_Property(extname_keyword, extname_prop));
+        }
+
         // Retrieve FITS (key, value) pairs and sort by key. Pairs corresponding to
         // the same VOTable element (as described above) will be consecutive.
 
@@ -134,33 +145,45 @@ public:
     //====================================================
 
 private:
-    // CCfits does not make it easy to retrieve keyword values.  Only
-    // keyword values of keytypes Tint, Tfloat, Tdouble, and Tstring can
-    // be retrieved directly from CCfits in string form.
-
-    // This function retrieves values of the keytypes mentioned above as
-    // strings. It retrieves values of keytypes implicitly convertible to
-    // int as int and then converts them to string.  It propagates the
-    // exception CCfits throws when asked to retrieve a value of any other
-    // keytype, e.g. Tcomplex.
-
+    // This function retrieves keyword values of certain keytypes in
+    // string form.  It propagates the exception CCfits throws when
+    // asked to retrieve, in string form, the value of a keytype for
+    // which this operation is unsupported, e.g. Tcomplex.
     static void get_keyword_value_as_string(std::string &value_str,
                                             const CCfits::Keyword *keyword) {
-        if ((keyword->keytype() == CCfits::Tint ||
-             keyword->keytype() == CCfits::Tfloat ||
-             keyword->keytype() == CCfits::Tdouble ||
-             keyword->keytype() == CCfits::Tstring)) {
-            keyword->value(value_str);
-        } else if (keyword->keytype() == CCfits::Tlogical) {
+        if (keyword->keytype() == CCfits::Tlogical) {
+            // std::cout << "type logical" << std::endl;
             bool value_bool;
             keyword->value(value_bool);
             value_str.assign(value_bool ? "true" : "false");
-        } else {
-            // If the keytype is not convertible to int, value() will throw an
-            // exception.
+        } else if (keyword->keytype() == CCfits::Tint) {
+            // std::cout << "type int" << std::endl;
             int value_int;
             keyword->value(value_int);
             value_str.assign(std::to_string(value_int));
+        } else if (keyword->keytype() == CCfits::Tlong) {
+            // std::cout << "type long" << std::endl;
+            long value_long;
+            keyword->value(value_long);
+            value_str.assign(std::to_string(value_long));
+        } else if (keyword->keytype() == CCfits::Tulong ||
+                   keyword->keytype() == CCfits::Tlonglong) {
+            // std::cout << "type longlong" << std::endl;
+            long long value_longlong;
+            keyword->value(value_longlong);
+            value_str.assign(std::to_string(value_longlong));
+        } else if (keyword->keytype() == CCfits::Tfloat) {
+            // std::cout << "type float" << std::endl;
+            float value_float;
+            keyword->value(value_float);
+            value_str.assign(std::to_string(value_float));
+        } else if (keyword->keytype() == CCfits::Tdouble) {
+            // std::cout << "type double" << std::endl;
+            double value_double;
+            keyword->value(value_double);
+            value_str.assign(std::to_string(value_double));
+        } else {
+            keyword->value(value_str);
         }
     }
 
@@ -207,6 +230,11 @@ private:
 
     //====================================================
 
+
+    // "Decoding" is for keywords in files converted by tablator to
+    // FITS format from e.g. VOTable format.
+
+    // This function returns true unless the keyword is to be ignored.
     static bool decode_fits_keyword(Keyword_Reader_Packet &krp, std::string &kwd_key,
                                     CCfits::Keyword *kwd_word_ptr,
                                     std::string &kwd_value) {
@@ -215,40 +243,39 @@ private:
         krp.prev_kwd_type_ = krp.kwd_type_;
         krp.prev_helper_name_ = krp.helper_name_;
 
+        // If <kwd> was generated from a LABELED_PROPERTIES
+        // element by write_fits(), then the kwd_value string
+        // includes the value of ATTR_NAME for that property;
+        // similarly for PARAM and FIELD elements.  We group
+        // together all kwd_values whose prefixes agree through
+        // the ATTR_NAME value and construct from them an element
+        // of the appropriate type whose label we extract from
+        // their common prefix.
+
+        static std::regex label_expr{"^(.+)" + tablator::LABEL_END_MARKER + "(.+)$",
+                                     std::regex::icase};
+        static std::regex attr_expr{"^(.+)\\." + tablator::XMLATTR + "\\." + "(.+)$",
+                                    std::regex::icase};
+        static std::regex info_expr{"^((?:.+\\.)?" + tablator::INFO + ")" + "\\." +
+                                    "(.+)$"};
+
+        static std::regex param_expr{"^((?:.+\\.)?" + tablator::PARAM + ")" + "\\." +
+                                     "(.+)$"};
+
+        static std::regex field_expr{"^((?:.+\\.)?" + tablator::FIELD + ")" + "\\." +
+                                     "(.+)$"};
+
+        std::smatch label_match;
+
+        // Set defaults and adjust below.
+        krp.prop_identifier_.assign(kwd_key);
+        krp.prop_label_.assign(krp.prop_identifier_);
+        krp.attr_name_.assign(krp.prop_identifier_);
+        krp.kwd_type_ = Keyword_Type::LABELED_PROPERTY;
+        krp.convert_value_to_attr_ = false;
+        krp.helper_name_ = "";  //  Non-empty only for PARAM and FIELD.
+
         if (kwd_word_ptr->keytype() == CCfits::Tstring) {
-            // If <kwd> was generated from a LABELED_PROPERTIES
-            // element by write_fits(), then the kwd_value string
-            // includes the value of ATTR_NAME for that property;
-            // similarly for PARAM and FIELD elements.  We group
-            // together all kwd_values whose prefixes agree through
-            // the ATTR_NAME value and construct from them an element
-            // of the appropriate type whose label we extract from
-            // their common prefix.
-
-            static std::regex label_expr{"^(.*)" + tablator::LABEL_END_MARKER + "(.*)$",
-                                         std::regex::icase};
-            static std::regex attr_expr{
-                    "^(.*)\\." + tablator::XMLATTR + "\\." + "(.*)$",
-                    std::regex::icase};
-            static std::regex info_expr{"^((?:.*\\.)?" + tablator::INFO + ")" + "\\." +
-                                        "(.*)$"};
-
-            static std::regex param_expr{"^((?:.*\\.)?" + tablator::PARAM + ")" +
-                                         "\\." + "(.*)$"};
-
-            static std::regex field_expr{"^((?:.*\\.)?" + tablator::FIELD + ")" +
-                                         "\\." + "(.*)$"};
-
-            std::smatch label_match;
-
-            // Set defaults and adjust below.
-            krp.prop_identifier_.assign(kwd_key);
-            krp.prop_label_.assign(krp.prop_identifier_);
-            krp.attr_name_.assign(krp.prop_identifier_);
-            krp.kwd_type_ = Keyword_Type::LABELED_PROPERTY;
-            krp.convert_value_to_attr_ = false;
-            krp.helper_name_ = "";  //  Non-empty only for PARAM and FIELD.
-
             if (std::regex_match(kwd_value, label_match, label_expr)) {
                 krp.prop_identifier_.assign(label_match[1]);
                 krp.attr_name_.assign(boost::to_lower_copy(krp.prop_identifier_));
@@ -325,6 +352,10 @@ private:
                 // and (ATTR_IRSA_VALUE, kwd_value).
                 krp.convert_value_to_attr_ = true;
             }
+        } else {
+            // not Tstring
+            // JTODO Use datatype attr to preserve datatype of non-string keywords.
+            krp.convert_value_to_attr_ = true;
         }
         return true;
     }
@@ -341,8 +372,8 @@ private:
 
         if (krp.kwd_type_ == Keyword_Type::PARAM) {
             if (krp.attr_name_ == "datatype") {
-			  krp.param_datatype_ =
-			  static_cast<int>(tablator::string_to_Data_Type(kwd_value));
+                krp.param_datatype_ =
+                        static_cast<int>(tablator::string_to_Data_Type(kwd_value));
             } else if (krp.attr_name_ == "arraysize") {
                 try {
                     krp.param_array_size_ = std::stol(kwd_value);
@@ -451,7 +482,7 @@ private:
                 krp.prop_.add_attribute(tablator::ATTR_UCD, i->second);
             }
         }
-    }
+    }  // end of construct_tablator_element_if_moving_on()
 
     // We'll load these three containers during the loop through sorted_kwd_map.
     tablator::Labeled_Properties combined_labeled_properties_;
@@ -791,11 +822,17 @@ private:
 
 void tablator::Table::read_fits(const boost::filesystem::path &path) {
     CCfits::FITS fits(path.string(), CCfits::Read, false);
+
+    static constexpr char const *PRIMARY_EXTNAME = "PRIMARY_EXTNAME";
+    static constexpr char const *TABLE_EXTNAME = "TABLE_EXTNAME";
+
     if (fits.extension().empty())
         throw std::runtime_error("Could not find any extensions in this file: " +
                                  path.string());
-    CCfits::ExtHDU &table_extension = *(fits.extension().begin()->second);
-    CCfits::BinTable *ccfits_table(dynamic_cast<CCfits::BinTable *>(&table_extension));
+
+    tablator::Labeled_Properties combined_labeled_properties;
+    std::vector<Field> table_element_params;
+    std::map<std::string, ATTRIBUTES> table_element_field_attributes;
 
     //*********************************************************
     // Retrieve FITS keywords in the form of labeled_properties.
@@ -803,12 +840,20 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     Keyword_Reader keyword_reader;
 
-    std::vector<std::pair<std::string, Property>> combined_labeled_properties;
-    std::vector<Field> table_element_params;
-    std::map<std::string, ATTRIBUTES> table_element_field_attributes;
+    // Retrieve FITS keywords from primary HDU
+
+    keyword_reader.read_keywords_as_tablator_elements(fits.pHDU(), PRIMARY_EXTNAME,
+                                                      fits.currentExtensionName());
+
+    // Retrieve FITS keywords from the first extension.  JTODO add extension_idx option?
+
+    CCfits::ExtHDU &table_extension = fits.extension(1);
+    CCfits::BinTable *ccfits_table(dynamic_cast<CCfits::BinTable *>(&table_extension));
+
     std::tie(combined_labeled_properties, table_element_params,
              table_element_field_attributes) =
-            keyword_reader.read_keywords_as_tablator_elements(table_extension);
+            keyword_reader.read_keywords_as_tablator_elements(
+                    table_extension, TABLE_EXTNAME, fits.currentExtensionName());
 
     //*********************************************************
     // Distribute the labeled_properties between assorted class
@@ -938,6 +983,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         fits_col, Data_Type::INT64_LE, array_size);
             } break;
             case CCfits::Tfloat: {
+                // std::cout << "Tfloat" << std::endl;
                 Field_Properties nan_nulls;
                 nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<float>::quiet_NaN());
@@ -947,6 +993,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                                                                  array_size);
             } break;
             case CCfits::Tdouble: {
+                // std::cout << "Tdouble" << std::endl;
                 Field_Properties nan_nulls;
                 nan_nulls.get_values().null =
                         std::to_string(std::numeric_limits<double>::quiet_NaN());
@@ -1025,17 +1072,18 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 }
 
                 size_t tab_col_idx = fits_col_idx - 1 + col_idx_adjuster;
-
                 CCfits::Column &fits_col = ccfits_table->column(fits_col_idx);
                 switch (abs(fits_col.type())) {
                     case CCfits::Tlogical: {
                         // Use template type uint8_t here; FITS doesn't support int8_t.
                         // null_value is not defined for this type.
+                        // std::cout << "uint8" << std::endl;
                         element_reader.read_element_given_column_and_row<uint8_t>(
                                 curr_row, fits_pointer, fits_col, fits_row_idx,
                                 tab_col_idx);
                     } break;
                     case CCfits::Tbyte: {
+                        // std::cout << "byte" << std::endl;
                         element_reader.read_element_given_column_and_row<uint8_t>(
                                 curr_row, fits_pointer, fits_col, fits_row_idx,
                                 tab_col_idx);

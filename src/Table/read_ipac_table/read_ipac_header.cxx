@@ -109,13 +109,13 @@ size_t tablator::Table::read_ipac_header(
         } else {
             check_bar_position(ipac_column_offsets, line, line_num);
         }
-        /// This split creates an empty element at the beginning and
-        /// end.  We keep the beginning to mark the null_bitfield_flag,
-        /// and pop off the end
+        // This split creates an empty element at the beginning and
+        // end.  We keep the beginning to mark the null_bitfield_flag,
+        // and pop off the end.
         boost::split(columns[header_line_num], line, boost::is_any_of("|"));
 
-        /// FIXME: I think this error can never happen, because it would
-        /// have been caught by check_bar_position.
+        // FIXME: I think this error can never happen, because it would
+        // have been caught by check_bar_position.
         if (columns[header_line_num].size() < 2)
             throw std::runtime_error(
                     "In line " + std::to_string(line_num) +

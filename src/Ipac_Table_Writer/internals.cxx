@@ -309,7 +309,6 @@ void Ipac_Table_Writer::write_column_headers(
         write_column_type(table, os, datatypes_for_writing, col_idx,
                           ipac_column_widths[col_idx]);
     }
-
     os << "\n|";
 
     // Write column units
