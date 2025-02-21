@@ -203,9 +203,7 @@ void write_element_given_column_and_row(fitsfile *fits_file, int fits_type,
 // 07Dec20)
 
 void write_tablator_elements_as_keywords(
-        fitsfile *fits_file,
-        const std::vector<std::pair<std::string, tablator::Property>>
-                &labeled_properties) {
+        fitsfile *fits_file, const tablator::Labeled_Properties &labeled_properties) {
     int status = 0;
     uint kwd_idx = 0;
     bool got_fits_keyword = false;
@@ -579,6 +577,7 @@ void tablator::Table::write_fits(
     combined_labeled_properties.insert(combined_labeled_properties.end(),
                                        combined_labeled_attributes.begin(),
                                        combined_labeled_attributes.end());
+
 
     write_tablator_elements_as_keywords(fits_file, combined_labeled_properties);
 

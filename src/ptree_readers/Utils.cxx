@@ -9,9 +9,9 @@ namespace {
 
 void load_link_singleton(tablator::Labeled_Properties &labeled_properties,
                          const boost::property_tree::ptree &node) {
-    labeled_properties.emplace_back(std::make_pair(
+    labeled_properties.emplace_back(
             tablator::LINK,
-            tablator::Property(tablator::ptree_readers::extract_attributes(node))));
+            tablator::Property(tablator::ptree_readers::extract_attributes(node)));
 }
 
 void load_link_array(tablator::Labeled_Properties &labeled_properties,
@@ -93,8 +93,8 @@ void load_field_array(std::vector<tablator::Field> &params,
 void load_labeled_properties_singleton(tablator::Labeled_Properties &labeled_properties,
                                        const std::string &element_label,
                                        const boost::property_tree::ptree &node) {
-    labeled_properties.emplace_back(std::make_pair(
-            element_label, tablator::ptree_readers::read_property(node)));
+    labeled_properties.emplace_back(element_label,
+                                    tablator::ptree_readers::read_property(node));
 }
 
 void load_labeled_properties_array(tablator::Labeled_Properties &labeled_properties,

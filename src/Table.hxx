@@ -335,9 +335,9 @@ public:
         boost::filesystem::ofstream os(p);
         write_ipac_table(os, options);
     }
-    void write_ipac_subtable_by_row(std::ostream &os,
-                                    std::vector<size_t> requested_row_ids,
-                                    const Command_Line_Options &options = default_options) const {
+    void write_ipac_subtable_by_row(
+            std::ostream &os, std::vector<size_t> requested_row_ids,
+            const Command_Line_Options &options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_row(*this, os, requested_row_ids, options);
     }
 
@@ -349,9 +349,9 @@ public:
                                                             requested_row_ids, options);
     }
 
-    void write_ipac_subtable_by_row(std::ostream &os, size_t start_row,
-                                    size_t row_count,
-                                    const Command_Line_Options &options = default_options) const {
+    void write_ipac_subtable_by_row(
+            std::ostream &os, size_t start_row, size_t row_count,
+            const Command_Line_Options &options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_row(*this, os, start_row, row_count,
                                                  options);
     }
@@ -865,7 +865,7 @@ public:
     // wrapper.
     void add_labeled_property(const Labeled_Property &label_and_prop);
     void add_labeled_property(const std::string &label, const Property &prop) {
-        add_labeled_property(std::make_pair(label, prop));
+        add_labeled_property(Labeled_Property(label, prop));
     }
 
     void add_group_elements(const std::vector<Group_Element> &ges) {
@@ -928,7 +928,7 @@ public:
 
     void add_resource_element_labeled_property(const std::string &label,
                                                const Property &prop) {
-        add_resource_element_labeled_property(std::make_pair(label, prop));
+        add_resource_element_labeled_property(Labeled_Property(label, prop));
     }
     size_t get_results_resource_idx() const { return results_resource_idx_; }
     void set_results_resource_idx(size_t idx) { results_resource_idx_ = idx; }
@@ -1036,7 +1036,7 @@ private:
             Labeled_Properties &resource_labeled_properties, const std::string &label,
             const Property &prop) {
         stash_resource_element_labeled_property(resource_labeled_properties,
-                                                std::make_pair(label, prop));
+                                                Labeled_Property(label, prop));
     }
 };
 }  // namespace tablator

@@ -595,6 +595,9 @@ static constexpr size_t KEYWORD_ALIGNMENT = 8;
 
 void write_keyword_header_line(std::ostream &os, const std::string &name,
                                const std::string &value) {
+    if (name.empty()) {
+        throw std::runtime_error("Invalid keyword pair: name must not be empty.");
+    }
     os << "\\" << std::setw(KEYWORD_ALIGNMENT);
     std::ostreambuf_iterator<char> out_iter(os);
     boost::replace_copy_if(name, out_iter, boost::is_any_of(tablator::NEWLINES), ' ');
@@ -761,6 +764,11 @@ void tablator::Ipac_Table_Writer::write_keywords_and_comments(
             results_resource_element.get_labeled_properties();
     for (auto &name_and_property : labeled_resource_element_properties) {
         const auto &label = name_and_property.first;
+        if (label.empty()) {
+            throw std::runtime_error(
+                    "Invalid labeled_property: label must not be empty.");
+        }
+
         auto &prop = name_and_property.second;
         const auto &prop_attributes = prop.get_attributes();
         const auto name_iter = prop_attributes.find(ATTR_NAME);
@@ -791,10 +799,8 @@ void tablator::Ipac_Table_Writer::write_keywords_and_comments(
             }
         }
 
-        if (!label.empty() && !prop.get_value().empty()) {
+        if (!prop.get_value().empty()) {
             write_keyword_header_line(os, label, prop.get_value());
-        } else if (!prop.get_value().empty()) {
-            write_keyword_header_line(os, ATTR_VALUE, prop.get_value());
         }
     }
 

@@ -67,25 +67,16 @@ size_t tablator::Table::read_ipac_header(
                     value_substr = value.substr(first, last - first + 1);
                 }
 
-                // JTODO INFO, name, value
                 ATTRIBUTES attr_map;
-                if (boost::iequals(key, std::string(tablator::TYPE)) ||
-                    boost::iequals(key, std::string(tablator::UTYPE)) ||
-                    boost::iequals(key, std::string(tablator::NAME)) ||
-                    boost::iequals(key, std::string(tablator::ID))) {
-                    // The valid RESOURCE attributes
-                    attr_map.insert(std::make_pair(key, value_substr));
-                    labeled_resource_properties.emplace_back("", Property(attr_map));
-                } else {
-                    // Not a RESOURCE attribute, so stick it in an INFO element,
-                    // which itself must have NAME attribute.
-                    attr_map.insert(std::make_pair(ATTR_NAME, key));
-                    attr_map.insert(std::make_pair(ATTR_VALUE, value_substr));
-                    labeled_resource_properties.emplace_back(INFO, Property(attr_map));
-                }
+                // Stick it in an INFO element, which itself must
+                // have a NAME attribute.
+                attr_map.insert(std::make_pair(ATTR_NAME, key));
+                attr_map.insert(std::make_pair(ATTR_VALUE, value_substr));
+                labeled_resource_properties.emplace_back(INFO, Property(attr_map));
             }
         }
     }
+
     size_t header_line_num = 0;
     for (; ipac_file && first_character == '|';
          first_character = ipac_file.peek(), ++header_line_num) {
