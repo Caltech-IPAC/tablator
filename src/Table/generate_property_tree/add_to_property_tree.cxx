@@ -66,6 +66,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 //*** ATTRIBUTES
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const tablator::ATTRIBUTES &attributes) {
+    // std::cout << "add_to_property_tree(), Attributes" << std::endl;
     for (const auto &attr_pair : attributes) {
         parent_tree.add(tablator::XMLATTR_DOT + attr_pair.first, attr_pair.second);
     }
@@ -76,9 +77,32 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::string &label, const Property &property,
                           bool json_prep) {
+    // std::cout << "add_to_property_tree(), Prop" << std::endl;
     const auto &value = property.get_value();
     const auto &attributes = property.get_attributes();
+
+    const auto name_iter = attributes.find(ATTR_NAME);
+    const auto value_iter = attributes.find(ATTR_VALUE);
+
+    if (label == tablator::INFO && attributes.size() == 2 &&
+        name_iter != attributes.end() && value_iter != attributes.end()) {
+        // Check for one of the few supported Resource attributes as encoded by
+        // Ipac_Table_Writer.
+
+        // JTODO: Check that we're at resource level?
+        const std::string &name = name_iter->second;
+        if (boost::iequals(name, std::string(tablator::TYPE)) ||
+            boost::iequals(name, std::string(tablator::UTYPE)) ||
+            boost::iequals(name, std::string(tablator::NAME)) ||
+            boost::iequals(name, std::string(tablator::ID))) {
+            tablator::ATTRIBUTES attrs{{name, value_iter->second}};
+            add_to_property_tree(parent_tree, {{name, value_iter->second}});
+            return;
+        }
+    }
+
     if (is_property_style_label(label)) {
+        // std::cout << "is_property_stype_label()" << std::endl;
         auto &label_tree = find_or_add_tree(parent_tree, label, json_prep);
         if (!value.empty()) {
             if (json_prep) {
@@ -90,13 +114,12 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
             }
         }
         add_to_property_tree(label_tree, attributes);
-    } else if (label.empty()) {
-        // JTODO ignore value?  Error if there is a value?
-        add_to_property_tree(parent_tree, attributes);
     } else if (boost::starts_with(label, XMLATTR)) {
+        // std::cout << "label starts with XMLATTR" << std::endl;
         parent_tree.add(label, value);
     } else {
         // For write_fits()
+        // std::cout << "creating INFO" << std::endl;
         auto &label_tree = parent_tree.add(INFO, "");
         label_tree.add(XMLATTR_NAME, label);
         if (!value.empty()) {
@@ -111,9 +134,10 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Labeled_Properties &labeled_properties,
                           bool json_prep) {
+    // std::cout << "add_to_property_tree(), Labeled_Props" << std::endl;
     for (const auto &labeled_list : labeled_properties) {
-        const auto &label = labeled_list.first;
-        add_to_property_tree(parent_tree, label, labeled_list.second, json_prep);
+        add_to_property_tree(parent_tree, labeled_list.first, labeled_list.second,
+                             json_prep);
     }
 }
 
@@ -245,6 +269,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Table_Element &table_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           const std::vector<std::string> &comments, bool json_prep) {
+    // std::cout << "add_to_property_tree(), Table" << std::endl;
     boost::property_tree::ptree &table_tree = parent_tree.add(TABLE, "");
 
     for (const auto &pair : table_element.get_attributes()) {
@@ -298,6 +323,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::vector<std::string> &comments,
                           const Labeled_Properties &table_labeled_properties,
                           bool json_prep) {
+    // std::cout << "add_to_property_tree(), Resource I" << std::endl;
     auto &resource_tree = find_or_add_tree(parent_tree, RESOURCE, json_prep);
 
     for (const auto &pair : resource_element.get_attributes()) {
@@ -354,6 +380,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           bool json_prep) {
+    // std::cout << "add_to_property_tree(), Resource II" << std::endl;
     add_to_property_tree(parent_tree, resource_element, datatypes_for_writing,
                          DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES, json_prep);
 }

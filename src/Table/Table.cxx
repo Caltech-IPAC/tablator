@@ -11,7 +11,7 @@ void append_info_list_with_label(tablator::Labeled_Properties &combined_list,
     std::transform(info_list.begin(), info_list.end(),
                    std::back_inserter(combined_list),
                    [&](const tablator::Property &prop) -> tablator::Labeled_Property {
-                       return std::make_pair(label, prop);
+                       return tablator::Labeled_Property(label, prop);
                    });
 }
 
@@ -21,7 +21,7 @@ void append_attributes_with_label(tablator::Labeled_Properties &combined_list,
     if (attrs.empty()) {
         return;
     }
-    combined_list.emplace_back(std::make_pair(label, attrs));
+    combined_list.emplace_back(label, attrs);
 }
 
 void append_column_attributes_with_label(
@@ -29,21 +29,22 @@ void append_column_attributes_with_label(
         const std::vector<tablator::Column> &column_list,
         const std::string &partial_label, bool is_param) {
     for (const auto &column : column_list) {
-	  auto attrs = column.get_field_properties().get_attributes();
+        auto attrs = column.get_field_properties().get_attributes();
 
-	  if (is_param) {
-		std::ostringstream type_os;
-		type_os << column.get_type();
-		attrs.emplace(std::make_pair("datatype", type_os.str()));
+        if (is_param) {
+            std::ostringstream type_os;
+            type_os << column.get_type();
+            attrs.emplace(std::make_pair("datatype", type_os.str()));
 
-		attrs.emplace(std::make_pair("arraysize", std::to_string(column.get_array_size())));
-	  }
+            attrs.emplace(std::make_pair("arraysize",
+                                         std::to_string(column.get_array_size())));
+        }
 
-	  if (attrs.empty()) {
-		continue;
-	  }
+        if (attrs.empty()) {
+            continue;
+        }
 
-	  combined_list.emplace_back(std::make_pair(partial_label + column.get_name(), attrs));
+        combined_list.emplace_back(partial_label + column.get_name(), attrs);
     }
 }
 
@@ -233,10 +234,12 @@ const Labeled_Properties Table::combine_attributes_all_levels(
 
     if (include_column_attributes_f) {
         append_column_attributes_with_label(combined_list, get_table_element_params(),
-                                            VOTABLE_RESOURCE_TABLE_PARAM_DOT, true /* is_param */);
+                                            VOTABLE_RESOURCE_TABLE_PARAM_DOT,
+                                            true /* is_param */);
 
         append_column_attributes_with_label(combined_list, get_table_element_fields(),
-                                            VOTABLE_RESOURCE_TABLE_FIELD_DOT, false /* is_param */);
+                                            VOTABLE_RESOURCE_TABLE_FIELD_DOT,
+                                            false /* is_param */);
     }
 
     return combined_list;
@@ -250,9 +253,10 @@ const Labeled_Properties Table::combine_labeled_properties_all_levels() const {
     const auto &resource_labeled_props = get_resource_element_labeled_properties();
     std::transform(resource_labeled_props.begin(), resource_labeled_props.end(),
                    std::back_inserter(combined_labeled_props),
-                   [](const Labeled_Property &nppair) -> Labeled_Property {
-                       return std::make_pair(VOTABLE_RESOURCE_DOT + nppair.first,
-                                             nppair.second);
+                   [](const Labeled_Property &label_and_prop) -> Labeled_Property {
+                       return Labeled_Property(
+                               VOTABLE_RESOURCE_DOT + label_and_prop.first,
+                               label_and_prop.second);
                    });
     return combined_labeled_props;
 }

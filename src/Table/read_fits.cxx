@@ -394,7 +394,6 @@ private:
             if (krp.convert_value_to_attr_) {
                 // if kwd came from genuine FITS keyword
                 krp.prop_.add_attribute(tablator::ATTR_VALUE, kwd_value);
-
             } else if (krp.attr_name_ == tablator::ATTR_IRSA_VALUE) {
                 // if kwd came from FITS-ified labeled_properties.value_ via
                 // write_fits()
@@ -425,8 +424,8 @@ private:
                 // prepare to move on.
 
                 if (!krp.prev_prop_label_.empty() && !krp.prop_.empty()) {
-                    combined_labeled_properties_.emplace_back(
-                            std::make_pair(krp.prev_prop_label_, krp.prop_));
+                    combined_labeled_properties_.emplace_back(krp.prev_prop_label_,
+                                                              krp.prop_);
                     krp.prop_.clear();
                 }
                 krp.prev_prop_identifier_.assign(krp.prop_identifier_);

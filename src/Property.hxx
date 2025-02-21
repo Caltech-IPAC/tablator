@@ -62,6 +62,10 @@ private:
     std::string value_;
 };
 
+
+// JTODO Make Labeled_Property a class and have the constructor
+// ensure that label_ is non-empty.  This will require adjustments
+// to query_server and periodogram_api.
 using Labeled_Property = std::pair<std::string, Property>;
 using Labeled_Properties = std::vector<Labeled_Property>;
 

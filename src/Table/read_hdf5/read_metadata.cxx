@@ -42,7 +42,7 @@ std::vector<Labeled_Property> read_metadata(const H5::DataSet &dataset) {
                                             std::string(hdf_attribute.name),
                                             std::string(hdf_attribute.value));
                                 }
-                                result.push_back(std::make_pair(
+                                result.push_back(Labeled_Property(
                                         std::string(hdf5_property.name), prop));
                             }
                         }

@@ -46,8 +46,7 @@ void load_link_singleton(tablator::Labeled_Properties &labeled_properties,
         }
     }
 
-    labeled_properties.emplace_back(
-            std::make_pair(tablator::LINK, tablator::Property(attrs)));
+    labeled_properties.emplace_back(tablator::LINK, tablator::Property(attrs));
 }
 
 void load_link_array(tablator::Labeled_Properties &labeled_properties,
