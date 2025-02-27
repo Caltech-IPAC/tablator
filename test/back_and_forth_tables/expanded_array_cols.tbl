@@ -1,0 +1,22 @@
+\fixlen = T
+\RowsRetrieved = 2
+\ chars_1
+\ chars_2
+\ uints_0
+\ uints_1 (NA)
+\ uints_2
+\ uints_3
+\ uints_4
+\ uints_5
+\ uints_6
+\ uints_7
+\ uints_8
+\ uints_9
+\ uints_10 (NA)
+\ uints_11
+|       chars_1|      chars_2|uints_0|uints_1|uints_2|uints_3|uints_4|uints_5|uints_6|uints_7|uints_8|uints_9|uints_10|uints_11|
+|          char|         char|   long|   long|   long|   long|   long|   long|   long|   long|   long|   long|    long|    long|
+|              |             |       |       |       |       |       |       |       |       |       |       |        |        |
+|          null|         null|   null|   null|   null|   null|   null|   null|   null|   null|   null|   null|    null|    null|
+   abc def  jkl                   123       4     567     123       4     567     123       4     567     123        4      567 
+           null ABC DEF - JKL    null    null    null    null    null    null    null    null    null    null     null     null 

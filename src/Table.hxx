@@ -257,20 +257,28 @@ public:
     }
 
     std::vector<size_t> find_omitted_column_ids(
-            const std::vector<std::string> &col_names) const {
+            const std::vector<size_t> &col_ids) const {
         const auto &columns = get_columns();
-        std::vector<size_t> col_ids = find_column_ids(col_names);
-        sort(col_ids.begin(), col_ids.end());
-
         std::vector<size_t> all_col_ids(columns.size() - 1);
         std::iota(all_col_ids.begin(), all_col_ids.end(), 1);
 
+        std::vector<size_t> sorted_col_ids(col_ids.begin(), col_ids.end());
+        std::sort(sorted_col_ids.begin(), sorted_col_ids.end());
+
         std::vector<size_t> diff_vec;
         diff_vec.reserve(columns.size());
-        std::set_difference(all_col_ids.begin(), all_col_ids.end(), col_ids.begin(),
-                            col_ids.end(), std::back_inserter(diff_vec));
+        std::set_difference(all_col_ids.begin(), all_col_ids.end(),
+                            sorted_col_ids.begin(), sorted_col_ids.end(),
+                            std::back_inserter(diff_vec));
         return diff_vec;
     }
+
+    std::vector<size_t> find_omitted_column_ids(
+            const std::vector<std::string> &col_names) const {
+        std::vector<size_t> col_ids = find_column_ids(col_names);
+        return find_omitted_column_ids(col_ids);
+    }
+
 
     // WARNING: append_column routines do not increase the size of the
     // null column.  The expectation is that the number of columns is
