@@ -1,6 +1,7 @@
-#include <CCfits/CCfits>
 #include <regex>
 #include <unordered_map>
+
+#include <CCfits/CCfits>
 
 #include "../Table.hxx"
 #include "../fits_keyword_ucd_mapping.hxx"
@@ -533,10 +534,11 @@ public:
     //=====================================================
 
     template <typename T>
-    void store_info_for_column(const CCfits::Column &fits_col,
+    void store_info_for_column(bool &got_null, T &null_value,
+                               const CCfits::Column &fits_col,
                                tablator::Data_Type tab_data_type, size_t array_size) {
-        T null_value = 0;
-        bool got_null = false;
+        got_null = false;
+        null_value = 0;
         if (is_null_value_supported(tab_data_type)) {
             // CCCfits::getNullValue() is surprisingly slow, in my
             // limited experience.  Storing its value as we do here
@@ -544,6 +546,7 @@ public:
             // rather than once for every combination of column and row.
             got_null = fits_col.getNullValue(&null_value);
         }
+
         size_t null_list_idx = 0;
         if (got_null) {
             null_list_idx = store_null_value_for_type(tab_data_type, null_value);
@@ -713,8 +716,6 @@ public:
         int status = 0;
         int anynul = 0;
 
-        // Note: As of 13Oct23, setting nulval to tablator::get_null() results in
-        // extraneous nulls.
         fits_read_col(fits_file, get_matched_datatype(), fits_col.index(), fits_row_idx,
                       1, array_size, NULL /* nulval */, temp_array.data(), &anynul,
                       &status);
@@ -727,13 +728,24 @@ public:
                          next_col_offset);
         } else {
             for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
-                if (got_null && temp_array[array_offset] == null_value) {
+                T array_elt = temp_array[array_offset];
+                if (got_null && array_elt == null_value) {
                     // Indicate that a single value in the array is null.
                     row.set_null(tab_data_type, 1 /* array_size */, tab_col_idx,
                                  col_offset + (array_offset * sizeof(T)),
                                  next_col_offset);
+                } else if ((tab_data_type == tablator::Data_Type::FLOAT32_LE ||
+                            tab_data_type == tablator::Data_Type::FLOAT64_LE) &&
+                           std::isnan(array_elt)) {
+                    // Do these types separately, both because FITS doesn't (or didn't)
+                    // allow columns of these types to specify a NULL signal and because
+                    // equality check doesn't work with NaN, which appears to be the
+                    // default NULL signal for these types, at least for Euclid files.
+                    row.set_null(tab_data_type, 1 /* array_size */, tab_col_idx,
+                                 col_offset + (array_offset * sizeof(T)),
+                                 next_col_offset);
                 } else {
-                    *reinterpret_cast<T *>(curr_ptr) = temp_array[array_offset];
+                    *reinterpret_cast<T *>(curr_ptr) = array_elt;
                     curr_ptr += sizeof(T);
                 }
             }
@@ -916,6 +928,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             continue;
         }
         size_t array_size = get_array_size(fits_col);
+        bool got_null = false;
 
         // Negative type indicates array-valued column.
         int abs_fits_type = abs(fits_col.type());
@@ -928,77 +941,115 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 col_info_manager.store_data_type_info_for_column(Data_Type::UINT8_LE,
                                                                  array_size);
             } break;
-            case CCfits::Tbyte:
+            case CCfits::Tbyte: {
                 // std::cout << "Tbyte: " << CCfits::Tbyte << std::endl;
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT8_LE, array_size);
+                uint8_t null_value = 0;
                 col_info_manager.store_info_for_column<uint8_t>(
-                        fits_col, Data_Type::UINT8_LE, array_size);
-                break;
+                        got_null, null_value, fits_col, Data_Type::INT32_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::UINT8_LE, array_size, null_prop);
+            } break;
             case CCfits::Tshort: {
                 // std::cout << "Tshort: " << CCfits::Tshort << std::endl;
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT16_LE, array_size);
+                int16_t null_value = 0;
                 col_info_manager.store_info_for_column<int16_t>(
-                        fits_col, Data_Type::INT16_LE, array_size);
+                        got_null, null_value, fits_col, Data_Type::INT16_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::INT16_LE, array_size, null_prop);
             } break;
             case CCfits::Tushort: {
                 // std::cout << "Tushort: " << CCfits::Tushort << std::endl;
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT16_LE, array_size);
+                uint16_t null_value = 0;
                 col_info_manager.store_info_for_column<uint16_t>(
-                        fits_col, Data_Type::UINT16_LE, array_size);
+                        got_null, null_value, fits_col, Data_Type::UINT16_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::UINT16_LE, array_size, null_prop);
             } break;
             case CCfits::Tint: {
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT32_LE, array_size);
+                int32_t null_value = 0;
                 col_info_manager.store_info_for_column<int32_t>(
-                        fits_col, Data_Type::INT32_LE, array_size);
+                        got_null, null_value, fits_col, Data_Type::INT32_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::INT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tuint: {
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT32_LE, array_size);
+                uint32_t null_value = 0;
                 col_info_manager.store_info_for_column<uint32_t>(
-                        fits_col, Data_Type::UINT32_LE, array_size);
+                        got_null, null_value, fits_col, Data_Type::UINT32_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::UINT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tlong: {
                 // The Tlong type code is used for 32-bit integer columns when reading.
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT32_LE, array_size);
+                int32_t null_value = 0;
                 col_info_manager.store_info_for_column<int32_t>(
-                        fits_col, Data_Type::INT32_LE, array_size);
+                        got_null, null_value, fits_col, Data_Type::INT32_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::INT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tulong: {
                 // The Tulong type code is used for 32-bit unsigned integer columns when
                 // reading.
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT32_LE, array_size);
+                uint32_t null_value = 0;
                 col_info_manager.store_info_for_column<uint32_t>(
-                        fits_col, Data_Type::UINT32_LE, array_size);
+                        got_null, null_value, fits_col, Data_Type::UINT32_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::UINT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tlonglong: {
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT64_LE, array_size);
+                int64_t null_value = 0;
                 col_info_manager.store_info_for_column<int64_t>(
-                        fits_col, Data_Type::INT64_LE, array_size);
+                        got_null, null_value, fits_col, Data_Type::INT64_LE,
+                        array_size);
+                Field_Properties null_prop;
+                null_prop.get_values().null =
+                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                tablator::append_column(columns, offsets, fits_col.name(),
+                                        Data_Type::INT64_LE, array_size, null_prop);
             } break;
             case CCfits::Tfloat: {
                 // std::cout << "Tfloat" << std::endl;
-                Field_Properties nan_nulls;
-                nan_nulls.get_values().null =
-                        std::to_string(std::numeric_limits<float>::quiet_NaN());
+                Field_Properties null_prop;
+                null_prop.get_values().null = DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::FLOAT32_LE, array_size, nan_nulls);
+                                        Data_Type::FLOAT32_LE, array_size, null_prop);
                 col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT32_LE,
                                                                  array_size);
             } break;
             case CCfits::Tdouble: {
                 // std::cout << "Tdouble" << std::endl;
-                Field_Properties nan_nulls;
-                nan_nulls.get_values().null =
-                        std::to_string(std::numeric_limits<double>::quiet_NaN());
+                Field_Properties null_prop;
+                null_prop.get_values().null = DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::FLOAT64_LE, array_size, nan_nulls);
+                                        Data_Type::FLOAT64_LE, array_size, null_prop);
                 col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT64_LE,
                                                                  array_size);
             } break;
