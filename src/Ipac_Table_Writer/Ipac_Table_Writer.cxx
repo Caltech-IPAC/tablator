@@ -1,5 +1,7 @@
 #include "../Ipac_Table_Writer.hxx"
 
+#include <set>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm/replace_copy_if.hpp>
 #include <boost/range/algorithm/replace_if.hpp>
@@ -634,9 +636,35 @@ void write_comment_line_with_newlines(std::ostream &os, const std::string &comme
 
 /*******************************************************/
 
-void write_comment_lines(std::ostream &os, const std::vector<std::string> &comments) {
-    for (auto &c : comments) {
-        write_comment_line_with_newlines(os, c);
+void write_comment_lines(const tablator::Table &table, std::ostream &os,
+                         const std::vector<size_t> &included_column_ids,
+                         const std::vector<std::string> &comments) {
+    const auto &columns = table.get_columns();
+    const auto excluded_column_ids = table.find_omitted_column_ids(included_column_ids);
+
+    if (excluded_column_ids.empty()) {
+        for (auto &cmt : comments) {
+            write_comment_line_with_newlines(os, cmt);
+        }
+        return;
+    }
+
+    // Prepare to skip comments that look like names of excluded columns.
+    std::set<std::string> excluded_column_names;
+    for (size_t oci : excluded_column_ids) {
+        excluded_column_names.insert(columns[oci].get_name());
+    }
+    for (auto &cmt : comments) {
+        size_t cmt_len = cmt.size();
+        auto iter = std::find_if(
+                excluded_column_names.begin(), excluded_column_names.end(),
+                [cmt, cmt_len](const std::string &name) {
+                    return (boost::starts_with(cmt, name) &&
+                            ((cmt_len == name.size()) || cmt.at(name.size()) == ' '));
+                });
+        if (iter == excluded_column_names.end()) {
+            write_comment_line_with_newlines(os, cmt);
+        }
     }
 }
 
@@ -845,7 +873,7 @@ void tablator::Ipac_Table_Writer::write_keywords_and_comments(
     if (!table.get_description().empty()) {
         write_comment_line_with_newlines(os, table.get_description());
     }
-    write_comment_lines(os, comments);
+    write_comment_lines(table, os, included_column_ids, comments);
     const auto table_element_description =
             results_resource_element.get_main_table_element().get_description();
 

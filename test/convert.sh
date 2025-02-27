@@ -1162,6 +1162,15 @@ else
     echo "FAIL: Lookup column names for exclusion"
 fi
 
+${tablator_bin} --column-names "uints_10 uints_11"  test/back_and_forth_tables/expanded_array_cols.tbl temp.tbl && diff test/back_and_forth_tables/selected_array_cols.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: column headers for selected columns"
+    rm -f temp.txt
+else
+    echo "FAIL: column headers for selected columns"
+fi
+
+
 ${tablator_bin} test/back_and_forth_tables/group_example.vot temp.vot && diff test/back_and_forth_tables/group_example.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Table with group metadata"
