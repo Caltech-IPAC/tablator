@@ -127,24 +127,10 @@ private:
             const std::vector<size_t> &ipac_column_widths,
             const std::vector<Data_Type> &datatypes_for_writing);
 
-
-    static void write_subtable_by_row(
-            const Table &table, std::ostream &os, size_t start_row, size_t row_count,
-            const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing,
-            const Command_Line_Options &options = default_options);
-
     static void write_subtable_by_column_and_row(
             const Table &table, std::ostream &os,
             const std::vector<size_t> &included_column_ids, size_t start_row,
             size_t row_count, const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing,
-            const Command_Line_Options &options = default_options);
-
-    static void write_subtable_by_row(
-            const Table &table, std::ostream &os,
-            const std::vector<size_t> &requested_row_ids,
-            const std::vector<size_t> &ipac_column_widths,
             const std::vector<Data_Type> &datatypes_for_writing,
             const Command_Line_Options &options = default_options);
 
@@ -156,13 +142,6 @@ private:
             const std::vector<Data_Type> &datatypes_for_writing,
             const Command_Line_Options &options = default_options);
 
-
-    static void write_single_record(const Table &table, std::ostream &os,
-                                    size_t row_offset,
-                                    const std::vector<size_t> &ipac_column_widths,
-                                    const std::vector<Data_Type> &datatypes_for_writing,
-                                    const Command_Line_Options &options);
-
     static void write_single_record(const Table &table, std::ostream &os,
                                     const std::vector<size_t> &included_column_ids,
                                     size_t row_offset,
@@ -171,22 +150,9 @@ private:
                                     const Command_Line_Options &options);
 
     static void write_consecutive_records(
-            const Table &table, std::ostream &os, size_t start_row, size_t row_count,
-            const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing,
-            const Command_Line_Options &options);
-
-    static void write_consecutive_records(
             const Table &table, std::ostream &os,
             const std::vector<size_t> &included_column_ids, size_t start_row,
             size_t row_count, const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing,
-            const Command_Line_Options &options);
-
-    static void write_selected_records(
-            const Table &table, std::ostream &os,
-            const std::vector<size_t> &requested_row_ids,
-            const std::vector<size_t> &ipac_column_widths,
             const std::vector<Data_Type> &datatypes_for_writing,
             const Command_Line_Options &options);
 
@@ -205,15 +171,9 @@ private:
                                    const std::vector<Data_Type> &datatypes_for_writing,
                                    const Command_Line_Options &options);
 
-    static void write_single_record_by_offset(
-            const Table &table, std::ostream &os, size_t row_offset,
-            const std::vector<size_t> &ipac_column_widths,
-            const std::vector<Data_Type> &datatypes_for_writing,
-            const Command_Line_Options &options);
-
-    static void write_single_record_by_offset(
+    static void write_single_record_internal(
             const Table &table, std::ostream &os,
-            const std::vector<size_t> &included_column_ids, size_t row_offset,
+            const std::vector<size_t> &included_column_ids, size_t row_idx,
             const std::vector<size_t> &ipac_column_widths,
             const std::vector<Data_Type> &datatypes_for_writing,
             const Command_Line_Options &options);

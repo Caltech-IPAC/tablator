@@ -28,16 +28,20 @@
 #include "Resource_Element.hxx"
 #include "Row.hxx"
 #include "Table_Element.hxx"
+#include "Utils/Null_Utils.hxx"
 #include "Utils/Table_Utils.hxx"
 
 namespace tablator {
 
 class Table {
 public:
+    friend Table add_counter_column(const Table &src_table,
+                                    const std::string &col_name);
+    friend Table combine_tables(const Table &src1, const Table &src2);
+
     static constexpr char const *FIXLEN_KEYWORD = "fixlen";
     static constexpr char const *ROWS_RETRIEVED_KEYWORD = "RowsRetrieved";
     static constexpr const char *DEFAULT_NULL_VALUE = "null";
-
 
 private:
     struct Options {
@@ -91,7 +95,6 @@ private:
             labeled_properties_.insert(labeled_properties_.end(),
                                        labeled_properties.begin(),
                                        labeled_properties.end());
-            ;
         }
 
         // For backward compatibility, Table implements its analogue of
@@ -118,7 +121,8 @@ private:
         void add_trailing_info(const Property &trailing_info) {
             trailing_info_list_.emplace_back(trailing_info);
         }
-    };
+    };  // end of Options struct
+
 
 public:
     class Builder {
@@ -183,13 +187,13 @@ public:
             return *this;
         }
 
-
     private:
         std::vector<Resource_Element> resource_elements_;
         Options options_;
-    };
+    };  // end of Builder class
 
 
+    // constructors
     Table(const std::vector<Column> &Columns,
           const std::map<std::string, std::string> &property_map);
 
@@ -203,26 +207,31 @@ public:
     Table(std::istream &input_stream) { read_unknown(input_stream); }
     Table(std::istream &input_stream, const Format &format);
 
-    // FIXME: Unfortunately, this is an opposite convention from
-    // VOTable.  VOTable use the most significant bit for the
-    // first column.  This uses the least significant bit.
-    bool is_null(size_t row_offset, size_t column) const {
-        auto pos = row_offset + (column - 1) / 8;
-        if (pos >= get_data().size()) {
-            throw std::runtime_error("invalid pos " + std::to_string(pos) +
-                                     "; data size is " +
-                                     std::to_string(get_data().size()));
+
+    // validators
+    void validate_column_index(size_t col_idx) const {
+        if (col_idx >= get_columns().size()) {
+            throw std::runtime_error("Invalid column index " + std::to_string(col_idx) +
+                                     ".");
         }
-        return get_data().at(pos) & (128 >> ((column - 1) % 8));
     }
 
+    void validate_row_index(size_t row_idx) const {
+        if (row_idx >= get_num_rows()) {
+            throw std::runtime_error("Invalid row index  " + std::to_string(row_idx) +
+                                     ".");
+        }
+    }
+
+
+    // column accessors
     std::vector<Column>::const_iterator find_column(const std::string &name) const {
         const auto &columns = get_columns();
         return std::find_if(columns.begin(), columns.end(),
                             [&](const Column &c) { return c.get_name() == name; });
     }
 
-    size_t column_index(const std::string &name) const {
+    size_t get_column_index(const std::string &name) const {
         const auto column_iter = find_column(name);
         const auto &columns = get_columns();
         if (column_iter == columns.end()) {
@@ -231,18 +240,24 @@ public:
         return std::distance(columns.begin(), column_iter);
     }
 
-    size_t column_offset(size_t col_id) const {
+    size_t get_column_offset(size_t col_idx) const {
         const auto &columns = get_columns();
-        if (col_id >= columns.size()) {
-            throw std::runtime_error("Invalid column ID " + std::to_string(col_id) +
-                                     " in table.");
-        }
-        return get_offsets().at(col_id);
+        validate_column_index(col_idx);
+        return get_offsets().at(col_idx);
     }
 
+    size_t get_column_offset(const std::string &name) const {
+        auto col_idx = column_index(name);
+        return get_offsets().at(col_idx);
+    }
+
+    // JTODO deprecated
+    size_t column_index(const std::string &name) const {
+        return get_column_index(name);
+    }
+    size_t column_offset(size_t col_idx) const { return get_column_offset(col_idx); }
     size_t column_offset(const std::string &name) const {
-        auto col_id = column_index(name);
-        return get_offsets().at(col_id);
+        return get_column_offset(name);
     }
 
     std::vector<size_t> find_column_ids(
@@ -280,46 +295,21 @@ public:
     }
 
 
-    // WARNING: append_column routines do not increase the size of the
-    // null column.  The expectation is that the number of columns is
-    // known before adding columns.
-    void append_column(const std::string &name, const Data_Type &type) {
-        append_column(name, type, 1);
-    }
-    void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size) {
-        append_column(name, type, size, Field_Properties());
-    }
-
-    void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size, const Field_Properties &field_properties) {
-        append_column(Column(name, type, size, field_properties));
-    }
-
-    void append_column(const Column &column) {
-        tablator::append_column(get_columns(), get_offsets(), column);
-    }
+    // table modifiers
 
     void append_row(const Row &row) {
-        assert(row.data.size() == row_size());
+        assert(row.data.size() == get_row_size());
         tablator::append_row(get_data(), row);
     }
 
     void unsafe_append_row(const char *row) {
-        tablator::unsafe_append_row(get_data(), row, row_size());
+        tablator::unsafe_append_row(get_data(), row, get_row_size());
     }
 
-    void pop_row() { tablator::pop_row(get_data(), row_size()); }
 
-    void resize_rows(const size_t &new_num_rows) {
-        tablator::resize_rows(get_data(), new_num_rows, row_size());
-    }
+    void append_rows(const Table &table2);
 
-    // This function is not used internally.
-
-    std::vector<STRING_PAIR> flatten_properties() const {
-        return flatten_properties(get_labeled_properties());
-    }
+    // write functions
 
     void write(std::ostream &os, const std::string &table_name, const Format &format,
                const Command_Line_Options &options = default_options) const;
@@ -331,8 +321,6 @@ public:
     }
     void write_hdf5(std::ostream &os) const;
     void write_hdf5(const boost::filesystem::path &p) const;
-    void write_hdf5_to_H5File(H5::H5File &outfile) const;
-    void write_hdf5_attributes(H5::DataSet &table) const;
 
     void write_ipac_table(std::ostream &os,
                           const Command_Line_Options &options = default_options) const {
@@ -343,6 +331,7 @@ public:
         boost::filesystem::ofstream os(p);
         write_ipac_table(os, options);
     }
+
     void write_ipac_subtable_by_row(
             std::ostream &os, std::vector<size_t> requested_row_ids,
             const Command_Line_Options &options = default_options) const {
@@ -422,27 +411,6 @@ public:
                                                   requested_row_ids, options);
     }
 
-    std::vector<size_t> get_column_widths(const Command_Line_Options &options) const {
-        return Ipac_Table_Writer::get_column_widths(*this, options);
-    }
-    // JTODO: G2P calls this function, so can't simply rename it.  :-(
-    [[deprecated]] std::vector<size_t> get_column_width(
-            const Command_Line_Options &options) const {
-        return get_column_widths(options);
-    }
-
-    void write_ipac_table_header(std::ostream &os) const {
-        Ipac_Table_Writer::write_keywords_and_comments(*this, os);
-    }
-
-    void write_ipac_column_headers(std::ostream &os,
-                                   const Command_Line_Options &options) const {
-        Ipac_Table_Writer::write_column_headers(*this, os, options);
-    }
-
-    std::string to_ipac_string(const Data_Type &type) const {
-        return Ipac_Table_Writer::to_ipac_string(type);
-    }
 
     void write_dsv(std::ostream &os, const char &separator,
                    const Command_Line_Options &options = default_options) const;
@@ -484,25 +452,6 @@ public:
                            const std::vector<STRING_PAIR> &polygon_input_names,
                            const Command_Line_Options &options) const;
 
-    void write_sql_insert(
-            std::ostream &os, const std::string &quoted_table_name,
-            const size_t &row_offset, const bool &has_point,
-            const std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>
-                    &point_input,
-            const std::vector<std::pair<std::pair<size_t, Data_Type>,
-                                        std::pair<size_t, Data_Type>>> &polygon_input,
-            const Command_Line_Options &options) const;
-
-    void write_sql_insert(std::ostream &os, const std::string &quoted_table_name,
-                          const size_t &row_offset,
-                          const Command_Line_Options &options) const {
-        write_sql_insert(
-                os, quoted_table_name, row_offset, false,
-                std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>(),
-                std::vector<std::pair<std::pair<size_t, Data_Type>,
-                                      std::pair<size_t, Data_Type>>>(),
-                options);
-    }
     void write_sql(std::ostream &os, const std::string &table_name,
                    const Format::Enums &sql_type,
                    const Command_Line_Options &options) const {
@@ -570,34 +519,41 @@ public:
         set_column_info(get_columns(), get_offsets(), dsv);
     };
 
-    size_t read_ipac_header(std::istream &ipac_file,
-                            std::array<std::vector<std::string>, 4> &Columns,
-                            std::vector<size_t> &ipac_table_offsets,
-                            Labeled_Properties &labeled_resource_properties);
 
-    void create_types_from_ipac_headers(
-            std::array<std::vector<std::string>, 4> &Columns,
-            const std::vector<size_t> &ipac_column_widths) {
-        create_types_from_ipac_headers(get_columns(), get_offsets(), Columns,
-                                       ipac_column_widths);
+    // Following the VOTable convention, we use the most significant
+    // bit for the first column.
+    bool is_null_value(size_t row_idx, size_t col_idx) const {
+        auto row_offset = row_idx * get_row_size();
+        auto col_bit_offset = (col_idx - 1) / 8;
+        auto pos = row_offset + col_bit_offset;
+        if (pos >= get_data().size()) {
+            throw std::runtime_error("invalid pos " + std::to_string(pos) +
+                                     "; data size is " +
+                                     std::to_string(get_data().size()));
+        }
+        return is_null_MSB(get_data(), row_offset, col_idx);
     }
 
-    void append_ipac_data_member(const std::string &name, const std::string &data_type,
-                                 const size_t &size) {
-        append_ipac_data_member(get_columns(), get_offsets(), name, data_type, size);
+    // Deprecated because of the use of row_offset rather than row_idx.
+    bool is_null(size_t row_offset, size_t col_idx) const {
+        auto pos = row_offset + (col_idx - 1) / 8;
+        if (pos >= get_data().size()) {
+            throw std::runtime_error("invalid pos " + std::to_string(pos) +
+                                     "; data size is " +
+                                     std::to_string(get_data().size()));
+        }
+        return get_data().at(pos) & (128 >> ((col_idx - 1) % 8));
     }
 
-    void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths) {
-        shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(), get_data(),
-                                          column_widths);
-    };
+
+    // extractors
 
     std::string extract_value_as_string(
-            const std::string &col_name, size_t row_id,
+            const std::string &col_name, size_t row_idx,
             const Command_Line_Options &options = default_options) const;
 
     std::string extract_value_as_string(
-            size_t col_id, size_t row_id,
+            size_t col_id, size_t row_idx,
             const Command_Line_Options &options = default_options) const;
 
     std::vector<std::string> extract_column_values_as_strings(
@@ -605,41 +561,39 @@ public:
             const Command_Line_Options &options = default_options) const;
 
     template <typename T>
-    std::vector<T> extract_value(const std::string &col_name, size_t row_id) {
-        auto col_id = column_index(col_name);
-        return extract_value<T>(col_id, row_id);
+    std::vector<T> extract_value(const std::string &col_name, size_t row_idx) const {
+        auto col_idx = column_index(col_name);
+        return extract_value<T>(col_idx, row_idx);
     }
 
     template <typename T>
-    std::vector<T> extract_value(size_t col_id, size_t row_id) {
+    std::vector<T> extract_value(size_t col_idx, size_t row_idx) const {
         std::vector<T> val_array;
-        extract_value(val_array, col_id, row_id);
+        extract_value(val_array, col_idx, row_idx);
         return val_array;
     }
 
     template <typename T>
-    void extract_value(std::vector<T> &val_array, size_t col_id, size_t row_id) {
+    void extract_value(std::vector<T> &val_array, size_t col_idx,
+                       size_t row_idx) const {
         static_assert(!std::is_same<T, char>::value,
                       "extract_value() is not supported for columns of type char; "
                       "please use extract_values_as_string().");
-        const auto &columns = get_columns();
-        if (col_id >= columns.size()) {
-            throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
-        }
-        if (row_id >= num_rows()) {
-            throw std::runtime_error("Invalid row index: " + std::to_string(row_id));
-        }
 
-        auto &column = columns[col_id];
+        validate_column_index(col_idx);
+        validate_row_index(row_idx);
+
+        const auto &columns = get_columns();
+        auto &column = columns[col_idx];
         auto array_size = column.get_array_size();
-        size_t row_offset = row_id * row_size();
-        if (is_null(row_offset, col_id)) {
+        size_t row_offset = row_idx * get_row_size();
+        if (is_null_value(row_idx, col_idx)) {
             for (size_t i = 0; i < array_size; ++i) {
                 val_array.emplace_back(get_null<T>());
             }
         } else {
             // JTODO what if an element is null?  Assume already has get_null() value?
-            size_t base_offset = row_offset + get_offsets().at(col_id);
+            size_t base_offset = row_offset + get_offsets().at(col_idx);
             uint8_t const *curr_data = get_data().data() + base_offset;
             size_t element_size = data_size(column.get_type());
 
@@ -650,68 +604,101 @@ public:
         }
     }
 
+    const uint8_t *extract_value_ptr(size_t col_idx, size_t row_idx) const;
 
     template <typename T>
-    std::vector<T> extract_column(const std::string &col_name) {
-        auto col_id = column_index(col_name);
-        return extract_column<T>(col_id);
+    std::vector<T> extract_column(const std::string &col_name) const {
+        auto col_idx = column_index(col_name);
+        return extract_column<T>(col_idx);
     }
 
     template <typename T>
-    std::vector<T> extract_column(size_t col_id) {
+    std::vector<T> extract_column(size_t col_idx) const {
         static_assert(!std::is_same<T, char>::value,
                       "extract_column() is not supported for columns of type char; "
                       "please use extract_column_values_as_strings().");
-        const auto &columns = get_columns();
-        if (col_id >= columns.size()) {
-            throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
-        }
-        auto &column = columns[col_id];
+        validate_column_index(col_idx);
 
+        const auto &columns = get_columns();
+        auto &column = columns[col_idx];
         size_t row_count = num_rows();
         std::vector<T> col_vec;
         col_vec.reserve(row_count * column.get_array_size());
-        for (size_t curr_row_id = 0; curr_row_id < row_count; ++curr_row_id) {
-            extract_value<T>(col_vec, col_id, curr_row_id);
+        for (size_t curr_row_idx = 0; curr_row_idx < row_count; ++curr_row_idx) {
+            extract_value<T>(col_vec, col_idx, curr_row_idx);
         }
         return col_vec;
     }
 
 
-    size_t row_size() const { return tablator::row_size(get_offsets()); }
-    size_t num_rows() const { return get_data().size() / row_size(); }
+    // inserters
+    void insert_null_into_row(tablator::Row &row, size_t col_idx,
+                              uint32_t array_size) const;
 
-    // static functions
-    static std::vector<uint8_t> read_dsv_rows(
-            std::vector<Column> &columns, std::vector<size_t> &offsets,
-            const std::list<std::vector<std::string>> &dsv);
+    void insert_null_into_row(tablator::Row &row, size_t col_idx) const {
+        insert_null_into_row(row, col_idx, get_columns().at(col_idx).get_array_size());
+    }
 
-    static void set_column_info(std::vector<Column> &columns,
-                                std::vector<size_t> &offsets,
-                                std::list<std::vector<std::string>> &dsv);
+    void insert_array_element_into_row(tablator::Row &row, size_t col_idx,
+                                       size_t elt_idx, const uint8_t *data_ptr) const;
 
-    static void append_ipac_data_member(std::vector<Column> &columns,
-                                        std::vector<size_t> &offsets,
-                                        const std::string &name,
-                                        const std::string &data_type,
-                                        const size_t &size);
+    void insert_ptr_value_into_row(Row &row, size_t col_idx, const uint8_t *data_ptr,
+                                   uint32_t array_size) const;
 
-    static void create_types_from_ipac_headers(
-            std::vector<Column> &columns, std::vector<size_t> &offsets,
-            const std::array<std::vector<std::string>, 4> &ipac_columns,
-            const std::vector<size_t> &ipac_column_widths);
-
-    static void shrink_ipac_string_columns_to_fit(
-            std::vector<Column> &columns, std::vector<size_t> &offsets,
-            std::vector<uint8_t> &data, const std::vector<size_t> &column_widths);
+    void insert_ptr_value_into_row(Row &row, size_t col_idx,
+                                   const uint8_t *data_ptr) const {
+        insert_ptr_value_into_row(row, col_idx, data_ptr,
+                                  get_columns().at(col_idx).get_array_size());
+    }
 
 
-    // This function is not used internally.
-    static std::vector<STRING_PAIR> flatten_properties(
-            const Labeled_Properties &properties);
+public:
+    void insert_string_column_value_into_row(Row &row, size_t col_idx,
+                                             const uint8_t *data_ptr,
+                                             uint32_t curr_array_size) const;
 
+    void insert_string_column_value_into_row(Row &row, size_t col_idx,
+                                             const uint8_t *data_ptr) {
+        insert_string_column_value_into_row(row, col_idx, data_ptr,
+                                            get_columns().at(col_idx).get_array_size());
+    }
+
+    template <typename T>
+    void insert_column_value_into_row(Row &row, size_t col_idx, const T &element,
+                                      uint32_t array_size) const {
+        insert_ptr_value_into_row(
+                row, col_idx, reinterpret_cast<const uint8_t *>(&element), array_size);
+    }
+
+    template <typename T>
+    void insert_column_value_into_row(Row &row, size_t col_idx,
+                                      const T &element) const {
+        insert_column_value_into_row<T>(row, col_idx, element,
+                                        get_columns().at(col_idx).get_array_size());
+    }
+
+    // accessors
+
+    size_t get_row_size() const { return tablator::get_row_size(get_offsets()); }
+    size_t get_num_rows() const {
+        return tablator::get_num_rows(get_offsets(), get_data());
+    }
+    size_t get_num_columns() const { return get_columns().size(); }
+
+    // called by query_server to trim result set
+    void resize_data(const size_t &new_num_rows) {
+        tablator::resize_data(get_data(), new_num_rows, get_row_size());
+    }
+
+    // deprecated
+    inline void resize_rows(const size_t &new_num_rows) { resize_data(new_num_rows); }
+    size_t row_size() const { return get_row_size(); }
+    size_t num_rows() const { return get_num_rows(); }
+
+    //===========================================================
 
     // getters for Optional elements
+
     ATTRIBUTES &get_attributes() { return options_.attributes_; }
     const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
 
@@ -747,8 +734,10 @@ public:
         return options_.trailing_info_list_;
     }
 
+    //===========================================================
 
     // getters for non-Optional elements
+
     std::vector<Resource_Element> &get_resource_elements() {
         return resource_elements_;
     }
@@ -941,7 +930,137 @@ public:
     size_t get_results_resource_idx() const { return results_resource_idx_; }
     void set_results_resource_idx(size_t idx) { results_resource_idx_ = idx; }
 
+
 private:
+    std::vector<size_t> get_column_widths(const Command_Line_Options &options) const {
+        return Ipac_Table_Writer::get_column_widths(*this, options);
+    }
+
+    void write_ipac_table_header(std::ostream &os) const {
+        Ipac_Table_Writer::write_keywords_and_comments(*this, os);
+    }
+
+    void write_ipac_column_headers(std::ostream &os,
+                                   const Command_Line_Options &options) const {
+        Ipac_Table_Writer::write_column_headers(*this, os, options);
+    }
+
+
+    std::string to_ipac_string(const Data_Type &type) const {
+        return Ipac_Table_Writer::to_ipac_string(type);
+    }
+
+
+    // helpers for writing
+
+    void write_hdf5_to_H5File(H5::H5File &outfile) const;
+    void write_hdf5_attributes(H5::DataSet &table) const;
+
+    void write_sql_insert(
+            std::ostream &os, const std::string &quoted_table_name,
+            const size_t &row_idx, const bool &has_point,
+            const std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>
+                    &point_input,
+            const std::vector<std::pair<std::pair<size_t, Data_Type>,
+                                        std::pair<size_t, Data_Type>>> &polygon_input,
+            const Command_Line_Options &options) const;
+
+    void write_sql_insert(std::ostream &os, const std::string &quoted_table_name,
+                          const size_t &row_idx,
+                          const Command_Line_Options &options) const {
+        write_sql_insert(
+                os, quoted_table_name, row_idx, false,
+                std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>(),
+                std::vector<std::pair<std::pair<size_t, Data_Type>,
+                                      std::pair<size_t, Data_Type>>>(),
+                options);
+    }
+
+
+    void reserve_data(const size_t &new_num_rows) {
+        tablator::reserve_data(get_data(), new_num_rows, get_row_size());
+    }
+
+    // helpers for reading
+
+    // WARNING: The private append_column() routines do not increase
+    // the size of the null column.  The expectation is that the
+    // number of columns is known before adding columns.
+    void append_column(const std::string &name, const Data_Type &type) {
+        append_column(name, type, 1);
+    }
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size) {
+        append_column(name, type, size, Field_Properties());
+    }
+
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size, const Field_Properties &field_properties) {
+        append_column(Column(name, type, size, field_properties));
+    }
+
+    void append_column(const Column &column) {
+        tablator::append_column(get_columns(), get_offsets(), column);
+    }
+
+
+    size_t read_ipac_header(std::istream &ipac_file,
+                            std::array<std::vector<std::string>, 4> &Columns,
+                            std::vector<size_t> &ipac_table_offsets,
+                            Labeled_Properties &labeled_resource_properties);
+
+    void create_types_from_ipac_headers(
+            std::array<std::vector<std::string>, 4> &Columns,
+            const std::vector<size_t> &ipac_column_widths) {
+        create_types_from_ipac_headers(get_columns(), get_offsets(), Columns,
+                                       ipac_column_widths);
+    }
+
+    void append_ipac_data_member(const std::string &name, const std::string &data_type,
+                                 const size_t &size) {
+        append_ipac_data_member(get_columns(), get_offsets(), name, data_type, size);
+    }
+
+    void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths) {
+        shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(), get_data(),
+                                          column_widths);
+    };
+
+
+    static void append_ipac_data_member(std::vector<Column> &columns,
+                                        std::vector<size_t> &offsets,
+                                        const std::string &name,
+                                        const std::string &data_type,
+                                        const size_t &size);
+
+    static void create_types_from_ipac_headers(
+            std::vector<Column> &columns, std::vector<size_t> &offsets,
+            const std::array<std::vector<std::string>, 4> &ipac_columns,
+            const std::vector<size_t> &ipac_column_widths);
+
+    static void shrink_ipac_string_columns_to_fit(
+            std::vector<Column> &columns, std::vector<size_t> &offsets,
+            std::vector<uint8_t> &data, const std::vector<size_t> &column_widths);
+
+
+    // miscellaneous helpers for reading
+
+
+    static std::vector<uint8_t> read_dsv_rows(
+            std::vector<Column> &columns, std::vector<size_t> &offsets,
+            const std::list<std::vector<std::string>> &dsv);
+
+
+    // used only for read_dsv()?
+    static void set_column_info(std::vector<Column> &columns,
+                                std::vector<size_t> &offsets,
+                                std::list<std::vector<std::string>> &dsv);
+
+
+    // This function is not used internally.
+    static std::vector<STRING_PAIR> flatten_properties(
+            const Labeled_Properties &properties);
+
     Table(const std::vector<Resource_Element> &resource_elements,
           const Options &options)
             : resource_elements_(resource_elements), options_(options) {
@@ -965,10 +1084,6 @@ private:
         }
     }
 
-    std::vector<Resource_Element> resource_elements_;
-    Options options_;
-    size_t results_resource_idx_;
-
     std::vector<Data_Type> get_original_datatypes() const {
         std::vector<Data_Type> orig_datatypes;
         const auto &columns = get_columns();
@@ -988,6 +1103,7 @@ private:
     void write_html(std::ostream &os,
                     const std::vector<Data_Type> &datatypes_for_writing,
                     const Command_Line_Options &options) const;
+
 
     void splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
                                     Format::Enums enum_format, uint num_spaces_left,
@@ -1046,5 +1162,11 @@ private:
         stash_resource_element_labeled_property(resource_labeled_properties,
                                                 Labeled_Property(label, prop));
     }
+
+    // private class members
+
+    std::vector<Resource_Element> resource_elements_;
+    Options options_;
+    size_t results_resource_idx_;
 };
 }  // namespace tablator

@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <boost/spirit/include/qi.hpp>
 
+#include "../../../../../Utils/Null_Utils.hxx"
 #include "../../../../../data_size.hxx"
 #include "../../../../../ptree_readers.hxx"
-#include "is_null_MSb.hxx"
 
 
 namespace tablator {
@@ -30,7 +30,7 @@ void compute_column_array_sizes(
                 position += data_size(field.get_type()) * field.get_array_size();
 
             } else {
-                if (is_null_MSb(stream, row_offset, field_idx)) {
+                if (is_null_MSB(stream, row_offset, field_idx)) {
                     position += sizeof(uint32_t);
                 } else {
                     // FIXME: This feels like the hard way to do things.
@@ -46,11 +46,11 @@ void compute_column_array_sizes(
                     if (position <= stream.size()) {
                         std::advance(end, position);
 
-                        /// VOTable spec says that array size is a 32
-                        /// bit MSB integer
+                        // VOTable spec says that array size is a 32
+                        // bit MSB integer
 
-                        /// This parsing can never fail, since any byte
-                        /// pattern is a valid 32 bit number
+                        // This parsing can never fail, since any byte
+                        // pattern is a valid 32 bit number
                         boost::spirit::qi::parse(
                                 begin, end, boost::spirit::qi::big_dword, array_size);
                         column_array_sizes[field_idx] =

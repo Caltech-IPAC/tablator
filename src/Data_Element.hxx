@@ -28,9 +28,6 @@ public:
 
     inline void set_data(const std::vector<uint8_t> &d) { data_ = d; }
 
-    inline size_t row_size() const { return *offsets_.rbegin(); }
-    inline size_t num_rows() const { return get_data().size() / row_size(); }
-
 private:
     std::vector<Column> columns_;
     std::vector<size_t> offsets_ = {0};

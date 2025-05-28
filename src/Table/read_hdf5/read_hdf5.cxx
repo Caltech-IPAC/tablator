@@ -107,7 +107,7 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
         }
     }
     std::vector<uint8_t> data;
-    data.resize(tablator::row_size(offsets) *
+    data.resize(tablator::get_row_size(offsets) *
                 dataset.getSpace().getSimpleExtentNpoints());
     dataset.read(data.data(), compound);
 

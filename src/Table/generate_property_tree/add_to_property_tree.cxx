@@ -191,6 +191,9 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
             // the result set is empty, in which case the column might
             // have been constructed with arraysize == 1 as a default.
             // JTODO handle this case better in query_server.
+            if (a.second == "1") {
+                continue;
+            }
         }
         field_tree.add(XMLATTR_DOT + a.first, a.second);
     }

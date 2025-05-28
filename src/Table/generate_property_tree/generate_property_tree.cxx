@@ -3,7 +3,6 @@
 
 #include "../../Column.hxx"
 #include "../../Common.hxx"
-#include "../../Data_Type_Adjuster.hxx"
 #include "../../Resource_Element.hxx"
 #include "../../Table.hxx"
 #include "../../Utils/Vector_Utils.hxx"

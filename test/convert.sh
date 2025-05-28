@@ -156,6 +156,32 @@ else
 fi
 
 
+${tablator_bin} --combine-tables=1 test/multi test/int_types.vot temp.vot 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: combine tables whose column names are not distinct"
+
+else
+    echo "PASS: combine tables whose column names are not distinct"
+    rm -f temp.tbl
+    rm -f temp.vot
+fi
+
+${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_float_array.vot test/back_and_forth_tables/two_row_double_array.vot temp.json5 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: combine tables whose corresponding columns are of different types"
+else
+    echo "PASS: combine tables whose corresponding columns are of different types"
+    rm -f temp.json5
+fi
+
+${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_double_array.vot test/back_and_forth_tables/two_row_double_array_II.vot out.tbl 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: combine tables whose corresponding offsets don't match"
+else
+    echo "PASS: combine tables whose corresponding offsets don't match"
+    rm -f temp.json5
+fi
+
 
 ###########################################################
 
@@ -368,6 +394,7 @@ fi
 ${tablator_bin} test/int_types_with_duplicate_keys.json5 out.json5 && diff -w test/int_types.json5 out.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert duplicate keys in JSON5 format to array"
+    rm -f out.json5
 else
     echo "FAIL: Convert duplicate keys in JSON5 format to array"
 fi
@@ -547,18 +574,20 @@ else
     echo "FAIL: Convert VOTable translated from FITS to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot out.fits &&  ${tablator_bin}  out.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.fits &&  ${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with unorthodox INFO property value to FITS and back"
     rm -f temp.vot
+    rm -f temp.fits
 else
     echo "FAIL: Convert VOTable with unorthodox INFO property value to FITS and back"
 fi
 
-${tablator_bin} --output-format=json test/back_and_forth_tables/fits_medium_modified_with_value.vot out.json &&  ${tablator_bin}  out.json temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
+${tablator_bin} --output-format=json test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.json &&  ${tablator_bin}  temp.json temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with unorthodox INFO property value to JSON and back"
     rm -f temp.vot
+    rm -f temp.json
 else
     echo "FAIL: Convert VOTable with unorthodox INFO property value to JSON and back"
 fi
@@ -763,7 +792,8 @@ ${tablator_bin} temp.tbl temp.csv &&
 diff test/back_and_forth_tables/multi_with_comments.csv temp.csv
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with hex and comments from csv to IPAC table and back"
-    rm -f temp_file
+    rm -f temp.tbl
+    rm -f temp.csv
 else
     echo "FAIL: Convert table with hex and comments from csv to IPAC table and back"
 fi
@@ -980,6 +1010,16 @@ else
     echo "FAIL: Extract uint32 value"
 fi
 
+${tablator_bin} --row-id=1 --column-to-extract uints --type UINT32_LE test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt && diff test/back_and_forth_tables/extracted_null_long_val.txt temp.txt
+if [ $? -eq 0 ]; then
+    echo "PASS: Extract null long value"
+    rm -f temp.txt
+else
+    echo "FAIL: Extract null long value"
+fi
+
+
+
 ${tablator_bin}  --row-id=1 --column-to-extract ubools --type UINT8_LE test/back_and_forth_tables/small_integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_ubool_val.txt temp.txt
 if [ $? -eq 0 ]; then
     echo "PASS: Extract uint8 value"
@@ -1045,6 +1085,24 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: Extract char value as string"
 fi
+
+${tablator_bin} --row-id=1 --column-to-extract chars --as-string 1 test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt && diff test/back_and_forth_tables/extracted_null_char_val.txt temp.txt
+if [ $? -eq 0 ]; then
+    echo "PASS: Extract null char value as string"
+    rm -f temp.txt
+else
+    echo "FAIL: Extract null char value as string"
+fi
+
+${tablator_bin} --row-id=1 --column-to-extract uints --as-string 1 test/back_and_forth_tables/two_row_array_with_nulls.vot temp.txt && diff test/back_and_forth_tables/extracted_null_char_val.txt temp.txt
+if [ $? -eq 0 ]; then
+    echo "PASS: Extract null long value as string"
+    rm -f temp.txt
+else
+    echo "FAIL: Extract null long value as string"
+fi
+
+
 
 # extract column
 ${tablator_bin} --column-to-extract big_uint64s --type UINT64_LE test/back_and_forth_tables/integer_type_arrays.json5 temp.txt && diff test/back_and_forth_tables/extracted_uint64_col.txt temp.txt
@@ -1300,7 +1358,7 @@ diff test/back_and_forth_tables/various_with_quotes.csv temp.csv
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with single and double quotes from csv to IPAC table and back"
     rm -f temp.tbl
-    rm -f temp.tsv
+    rm -f temp.csv
 
 else
     echo "FAIL: Convert table with single and double quotes from csv to IPAC table and back"
@@ -1330,3 +1388,33 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: Write subtable with consecutive rows in IPAC Table format, trim with N=10"
 fi
+
+#################################################################
+# construct new tables
+#################################################################
+
+${tablator_bin} --counter-column=my_cntr test/back_and_forth_tables/two_row_array_with_nulls.vot temp.tbl && diff test/back_and_forth_tables/two_row_array_with_nulls_and_cntr.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: add counter column to vot and write as tbl"
+    rm -f temp.tbl
+else
+    echo "FAIL: add counter column to vot and write as tbl"
+fi
+
+${tablator_bin} --combine-tables=1 test/back_and_forth_tables/two_row_array_with_nulls.vot test/back_and_forth_tables/two_row_large_ulong_array_from_json5.vot temp.tbl && diff test/back_and_forth_tables/combined_two_row_table.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: combine vot tables and write as tbl"
+    rm -f temp.tbl
+else
+    echo "PASS: combine vot tables and write as tbl"
+fi
+
+
+${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_int_array.json5 test/back_and_forth_tables/two_row_int_array_II.json5 temp.json5 && diff test/back_and_forth_tables/two_row_int_array_appended.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: append json5 table"
+    rm -f temp.json5
+else
+    echo "FAIL: append json5 table"
+fi
+

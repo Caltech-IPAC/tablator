@@ -20,8 +20,9 @@ public:
     // backward compatibility
     void set_zero() { fill_with_zeros(); }
 
-    void set_null(const Data_Type &type, const size_t &array_size, const size_t &column,
-                  const size_t &offset, const size_t &offset_end);
+    void set_null(const Data_Type &type, const size_t &array_size,
+                  const size_t &col_idx, const size_t &offset,
+                  const size_t &offset_end);
 
     template <typename T>
     void insert(const T &element, const size_t &offset) {
@@ -47,7 +48,9 @@ public:
         insert(tablator::get_null<T>(), offset);
     }
 
-    size_t size() const { return data.size(); }
+    size_t get_size() const { return data.size(); }
+    // Deprecated
+    size_t size() const { return get_size(); }
 
     const std::vector<char> &get_data() const { return data; }
     std::vector<char> &get_data() { return data; }

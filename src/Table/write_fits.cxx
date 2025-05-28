@@ -586,7 +586,7 @@ void tablator::Table::write_fits(
     //*********************************************************
 
     const auto &offsets = get_offsets();
-    const size_t number_of_rows(num_rows());
+    const size_t number_of_rows(get_num_rows());
 
     // Retrieve table's data pointer.
     const uint8_t *data_start_ptr = get_data().data();
@@ -596,19 +596,19 @@ void tablator::Table::write_fits(
 
     // FITS row index is 1-based.
     for (size_t fits_row_idx = 1; fits_row_idx <= number_of_rows;
-         ++fits_row_idx, row_start_ptr += row_size()) {
+         ++fits_row_idx, row_start_ptr += get_row_size()) {
         // Skip null_bitfield_flags column.  Corresponding
         // columns of the tablator and FITS tables have the same (1-based)
         // index.
+        auto tab_row_idx = fits_row_idx - 1;
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
             auto &column = columns[col_idx];
 
             uint8_t *curr_data_ptr = row_start_ptr + offsets[col_idx];
-            size_t curr_row_start_offset = (fits_row_idx - 1) * row_size();
             Data_Type datatype_for_writing = datatypes_for_writing[col_idx];
 
             size_t array_size = column.get_array_size();
-            bool null_flag_is_set = is_null(curr_row_start_offset, col_idx);
+            bool null_flag_is_set = is_null_value(tab_row_idx, col_idx);
 
             bool all_or_nothing_null =
                     ((array_size == 1) || (datatype_for_writing == Data_Type::CHAR) ||

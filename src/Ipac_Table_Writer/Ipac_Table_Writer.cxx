@@ -11,6 +11,7 @@
 #include "../Decimal_String_Trimmer.hxx"
 #include "../Table.hxx"
 
+
 // This file contains high-level implementations of public functions of the
 // Ipac_Table_Writer class.
 
@@ -23,7 +24,7 @@ const std::vector<size_t> get_all_nonzero_col_ids(const tablator::Table &table) 
 }
 
 const std::vector<size_t> get_all_row_ids(const tablator::Table &table) {
-    std::vector<size_t> all_row_ids(table.num_rows());
+    std::vector<size_t> all_row_ids(table.get_num_rows());
     std::iota(all_row_ids.begin(), all_row_ids.end(), 0);
     return all_row_ids;
 }
@@ -46,10 +47,10 @@ size_t compute_max_column_width_for_type(const tablator::Table &table,
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
-        size_t curr_row_start_offset = requested_row_id * table.row_size();
+        size_t curr_row_start_offset = requested_row_id * table.get_row_size();
         uint8_t const *curr_col_data_ptr = col_data_start_ptr + curr_row_start_offset;
 
-        if (table.is_null(curr_row_start_offset, col_idx)) {
+        if (table.is_null_value(requested_row_id, col_idx)) {
             // We've already accounted for the width of the null value.
             continue;
         }
@@ -88,10 +89,10 @@ size_t compute_max_column_width_for_double(const tablator::Table &table,
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
-        size_t curr_row_start_offset = requested_row_id * table.row_size();
+        size_t curr_row_start_offset = requested_row_id * table.get_row_size();
         uint8_t const *curr_col_data_ptr = col_data_start_ptr + curr_row_start_offset;
 
-        if (table.is_null(curr_row_start_offset, col_idx)) {
+        if (table.is_null_value(requested_row_id, col_idx)) {
             // We've already accounted for the width of the null value.
             continue;
         }
@@ -129,10 +130,10 @@ size_t compute_max_column_width_for_char(const tablator::Table &table,
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
-        size_t curr_row_start_offset = requested_row_id * table.row_size();
+        size_t curr_row_start_offset = requested_row_id * table.get_row_size();
         uint8_t const *curr_col_data_ptr = col_data_start_ptr + curr_row_start_offset;
 
-        if (table.is_null(curr_row_start_offset, col_idx)) {
+        if (table.is_null_value(requested_row_id, col_idx)) {
             continue;
         }
 
@@ -390,11 +391,14 @@ std::vector<size_t> tablator::Ipac_Table_Writer::get_column_widths(
 
 void tablator::Ipac_Table_Writer::write(const tablator::Table &table, std::ostream &os,
                                         const Command_Line_Options &options) {
-    write_subtable_by_row(table, os, 0, table.num_rows(),
-                          get_column_widths(table, options),
-                          Data_Type_Adjuster(table).get_datatypes_for_writing(
-                                  Format::Enums::IPAC_TABLE),
-                          options);
+    std::vector<size_t> included_col_ids = get_all_nonzero_col_ids(table);
+
+    write_subtable_by_column_and_row(
+            table, os, included_col_ids, 0, table.get_num_rows(),
+            get_column_widths(table, options),
+            Data_Type_Adjuster(table).get_datatypes_for_writing(
+                    Format::Enums::IPAC_TABLE),
+            options);
 }
 
 /**********************************************************/
@@ -414,10 +418,11 @@ void tablator::Ipac_Table_Writer::write_subtable_by_row(
         const Table &table, std::ostream &os,
         const std::vector<size_t> &requested_row_ids,
         const Command_Line_Options &options) {
-    tablator::Ipac_Table_Writer::write_subtable_by_row(
-            table, os, requested_row_ids,
-            get_column_widths(table, requested_row_ids, get_all_nonzero_col_ids(table),
-                              options),
+    std::vector<size_t> included_col_ids = get_all_nonzero_col_ids(table);
+
+    tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
+            table, os, included_col_ids, requested_row_ids,
+            get_column_widths(table, requested_row_ids, included_col_ids, options),
             Data_Type_Adjuster(table).get_datatypes_for_writing(
                     Format::Enums::IPAC_TABLE),
             options);
@@ -448,10 +453,11 @@ void tablator::Ipac_Table_Writer::write_subtable_by_row(
     std::vector<size_t> requested_row_ids(true_row_count);
     std::iota(requested_row_ids.begin(), requested_row_ids.end(), start_row);
 
-    tablator::Ipac_Table_Writer::write_subtable_by_row(
-            table, os, start_row, true_row_count,
-            get_column_widths(table, requested_row_ids, get_all_nonzero_col_ids(table),
-                              options),
+    std::vector<size_t> included_col_ids = get_all_nonzero_col_ids(table);
+
+    tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
+            table, os, included_col_ids, start_row, true_row_count,
+            get_column_widths(table, requested_row_ids, included_col_ids, options),
             Data_Type_Adjuster(table).get_datatypes_for_writing(
                     Format::Enums::IPAC_TABLE),
             options);
@@ -482,22 +488,21 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
 void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
         const Table &table, std::ostream &os, const std::vector<size_t> &column_ids,
         const Command_Line_Options &options) {
-    write_subtable_by_column_and_row(table, os, column_ids, 0, table.num_rows(),
+    write_subtable_by_column_and_row(table, os, column_ids, 0, table.get_num_rows(),
                                      options);
 }
 
 /**********************************************************/
 
 void tablator::Ipac_Table_Writer::write_single_record(
-        const Table &table, std::ostream &os, size_t row_id,
+        const Table &table, std::ostream &os, size_t row_idx,
         const Command_Line_Options &options) {
-    size_t curr_row_offset = row_id * table.row_size();
-    std::vector<size_t> requested_row_ids(1, row_id);
+    std::vector<size_t> requested_row_ids(1, row_idx);
+    std::vector<size_t> included_col_ids = get_all_nonzero_col_ids(table);
 
-    tablator::Ipac_Table_Writer::write_single_record_by_offset(
-            table, os, curr_row_offset,
-            get_column_widths(table, requested_row_ids, get_all_nonzero_col_ids(table),
-                              options),
+    tablator::Ipac_Table_Writer::write_single_record_internal(
+            table, os, included_col_ids, row_idx,
+            get_column_widths(table, requested_row_ids, included_col_ids, options),
             Data_Type_Adjuster(table).get_datatypes_for_writing(
                     Format::Enums::IPAC_TABLE),
             options);
@@ -507,11 +512,11 @@ void tablator::Ipac_Table_Writer::write_single_record(
 
 void tablator::Ipac_Table_Writer::write_single_record(
         const Table &table, std::ostream &os, const std::vector<size_t> &column_ids,
-        size_t row_id, const Command_Line_Options &options) {
-    std::vector<size_t> requested_row_ids(1, row_id);
-    size_t curr_row_offset = row_id * table.row_size();
-    tablator::Ipac_Table_Writer::write_single_record_by_offset(
-            table, os, column_ids, curr_row_offset,
+        size_t row_idx, const Command_Line_Options &options) {
+    std::vector<size_t> requested_row_ids(1, row_idx);
+
+    tablator::Ipac_Table_Writer::write_single_record_internal(
+            table, os, column_ids, row_idx,
             get_column_widths(table, requested_row_ids, column_ids, options),
             Data_Type_Adjuster(table).get_datatypes_for_writing(
                     Format::Enums::IPAC_TABLE),
@@ -529,10 +534,11 @@ void tablator::Ipac_Table_Writer::write_consecutive_records(
     std::vector<size_t> requested_row_ids(true_row_count);
     std::iota(requested_row_ids.begin(), requested_row_ids.end(), start_row);
 
+    std::vector<size_t> included_col_ids = get_all_nonzero_col_ids(table);
+
     tablator::Ipac_Table_Writer::write_consecutive_records(
-            table, os, start_row, true_row_count,
-            get_column_widths(table, requested_row_ids, get_all_nonzero_col_ids(table),
-                              options),
+            table, os, included_col_ids, start_row, true_row_count,
+            get_column_widths(table, requested_row_ids, included_col_ids, options),
             Data_Type_Adjuster(table).get_datatypes_for_writing(
                     Format::Enums::IPAC_TABLE),
             options);
@@ -564,10 +570,11 @@ void tablator::Ipac_Table_Writer::write_selected_records(
         const Table &table, std::ostream &os,
         const std::vector<size_t> &requested_row_ids,
         const Command_Line_Options &options) {
+    std::vector<size_t> included_col_ids = get_all_nonzero_col_ids(table);
+
     tablator::Ipac_Table_Writer::write_selected_records(
-            table, os, requested_row_ids,
-            get_column_widths(table, requested_row_ids, get_all_nonzero_col_ids(table),
-                              options),
+            table, os, included_col_ids, requested_row_ids,
+            get_column_widths(table, requested_row_ids, included_col_ids, options),
             Data_Type_Adjuster(table).get_datatypes_for_writing(
                     Format::Enums::IPAC_TABLE),
             options);
@@ -733,9 +740,9 @@ size_t tablator::Ipac_Table_Writer::get_true_row_count(
         const tablator::Table &table, size_t start_row,
         size_t requested_consecutive_row_count) {
     size_t true_row_count = 0;
-    if (start_row < table.num_rows()) {
-        true_row_count =
-                std::min(table.num_rows() - start_row, requested_consecutive_row_count);
+    if (start_row < table.get_num_rows()) {
+        true_row_count = std::min(table.get_num_rows() - start_row,
+                                  requested_consecutive_row_count);
     }
     return true_row_count;
 }
@@ -750,7 +757,7 @@ bool tablator::Ipac_Table_Writer::is_valid_col_idx(const Table &table, size_t co
 void tablator::Ipac_Table_Writer::write_keywords_and_comments(const Table &table,
                                                               std::ostream &os) {
     write_keywords_and_comments(table, os, get_all_nonzero_col_ids(table),
-                                table.num_rows());
+                                table.get_num_rows());
 }
 
 
@@ -765,7 +772,7 @@ void tablator::Ipac_Table_Writer::write_keywords_and_comments(const Table &table
 void tablator::Ipac_Table_Writer::write_keywords_and_comments(
         const Table &table, std::ostream &os,
         const std::vector<size_t> &included_column_ids) {
-    write_keywords_and_comments(table, os, included_column_ids, table.num_rows());
+    write_keywords_and_comments(table, os, included_column_ids, table.get_num_rows());
 }
 
 

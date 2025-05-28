@@ -180,10 +180,6 @@ public:
 
     Table_Element() {}
 
-
-    size_t row_size() const { return get_main_data_element().row_size(); }
-    size_t num_rows() const { return get_main_data_element().num_rows(); }
-
     // accessors for Optional elements
     const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
     const std::string &get_description() const { return options_.description_; }

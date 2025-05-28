@@ -1,8 +1,8 @@
 #include "../../../../../../ptree_readers.hxx"
-#include "../is_null_MSb.hxx"
 
 #include <boost/spirit/include/qi.hpp>
 
+#include "../../../../../../Utils/Null_Utils.hxx"
 #include "../../../../../../Utils/Table_Utils.hxx"
 
 namespace tablator {
@@ -23,24 +23,25 @@ void ptree_readers::append_data_from_stream(
         size_t num_rows) {
     const size_t null_flags_size((columns.size() + 6) / 8);
     size_t position(0);
-    Row row(row_size(offsets));
+    Row row(get_row_size(offsets));
     for (size_t r = 0; r < num_rows; ++r) {
         row.fill_with_zeros();
         size_t row_offset(position);
         position += null_flags_size;
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
-            bool is_array_dynamic = field_flag_pairs[col_idx].get_dynamic_array_flag();
-            if (is_null_MSb(stream, row_offset, col_idx)) {
+            bool dynamic_array_flag =
+                    field_flag_pairs[col_idx].get_dynamic_array_flag();
+            if (is_null_MSB(stream, row_offset, col_idx)) {
                 row.set_null(columns[col_idx].get_type(),
                              columns[col_idx].get_array_size(), col_idx,
                              offsets[col_idx], offsets[col_idx + 1]);
-                if (is_array_dynamic)
+                if (dynamic_array_flag)
                     position += sizeof(uint32_t);
                 else
                     position += data_size(columns[col_idx].get_type()) *
                                 columns[col_idx].get_array_size();
             } else {
-                if (is_array_dynamic) {
+                if (dynamic_array_flag) {
                     auto begin = stream.begin();
                     std::advance(begin, position);
                     auto end = stream.begin();
@@ -61,7 +62,9 @@ void ptree_readers::append_data_from_stream(
                 }
             }
         }
-        if (position <= stream.size()) append_row(data, row);
+        if (position <= stream.size()) {
+            append_row(data, row);
+        }
     }
 }
 }  // namespace tablator
