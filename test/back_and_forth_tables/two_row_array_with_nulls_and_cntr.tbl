@@ -1,0 +1,10 @@
+\fixlen = T
+\RowsRetrieved = 2
+\ chars2
+\ uints
+|       chars|       chars2|uints_0|uints_1|uints_2|my_cntr|
+|        char|         char|   long|   long|   long|   long|
+|            |             |       |       |       |       |
+|        null|         null|   null|   null|   null|   null|
+ abc def  jkl                   123       4     567       1 
+         null ABC DEF - JKL    null    null    null       2 

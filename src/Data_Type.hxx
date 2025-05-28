@@ -3,9 +3,9 @@
 #include <limits>
 #include <stdexcept>
 
-/// This enum exists only because checking what type an H5::DataType
-/// is requires a dynamic lookup.  This ends up dominating the run
-/// time if used for every row.
+// This enum exists only because checking what type an H5::DataType
+// is requires a dynamic lookup.  This ends up dominating the run
+// time if used for every row.
 namespace tablator {
 enum class Data_Type {
     INT8_LE,

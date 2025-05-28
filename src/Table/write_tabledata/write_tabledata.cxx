@@ -3,7 +3,6 @@
 #include <limits>
 
 #include "../../Ascii_Writer.hxx"
-#include "../../Data_Type_Adjuster.hxx"
 #include "../../Table.hxx"
 #include "../../to_string.hxx"
 
@@ -53,19 +52,22 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
 
     const auto &columns = get_columns();
     const auto &offsets = get_offsets();
+    size_t num_rows = get_num_rows();
     const auto &data = get_data();
 
-    for (size_t row_offset = 0; row_offset < data.size(); row_offset += row_size()) {
+    for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
+         ++row_idx, row_offset += row_size()) {
         os << tr_prefix;
 
-        /// Skip the null bitfield flag
-        for (size_t i = 1; i < columns.size(); ++i) {
+        // Skip the null bitfield flag
+        for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
+            const auto &column = columns[col_idx];
             std::stringstream td;
             // Leave null entries blank, unlike in IPAC_TABLE format.
-            if (!is_null(row_offset, i)) {
+            if (!is_null_value(row_idx, col_idx)) {
                 Ascii_Writer::write_type_as_ascii(
-                        td, columns[i].get_type(), columns[i].get_array_size(),
-                        data.data() + row_offset + offsets[i],
+                        td, column.get_type(), column.get_array_size(),
+                        data.data() + row_offset + offsets[col_idx],
                         Ascii_Writer::DEFAULT_SEPARATOR, options);
             }
             os << td_prefix;
@@ -86,7 +88,7 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
                     break;
             }
             os << td_suffix;
-            if (is_json && i < columns.size() - 1) {
+            if (is_json && col_idx < columns.size() - 1) {
                 os << ',';
             }
             os << '\n';

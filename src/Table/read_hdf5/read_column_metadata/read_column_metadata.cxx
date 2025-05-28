@@ -29,9 +29,9 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
 
     hvl_t hdf5_columns;
     attribute.read(columns, &hdf5_columns);
-    for (size_t column = 0; column < hdf5_columns.len; ++column) {
+    for (size_t col_idx = 0; col_idx < hdf5_columns.len; ++col_idx) {
         HDF5_Column &hdf5_column =
-                reinterpret_cast<HDF5_Column *>(hdf5_columns.p)[column];
+                reinterpret_cast<HDF5_Column *>(hdf5_columns.p)[col_idx];
 
         ATTRIBUTES attributes;
         HDF5_Field_Properties &hdf5_field_properties(hdf5_column.field_properties);
@@ -41,7 +41,7 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                     reinterpret_cast<HDF5_Attribute *>(hdf5_attributes.p)[attribute]);
             const std::string name(a.name);
             if (attributes.find(name) != attributes.end()) {
-                throw std::runtime_error("In " + section + " in column " +
+                throw std::runtime_error("In " + section + " in col_idx " +
                                          hdf5_column.name + ": duplicate attribute " +
                                          name);
             }

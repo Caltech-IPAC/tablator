@@ -9,6 +9,7 @@
 #include <boost/program_options.hpp>
 
 #include "../Table.hxx"
+#include "../Table_Ops.hxx"
 
 static constexpr size_t SIZE_T_MAX = std::numeric_limits<size_t>::max();
 
@@ -107,7 +108,7 @@ void handle_extract_column(const boost::filesystem::path &input_path,
     boost::filesystem::ofstream output_stream(output_path);
     auto column_id = table.column_index(column_name);
     auto array_size = table.get_columns().at(column_id).get_array_size();
-    auto num_rows = table.num_rows();
+    auto num_rows = table.get_num_rows();
 
     if (boost::iequals(type_str, "INT8_LE")) {
         auto val_array_vec = table.extract_column<int8_t>(column_id);
@@ -168,15 +169,15 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
     const std::vector<size_t> *active_row_id_ptr = &row_id_list;
     std::vector<size_t> modified_row_id_list;
     if (row_id_list.empty()) {
-        if (row_id < table.num_rows()) {
+        if (row_id < table.get_num_rows()) {
             modified_row_id_list.emplace_back(row_id);
         } else if (row_id < SIZE_T_MAX) {
             // row_id == SIZE_T_MAX if user did not specify row-id.
             std::string msg("Error: row-id value is too large.\n");
             throw(std::runtime_error(msg));
-        } else if (start_row < table.num_rows()) {
+        } else if (start_row < table.get_num_rows()) {
             size_t modified_row_count =
-                    std::min(row_count, table.num_rows() - start_row);
+                    std::min(row_count, table.get_num_rows() - start_row);
             modified_row_id_list.resize(modified_row_count);
             std::iota(modified_row_id_list.begin(), modified_row_id_list.end(),
                       start_row);
@@ -186,7 +187,7 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
             throw(std::runtime_error(msg));
         } else {
             // User didn't specify constraints, so return all rows.
-            modified_row_id_list.resize(table.num_rows());
+            modified_row_id_list.resize(table.get_num_rows());
             std::iota(modified_row_id_list.begin(), modified_row_id_list.end(), 0);
         }
         active_row_id_ptr = &modified_row_id_list;
@@ -235,7 +236,7 @@ ushort parse_trim_decimal_runs(const std::string &trim_str) {
 
 int main(int argc, char *argv[]) {
     bool stream_intermediate(false);
-    tablator::Format input_format, output_format;
+    tablator::Format input_format, input2_format, output_format;
     std::vector<size_t> column_id_list;
     std::string column_id_string;
     std::vector<std::string> column_name_list;
@@ -250,12 +251,16 @@ int main(int argc, char *argv[]) {
     bool skip_comments_f = false;
     bool as_string_f = false;
     std::string input_format_str;
+    std::string input2_format_str;
     std::string output_format_str;
     std::string column_to_extract;
     std::string type_str;
     bool write_null_strings_f = false;
     bool idx_lookup = false;
     std::string trim_decimal_runs = "1";
+    std::string counter_column_name = "";
+    bool combine_tables_f = false;
+    bool append_rows_f = true;
 
     // Declare the supported options.
     boost::program_options::options_description visible_options("Options");
@@ -266,6 +271,10 @@ int main(int argc, char *argv[]) {
             "input-format",
             boost::program_options::value<std::string>(&input_format_str),
             "Input file format (json,json5,votable,csv,tsv,fits,ipac_table,"
+            "text,html,hdf5)")(
+            "input2-format",
+            boost::program_options::value<std::string>(&input2_format_str),
+            "Input2 file format (json,json5,votable,csv,tsv,fits,ipac_table,"
             "text,html,hdf5)")(
             "output-format",
             boost::program_options::value<std::string>(&output_format_str),
@@ -310,6 +319,16 @@ int main(int argc, char *argv[]) {
                                 ->default_value(false),
                         "render null values in tsv/csv tables  as \"null\" rather than "
                         "as empty string (default false)")(
+            "counter-column",
+            boost::program_options::value<std::string>(&counter_column_name),
+            "add counter column with indicated name")(
+            "combine-tables",
+            boost::program_options::value<bool>(&combine_tables_f)
+                    ->default_value(false),
+            "combine tables having same number of rows)")(
+            "append-rows",
+            boost::program_options::value<bool>(&append_rows_f)->default_value(false),
+            "append rows of second table having same columns and offsets)")(
             "trim-decimal-runs",
             boost::program_options::value<std::string>(&trim_decimal_runs),
             "check for and round round up/down decimal runs of length N of 9s or of 0s "
@@ -346,9 +365,15 @@ int main(int argc, char *argv[]) {
         /*** Validate and adjust ***/
         /***************************/
 
-        if (option_variables.count("input-format")) input_format.init(input_format_str);
-        if (option_variables.count("output-format"))
+        if (option_variables.count("input-format")) {
+            input_format.init(input_format_str);
+        }
+        if (option_variables.count("input2-format")) {
+            input2_format.init(input2_format_str);
+        }
+        if (option_variables.count("output-format")) {
             output_format.init(output_format_str);
+        }
         if (option_variables.count("start-row") &&
             !option_variables.count("row-count")) {
             row_count = 1;
@@ -421,7 +446,7 @@ int main(int argc, char *argv[]) {
                       std::back_inserter(column_name_list));
         }
 
-        boost::filesystem::path input_path, output_path;
+        boost::filesystem::path input_path, input2_path, output_path;
         if (option_variables.count("files")) {
             std::vector<std::string> paths(
                     option_variables["files"].as<std::vector<std::string> >());
@@ -429,15 +454,37 @@ int main(int argc, char *argv[]) {
                 std::cerr << "Missing an output file\n";
                 return 1;
             }
-            if (paths.size() != 2) {
-                std::cerr << "Too many filenames\n";
-                return 1;
+
+            if (combine_tables_f || append_rows_f) {
+                if (paths.size() != 3) {
+                    std::cerr << "combine-tables and append-rows options require 3 "
+                                 "paths.\n";
+                    return 1;
+                }
+                input_path = paths.at(0);
+                input2_path = paths.at(1);
+                output_path = paths.at(2);
+                if (input_format.is_unknown()) {
+                    input_format.set_from_extension(input_path);
+                }
+                if (input2_format.is_unknown()) {
+                    input2_format.set_from_extension(input2_path);
+                }
+                if (output_format.is_unknown()) {
+                    output_format.set_from_extension(output_path);
+                }
+            } else {
+                if (paths.size() != 2) {
+                    std::cerr << "Too many filenames\n";
+                    return 1;
+                }
+                input_path = paths.at(0);
+                output_path = paths.at(1);
+                if (input_format.is_unknown())
+                    input_format.set_from_extension(input_path);
+                if (output_format.is_unknown())
+                    output_format.set_from_extension(output_path);
             }
-            input_path = paths.at(0);
-            output_path = paths.at(1);
-            if (input_format.is_unknown()) input_format.set_from_extension(input_path);
-            if (output_format.is_unknown())
-                output_format.set_from_extension(output_path);
         } else {
             std::cerr << "Missing an input and output file\n"
                       << usage(visible_options) << "\n";
@@ -563,6 +610,45 @@ int main(int argc, char *argv[]) {
             boost::filesystem::ofstream output_stream(output_path);
             table.write(output_stream, output_path.stem().native(), output_format,
                         options);
+        } else if (!counter_column_name.empty()) {
+            // JTODO make this option incompatible with other options
+            boost::filesystem::ifstream input_stream(input_path);
+            tablator::Table in_table(input_stream, input_format);
+            tablator::Table out_table =
+                    tablator::add_counter_column(in_table, counter_column_name);
+            boost::filesystem::ofstream output_stream(output_path);
+            out_table.write(output_stream, output_path.stem().native(), output_format,
+                            options);
+        } else if (combine_tables_f) {
+            // JTODO make this option incompatible with other options
+            boost::filesystem::ifstream input_stream(input_path);
+            tablator::Table in_table1(input_stream, input_format);
+            input_stream.close();
+
+            boost::filesystem::ifstream input2_stream(input2_path);
+            tablator::Table in_table2(input2_stream, input2_format);
+            input2_stream.close();
+
+            tablator::Table out_table = tablator::combine_tables(in_table1, in_table2);
+
+            boost::filesystem::ofstream output_stream(output_path);
+            out_table.write(output_stream, output_path.stem().native(), output_format,
+                            options);
+        } else if (append_rows_f) {
+            // JTODO make this option incompatible with other options
+            boost::filesystem::ifstream input_stream(input_path);
+            tablator::Table in_table1(input_stream, input_format);
+            input_stream.close();
+
+            boost::filesystem::ifstream input2_stream(input2_path);
+            tablator::Table in_table2(input2_stream, input2_format);
+            input2_stream.close();
+
+            in_table1.append_rows(in_table2);
+
+            boost::filesystem::ofstream output_stream(output_path);
+            in_table1.write(output_stream, output_path.stem().native(), output_format,
+                            options);
         } else {
             tablator::Table table(input_path, input_format);
             table.write(output_path, output_format, options);

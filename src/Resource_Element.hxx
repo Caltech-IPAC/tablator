@@ -289,8 +289,6 @@ public:
 
     Resource_Element() : resource_type_(Resource_Type::META) {}
 
-    size_t num_rows() const { return get_main_table_element().num_rows(); }
-
     // accessors for Optional elements
 
     const ATTRIBUTES &get_attributes() const { return options_.attributes_; }

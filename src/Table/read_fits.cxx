@@ -1074,7 +1074,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     Row_Column_Element_Reader element_reader(col_info_manager, offsets);
 
-    size_t row_size = tablator::row_size(offsets);
+    size_t row_size = tablator::get_row_size(offsets);
     size_t num_rows = ccfits_table->rows();
 
     std::vector<uint8_t> data;

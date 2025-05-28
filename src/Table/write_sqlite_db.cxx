@@ -21,10 +21,10 @@ void tablator::Table::write_sqlite_db(const boost::filesystem::path &path,
     sql_stream << ";";
     sqlite::execute(connection, sql_stream.str(), true);
 
-    for (size_t row_offset = 0; row_offset < get_data().size();
-         row_offset += row_size()) {
+    auto num_rows = get_num_rows();
+    for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
         sql_stream.str("");
-        write_sql_insert(sql_stream, table_name, row_offset, options);
+        write_sql_insert(sql_stream, table_name, row_idx, options);
         sqlite::execute(connection, sql_stream.str(), true);
     }
 }

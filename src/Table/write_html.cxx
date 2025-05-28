@@ -5,8 +5,6 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "../Data_Type_Adjuster.hxx"
-
 
 /**********************************************************/
 

@@ -12,37 +12,40 @@ size_t count_elements(const std::string &entry, const Data_Type &type);
 tablator::Data_Element tablator::ptree_readers::read_tabledata(
         const boost::property_tree::ptree &tabledata,
         const std::vector<Field_And_Flag> &field_flag_pairs) {
-    std::vector<std::vector<std::string> > rows;
+    std::vector<std::vector<std::string> > element_lists_by_row;
     size_t num_fields = field_flag_pairs.size();
 
-    /// Need to set the size to at least 1, because H5::StrType can not
-    /// handle zero sized strings.
+    // Need to set the size to at least 1, because H5::StrType can not
+    // handle zero sized strings.
     std::vector<size_t> column_array_sizes(num_fields, 1);
     const size_t null_flags_size((num_fields + 6) / 8);
     column_array_sizes.at(0) = null_flags_size;
+
     for (auto &tr : tabledata) {
         if (tr.first == "TR" || tr.first.empty()) {
-            /// Add something for the null_bitfields_flag
-            rows.push_back({});
+            // Add something for the null_bitfields_flag
+            element_lists_by_row.push_back({});
             auto td = tr.second.begin();
             while (td != tr.second.end() && td->first == XMLATTR_DOT + ID) {
                 ++td;
             }
             for (std::size_t c = 1; c < num_fields; ++c) {
-                const auto &field = field_flag_pairs.at(c).get_field();
-                if (td == tr.second.end())
+                if (td == tr.second.end()) {
                     throw std::runtime_error(
-                            "Not enough columns in row " + std::to_string(rows.size()) +
+                            "Not enough columns in row " +
+                            std::to_string(element_lists_by_row.size()) +
                             ".  Expected " + std::to_string(num_fields - 1) +
                             ", but only got " + std::to_string(c - 1) + ".");
-
+                }
+                const auto &field = field_flag_pairs.at(c).get_field();
                 if (td->first == "TD" || td->first.empty()) {
                     std::string temp = td->second.get_value<std::string>();
-                    if (field.get_array_size() != 1)
+                    if (field.get_array_size() != 1) {
                         column_array_sizes[c] =
                                 std::max(column_array_sizes[c],
                                          count_elements(temp, field.get_type()));
-                    rows.rbegin()->emplace_back(temp);
+                    }
+                    element_lists_by_row.rbegin()->emplace_back(temp);
                 } else {
                     throw std::runtime_error(
                             "Expected TD inside RESOURCE.TABLE.DATA.TABLEDATA.TR, "
@@ -53,9 +56,10 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                 ++td;
             }
             if (td != tr.second.end()) {
-                throw std::runtime_error(
-                        "Too many elements in row " + std::to_string(rows.size()) +
-                        ".  Only expected " + std::to_string(num_fields - 1) + ".");
+                throw std::runtime_error("Too many elements in row " +
+                                         std::to_string(element_lists_by_row.size()) +
+                                         ".  Only expected " +
+                                         std::to_string(num_fields - 1) + ".");
             }
         } else if (tr.first != XMLATTR_DOT + "encoding" && tr.first != XMLCOMMENT) {
             throw std::runtime_error(
@@ -76,29 +80,29 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
 
     Row row_string(*offsets.rbegin());
 
-    for (size_t current_row = 0; current_row < rows.size(); ++current_row) {
-        auto &row(rows[current_row]);
+    for (size_t row_idx = 0; row_idx < element_lists_by_row.size(); ++row_idx) {
+        auto &element_list = element_lists_by_row[row_idx];
         row_string.fill_with_zeros();
-        for (size_t column = 1; column < num_fields; ++column) {
-            auto &element(row[column - 1]);
+        for (size_t col_idx = 1; col_idx < num_fields; ++col_idx) {
+            const auto &column = columns[col_idx];
+            auto &element = element_list[col_idx - 1];
             if (element.empty()) {
-                row_string.set_null(columns[column].get_type(),
-                                    columns[column].get_array_size(), column,
-                                    offsets[column], offsets[column + 1]);
+                row_string.set_null(column.get_type(), column.get_array_size(), col_idx,
+                                    offsets[col_idx], offsets[col_idx + 1]);
             } else
                 try {
-                    insert_ascii_in_row(columns[column].get_type(),
-                                        columns[column].get_array_size(), column,
-                                        element, offsets[column], offsets[column + 1],
-                                        row_string);
+                    insert_ascii_in_row(row_string, column.get_type(),
+                                        column.get_array_size(), col_idx, element,
+                                        offsets[col_idx], offsets[col_idx + 1]);
                 } catch (std::exception &error) {
                     throw std::runtime_error(
                             "Invalid " +
-                            to_string(field_flag_pairs[column].get_field().get_type()) +
-                            " value " + element + " in row " +
-                            std::to_string(current_row + 1) + ", field " +
-                            std::to_string(column) + ", array_size: " +
-                            std::to_string(columns[column].get_array_size()) +
+                            to_string(
+                                    field_flag_pairs[col_idx].get_field().get_type()) +
+                            " value " + element + " in element_list " +
+                            std::to_string(row_idx + 1) + ", field " +
+                            std::to_string(col_idx) +
+                            ", array_size: " + std::to_string(column.get_array_size()) +
                             ". Error message: " + error.what());
                 }
         }

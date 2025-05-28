@@ -4,6 +4,7 @@
 
 #include "../../../Property.hxx"
 #include "../../../Table_Element.hxx"
+#include "../../../Utils/Null_Utils.hxx"
 #include "../../../Utils/Table_Utils.hxx"
 #include "../../../Utils/Vector_Utils.hxx"
 #include "../../Utils.hxx"

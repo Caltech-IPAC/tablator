@@ -31,7 +31,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     H5::Group group(outfile.createGroup("RESOURCE_0"));
     write_hdf5_columns(get_resource_element_params(), PARAM, group);
 
-    std::array<hsize_t, 1> dims = {{num_rows()}};
+    std::array<hsize_t, 1> dims = {{get_num_rows()}};
     H5::DataSpace dataspace(dims.size(), dims.data());
 
     const auto &columns = get_columns();
@@ -39,7 +39,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
 
     std::vector<H5::StrType> string_types;
     std::vector<H5::ArrayType> array_types;
-    H5::CompType compound_type(row_size());
+    H5::CompType compound_type(get_row_size());
     std::vector<std::string> unique_names;
 
     unique_names.reserve(columns.size());

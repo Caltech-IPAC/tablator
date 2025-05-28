@@ -22,7 +22,12 @@ public:
               array_size_(Array_size),
               field_properties_(Field_properties) {}
 
-    inline size_t data_size() const { return tablator::data_size(type_) * array_size_; }
+    inline size_t get_data_size() const {
+        return tablator::data_size(type_) * array_size_;
+    }
+
+    // deprecated
+    inline size_t data_size() const { return get_data_size(); }
 
     // accessors
     inline const std::string &get_name() const { return name_; }
@@ -63,6 +68,8 @@ public:
 private:
     std::string name_;
     Data_Type type_;
+
+    // Actual array_size for fixed-length arrays; maximum array_size otherwise.
     size_t array_size_;
     Field_Properties field_properties_;
 };

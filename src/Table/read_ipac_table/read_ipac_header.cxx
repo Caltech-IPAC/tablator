@@ -1,5 +1,6 @@
 #include "../../Table.hxx"
 
+#include "../read_ipac_table.hxx"
 
 namespace {
 
@@ -27,7 +28,7 @@ void check_bar_position(const std::vector<size_t> &bar_offsets, const std::strin
 }  // namespace
 
 size_t tablator::Table::read_ipac_header(
-        std::istream &ipac_file, std::array<std::vector<std::string>, 4> &columns,
+        std::istream &ipac_file, std::array<std::vector<std::string>, 4> &ipac_columns,
         std::vector<size_t> &ipac_column_offsets,
         std::vector<Labeled_Property> &labeled_resource_properties) {
     size_t line_num = 0;
@@ -77,9 +78,9 @@ size_t tablator::Table::read_ipac_header(
         }
     }
 
-    size_t header_line_num = 0;
+    size_t num_header_lines = 0;
     for (; ipac_file && first_character == '|';
-         first_character = ipac_file.peek(), ++header_line_num) {
+         first_character = ipac_file.peek(), ++num_header_lines) {
         std::string line;
         std::getline(ipac_file, line);
         ++line_num;
@@ -89,13 +90,13 @@ size_t tablator::Table::read_ipac_header(
                                      ", the header '" + line +
                                      "' contains tabs at character " +
                                      std::to_string(tab_position + 1));
-        if (header_line_num > 3) {
+        if (num_header_lines > 3) {
             throw std::runtime_error(
                     "The table has more than 4 header lines "
                     "starting with '|'.");
         }
 
-        if (header_line_num == 0) {
+        if (num_header_lines == 0) {
             ipac_column_offsets = get_bar_offsets(line);
         } else {
             check_bar_position(ipac_column_offsets, line, line_num);
@@ -103,51 +104,58 @@ size_t tablator::Table::read_ipac_header(
         // This split creates an empty element at the beginning and
         // end.  We keep the beginning to mark the null_bitfield_flag,
         // and pop off the end.
-        boost::split(columns[header_line_num], line, boost::is_any_of("|"));
+        boost::split(ipac_columns[num_header_lines], line, boost::is_any_of("|"));
 
         // FIXME: I think this error can never happen, because it would
         // have been caught by check_bar_position.
-        if (columns[header_line_num].size() < 2)
+        if (ipac_columns[num_header_lines].size() < 2)
             throw std::runtime_error(
                     "In line " + std::to_string(line_num) +
                     ", the table is missing header information in this line: '" + line +
                     "'");
-        columns[header_line_num].pop_back();
-        for (auto &column : columns[header_line_num]) boost::algorithm::trim(column);
+        ipac_columns[num_header_lines].pop_back();
 
-        if (header_line_num == 0) {
-            columns[0][0] = null_bitfield_flags_name;
-        } else if (header_line_num == 1) {
-            if (columns[0].size() != columns[1].size())
-                throw std::runtime_error("Wrong number of data types in line " +
-                                         std::to_string(line_num) + ". Expected " +
-                                         std::to_string(columns[0].size()) +
-                                         " but found " +
-                                         std::to_string(columns[1].size()));
-        } else if (header_line_num == 2 && columns[0].size() < columns[2].size()) {
+        for (auto &column : ipac_columns[num_header_lines]) {
+            boost::algorithm::trim(column);
+        }
+
+        if (num_header_lines == 0) {
+            ipac_columns[COL_NAME_IDX][0] = null_bitfield_flags_name;
+        } else if (num_header_lines == 1) {
+            if (ipac_columns[COL_NAME_IDX].size() != ipac_columns[1].size())
+                throw std::runtime_error(
+                        "Wrong number of data types in line " +
+                        std::to_string(line_num) + ". Expected " +
+                        std::to_string(ipac_columns[COL_NAME_IDX].size()) +
+                        " but found " + std::to_string(ipac_columns[1].size()));
+        } else if (num_header_lines == 2 && ipac_columns[COL_NAME_IDX].size() <
+                                                    ipac_columns[COL_UNIT_IDX].size()) {
             throw std::runtime_error("Too many values for units in line  " +
                                      std::to_string(line_num) + ".  Expected at most " +
-                                     std::to_string(columns[0].size()) + " but found " +
-                                     std::to_string(columns[2].size()));
-        } else if (header_line_num == 3 && columns[0].size() < columns[3].size()) {
+                                     std::to_string(ipac_columns[COL_NAME_IDX].size()) +
+                                     " but found " +
+                                     std::to_string(ipac_columns[COL_UNIT_IDX].size()));
+        } else if (num_header_lines == 3 && ipac_columns[COL_NAME_IDX].size() <
+                                                    ipac_columns[COL_NULL_IDX].size()) {
             throw std::runtime_error("Too many values for null in line  " +
                                      std::to_string(line_num) + ".  Expected at most " +
-                                     std::to_string(columns[0].size()) + " but found " +
-                                     std::to_string(columns[3].size()));
+                                     std::to_string(ipac_columns[COL_NAME_IDX].size()) +
+                                     " but found " +
+                                     std::to_string(ipac_columns[COL_NULL_IDX].size()));
         }
     }
 
-    if (header_line_num < 1) {
+    if (num_header_lines < 1) {
         throw std::runtime_error(
                 "Could not find any lines starting with "
                 "'|' for the names of the columns.");
     }
-    if (header_line_num < 2) {
+    if (num_header_lines < 2) {
         throw std::runtime_error(
                 "Could not find any lines starting with "
                 "'|' for the data types of the columns.");
     }
-    columns[2].resize(columns[0].size());
-    columns[3].resize(columns[0].size());
+    ipac_columns[COL_UNIT_IDX].resize(ipac_columns[COL_NAME_IDX].size());
+    ipac_columns[COL_NULL_IDX].resize(ipac_columns[COL_NAME_IDX].size());
     return line_num;
 }

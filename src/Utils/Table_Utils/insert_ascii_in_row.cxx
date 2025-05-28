@@ -7,21 +7,23 @@
 #include "../Table_Utils.hxx"
 
 namespace tablator {
-void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,
+void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &array_size,
                          const size_t &column, const std::string &element,
-                         const size_t &offset, const size_t &offset_end, Row &row) {
+                         const size_t &offset, const size_t &offset_end) {
     if (array_size != 1 && data_type != Data_Type::CHAR) {
         std::vector<std::string> elements;
         boost::split(elements, element, boost::is_any_of(" "));
-        if (elements.size() != array_size)
+        size_t num_elements = elements.size();
+        if (num_elements != array_size) {
             throw std::runtime_error(
                     "Expected " + std::to_string(array_size) + " elements, but found " +
-                    std::to_string(elements.size()) + ": '" + element + "'");
+                    std::to_string(num_elements) + ": '" + element + "'");
+        }
         auto element_offset = offset;
         auto element_size = data_size(data_type);
         for (auto &e : elements) {
-            insert_ascii_in_row(data_type, 1, column, e, element_offset,
-                                element_offset + element_size, row);
+            insert_ascii_in_row(row, data_type, 1, column, e, element_offset,
+                                element_offset + element_size);
             element_offset += element_size;
         }
     } else {
@@ -33,8 +35,9 @@ void insert_ascii_in_row(const Data_Type &data_type, const size_t &array_size,
                     bool result = (boost::iequals(element, "true") ||
                                    boost::iequals(element, "t") || element == "1");
                     if (!result && !(boost::iequals(element, "false") ||
-                                     boost::iequals(element, "f") || element == "0"))
+                                     boost::iequals(element, "f") || element == "0")) {
                         throw std::exception();
+                    }
                     row.insert(static_cast<uint8_t>(result), offset);
                 }
                 break;
