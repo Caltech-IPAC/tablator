@@ -150,9 +150,12 @@ Table::Table(const boost::filesystem::path &input_path, const Format &format) {
     switch (format.enum_format) {
         case Format::Enums::HDF5:
             H5::Exception::dontPrint();
+			// std::cout << "Table(), before read_hdf5()" << std::endl;
             read_hdf5(input_path);
+			// std::cout << "Table(), after read_hdf5()" << std::endl;
             break;
         case Format::Enums::FITS:
+		  // std::cout << "before read_fits()" << std::endl;
             read_fits(input_path);
             break;
         case Format::Enums::IPAC_TABLE:
@@ -160,9 +163,12 @@ Table::Table(const boost::filesystem::path &input_path, const Format &format) {
             read_ipac_table(input_path);
             break;
         case Format::Enums::JSON5:
+			// std::cout << "Table(), before read_json5" << std::endl;
             read_json5(input_path);
+			// std::cout << "Table(), after read_json5" << std::endl;
             break;
         case Format::Enums::VOTABLE:
+        case Format::Enums::VOTABLE_BINARY2:  // JTODO
             read_votable(input_path);
             break;
         case Format::Enums::JSON:
@@ -201,9 +207,17 @@ Table::Table(std::istream &input_stream, const Format &format) {
             read_ipac_table(input_stream);
             break;
         case Format::Enums::JSON5:
+			// std::cout << "Table(), before read_json5 II" << std::endl;
+			try {
             read_json5(input_stream);
+			} catch (...) {
+			// std::cout << "Table(), read_json5 threw unknown error" << std::endl;
+			throw std::runtime_error("hmm2");
+			}
+			// std::cout << "Table(), after read_json5 II" << std::endl;
             break;
         case Format::Enums::VOTABLE:
+        case Format::Enums::VOTABLE_BINARY2:
             read_votable(input_stream);
             break;
         case Format::Enums::JSON:
@@ -237,9 +251,11 @@ void Table::read_votable(std::istream &input_stream) {
 }
 
 void Table::read_json(std::istream &input_stream) {
+  // std::cout << "Table::read_json(), enter" << std::endl;
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(input_stream, tree);
     tablator::ptree_readers::read_property_tree_as_votable(*this, tree);
+  // std::cout << "Table::read_json(), exit" << std::endl;
 }
 
 

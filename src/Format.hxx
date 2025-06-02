@@ -24,6 +24,7 @@ public:
         ORACLE_SQL,
         SQLITE_SQL,
         SQLITE_DB,
+        VOTABLE_BINARY2,
         UNKNOWN
     };
 
@@ -46,6 +47,7 @@ public:
             {Enums::ORACLE_SQL, {"oracle", {"oracle"}}},
             {Enums::SQLITE_SQL, {"sqlite", {"sqlite"}}},
             {Enums::SQLITE_DB, {"db", {"db"}}},
+            {Enums::VOTABLE_BINARY2, {"votable_binary2", {"vbin2"}}},
             {Enums::UNKNOWN, {"unknown", {}}}};
 
     Enums enum_format = Enums::UNKNOWN;
@@ -94,6 +96,7 @@ public:
     bool is_json() const { return enum_format == Enums::JSON; }
     bool is_json5() const { return enum_format == Enums::JSON5; }
     bool is_votable() const { return enum_format == Enums::VOTABLE; }
+    bool is_votable_binary2() const { return enum_format == Enums::VOTABLE_BINARY2; }
     bool is_csv() const { return enum_format == Enums::CSV; }
     bool is_tsv() const { return enum_format == Enums::TSV; }
     bool is_text() const { return enum_format == Enums::TEXT; }

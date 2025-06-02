@@ -119,15 +119,18 @@ size_t tablator::Table::read_ipac_header(
             boost::algorithm::trim(column);
         }
 
+		// JTODO why check only '<'? Did we handle '>' in check_bar_position?
+
         if (num_header_lines == 0) {
+		  // First time through
             ipac_columns[COL_NAME_IDX][0] = null_bitfield_flags_name;
         } else if (num_header_lines == 1) {
-            if (ipac_columns[COL_NAME_IDX].size() != ipac_columns[1].size())
+            if (ipac_columns[COL_NAME_IDX].size() != ipac_columns[COL_TYPE_IDX].size())
                 throw std::runtime_error(
                         "Wrong number of data types in line " +
                         std::to_string(line_num) + ". Expected " +
                         std::to_string(ipac_columns[COL_NAME_IDX].size()) +
-                        " but found " + std::to_string(ipac_columns[1].size()));
+                        " but found " + std::to_string(ipac_columns[COL_TYPE_IDX].size()));
         } else if (num_header_lines == 2 && ipac_columns[COL_NAME_IDX].size() <
                                                     ipac_columns[COL_UNIT_IDX].size()) {
             throw std::runtime_error("Too many values for units in line  " +
@@ -143,7 +146,7 @@ size_t tablator::Table::read_ipac_header(
                                      " but found " +
                                      std::to_string(ipac_columns[COL_NULL_IDX].size()));
         }
-    }
+    } // end of loop through lines beginning with '|'
 
     if (num_header_lines < 1) {
         throw std::runtime_error(
@@ -155,7 +158,10 @@ size_t tablator::Table::read_ipac_header(
                 "Could not find any lines starting with "
                 "'|' for the data types of the columns.");
     }
+
+	// JTODO don't we have a problem if they don't already match up?  Or are we filling in blank lines?
     ipac_columns[COL_UNIT_IDX].resize(ipac_columns[COL_NAME_IDX].size());
     ipac_columns[COL_NULL_IDX].resize(ipac_columns[COL_NAME_IDX].size());
+
     return line_num;
 }

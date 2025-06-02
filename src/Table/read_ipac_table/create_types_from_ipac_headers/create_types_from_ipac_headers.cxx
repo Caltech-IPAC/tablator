@@ -2,6 +2,7 @@
 
 #include "../../read_ipac_table.hxx"
 
+// JTODO rename file
 void tablator::Table::create_types_from_ipac_headers(
         std::vector<Column> &columns, std::vector<size_t> &offsets,
         const std::array<std::vector<std::string>, 4> &ipac_columns,
@@ -10,7 +11,7 @@ void tablator::Table::create_types_from_ipac_headers(
                             Data_Type::UINT8_LE, ipac_column_widths.at(0),
                             Field_Properties(null_bitfield_flags_description));
 
-    size_t num_columns = ipac_columns[0].size();
+    size_t num_columns = ipac_columns[COL_NAME_IDX].size();
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
         append_ipac_data_member(columns, offsets,
                                 ipac_columns.at(COL_NAME_IDX).at(col_idx),
@@ -30,5 +31,8 @@ void tablator::Table::create_types_from_ipac_headers(
                     boost::algorithm::trim_copy(ipac_columns[COL_NULL_IDX].at(col_idx));
         }
         columns.at(col_idx).set_field_properties(field_props);
+		// JTODO
+		//        columns.at(col_idx).set_dynamic_array_flag(ipac_columns[COL_TYPE].at(col_idx) == "char");
+
     }
 }

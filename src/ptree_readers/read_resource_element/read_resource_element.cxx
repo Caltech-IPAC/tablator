@@ -127,7 +127,6 @@ tablator::Resource_Element read_resource_element(
         }
         ++child;
     }
-
     std::vector<Property> trailing_info_list;
     child = read_trailing_info_section(trailing_info_list, child, end);
 

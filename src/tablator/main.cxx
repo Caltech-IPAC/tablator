@@ -103,6 +103,7 @@ void handle_extract_column(const boost::filesystem::path &input_path,
                            const boost::filesystem::path &output_path,
                            const std::string &column_name,
                            const std::string &type_str) {
+  // std::cout << "main, handle_extract_column() enter" << std::endl;
     boost::filesystem::ifstream input_stream(input_path);
     tablator::Table table(input_stream, input_format);
     boost::filesystem::ofstream output_stream(output_path);
@@ -126,6 +127,7 @@ void handle_extract_column(const boost::filesystem::path &input_path,
         auto val_array_vec = table.extract_column<int32_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "UINT32_LE")) {
+	  // std::cout << "main, before uint32_le" << std::endl;
         auto val_array_vec = table.extract_column<uint32_t>(column_id);
         dump_column_vector(output_stream, val_array_vec, num_rows, array_size);
     } else if (boost::iequals(type_str, "INT64_LE")) {
@@ -554,9 +556,11 @@ int main(int argc, char *argv[]) {
         /**************/
 
         if (extract_single_value) {
+		  // std::cout << "extract_single_value" << std::endl;
             handle_extract_single_value(input_path, input_format, output_path,
                                         column_to_extract, type_str, row_id);
         } else if (extract_column) {
+		  // std::cout << "extract_column" << std::endl;
             handle_extract_column(input_path, input_format, output_path,
                                   column_to_extract, type_str);
         } else if (extract_single_value_as_string) {
@@ -621,16 +625,18 @@ int main(int argc, char *argv[]) {
                             options);
         } else if (combine_tables_f) {
             // JTODO make this option incompatible with other options
+		  // std::cout << "main, combine, before stream1" << std::endl;
             boost::filesystem::ifstream input_stream(input_path);
             tablator::Table in_table1(input_stream, input_format);
             input_stream.close();
+		  // std::cout << "main, combine, after stream1" << std::endl;
 
             boost::filesystem::ifstream input2_stream(input2_path);
             tablator::Table in_table2(input2_stream, input2_format);
             input2_stream.close();
-
+		  // std::cout << "main, combine, after stream2" << std::endl;
             tablator::Table out_table = tablator::combine_tables(in_table1, in_table2);
-
+		  // std::cout << "main, combine, after combine()" << std::endl;
             boost::filesystem::ofstream output_stream(output_path);
             out_table.write(output_stream, output_path.stem().native(), output_format,
                             options);
@@ -650,8 +656,11 @@ int main(int argc, char *argv[]) {
             in_table1.write(output_stream, output_path.stem().native(), output_format,
                             options);
         } else {
+		   // std::cout << "main(), before read()" << std::endl;
             tablator::Table table(input_path, input_format);
+		   // std::cout << "main(), before write()" << std::endl;
             table.write(output_path, output_format, options);
+		   // std::cout << "main(), after write()" << std::endl;
         }
     } catch (boost::program_options::error &exception) {
         std::cerr << exception.what() << "\n" << usage(visible_options);

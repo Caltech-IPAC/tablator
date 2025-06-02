@@ -4,6 +4,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Column.hxx"
+#include "Utils/Table_Utils.hxx"  // JTODO
 
 // JTODO: Create struct to hold commonly used (columns, offsets) pair?
 

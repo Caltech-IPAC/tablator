@@ -52,6 +52,7 @@ std::string tablator::Table::extract_value_as_string(
     // JTODO Write UINT8_LE values the way Ipac_Table_Writer does?
     tablator::Ascii_Writer::write_type_as_ascii(
             ss, column.get_type(), column.get_array_size(),
+			column.get_dynamic_array_flag(),
             data.data() + curr_row_offset + offsets[col_idx],
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     return ss.str();
@@ -128,7 +129,7 @@ void tablator::Table::insert_null_into_row(tablator::Row &row, size_t col_idx,
     validate_parameters(row, *this, col_idx, 0 /* elt_idx */, array_size);
     const auto &column = get_columns().at(col_idx);
     row.set_null(column.get_type(), sizeof(uint32_t), col_idx,
-                 get_offsets().at(col_idx), get_offsets().at(col_idx + 1));
+                 get_offsets().at(col_idx), get_offsets().at(col_idx + 1), column.get_dynamic_array_flag());
 }
 
 

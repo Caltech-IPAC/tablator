@@ -305,7 +305,6 @@ public:
         tablator::unsafe_append_row(get_data(), row, get_row_size());
     }
 
-
     void append_rows(const Table &table2);
 
     // write functions
@@ -364,7 +363,7 @@ public:
             std::ostream &os, const std::vector<size_t> &column_ids,
             const Command_Line_Options options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids, 0,
-                                                            num_rows(), options);
+                                                            get_num_rows(), options);
     }
 
     void write_single_ipac_record(std::ostream &os, size_t row_idx,
@@ -470,6 +469,8 @@ public:
     void write_tabledata(std::ostream &os, const Format::Enums &output_format,
                          const Command_Line_Options &options) const;
 
+    void write_binary2(std::ostream &os, const Format::Enums &output_format) const;
+
     void write_html(std::ostream &os, const Command_Line_Options &options) const;
 
     boost::property_tree::ptree generate_property_tree() const;
@@ -530,9 +531,10 @@ public:
                                      "; data size is " +
                                      std::to_string(get_data().size()));
         }
+		// std::cout << "is_null_value(), col_idx: " << col_idx << "< row_idx: " << row_idx << std::endl;
         return is_null_MSB(get_data(), row_offset, col_idx);
     }
-
+#if 0
     // Deprecated because of the use of row_offset rather than row_idx.
     bool is_null(size_t row_offset, size_t col_idx) const {
         auto pos = row_offset + (col_idx - 1) / 8;
@@ -543,7 +545,7 @@ public:
         }
         return get_data().at(pos) & (128 >> ((col_idx - 1) % 8));
     }
-
+#endif
 
     // extractors
 
@@ -572,31 +574,48 @@ public:
         return val_array;
     }
 
+  // JTODO move to .cxx
+  // Note: This function does not clear the incoming val_array. JTODO
     template <typename T>
     void extract_value(std::vector<T> &val_array, size_t col_idx,
                        size_t row_idx) const {
         static_assert(!std::is_same<T, char>::value,
                       "extract_value() is not supported for columns of type char; "
                       "please use extract_values_as_string().");
+		// std::cout << "extract_value(), enter, col_idx: " << col_idx << ", row_idx: " << row_idx << std::endl;
 
         validate_column_index(col_idx);
         validate_row_index(row_idx);
 
         const auto &columns = get_columns();
         auto &column = columns[col_idx];
+
+
+		size_t row_offset = row_idx * get_row_size();
+		size_t base_offset = row_offset + get_offsets().at(col_idx);
+		uint8_t const *curr_data = get_data().data() + base_offset;
+
         auto array_size = column.get_array_size();
-        size_t row_offset = row_idx * get_row_size();
+		auto dynamic_array_flag = column.get_dynamic_array_flag();
+
+
+		auto curr_array_size = array_size;
+		  if (dynamic_array_flag) {
+			curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_data));
+			curr_data += sizeof(uint32_t);
+		  }
+		  // std::cout << "extract_value, array_size: " << array_size << ", curr_array_size: " << curr_array_size << ", dynamic: " << dynamic_array_flag << std::endl;
+
+		// JTODO array_size? curr_array_size?
         if (is_null_value(row_idx, col_idx)) {
-            for (size_t i = 0; i < array_size; ++i) {
+		  // std::cout << "is_null" << std::endl;
+            for (size_t i = 0; i < curr_array_size || i < 1; ++i) {
                 val_array.emplace_back(get_null<T>());
             }
         } else {
-            // JTODO what if an element is null?  Assume already has get_null() value?
-            size_t base_offset = row_offset + get_offsets().at(col_idx);
-            uint8_t const *curr_data = get_data().data() + base_offset;
             size_t element_size = data_size(column.get_type());
-
-            for (size_t i = 0; i < array_size; ++i) {
+			// std::cout << "not null, elt size: " << element_size << std::endl;
+            for (size_t i = 0; i < curr_array_size; ++i) {
                 val_array.emplace_back(*(reinterpret_cast<const T *>(curr_data)));
                 curr_data += element_size;
             }
@@ -621,14 +640,16 @@ public:
         const auto &columns = get_columns();
         auto &column = columns[col_idx];
         size_t row_count = num_rows();
+
         std::vector<T> col_vec;
+		// std::cout << "extract_column(), array_size: " << column.get_array_size() << std::endl;
         col_vec.reserve(row_count * column.get_array_size());
         for (size_t curr_row_idx = 0; curr_row_idx < row_count; ++curr_row_idx) {
+		  // std::cout << "before extract_value(), curr_row_idx: " << curr_row_idx << ", row_count: " << row_count << std::endl;
             extract_value<T>(col_vec, col_idx, curr_row_idx);
         }
         return col_vec;
     }
-
 
     // inserters
     void insert_null_into_row(tablator::Row &row, size_t col_idx,
@@ -650,8 +671,6 @@ public:
                                   get_columns().at(col_idx).get_array_size());
     }
 
-
-public:
     void insert_string_column_value_into_row(Row &row, size_t col_idx,
                                              const uint8_t *data_ptr,
                                              uint32_t curr_array_size) const;
@@ -1113,10 +1132,13 @@ private:
                                     Format::Enums enum_format, uint num_spaces_left,
                                     uint num_spaces_right,
                                     const Command_Line_Options &options) const;
-
+    void splice_binary2_and_write(std::ostream &os, std::stringstream &ss,
+                                  Format::Enums enum_format, uint num_spaces_left,
+                                  uint num_spaces_right) const;
 
     boost::property_tree::ptree generate_property_tree(
-            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const;
+            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep,
+            bool do_binary2) const;
 
     void distribute_metadata(
             tablator::Labeled_Properties &resource_element_labeled_properties,

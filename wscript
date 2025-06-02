@@ -6,7 +6,7 @@ def options(opt):
 
 def configure(conf):
     conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
-    conf.check_boost(lib='filesystem system program_options regex')
+    conf.check_boost(lib='filesystem system program_options regex thread')
 
 def build(bld):
 
@@ -15,6 +15,7 @@ def build(bld):
     else:
         default_flags=['-Wall', '-Wextra', '-g', '-Ofast', '-fno-finite-math-only', '-DNDEBUG']
 
+    default_flags.append("-DBOOST_SPIRIT_THREADSAFE")
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser', 'sqlite3', 'vsqlitepp']
 
@@ -60,6 +61,8 @@ def build(bld):
              'src/Table/write_html.cxx',
              'src/Table/write_tabledata/write_tabledata.cxx',
              'src/Table/write_tabledata/decode_links.cxx',
+             'src/Table/write_binary2/write_binary2.cxx',
+             'src/Table/write_binary2/encode_base64_stream.cxx',
              'src/Table/generate_property_tree/generate_property_tree.cxx',
              'src/Table/generate_property_tree/add_to_property_tree.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',

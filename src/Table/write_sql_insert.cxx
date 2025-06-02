@@ -9,13 +9,14 @@ void write_point(std::ostream &os,
                                  std::pair<size_t, tablator::Data_Type> > &point_input,
                  const uint8_t *row_start,
                  const tablator::Command_Line_Options &options) {
+  bool dynamic_array_flag = false;
     os << "ST_MakePoint(";
     tablator::Ascii_Writer::write_type_as_ascii(
-            os, point_input.first.second, 1, row_start + point_input.first.first,
+												os, point_input.first.second, (uint32_t)1, dynamic_array_flag, row_start + point_input.first.first,
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     os << ", ";
     tablator::Ascii_Writer::write_type_as_ascii(
-            os, point_input.second.second, 1, row_start + point_input.second.first,
+            os, point_input.second.second, 1, dynamic_array_flag, row_start + point_input.second.first,
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     os << "),\n";
 }
@@ -53,6 +54,7 @@ void tablator::Table::write_sql_insert(
                 std::stringstream ss;
                 tablator::Ascii_Writer::write_type_as_ascii(
                         ss, column.get_type(), column.get_array_size(),
+						column.get_dynamic_array_flag(),
                         data.data() + row_offset + offsets[col_idx], ' ', options);
                 os << quote_sql_string(ss.str(), '\'');
             } else {
@@ -61,6 +63,7 @@ void tablator::Table::write_sql_insert(
                 }
                 tablator::Ascii_Writer::write_type_as_ascii(
                         os, column.get_type(), column.get_array_size(),
+						column.get_dynamic_array_flag(),
                         data.data() + row_offset + offsets[col_idx], ',', options);
                 if (column.get_array_size() != 1) {
                     os << "}'";

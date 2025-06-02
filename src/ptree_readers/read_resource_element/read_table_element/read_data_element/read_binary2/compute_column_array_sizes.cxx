@@ -25,8 +25,8 @@ void compute_column_array_sizes(
             const auto &field = field_flag_pairs[field_idx].get_field();
             bool is_array_dynamic =
                     field_flag_pairs[field_idx].get_dynamic_array_flag();
-
             if (!is_array_dynamic) {
+			  column_array_sizes[field_idx] = field.get_array_size();
                 position += data_size(field.get_type()) * field.get_array_size();
 
             } else {
@@ -61,7 +61,9 @@ void compute_column_array_sizes(
                 }
             }
         }  // end of loop through fields
-        if (position <= stream.size()) ++num_rows;
+        if (position <= stream.size()) {
+            ++num_rows;
+        }
     }
 }
 }  // namespace tablator

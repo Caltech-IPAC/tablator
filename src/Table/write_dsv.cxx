@@ -46,9 +46,14 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
     const auto &columns = get_columns();
     const auto &offsets = get_offsets();
     const auto &data = get_data();
+
     size_t num_columns = columns.size();
     size_t num_rows = get_num_rows();
-    if (num_columns == 0) return;
+
+    if (num_columns == 0) {
+	  return;
+	}
+
     // Skip null_bitfield_flags
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
         write_escaped_string(os, columns[col_idx].get_name(), separator,
@@ -66,6 +71,7 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
             if (!is_null_value(row_idx, col_idx)) {
                 tablator::Ascii_Writer::write_type_as_ascii(
                         ss, column.get_type(), column.get_array_size(),
+						column.get_dynamic_array_flag(),
                         data.data() + offset, tablator::Ascii_Writer::DEFAULT_SEPARATOR,
                         options);
             } else if (options.write_null_strings_) {

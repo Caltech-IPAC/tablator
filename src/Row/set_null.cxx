@@ -3,17 +3,34 @@
 #include "../Row.hxx"
 #include "../data_size.hxx"
 
-void tablator::Row::set_null(const Data_Type &data_type, const size_t &array_size,
+// https://www.ivoa.net/documents/VOTable/20250116/REC-VOTable-1.5.html#tth_sEc5.4
+
+// It is recommended, but not required, that a cell value flagged as
+// null is filled with the NaN value for floating point or complex
+// datatypes, and zero-valued bytes for other datatypes. It is
+// particularly recommended that a variable length array cell value
+// flagged as null is represented as 4 zero-valued bytes, indicating a
+// zero-length value.
+
+size_t tablator::Row::set_null(const Data_Type &data_type, const size_t &array_size,
                              const size_t &col_idx, const size_t &offset,
-                             const size_t &offset_end) {
+                             const size_t &offset_end, bool dynamic_array_flag) {
+  // std::cout << "set_null(),  col_idx: " << col_idx << ", offset: " << offset << std::endl;
     const int byte = (col_idx - 1) / 8;
     const char mask = (128 >> ((col_idx - 1) % 8));
 
     // Update the null_bitfield_flag's bit for this column.
-    data[byte] = data[byte] | mask;
+    data_[byte] = data_[byte] | mask;
 
     size_t curr_offset = offset;
     size_t data_type_size = data_size(data_type);
+
+	if (dynamic_array_flag) {
+	  char *curr_ptr = data_.data() + curr_offset;
+	  *(reinterpret_cast<uint32_t *>(curr_ptr)) = 0;
+
+		curr_offset += sizeof(uint32_t);
+	} else {
 
     // Mark the indicated array elements as null.
     for (size_t i = 0; i < array_size; ++i) {
@@ -24,6 +41,8 @@ void tablator::Row::set_null(const Data_Type &data_type, const size_t &array_siz
             break;
         }
     }
+	}
+	  return (curr_offset - offset);
 }
 
 void tablator::Row::set_null_internal(const Data_Type &data_type,

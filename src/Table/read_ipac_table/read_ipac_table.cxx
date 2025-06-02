@@ -16,6 +16,7 @@ std::vector<size_t> get_ipac_column_widths(
     std::vector<size_t> ipac_column_widths;
     // Add a column for null flags.
     ipac_column_widths.push_back(tablator::bits_to_bytes(num_columns));
+
     for (size_t i = 0; i < num_columns; ++i)
         ipac_column_widths.push_back(ipac_column_offsets[i + 1] -
                                      ipac_column_offsets[i] - 1);
@@ -43,6 +44,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     size_t num_tablator_columns = ipac_columns[COL_NAME_IDX].size();
 
     std::vector<size_t> minimum_column_widths(num_tablator_columns, 1);
+
     std::string line;
     std::getline(input_stream, line);
     Row row_string(tablator::get_row_size(offsets));
@@ -65,22 +67,27 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 std::string element = line.substr(ipac_column_offsets[col_idx - 1] + 1,
                                                   ipac_column_widths[col_idx]);
                 boost::algorithm::trim(element);
+
+				// std::cout << "col_idx: " << col_idx << ", before, min_width_sofar: " << minimum_column_widths[col_idx] << std::endl;
                 minimum_column_widths[col_idx] =
                         std::max(minimum_column_widths[col_idx], element.size());
-
+				// std::cout << "col_idx: " << col_idx << ", after, min_width_sofar: " << minimum_column_widths[col_idx] << std::endl;
                 if ((!ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      element == ipac_columns[COL_NULL_IDX][col_idx]) ||
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      tab_column.get_type() != Data_Type::CHAR && element.empty())) {
+				  // std::cout << "before set_null() TODO" << std::endl;
+				  // JTODO dynamic?
                     row_string.set_null(tab_column.get_type(),
                                         tab_column.get_array_size(), col_idx,
-                                        offsets[col_idx], offsets[col_idx + 1]);
+                                        offsets[col_idx], offsets[col_idx + 1], tab_column.get_dynamic_array_flag());
                 } else {
+				  // std::cout << "read_ipac_table(), not null, dynamic_flag: " << tab_column.get_dynamic_array_flag() << std::endl;
                     try {
                         insert_ascii_in_row(row_string, tab_column.get_type(),
                                             tab_column.get_array_size(), col_idx,
                                             element, offsets[col_idx],
-                                            offsets[col_idx + 1]);
+                                            offsets[col_idx + 1], tab_column.get_dynamic_array_flag());
                     } catch (std::exception &error) {
                         throw std::runtime_error(
                                 "Invalid " + to_string(tab_column.get_type()) +

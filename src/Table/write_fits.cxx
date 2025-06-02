@@ -605,9 +605,19 @@ void tablator::Table::write_fits(
             auto &column = columns[col_idx];
 
             uint8_t *curr_data_ptr = row_start_ptr + offsets[col_idx];
+
             Data_Type datatype_for_writing = datatypes_for_writing[col_idx];
 
             size_t array_size = column.get_array_size();
+			// std::cout << "write_fits(), dynamic_array_flag: " << column.get_dynamic_array_flag() << std::endl;
+			if (column.get_dynamic_array_flag()) {
+			  // std::cout << "write_fits(), writing size " << array_size << " and advancing pointer" << std::endl;
+			  array_size = *(reinterpret_cast<const uint32_t *>(curr_data_ptr));
+			  curr_data_ptr += sizeof(uint32_t);
+
+			  // std::cout << "write_fits(), found dynamic array, curr size: " << array_size << ", max size: " << column.get_array_size()<< std::endl;
+			}
+
             bool null_flag_is_set = is_null_value(tab_row_idx, col_idx);
 
             bool all_or_nothing_null =

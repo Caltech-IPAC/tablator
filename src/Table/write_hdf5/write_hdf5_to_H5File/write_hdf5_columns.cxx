@@ -24,12 +24,16 @@ hvl_t make_option_array(const std::vector<Option> &options,
     return hdf5_options;
 }
 
-// column_flavor is PARAM or FIELD.
+  // column_flavor is PARAM or FIELD.
 void write_hdf5_columns(const std::vector<Column> &tab_columns,
                         const std::string &column_flavor, H5::H5Location &location) {
+  // std::cout << "write_hdf5_columns(), enter, flavor: " << column_flavor << std::endl;
     if (tab_columns.empty()) {
+	// std::cout << "write_hdf5_columns(), early exit" << std::endl;
         return;
     }
+	// std::cout << "write_hdf5_columns(), after early exit" << std::endl;
+
     H5::StrType hdf5_string(0, H5T_VARIABLE);
 
     H5::CompType hdf5_option(sizeof(HDF5_Attribute));
@@ -59,6 +63,8 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
 
     H5::VarLenType hdf5_attribute_array(&hdf5_attribute);
 
+	// std::cout << "write_hdf5_columns(), before field_properties()" << std::endl;
+
     H5::CompType hdf5_field_properties(sizeof(HDF5_Field_Properties));
     hdf5_field_properties.insertMember(Field_Properties::FP_DESCRIPTION,
                                        HOFFSET(HDF5_Field_Properties, description),
@@ -73,6 +79,9 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
                                        HOFFSET(HDF5_Field_Properties, values),
                                        hdf5_values);
 
+	//	H5::PredType hdf5_int
+
+	// name, type, array_size etc. are class members of HD5_Column.
     H5::CompType hdf5_column(sizeof(HDF5_Column));
     hdf5_column.insertMember(Column::COL_NAME, HOFFSET(HDF5_Column, name), hdf5_string);
     hdf5_column.insertMember(Column::COL_TYPE, HOFFSET(HDF5_Column, type), hdf5_string);
@@ -81,6 +90,9 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
     hdf5_column.insertMember(Column::COL_FIELD_PROPERTIES,
                              HOFFSET(HDF5_Column, field_properties),
                              hdf5_field_properties);
+    hdf5_column.insertMember(Column::COL_DYNAMIC_ARRAY_FLAG,
+                             HOFFSET(HDF5_Column, dynamic_array_flag),
+                             H5::PredType::STD_I8LE);
 
     H5::VarLenType hdf5_columns_type(&hdf5_column);
 
@@ -132,17 +144,24 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
         HDF5_Field_Properties hdf5_field_properties = {
                 field_properties.get_description().c_str(), hdf5_attributes, hdf5_links,
                 hdf5_values};
+
         type_strings.push_back(to_string(field.get_type()));
+
+		bool dynamic_array_flag = field.get_dynamic_array_flag();
+
         hdf5_columns.emplace_back(field.get_name().c_str(),
                                   type_strings.rbegin()->c_str(),
-                                  field.get_array_size(), hdf5_field_properties);
+                                  field.get_array_size(), hdf5_field_properties, dynamic_array_flag);
+
     }
 
     hvl_t H5_columns = {hdf5_columns.size(), hdf5_columns.data()};
+	// std::cout << "write_hdf5_columns(), hdf5_columns.size(): " << hdf5_columns.size() << std::endl;
 
     H5::DataSpace column_space(H5S_SCALAR);
     H5::Attribute location_attribute =
             location.createAttribute(column_flavor, hdf5_columns_type, column_space);
+
     location_attribute.write(hdf5_columns_type, &H5_columns);
 }
 }  // namespace tablator

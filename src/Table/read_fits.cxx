@@ -497,21 +497,27 @@ private:
 //====================================================
 
 // There is more than one way to indicate the array_size of a FITS column.
-size_t get_array_size(const CCfits::Column &fits_col) {
+  std::pair<size_t, bool> get_array_info(const CCfits::Column &fits_col) {
     size_t array_size = 1;
-    if (std::isdigit(fits_col.format().at(0))) {
-        array_size = std::stoll(fits_col.format());
+	bool dynamic_array_flag = false;
+
+	const std::string &col_format = fits_col.format();
+	// std::cout << "col_format: " << col_format << std::endl;
+    if (std::isdigit(col_format.at(0))) {
+        array_size = std::stoll(col_format);
     } else {
         // Capture e.g. "PK(5)".
         static std::regex format_regex{R"(([0-9]+))"};
         std::smatch number_match;
         bool format_contains_paren_number =
-                std::regex_search(fits_col.format(), number_match, format_regex);
+                std::regex_search(col_format, number_match, format_regex);
         if (format_contains_paren_number) {
             array_size = std::stoi(number_match[1]);
         }
+		dynamic_array_flag = (col_format.find_first_of("PQ") != std::string::npos);
+
     }
-    return array_size;
+    return std::make_pair(array_size, dynamic_array_flag);
 }
 
 //=====================================================
@@ -525,9 +531,9 @@ public:
     // This un-templatized version is called for data_types for which
     // CCfits::getNullValue() is not defined.
     void store_data_type_info_for_column(tablator::Data_Type tab_data_type,
-                                         size_t array_size) {
+                                         size_t array_size, bool dynamic_array_flag) {
         column_info_list_.emplace_back(tab_data_type, array_size, false /* got_null */,
-                                       0 /* null_list_idx */);
+                                       0 /* null_list_idx */, dynamic_array_flag);
     }
 
     //=====================================================
@@ -535,7 +541,7 @@ public:
     template <typename T>
     void store_info_for_column(bool &got_null, T &null_value,
                                const CCfits::Column &fits_col,
-                               tablator::Data_Type tab_data_type, size_t array_size) {
+                               tablator::Data_Type tab_data_type, size_t array_size, bool dynamic_array_flag) {
         got_null = false;
         null_value = 0;
         if (is_null_value_supported(tab_data_type)) {
@@ -545,13 +551,13 @@ public:
             // rather than once for every combination of column and row.
             got_null = fits_col.getNullValue(&null_value);
         }
-
+		// std::cout << "store_info_for_column(), got_null: " << got_null << std::endl;
         size_t null_list_idx = 0;
         if (got_null) {
             null_list_idx = store_null_value_for_type(tab_data_type, null_value);
         }
         column_info_list_.emplace_back(tab_data_type, array_size, got_null,
-                                       null_list_idx);
+                                       null_list_idx, dynamic_array_flag);
     }
 
     //=====================================================
@@ -559,6 +565,7 @@ public:
     template <typename T>
     void retrieve_info_for_column(tablator::Data_Type &tab_data_type,
                                   size_t &array_size, bool &got_null, T &null_value,
+								  bool &dynamic_array_flag,
                                   size_t tab_col_idx) const {
         // The vector column_info_list_ is indexed from 0, but the
         // non-null_bitfield_flags columns of the tablator table are
@@ -571,13 +578,14 @@ public:
             null_value = retrieve_null_value_for_type<T>(tab_data_type,
                                                          col_info.null_list_idx_);
         }
+		dynamic_array_flag = col_info.dynamic_array_flag_;
     }
 
     //=====================================================
 
-    size_t retrieve_array_size_for_column(size_t tab_col_idx) const {
+  std::pair<size_t, bool> retrieve_array_info_for_column(size_t tab_col_idx) const {
         const Column_Info &col_info = column_info_list_.at(tab_col_idx - 1);
-        return col_info.array_size_;
+        return std::make_pair(col_info.array_size_, col_info.dynamic_array_flag_);
     }
 
 private:
@@ -656,16 +664,17 @@ private:
     //=====================================================
 
     struct Column_Info {
-        Column_Info(tablator::Data_Type tdt, size_t as, bool gn, size_t nli)
+	  Column_Info(tablator::Data_Type tdt, size_t as, bool gn, size_t nli, bool daf)
                 : tab_data_type_(tdt),
                   array_size_(as),
                   got_null_(gn),
-                  null_list_idx_(nli) {}
+                  null_list_idx_(nli), dynamic_array_flag_(daf) {}
 
         tablator::Data_Type tab_data_type_;
         size_t array_size_;
         bool got_null_;
         size_t null_list_idx_;
+	  bool dynamic_array_flag_;
     };
 
     // Storage for type-specific per-column null_values
@@ -692,24 +701,32 @@ public:
             : col_info_manager_(col_info_manager), offsets_(offsets){};
 
 
+
+
+  // JTODO This function is not called for CHAR.
     template <typename T>
     void read_element_given_column_and_row(tablator::Row &row, fitsfile *fits_file,
                                            const CCfits::Column &fits_col,
                                            size_t fits_row_idx, size_t tab_col_idx) {
+	  // std::cout << "read_element_given_column_and_row(), enter" << std::endl;
         // Use the C api because the C++ api (Column::readArrays) is
         // horrendously slow.
         tablator::Data_Type tab_data_type;
         size_t array_size;
         bool got_null = false;
         T null_value = 0;
+		bool dynamic_array_flag = false;
         col_info_manager_.retrieve_info_for_column(tab_data_type, array_size, got_null,
-                                                   null_value, tab_col_idx);
+                                                   null_value, dynamic_array_flag, tab_col_idx);
 
-        size_t col_offset = offsets_[tab_col_idx];
-        size_t next_col_offset = offsets_[tab_col_idx + 1];
+		// std::cout << "after retrieve_info()" << std::endl;
+		// JTODO take dynamic_array_flag into account.  Use function for this.
+		size_t col_start_offset = tablator::get_col_start_offset(offsets_, tab_col_idx);
+        size_t col_data_start_offset = tablator::get_col_data_start_offset(offsets_, tab_col_idx, dynamic_array_flag);
+        size_t col_end_offset = tablator::get_col_end_offset(offsets_, tab_col_idx);
 
         auto get_matched_datatype = CCfits::FITSUtil::MatchType<T>();
-        char *curr_ptr = row.get_data().data() + col_offset;
+        char *curr_ptr = row.get_data().data() + col_start_offset;
 
         std::vector<T> temp_array(array_size);
         int status = 0;
@@ -718,22 +735,43 @@ public:
         fits_read_col(fits_file, get_matched_datatype(), fits_col.index(), fits_row_idx,
                       1, array_size, NULL /* nulval */, temp_array.data(), &anynul,
                       &status);
+		// std::cout << "after fits_read_col()" << std::endl;
 
+
+		// JTODO
         if (anynul) {
             // Indicate that all array_size values are null.
 
             // Note: As of 13Oct23, the only value I have seen for anynul is 0.
-            row.set_null(tab_data_type, array_size, tab_col_idx, col_offset,
-                         next_col_offset);
+			// This function does what is needed for dynamic arrays.
+            row.set_null(tab_data_type, array_size, tab_col_idx, col_start_offset,
+                         col_end_offset, dynamic_array_flag);
+
         } else {
+
+#if 1
+		  // Do this before loop through array elements.
+		  // Overwrite if array turns out to be null?  JTODO
+		// Awkward mix of curr_ptr and offsets.  Reset curr_ptr from offsets each time?  Don't advance it?
+		  if (dynamic_array_flag) {
+			// std::cout << "read_fits(), dynamic, setting array_size " << array_size << " and advancing pointer" << std::endl;
+			*reinterpret_cast<uint32_t *>(curr_ptr) = array_size;
+			curr_ptr += sizeof(uint32_t);
+		  }
+#endif
+
             for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
                 T array_elt = temp_array[array_offset];
-                if (got_null && array_elt == null_value) {
+				// JTODO how about a single null for the whole array?
+				if (got_null && array_elt == null_value) {
                     // Indicate that a single value in the array is null.
                     row.set_null(tab_data_type, 1 /* array_size */, tab_col_idx,
-                                 col_offset + (array_offset * sizeof(T)),
-                                 next_col_offset);
-                } else if ((tab_data_type == tablator::Data_Type::FLOAT32_LE ||
+                                 col_data_start_offset + (array_offset * sizeof(T)),
+                                 col_end_offset, false /* dynamic_array_flag */);
+
+		  } else
+
+			if ((tab_data_type == tablator::Data_Type::FLOAT32_LE ||
                             tab_data_type == tablator::Data_Type::FLOAT64_LE) &&
                            std::isnan(array_elt)) {
                     // Do these types separately, both because FITS doesn't (or didn't)
@@ -741,8 +779,8 @@ public:
                     // equality check doesn't work with NaN, which appears to be the
                     // default NULL signal for these types, at least for Euclid files.
                     row.set_null(tab_data_type, 1 /* array_size */, tab_col_idx,
-                                 col_offset + (array_offset * sizeof(T)),
-                                 next_col_offset);
+                                 col_data_start_offset + (array_offset * sizeof(T)),
+                                 col_end_offset, false /* dynamic_array_flag */);
                 } else {
                     *reinterpret_cast<T *>(curr_ptr) = array_elt;
                     curr_ptr += sizeof(T);
@@ -762,18 +800,21 @@ public:
                                           const CCfits::Column &fits_col,
                                           size_t fits_row_idx, size_t tab_col_idx) {
         // array_size is the size of the column in bytes/chars.
-        size_t array_size =
-                col_info_manager_.retrieve_array_size_for_column(tab_col_idx);
-
-        size_t col_offset = offsets_[tab_col_idx];
-        size_t next_col_offset = offsets_[tab_col_idx + 1];
+	  size_t array_size;
+	  bool dynamic_array_flag;
+	  std::tie(array_size, dynamic_array_flag) =
+                col_info_manager_.retrieve_array_info_for_column(tab_col_idx);
+	  // std::cout << "read_string_given(), row_idx: " << fits_row_idx << ", col_idx: " << tab_col_idx << ", dynamic: " << dynamic_array_flag << std::endl;
+        size_t col_start_offset = offsets_[tab_col_idx];
+        size_t col_end_offset = offsets_[tab_col_idx + 1];
 
         // If this string column is a vector column, all of the array
         // elements (henceforth "substrings") have the same size: the
         // value of CCfits::Column::width().
+
         size_t substring_size = fits_col.width();
         size_t num_substrings = array_size / substring_size;
-
+		// std::cout << "before array_size check, num_substrings: " << num_substrings << std::endl;
         if (array_size != num_substrings * substring_size) {
             throw std::runtime_error(
                     "array_size is not an exact multiple of substring_size.");
@@ -786,6 +827,7 @@ public:
 
         std::vector<std::vector<char>> data_vec(num_substrings,
                                                 std::vector<char>(substring_size + 1));
+		// std::cout << "before ptr_vec loop, num_substrings: " << num_substrings << ", size: " << substring_size << std::endl;
         for (size_t i = 0; i < num_substrings; ++i) {
             ptr_vec.emplace_back(data_vec.at(i).data());
         }
@@ -796,26 +838,43 @@ public:
         char nulstr[] = "";
         int status = 0;
         int anynul = 0;
-
+		// std::cout << "before fits_read_col_str()" << std::endl;
         fits_read_col_str(fits_file, fits_col.index(), fits_row_idx, 1 /* firstelem */,
                           num_substrings /* nelements */, nulstr, data_str, &anynul,
                           &status);
-
+		// std::cout << "after fits_read_col_str()" << std::endl;
         if (anynul) {
-            row.set_null(tab_col_type, fits_col.repeat(), tab_col_idx, col_offset,
-                         next_col_offset);
+		  // std::cout << "anynul" << std::endl;
+            row.set_null(tab_col_type, fits_col.repeat(), tab_col_idx, col_start_offset,
+                         col_end_offset, dynamic_array_flag);
         } else {
-            char *current = row.get_data().data() + col_offset;
+		  // std::cout << "not anynul" << std::endl;
+		  // std::cout << "col_start_offset: " << col_start_offset << ", array_size: " << array_size << std::endl;
+            char *current = row.get_data().data() + col_start_offset;
+			// JTODO set curr_array_size, not max_array_size.
+
+			if (dynamic_array_flag) {
+			// std::cout << "read_fits(), setting array_size " << array_size << " and advancing pointer" << std::endl;
+
+			*(reinterpret_cast<uint32_t *>(current)) = array_size;
+                    current += sizeof(uint32_t);
+			}
+			// std::cout << "after daf" << std::endl;
+
             for (size_t i = 0; i < num_substrings; ++i) {
                 char *element = data_str[i];
                 size_t elt_length = strlen(element);
+				// std::cout << "elt_length: " << elt_length << std::endl;
                 size_t j = 0;
                 for (/* */; j < elt_length && j < substring_size; ++j) {
+				  // std::cout << "1st loop, j: " << j << std::endl;
                     *(current + j) = *(element + j);
                 }
                 for (/* */; j < substring_size; ++j) {
+				  // std::cout << "2nd loop, j: " << j << std::endl;
                     *(current + j) = '\0';
                 }
+				// std::cout << "after loop through substrings" << std::endl;
             }
         }
     }
@@ -832,6 +891,8 @@ private:
 //====================================================
 
 void tablator::Table::read_fits(const boost::filesystem::path &path) {
+  // std::cout << "read_fits(), path, enter" << std::endl;
+
     CCfits::FITS fits(path.string(), CCfits::Read, false);
 
     static constexpr char const *PRIMARY_EXTNAME = "PRIMARY_EXTNAME";
@@ -840,7 +901,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     if (fits.extension().empty())
         throw std::runtime_error("Could not find any extensions in this file: " +
                                  path.string());
-
+	// std::cout << "read_fits(), before LP" << std::endl;
     tablator::Labeled_Properties combined_labeled_properties;
     std::vector<Field> table_element_params;
     std::map<std::string, ATTRIBUTES> table_element_field_attributes;
@@ -852,7 +913,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     Keyword_Reader keyword_reader;
 
     // Retrieve FITS keywords from primary HDU
-
+	// std::cout << "read_fits(), before read_keywords()" << std::endl;
     keyword_reader.read_keywords_as_tablator_elements(fits.pHDU(), PRIMARY_EXTNAME,
                                                       fits.currentExtensionName());
 
@@ -888,7 +949,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     std::vector<Column> columns;
     std::vector<size_t> offsets = {0};
-
+	// std::cout << "read_fits(), before append null bitfields column" << std::endl;
     // Create null_bitfield_flags column for internal use.
     tablator::append_column(columns, offsets, null_bitfield_flags_name,
                             Data_Type::UINT8_LE,
@@ -907,6 +968,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                                                null_bitfield_flags_name &&
                                        ccfits_table->column(1).type() == CCfits::Tbyte);
 
+	// std::cout << "has_null_bitfield_flags: " << has_null_bitfield_flags << std::endl;
 
     Column_Info_Manager col_info_manager;
 
@@ -917,18 +979,22 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     //*********************************************************
     // Retrieve column metadata.
     //*********************************************************
-
+	// std::cout << "read_fits(), before first loop through columns" << std::endl;
     for (size_t fits_col_idx = 1; fits_col_idx <= ccfits_table->column().size();
          ++fits_col_idx) {
+	  // std::cout << "top of loop, fits_col_idx: " << fits_col_idx << std::endl;
         CCfits::Column &fits_col = ccfits_table->column(fits_col_idx);
+
 
         if (fits_col_idx == 1 && has_null_bitfield_flags) {
             // Skip the null_bitfield_flags column, if it exists.
             continue;
         }
-        size_t array_size = get_array_size(fits_col);
+        size_t array_size;
+		bool dynamic_array_flag;
+		std::tie(array_size, dynamic_array_flag) = get_array_info(fits_col);
         bool got_null = false;
-
+		// std::cout << "read_fits(), fits_col_idx: " << fits_col_idx << " , dynamic: " << dynamic_array_flag << std::endl;
         // Negative type indicates array-valued column.
         int abs_fits_type = abs(fits_col.type());
 
@@ -936,79 +1002,79 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             case CCfits::Tlogical: {
                 // std::cout << "Tlogical: " << CCfits::Tlogical << std::endl;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT8_LE, array_size);
+                                        Data_Type::INT8_LE, array_size, dynamic_array_flag);
                 col_info_manager.store_data_type_info_for_column(Data_Type::UINT8_LE,
-                                                                 array_size);
+                                                                 array_size, dynamic_array_flag);
             } break;
             case CCfits::Tbyte: {
                 // std::cout << "Tbyte: " << CCfits::Tbyte << std::endl;
                 uint8_t null_value = 0;
                 col_info_manager.store_info_for_column<uint8_t>(
                         got_null, null_value, fits_col, Data_Type::INT32_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT8_LE, array_size, null_prop);
+                                        Data_Type::UINT8_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tshort: {
                 // std::cout << "Tshort: " << CCfits::Tshort << std::endl;
                 int16_t null_value = 0;
                 col_info_manager.store_info_for_column<int16_t>(
                         got_null, null_value, fits_col, Data_Type::INT16_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT16_LE, array_size, null_prop);
+                                        Data_Type::INT16_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tushort: {
                 // std::cout << "Tushort: " << CCfits::Tushort << std::endl;
                 uint16_t null_value = 0;
                 col_info_manager.store_info_for_column<uint16_t>(
                         got_null, null_value, fits_col, Data_Type::UINT16_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT16_LE, array_size, null_prop);
+                                        Data_Type::UINT16_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tint: {
                 int32_t null_value = 0;
                 col_info_manager.store_info_for_column<int32_t>(
                         got_null, null_value, fits_col, Data_Type::INT32_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT32_LE, array_size, null_prop);
+                                        Data_Type::INT32_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tuint: {
                 uint32_t null_value = 0;
                 col_info_manager.store_info_for_column<uint32_t>(
                         got_null, null_value, fits_col, Data_Type::UINT32_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT32_LE, array_size, null_prop);
+                                        Data_Type::UINT32_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tlong: {
                 // The Tlong type code is used for 32-bit integer columns when reading.
                 int32_t null_value = 0;
                 col_info_manager.store_info_for_column<int32_t>(
                         got_null, null_value, fits_col, Data_Type::INT32_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT32_LE, array_size, null_prop);
+                                        Data_Type::INT32_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tulong: {
                 // The Tulong type code is used for 32-bit unsigned integer columns when
@@ -1016,47 +1082,50 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 uint32_t null_value = 0;
                 col_info_manager.store_info_for_column<uint32_t>(
                         got_null, null_value, fits_col, Data_Type::UINT32_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT32_LE, array_size, null_prop);
+                                        Data_Type::UINT32_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tlonglong: {
                 int64_t null_value = 0;
                 col_info_manager.store_info_for_column<int64_t>(
                         got_null, null_value, fits_col, Data_Type::INT64_LE,
-                        array_size);
+                        array_size, dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT64_LE, array_size, null_prop);
+                                        Data_Type::INT64_LE, array_size, null_prop, dynamic_array_flag);
             } break;
             case CCfits::Tfloat: {
                 // std::cout << "Tfloat" << std::endl;
                 Field_Properties null_prop;
                 null_prop.get_values().null = DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::FLOAT32_LE, array_size, null_prop);
+                                        Data_Type::FLOAT32_LE, array_size, null_prop, dynamic_array_flag);
                 col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT32_LE,
-                                                                 array_size);
+                                                                 array_size, dynamic_array_flag);
             } break;
             case CCfits::Tdouble: {
                 // std::cout << "Tdouble" << std::endl;
                 Field_Properties null_prop;
                 null_prop.get_values().null = DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::FLOAT64_LE, array_size, null_prop);
+                                        Data_Type::FLOAT64_LE, array_size, null_prop, dynamic_array_flag);
                 col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT64_LE,
-                                                                 array_size);
+                                                                 array_size, dynamic_array_flag);
             } break;
-            case CCfits::Tstring:
+		case CCfits::Tstring: {
+		  // std::cout << "Tstring" << std::endl;
+			  // JTODO dynamic
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::CHAR, fits_col.width());
+                                        Data_Type::CHAR, fits_col.width(), tablator::Field_Properties(), dynamic_array_flag);
                 col_info_manager.store_data_type_info_for_column(Data_Type::CHAR,
-                                                                 array_size);
+                                                                 array_size, dynamic_array_flag);
+		}
                 break;
             default:
                 throw std::runtime_error(
@@ -1079,7 +1148,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
     std::vector<uint8_t> data;
     data.reserve(row_size * num_rows);
-
+	// std::cout << "row_size: " << row_size << ", num_rows: " << num_rows << std::endl;
     // CCfits dies in read_element_given_column_and_row() if there is no data in the
     // table. :(
 
@@ -1106,6 +1175,8 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         size_t col_idx_adjuster = (has_null_bitfield_flags) ? 0 : 1;
 
         for (size_t j = 0; j < num_rows; ++j) {
+	// std::cout << "read_fits(), before loop through rows" << std::endl;
+
             size_t fits_row_idx = j + 1;
 
             // Row by row, we'll populate <curr_row> and append it to <data>.
@@ -1115,7 +1186,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
             for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
                 size_t fits_col_idx = i + 1;
-
+	// std::cout << "read_fits(), top of loop through columns" << std::endl;
                 if (fits_col_idx == 1 && has_null_bitfield_flags) {
                     // Skip the null_bitfield_flags column, if it exists.
                     continue;
@@ -1184,6 +1255,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                     } break;
                     case CCfits::Tstring: {
                         // std::cout << "Tstring" << std::endl;
+						// std::cout << "row_size: " << row_size << ", num_rows: " << num_rows << ", total size: " << row_size * num_rows << std::endl;
                         // read_element_given_column_and_row() calls fits_read_col(),
                         // which is not supported for CCfits::Tstring.
                         element_reader.read_string_given_column_and_row(
@@ -1198,19 +1270,24 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 }
                 // FIXME: This should get the comment, but the comment()
                 // function is protected???
+				// std::cout << "before fits_col.unit()" << std::endl;
                 if (!fits_col.unit().empty()) {
                     columns[tab_col_idx].get_field_properties().add_attribute(
                             "unit", fits_col.unit());
                 }
+				// std::cout << "after fits_col.unit()" << std::endl;
             }
+			// std::cout << "before append_row()" << std::endl;
             tablator::append_row(data, curr_row);
+			// std::cout << "after append_row()" << std::endl;
         }
+		// std::cout << "bottom of loop through rows" << std::endl;
     }
 
     //*********************************************************
     // Assemble resource element.
     //*********************************************************
-
+	// std::cout << "before table_elt" << std::endl;
     const auto table_element =
             Table_Element::Builder(columns, offsets, data)
                     .add_trailing_info_list(table_element_trailing_infos)
@@ -1223,4 +1300,5 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                     .add_trailing_info_list(resource_element_trailing_infos)
                     .add_attributes(resource_element_attributes)
                     .build());
+	// std::cout << "after resource_elt" << std::endl;
 }

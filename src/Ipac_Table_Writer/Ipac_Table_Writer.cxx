@@ -41,7 +41,9 @@ size_t compute_max_column_width_for_type(const tablator::Table &table,
                                          uint8_t const *col_data_start_ptr,
                                          size_t col_width_from_headers,
                                          uint max_width_for_type, uint array_size) {
+  // std::cout << "IPW::compute_max_column_width_for_type(), col_idx: " << col_idx << ", enter" << std::endl;
     if (col_width_from_headers >= max_width_for_type) {
+	  // std::cout << "early exit: " << col_width_from_headers << std::endl;
         return col_width_from_headers;
     }
     size_t max_width_sofar = col_width_from_headers;
@@ -63,6 +65,7 @@ size_t compute_max_column_width_for_type(const tablator::Table &table,
                 continue;
             }
             std::string string_val = boost::lexical_cast<std::string>(curr_array_elt);
+			// std::cout << "in loop, col_idx: " << col_idx << ", j: " << j << ", curr max_width: " << string_val.size() << std::endl;
             max_width_sofar = std::max(max_width_sofar, string_val.size());
 
             if (max_width_sofar >= max_width_for_type) {
@@ -71,6 +74,7 @@ size_t compute_max_column_width_for_type(const tablator::Table &table,
             ++curr_array_elt_data_ptr;
         }
     }
+	// std::cout << "return : " <<  max_width_sofar << std::endl;
     return max_width_sofar;
 }
 
@@ -126,21 +130,28 @@ size_t compute_max_column_width_for_char(const tablator::Table &table,
                                          size_t col_idx,
                                          uint8_t const *col_data_start_ptr,
                                          size_t col_width_from_headers,
-                                         size_t array_size) {
+                                         size_t array_size, bool dynamic_array_flag) {
+  // std::cout << "compute_max_column_width_for_char(), enter, col_idx: " << col_idx << ", array_size: " << array_size << ", flag: " << dynamic_array_flag << std::endl;
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
-        size_t curr_row_start_offset = requested_row_id * table.get_row_size();
-        uint8_t const *curr_col_data_ptr = col_data_start_ptr + curr_row_start_offset;
 
         if (table.is_null_value(requested_row_id, col_idx)) {
             continue;
         }
-
-        size_t curr_width = std::min(
-                strlen(reinterpret_cast<const char *>(curr_col_data_ptr)), array_size);
+		size_t curr_array_size = array_size;
+        size_t curr_row_start_offset = requested_row_id * table.get_row_size();
+        uint8_t const *curr_col_data_ptr = col_data_start_ptr + curr_row_start_offset;
+		if (dynamic_array_flag) {
+		  curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_col_data_ptr));
+		}
+		// JTODO skip the strlen?
+		size_t curr_width = std::min(
+									 strlen(reinterpret_cast<const char *>(curr_col_data_ptr)), array_size);
+		// std::cout << "compute_max_column_width_for_char(), curr_width: " << curr_width << ", curr_array_size: " << curr_array_size << ", array_size: " << array_size << std::endl;
         max_width_sofar = std::max(max_width_sofar, curr_width);
     }
+	// std::cout << "compute_max_column_width_for_char(), return: " << max_width_sofar << std::endl;
     return max_width_sofar;
 }
 
@@ -192,7 +203,7 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
     }
 
     // Allow for '-' sign.
-
+	// std::cout << "get_single_column_width(), col_idx: " << col_idx << ", enter" << std::endl;
     static size_t MAX_INT8_STRLEN = ceil(log10(INT8_MAX)) + 1;
     static size_t MAX_UINT8_STRLEN = ceil(log10(UINT8_MAX));
     static size_t MAX_INT16_STRLEN = ceil(log10(INT16_MAX)) + 1;
@@ -238,12 +249,16 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
     const std::string &null_str =
             (null_value.empty()) ? tablator::Table::DEFAULT_NULL_VALUE : null_value;
     max_width_sofar = std::max(max_width_sofar, null_str.size());
-
+	// std::cout << "get_single_column_width(), col_idx: " << col_idx << ", after null, max_width: " << max_width_sofar << std::endl;
 
     const std::vector<uint8_t> &table_data = table.get_data();
     size_t col_offset = table.get_offsets().at(col_idx);
     uint8_t const *data_start_ptr = table_data.data();
     uint8_t const *col_data_start_ptr = data_start_ptr + col_offset;
+	if (column.get_dynamic_array_flag()) {
+	  // JTODO
+	  col_data_start_ptr += sizeof(uint32_t);
+	}
 
     bool trim_decimal_runs_f = options.is_trim_decimal_runs();
     short min_run_length_for_trim = options.min_run_length_for_trim_;
@@ -315,9 +330,11 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
             }
         } break;
         case Data_Type::CHAR: {
+		  // std::cout << "IPW, char, dynamic: " << column.get_dynamic_array_flag() << std::endl;
             max_width_sofar = compute_max_column_width_for_char(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
-                    max_width_sofar, array_size);
+                    max_width_sofar, array_size, column.get_dynamic_array_flag());
+			// std::cout << "char, after, max_width: " << max_width_sofar << std::endl;
         } break;
     }
     return max_width_sofar;
@@ -366,8 +383,10 @@ std::vector<size_t> tablator::Ipac_Table_Writer::get_column_widths(
         }
 
         if (is_valid_col_idx(table, col_idx)) {
+
             widths.push_back(get_single_column_width(table, requested_row_ids, col_idx,
                                                      options));
+			// std::cout << "IPW, col_idx: " << col_idx << ", pushing back single width: " << widths.back() << std::endl;
             ++prev_col_idx;
         } else {
             // col_idx is too big to correspond to a column of our table.
@@ -447,6 +466,8 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
 void tablator::Ipac_Table_Writer::write_subtable_by_row(
         const Table &table, std::ostream &os, size_t start_row,
         size_t requested_consecutive_row_count, const Command_Line_Options &options) {
+  // std::cout << "ITW::write_subtable_by_row() V, enter" << std::endl;
+
     size_t true_row_count =
             get_true_row_count(table, start_row, requested_consecutive_row_count);
 
@@ -512,9 +533,10 @@ void tablator::Ipac_Table_Writer::write_single_record(
 
 void tablator::Ipac_Table_Writer::write_single_record(
         const Table &table, std::ostream &os, const std::vector<size_t> &column_ids,
-        size_t row_idx, const Command_Line_Options &options) {
-    std::vector<size_t> requested_row_ids(1, row_idx);
 
+        size_t row_idx, const Command_Line_Options &options) {
+
+    std::vector<size_t> requested_row_ids(1, row_idx);
     tablator::Ipac_Table_Writer::write_single_record_internal(
             table, os, column_ids, row_idx,
             get_column_widths(table, requested_row_ids, column_ids, options),

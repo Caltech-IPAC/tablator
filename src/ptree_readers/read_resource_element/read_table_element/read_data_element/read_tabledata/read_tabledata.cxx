@@ -25,6 +25,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         if (tr.first == "TR" || tr.first.empty()) {
             // Add something for the null_bitfields_flag
             element_lists_by_row.push_back({});
+
             auto td = tr.second.begin();
             while (td != tr.second.end() && td->first == XMLATTR_DOT + ID) {
                 ++td;
@@ -58,7 +59,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
             if (td != tr.second.end()) {
                 throw std::runtime_error("Too many elements in row " +
                                          std::to_string(element_lists_by_row.size()) +
-                                         ".  Only expected " +
+                                         ".  Expected only " +
                                          std::to_string(num_fields - 1) + ".");
             }
         } else if (tr.first != XMLATTR_DOT + "encoding" && tr.first != XMLCOMMENT) {
@@ -75,11 +76,13 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
     for (std::size_t c = 0; c < num_fields; ++c) {
         const auto &field = field_flag_pairs.at(c).get_field();
         append_column(columns, offsets, field.get_name(), field.get_type(),
-                      column_array_sizes[c], field.get_field_properties());
+                      column_array_sizes[c], field.get_field_properties(),
+                      field_flag_pairs.at(c).get_dynamic_array_flag());
     }
 
     Row row_string(*offsets.rbegin());
 
+	// JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in '\0'?
     for (size_t row_idx = 0; row_idx < element_lists_by_row.size(); ++row_idx) {
         auto &element_list = element_lists_by_row[row_idx];
         row_string.fill_with_zeros();
@@ -87,13 +90,15 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
             const auto &column = columns[col_idx];
             auto &element = element_list[col_idx - 1];
             if (element.empty()) {
+			  // JTODO dynamic?
                 row_string.set_null(column.get_type(), column.get_array_size(), col_idx,
-                                    offsets[col_idx], offsets[col_idx + 1]);
+                                    offsets[col_idx], offsets[col_idx + 1], column.get_dynamic_array_flag());
             } else
                 try {
                     insert_ascii_in_row(row_string, column.get_type(),
                                         column.get_array_size(), col_idx, element,
-                                        offsets[col_idx], offsets[col_idx + 1]);
+                                        offsets[col_idx], offsets[col_idx + 1],
+										column.get_dynamic_array_flag());
                 } catch (std::exception &error) {
                     throw std::runtime_error(
                             "Invalid " +

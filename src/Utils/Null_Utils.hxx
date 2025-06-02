@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 namespace tablator {
 
 static const std::string null_bitfield_flags_name("null_bitfield_flags");
