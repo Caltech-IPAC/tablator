@@ -31,7 +31,9 @@ constexpr const char Ascii_Writer::IPAC_COLUMN_SEPARATOR;
 // specified in the <separator> argument.
 void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
                                        size_t array_size,
-									   bool dynamic_array_flag,
+
+ // move this after data xobecause of period repo?  No, that call will go away.
+									   bool dynamic_array_flag, 
 									   const uint8_t *data,
                                        const char &separator,
                                        const Command_Line_Options &options) {
@@ -96,7 +98,7 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
   size_t curr_array_size = array_size;
 	// std::cout << "write_type_as_ascii_expand_array(), incoming array_size: " << array_size << std::endl;
 
-  if (dynamic_array_flag) { // always true for CHAR
+  if (dynamic_array_flag) {
 	curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
 	// std::cout << "write_type_as_ascii_expand_array(), curr_array_size: " << curr_array_size << std::endl;
 	std::advance(array_start, sizeof(uint32_t));

@@ -35,6 +35,8 @@ namespace tablator {
 	// std::cout << "insert_ascii(), writing size to row: " << curr_array_size << std::endl;
 	row.insert(static_cast<uint32_t>(curr_array_size), curr_offset);	
 	curr_offset += sizeof(uint32_t);
+  } else {
+	// std::cout << "insert_ascii(), not writing size to row: " << curr_array_size << std::endl;
   }
 
 	if (curr_array_size != 1 && data_type != Data_Type::CHAR) {

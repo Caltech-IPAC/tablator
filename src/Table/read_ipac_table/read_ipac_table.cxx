@@ -45,14 +45,19 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::vector<size_t> offsets = {0};
     create_types_from_ipac_headers(columns, offsets, ipac_columns, ipac_column_widths);
 
-	// std::cout << "read_ipac_table(), before offsets" << std::endl;
+ // std::cout << "read_ipac_table(), after create_types()" << std::endl;
+#if 0
 	for (const auto &offset : offsets) {
-	  // std::cout << "  offset: " << offset << std::endl;
+	  std::cout << "  offset: " << offset << std::endl;
 	  }
+#endif
 
+	size_t num_tablator_columns = ipac_columns[COL_NAME].size();
+	size_t line_num_after_headers = current_line_num;
 
+    std::vector<size_t> minimum_column_widths(num_tablator_columns, 1);
+    std::vector<bool> dynamic_array_flags(num_tablator_columns, false);
 
-    std::vector<size_t> minimum_column_widths(ipac_columns[COL_NAME].size(), 1);
     std::string line;
     std::getline(input_stream, line);
     Row row_string(tablator::get_row_size(offsets));
@@ -61,7 +66,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
             row_string.fill_with_zeros();
-            for (size_t col_idx = 1; col_idx < ipac_columns[COL_NAME].size(); ++col_idx) {
+            for (size_t col_idx = 1; col_idx < num_tablator_columns; ++col_idx) {
 				const auto &column = columns[col_idx];
                 if (line[ipac_column_offsets[col_idx - 1]] != ' ')
                     throw std::runtime_error(
@@ -75,6 +80,10 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 std::string element = line.substr(ipac_column_offsets[col_idx - 1] + 1,
                                                   ipac_column_widths[col_idx]);
                 boost::algorithm::trim(element);
+				if (column.get_type() == Data_Type::CHAR && element.size() != minimum_column_widths[col_idx]) {
+				  // Do this only for CHAR columns?  If we get here, array really is dynamic.
+				  dynamic_array_flags[col_idx] = true;
+				}
 				// std::cout << "col_idx: " << col_idx << ", before, min_width_sofar: " << minimum_column_widths[col_idx] << std::endl;
                 minimum_column_widths[col_idx] =
                         std::max(minimum_column_widths[col_idx], element.size());
@@ -105,7 +114,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 }
             }
             std::size_t bad_char(line.find_first_not_of(
-                    " \t\r", ipac_column_offsets[ipac_columns[COL_NAME].size() - 1]));
+                    " \t\r", ipac_column_offsets[num_tablator_columns - 1]));
             if (bad_char != std::string::npos)
                 throw std::runtime_error("Non-whitespace found at the end of line " +
                                          std::to_string(current_line_num) +
@@ -118,6 +127,23 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
         ++current_line_num;
         std::getline(input_stream, line);
     }
+
+	// Adjust dynamic_array_flags and offsets  if necessary.
+	for (size_t col_idx = 1; col_idx < num_tablator_columns; ++col_idx) {
+	 auto &column = columns[col_idx];
+	  if (column.get_type() == Data_Type::CHAR && !dynamic_array_flags[col_idx]) {
+		// std::cout << "col_idx: " << col_idx << ", unsetting dynamic_array_flag" << std::endl;
+		column.set_dynamic_array_flag(false);
+#if 1
+		if (current_line_num > line_num_after_headers && offsets[col_idx] < sizeof(uint32_t)) {
+		  throw std::runtime_error("Offset too small for column of type CHAR.");
+		}
+		offsets[col_idx] -= sizeof(uint32_t);
+#endif
+	  }
+
+	}
+
     shrink_ipac_string_columns_to_fit(columns, offsets, data, minimum_column_widths);
 
     Table_Element table_element =

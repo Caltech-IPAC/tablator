@@ -10,6 +10,9 @@ void tablator::Table::create_types_from_ipac_headers(
         std::vector<Column> &columns, std::vector<size_t> &offsets,
         const std::array<std::vector<std::string>, 4> &ipac_columns,
         const std::vector<size_t> &ipac_column_widths) {
+  // JTODO figure out whether char array is dynamic
+
+  // Initial null_bitfield_flags column
     tablator::append_column(columns, offsets, ipac_columns.at(0).at(0),
                             Data_Type::UINT8_LE, ipac_column_widths.at(0),
                             Field_Properties(null_bitfield_flags_description));
@@ -17,7 +20,8 @@ void tablator::Table::create_types_from_ipac_headers(
     size_t num_columns = ipac_columns[COL_NAME].size();
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
         // JTODO magic numbers
-	  // JTODO don't use column_width(), which might be determined by header values.
+	  // JTODO don't use column_width(), which might be determined by header values.  No?
+	  // JTODO rename
         append_ipac_data_member(columns, offsets, ipac_columns.at(COL_NAME).at(col_idx),
                                 ipac_columns.at(COL_TYPE).at(col_idx), ipac_column_widths.at(col_idx));
     }
@@ -33,6 +37,9 @@ void tablator::Table::create_types_from_ipac_headers(
                     boost::algorithm::trim_copy(ipac_columns[COL_NULL].at(col_idx));
         }
         columns.at(col_idx).set_field_properties(field_props);
+#if 0
+		// Assume char columns consist of dynamic arrays; we can adjust later.
         columns.at(col_idx).set_dynamic_array_flag(ipac_columns[COL_TYPE].at(col_idx) == "char");
+#endif
     }
 }

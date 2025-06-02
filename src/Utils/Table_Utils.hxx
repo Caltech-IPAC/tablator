@@ -27,6 +27,7 @@ inline size_t get_row_size(const std::vector<size_t> &offsets) {
     return data.size()/get_row_size(offsets);
 }
 
+#if 0
   inline size_t get_num_dynamic_arrays(const std::vector<Column> &columns) {
 	size_t nda=0;
 	// JTODO fancy
@@ -37,6 +38,9 @@ inline size_t get_row_size(const std::vector<size_t> &offsets) {
 	}
 	return nda;
   }
+
+
+
   // JTODO assertion
   inline size_t get_row_size_without_dynamic_array_sizes(const std::vector<size_t> &offsets, const std::vector<Column> &columns) {
 	// std::cout << "get_row_size_without(), enter" << std::endl;
@@ -45,7 +49,7 @@ inline size_t get_row_size(const std::vector<size_t> &offsets) {
 	// std::cout << "  return row_size_wo: " << get_row_size(offsets) - get_num_dynamic_arrays(columns) * sizeof(uint32_t) << std::endl;
 	return get_row_size(offsets) - get_num_dynamic_arrays(columns) * sizeof(uint32_t);
   }
-
+#endif
 
 
 void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
@@ -59,6 +63,15 @@ inline void append_column(std::vector<Column> &columns, std::vector<size_t> &off
                   Column(name, type, size, field_properties, dynamic_array_flag));
 }
 
+
+inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
+                          const std::string &name, const Data_Type &type,
+                          const size_t &size,
+                          bool dynamic_array_flag) {
+    append_column(columns, offsets,
+                  Column(name, type, size, Field_Properties(), dynamic_array_flag));
+}
+
 inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
                           const std::string &name, const Data_Type &type,
                           const size_t &size,
@@ -66,7 +79,13 @@ inline void append_column(std::vector<Column> &columns, std::vector<size_t> &off
   // std::cout << "append_column(), setting flag to " << (type == Data_Type::CHAR) << std::endl;
     append_column(columns, offsets,
                   Column(name, type, size, field_properties,
-                         type == Data_Type::CHAR /* dynamic_array_flag */));
+#if 0
+                         type == Data_Type::CHAR /* dynamic_array_flag */
+#else
+						 // JTODO Check attributes?
+						 false 
+#endif
+));
 }
 
 inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
@@ -81,7 +100,7 @@ inline void append_column(std::vector<Column> &columns, std::vector<size_t> &off
 }
 
 inline void append_row(std::vector<uint8_t> &data, const Row &row) {
-    data.insert(data.end(), row.data.begin(), row.data.end());
+    data.insert(data.end(), row.get_data().begin(), row.get_data().end());
 }
 
 inline void unsafe_append_row(std::vector<uint8_t> &data, const char *row,

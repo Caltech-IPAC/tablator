@@ -3,7 +3,7 @@
 #include <limits>
 
 #include "../../Ascii_Writer.hxx"
-#include "../../Data_Type_Adjuster.hxx"
+// #include "../../Data_Type_Adjuster.hxx"
 #include "../../Table.hxx"
 #include "../../to_string.hxx"
 

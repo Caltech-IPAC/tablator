@@ -160,10 +160,14 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     size_t col_array_size = column.get_array_size();
 	// std::cout << "add_to_property_tree(), arraysize: " << col_array_size << std::endl;
     bool early_arraysize_f = false;
-    if (active_datatype == Data_Type::CHAR) {
+#if 1
+	// JTODO and if orig_datatype is something else?
+    if (active_datatype == Data_Type::CHAR && column.get_type() != Data_Type::CHAR) {
         field_tree.add(XMLATTR_ARRAYSIZE, "*");
         early_arraysize_f = true;
-    } else if (column.get_dynamic_array_flag()) {
+    } else
+#endif
+	  if (column.get_dynamic_array_flag()) {
         field_tree.add(XMLATTR_ARRAYSIZE, "*");
         early_arraysize_f = true;
     } else if (col_array_size != 1) {
@@ -195,6 +199,10 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
             // the result set is empty, in which case the column might
             // have been constructed with arraysize == 1 as a default.
             // JTODO handle this case better in query_server.
+
+			if (a.second == "1") {
+			  continue;
+			}
         }
         field_tree.add(XMLATTR_DOT + a.first, a.second);
     }

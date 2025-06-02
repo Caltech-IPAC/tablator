@@ -11,8 +11,9 @@ class Row {
 public:
     // JTODO Update tablator clients to call get_data() and then make data a private
     // class member.
+#if 0
     std::vector<char> data;
-
+#endif
     Row(const size_t &size) : data(size) {}
 
     void fill_with_zeros() { std::fill(data.begin(), data.end(), 0); }
@@ -20,7 +21,7 @@ public:
     // backward compatibility
     void set_zero() { fill_with_zeros(); }
 
-    void set_null(const Data_Type &type, const size_t &array_size, const size_t &column,
+    void set_null(const Data_Type &type, const size_t &array_size, const size_t &col_idx, 
                   const size_t &offset, const size_t &offset_end);
 
     template <typename T>
@@ -54,6 +55,8 @@ public:
 
 private:
     void set_null_internal(const Data_Type &data_type, const size_t &offset);
+
+    std::vector<char> data;
 };
 
 

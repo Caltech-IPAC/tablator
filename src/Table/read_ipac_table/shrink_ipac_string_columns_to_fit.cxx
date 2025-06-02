@@ -18,14 +18,14 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
 	  size_t dynamic_array_size_size = 0; // JTODO
         if (columns[col_idx].get_type() == Data_Type::CHAR) {
             new_columns[col_idx].set_array_size(minimum_column_data_widths[col_idx]);
-			// std::cout << "shrink(), col_idx: " << col_idx << ", array_size: " << minimum_column_data_widths[col_idx] << std::endl;
+			// std::cout << "shrink(), CHAR, col_idx: " << col_idx << ", array_size: " << minimum_column_data_widths[col_idx] << ", dynamic_array_flag: " << columns[col_idx].get_dynamic_array_flag()<< std::endl;
 			if (columns[col_idx].get_dynamic_array_flag()) {
 			  dynamic_array_size_size = sizeof(uint32_t);
 			}
         }
-        new_row_size += new_columns[col_idx].data_size();
+        new_row_size += new_columns[col_idx].get_data_size();
 		new_row_size += dynamic_array_size_size;
-		// std::cout << "new_row_size: " << new_row_size << std::endl;
+		// std::cout << "col_idx: " << col_idx << ", new_row_size: " << new_row_size << std::endl;
 		// std::cout << "pushing back new_offset: " << new_row_size << std::endl;
         new_offsets.push_back(new_row_size);
     } // end loop through columns
@@ -37,14 +37,37 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
     size_t old_row_offset(0), new_row_offset(0);
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
         for (size_t col_idx = 0; col_idx < offsets.size() - 1; ++col_idx) {
+		  const auto &column = columns[col_idx];
 
-		  size_t dynamic_array_size_size = (columns[col_idx].get_dynamic_array_flag() ? sizeof(uint32_t) : 0);
+		  //		  bool old_array_flag = (column.get_type() == Data_Type::CHAR);
+		  bool new_array_flag = columns[col_idx].get_dynamic_array_flag();
+#if 0
+		  uint32_t old_size_offset = old_array_flag? sizeof(uint32_t) : 0;
+		  uint32_t new_size_offset = new_array_flag? sizeof(uint32_t) : 0;
+
+		  //		  size_t dynamic_array_size_size = (columns[col_idx].get_dynamic_array_flag() ? sizeof(uint32_t) : 0);
+#endif
+
+		  uint32_t copy_start_offset = old_row_offset + offsets[col_idx];
+		uint32_t copy_len = new_columns[col_idx].get_data_size();
+
+		if (column.get_type() == Data_Type::CHAR && !new_array_flag) {
+		  // Skip the array_size value preceding the array itself.
+		  // std::cout << "col_idx: " << col_idx << ", char, not dynamic, skipping size" << std::endl;
+		  copy_start_offset += sizeof(uint32_t);
+		}
+
+		if (column.get_type() == Data_Type::CHAR && new_array_flag) {
+		  // Include the array_size value preceding the array itself.
+		  // std::cout << "col_idx: " << col_idx << ", char, dynamic, including size" << std::endl;
+		  copy_len += sizeof(uint32_t);
+		}
+		// std::cout << "col_idx: " << col_idx << ", start_offset: " << copy_start_offset << ", copy_len: " << copy_len << std::endl;
 
 		  // JTODO Don't we need to trim?  How do we know we're copying the relevant part of old_data?
 		  // We already trimmed while loading old_data.
-            std::copy(data.begin() + old_row_offset + offsets[col_idx],
-                      data.begin() + old_row_offset + offsets[col_idx] + dynamic_array_size_size +
-                              new_columns[col_idx].data_size(),
+		std::copy(data.begin() + copy_start_offset,
+                      data.begin() + copy_start_offset + copy_len,
                       new_data.begin() + new_row_offset + new_offsets[col_idx]);
         } // end loop through columns
         old_row_offset += old_row_size;

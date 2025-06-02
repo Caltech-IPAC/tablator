@@ -26,6 +26,8 @@ def build(bld):
              'src/H5_to_Data_Type.cxx',
              'src/quote_sql_string.cxx',
              'src/Table/Table.cxx',
+             'src/Table/copy_with_added_columns.cxx',
+             'src/Table/insert_element.cxx',
              'src/Table/flatten_properties.cxx',
              'src/Table/extract_column_values_as_strings.cxx',
              'src/Table/read_unknown/read_unknown.cxx',

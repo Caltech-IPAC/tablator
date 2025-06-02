@@ -16,7 +16,12 @@ public:
 
     Column(const std::string &Name, const Data_Type &Type, const size_t &Array_size)
             : Column(Name, Type, Array_size, Field_Properties(),
-                     Type == Data_Type::CHAR /* dynamic_array_flag */) {}
+#if 0
+                     Type == Data_Type::CHAR /* dynamic_array_flag */
+#else
+					 false /* JTODO */
+#endif
+) {}
 
     Column(const std::string &Name, const Data_Type &Type, const size_t &Array_size,
            bool dynamic_array_flag)
@@ -25,7 +30,12 @@ public:
     Column(const std::string &Name, const Data_Type &Type, const size_t &Array_size,
            const Field_Properties &Field_properties)
             : Column(Name, Type, Array_size, Field_properties,
-                     Type == Data_Type::CHAR /* dynamic_array_flag */) {}
+#if 0
+                     Type == Data_Type::CHAR /* dynamic_array_flag */
+#else
+					 false  // JTODO
+#endif
+					 ) {}
 
     Column(const std::string &Name, const Data_Type &Type, const size_t &Array_size,
            const Field_Properties &Field_properties, bool dynamic_array_flag)
@@ -33,10 +43,15 @@ public:
               type_(Type),
               array_size_(Array_size),
               field_properties_(Field_properties),
-              dynamic_array_flag_(dynamic_array_flag || Type == Data_Type::CHAR) {}
+#if 0
+              dynamic_array_flag_(dynamic_array_flag || Type == Data_Type::CHAR)
+#else
+              dynamic_array_flag_(dynamic_array_flag)
+#endif
+  {}
 
-  inline size_t data_size() const {
-	// std::cout << "Column.data_size(), enter, data_size(type_): " << tablator::data_size(type_) << ", array_size: " << array_size_ << std::endl;
+  inline size_t get_data_size() const {
+	//	std::cout << "Column.data_size(), enter, data_size(type_): " << tablator::data_size(type_) << ", array_size: " << array_size_ << std::endl;
 	return tablator::data_size(type_) * array_size_;
   }
 

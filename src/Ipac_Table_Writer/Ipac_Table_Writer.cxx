@@ -318,7 +318,6 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
         } break;
         case Data_Type::CHAR: {
 		  if (column.get_dynamic_array_flag()) {
-			// JTODO Always the case as of 09May25.
 			col_data_start_ptr += sizeof(uint32_t);
 		  }
             max_width_sofar = compute_max_column_width_for_char(

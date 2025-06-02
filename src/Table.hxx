@@ -120,6 +120,38 @@ private:
         }
     };
 
+#if 1
+    // WARNING: append_column routines do not increase the size of the
+    // null column.  The expectation is that the number of columns is
+    // known before columns are added.
+
+    void append_column(const std::string &name, const Data_Type &type) {
+        append_column(name, type, 1);
+    }
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size) {
+        append_column(name, type, size, Field_Properties());
+    }
+
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size, const Field_Properties &field_properties) {
+        append_column(Column(name, type, size, field_properties));
+    }
+
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size, const Field_Properties &field_properties,
+                       bool dynamic_array_flag) {
+        append_column(Column(name, type, size, field_properties, dynamic_array_flag));
+    }
+
+    void append_column(const Column &column) {
+        tablator::append_column(get_columns(), get_offsets(), column);
+    }
+#endif
+
+
+
+
 public:
     class Builder {
     public:
@@ -279,7 +311,7 @@ public:
         return find_omitted_column_ids(col_ids);
     }
 
-
+#if 0
     // WARNING: append_column routines do not increase the size of the
     // null column.  The expectation is that the number of columns is
     // known before columns are added.
@@ -306,9 +338,10 @@ public:
     void append_column(const Column &column) {
         tablator::append_column(get_columns(), get_offsets(), column);
     }
+#endif
 
     void append_row(const Row &row) {
-        assert(row.data.size() == get_row_size());
+	  assert(row.get_data().size() == get_row_size());
         tablator::append_row(get_data(), row);
     }
 
@@ -697,6 +730,11 @@ auto dynamic_array_flag = column.get_dynamic_array_flag();
 
     size_t get_row_size() const { return tablator::get_row_size(get_offsets()); }
   size_t get_num_rows() const { return tablator::get_num_rows(get_offsets(), get_data()); }
+  size_t get_num_columns() const { return get_columns().size(); }
+
+  void insert_element_in_row(Row &row, size_t col_idx, const uint8_t *data_ptr, uint32_t array_size);
+
+
 
   // backward compatibility for sake of tablator clients
   size_t row_size() const { return get_row_size(); }
@@ -731,6 +769,10 @@ auto dynamic_array_flag = column.get_dynamic_array_flag();
     static std::vector<STRING_PAIR> flatten_properties(
             const Labeled_Properties &properties);
 
+  static Table copy_and_add_columns(const Table &table, const std::vector<Column> &columns, const std::vector<uint8_t> &extension_data_vec); 
+  //  static Table copy_and_add_column(const Table &table, const Column &column, const std::vector<uint8_t> &extension_data_vec); 
+
+  static Table combine_tables(const Table &src_table1, const Table &src_table2);
 
     // getters for Optional elements
     ATTRIBUTES &get_attributes() { return options_.attributes_; }

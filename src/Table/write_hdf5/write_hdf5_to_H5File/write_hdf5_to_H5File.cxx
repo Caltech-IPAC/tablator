@@ -40,9 +40,11 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     const auto &columns = get_columns();
     const auto &offsets = get_offsets();
 
+#if 0
 	for (const auto &offset : offsets) {
-	  // std::cout << "  offset: " << offset << std::endl;
+	   std::cout << "  offset: " << offset << std::endl;
 	  }
+#endif
 	// std::cout << "write_hdf5_to_H5File(), before string_types()" << std::endl;
     std::vector<H5::StrType> string_types;
     std::vector<H5::ArrayType> array_types;
