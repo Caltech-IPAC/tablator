@@ -180,9 +180,10 @@ public:
 
     Table_Element() {}
 
-
-    size_t row_size() const { return get_main_data_element().row_size(); }
-    size_t num_rows() const { return get_main_data_element().num_rows(); }
+#if 0
+    size_t get_row_size() const { return get_main_data_element().get_row_size(); }
+    size_t get_num_rows() const { return get_main_data_element().get_num_rows(); }
+#endif
 
     // accessors for Optional elements
     const ATTRIBUTES &get_attributes() const { return options_.attributes_; }

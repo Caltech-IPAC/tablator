@@ -60,6 +60,8 @@ def build(bld):
              'src/Table/write_html.cxx',
              'src/Table/write_tabledata/write_tabledata.cxx',
              'src/Table/write_tabledata/decode_links.cxx',
+             'src/Table/write_binary2/write_binary2.cxx',
+             'src/Table/write_binary2/encode_base64_stream.cxx',
              'src/Table/generate_property_tree/generate_property_tree.cxx',
              'src/Table/generate_property_tree/add_to_property_tree.cxx',
              'src/Table/write_hdf5/write_hdf5.cxx',

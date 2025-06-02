@@ -107,7 +107,7 @@ void handle_extract_column(const boost::filesystem::path &input_path,
     boost::filesystem::ofstream output_stream(output_path);
     auto column_id = table.column_index(column_name);
     auto array_size = table.get_columns().at(column_id).get_array_size();
-    auto num_rows = table.num_rows();
+    auto num_rows = table.get_num_rows();
 
     if (boost::iequals(type_str, "INT8_LE")) {
         auto val_array_vec = table.extract_column<int8_t>(column_id);
@@ -168,15 +168,15 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
     const std::vector<size_t> *active_row_id_ptr = &row_id_list;
     std::vector<size_t> modified_row_id_list;
     if (row_id_list.empty()) {
-        if (row_id < table.num_rows()) {
+        if (row_id < table.get_num_rows()) {
             modified_row_id_list.emplace_back(row_id);
         } else if (row_id < SIZE_T_MAX) {
             // row_id == SIZE_T_MAX if user did not specify row-id.
             std::string msg("Error: row-id value is too large.\n");
             throw(std::runtime_error(msg));
-        } else if (start_row < table.num_rows()) {
+        } else if (start_row < table.get_num_rows()) {
             size_t modified_row_count =
-                    std::min(row_count, table.num_rows() - start_row);
+                    std::min(row_count, table.get_num_rows() - start_row);
             modified_row_id_list.resize(modified_row_count);
             std::iota(modified_row_id_list.begin(), modified_row_id_list.end(),
                       start_row);
@@ -186,7 +186,7 @@ void handle_write_ipac_subtable(boost::filesystem::ofstream &output_stream,
             throw(std::runtime_error(msg));
         } else {
             // User didn't specify constraints, so return all rows.
-            modified_row_id_list.resize(table.num_rows());
+            modified_row_id_list.resize(table.get_num_rows());
             std::iota(modified_row_id_list.begin(), modified_row_id_list.end(), 0);
         }
         active_row_id_ptr = &modified_row_id_list;
@@ -564,8 +564,11 @@ int main(int argc, char *argv[]) {
             table.write(output_stream, output_path.stem().native(), output_format,
                         options);
         } else {
+		  // std::cout << "main(), before read()" << std::endl;
             tablator::Table table(input_path, input_format);
+		  // std::cout << "main(), before write()" << std::endl;
             table.write(output_path, output_format, options);
+		  // std::cout << "main(), after write()" << std::endl;
         }
     } catch (boost::program_options::error &exception) {
         std::cerr << exception.what() << "\n" << usage(visible_options);

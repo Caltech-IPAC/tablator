@@ -66,7 +66,7 @@ bool tablator::Data_Type_Adjuster::contains_large_uint64_val(size_t col_idx) con
     const auto &table_data = table_.get_data();
     auto total_data_size = table_data.size();
 
-    auto row_size = table_.row_size();
+    auto row_size = table_.get_row_size();
 
     // Iterate through the elements of the indicated column and return
     // true if any of these elements is too large to be represented as

@@ -282,7 +282,8 @@ public:
 
     // WARNING: append_column routines do not increase the size of the
     // null column.  The expectation is that the number of columns is
-    // known before adding columns.
+    // known before columns are added.
+
     void append_column(const std::string &name, const Data_Type &type) {
         append_column(name, type, 1);
     }
@@ -296,27 +297,32 @@ public:
         append_column(Column(name, type, size, field_properties));
     }
 
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size, const Field_Properties &field_properties,
+                       bool dynamic_array_flag) {
+        append_column(Column(name, type, size, field_properties, dynamic_array_flag));
+    }
+
     void append_column(const Column &column) {
         tablator::append_column(get_columns(), get_offsets(), column);
     }
 
     void append_row(const Row &row) {
-        assert(row.data.size() == row_size());
+        assert(row.data.size() == get_row_size());
         tablator::append_row(get_data(), row);
     }
 
     void unsafe_append_row(const char *row) {
-        tablator::unsafe_append_row(get_data(), row, row_size());
+        tablator::unsafe_append_row(get_data(), row, get_row_size());
     }
 
-    void pop_row() { tablator::pop_row(get_data(), row_size()); }
+    void pop_row() { tablator::pop_row(get_data(), get_row_size()); }
 
     void resize_rows(const size_t &new_num_rows) {
-        tablator::resize_rows(get_data(), new_num_rows, row_size());
+        tablator::resize_rows(get_data(), new_num_rows, get_row_size());
     }
 
     // This function is not used internally.
-
     std::vector<STRING_PAIR> flatten_properties() const {
         return flatten_properties(get_labeled_properties());
     }
@@ -376,7 +382,7 @@ public:
             std::ostream &os, const std::vector<size_t> &column_ids,
             const Command_Line_Options options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids, 0,
-                                                            num_rows(), options);
+                                                            get_num_rows(), options);
     }
 
     void write_single_ipac_record(std::ostream &os, size_t row_idx,
@@ -522,6 +528,8 @@ public:
     void write_tabledata(std::ostream &os, const Format::Enums &output_format,
                          const Command_Line_Options &options) const;
 
+    void write_binary2(std::ostream &os, const Format::Enums &output_format) const;
+
     void write_html(std::ostream &os, const Command_Line_Options &options) const;
 
     boost::property_tree::ptree generate_property_tree() const;
@@ -617,6 +625,7 @@ public:
         return val_array;
     }
 
+  // JTODO move to .cxx
     template <typename T>
     void extract_value(std::vector<T> &val_array, size_t col_id, size_t row_id) {
         static_assert(!std::is_same<T, char>::value,
@@ -626,13 +635,14 @@ public:
         if (col_id >= columns.size()) {
             throw std::runtime_error("Invalid column index: " + std::to_string(col_id));
         }
-        if (row_id >= num_rows()) {
+        if (row_id >= get_num_rows()) {
             throw std::runtime_error("Invalid row index: " + std::to_string(row_id));
         }
 
         auto &column = columns[col_id];
-        auto array_size = column.get_array_size();
-        size_t row_offset = row_id * row_size();
+        uint32_t array_size = column.get_array_size();
+auto dynamic_array_flag = column.get_dynamic_array_flag();
+        size_t row_offset = row_id * get_row_size();
         if (is_null(row_offset, col_id)) {
             for (size_t i = 0; i < array_size; ++i) {
                 val_array.emplace_back(get_null<T>());
@@ -641,9 +651,16 @@ public:
             // JTODO what if an element is null?  Assume already has get_null() value?
             size_t base_offset = row_offset + get_offsets().at(col_id);
             uint8_t const *curr_data = get_data().data() + base_offset;
+		  auto row_array_size = array_size;
+		  if (dynamic_array_flag) {
+			row_array_size = *(reinterpret_cast<const uint32_t *>(curr_data));
+			curr_data += sizeof(uint32_t);
+		  }
+
+
             size_t element_size = data_size(column.get_type());
 
-            for (size_t i = 0; i < array_size; ++i) {
+            for (size_t i = 0; i < row_array_size; ++i) {
                 val_array.emplace_back(*(reinterpret_cast<const T *>(curr_data)));
                 curr_data += element_size;
             }
@@ -668,7 +685,7 @@ public:
         }
         auto &column = columns[col_id];
 
-        size_t row_count = num_rows();
+        size_t row_count = get_num_rows();
         std::vector<T> col_vec;
         col_vec.reserve(row_count * column.get_array_size());
         for (size_t curr_row_id = 0; curr_row_id < row_count; ++curr_row_id) {
@@ -678,8 +695,12 @@ public:
     }
 
 
-    size_t row_size() const { return tablator::row_size(get_offsets()); }
-    size_t num_rows() const { return get_data().size() / row_size(); }
+    size_t get_row_size() const { return tablator::get_row_size(get_offsets()); }
+  size_t get_num_rows() const { return tablator::get_num_rows(get_offsets(), get_data()); }
+
+  // backward compatibility for sake of tablator clients
+  size_t row_size() const { return get_row_size(); }
+  size_t num_rows() const { return get_num_rows(); }
 
     // static functions
     static std::vector<uint8_t> read_dsv_rows(
@@ -993,10 +1014,13 @@ private:
                                     Format::Enums enum_format, uint num_spaces_left,
                                     uint num_spaces_right,
                                     const Command_Line_Options &options) const;
-
+    void splice_binary2_and_write(std::ostream &os, std::stringstream &ss,
+                                  Format::Enums enum_format, uint num_spaces_left,
+                                  uint num_spaces_right) const;
 
     boost::property_tree::ptree generate_property_tree(
-            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const;
+            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep,
+            bool do_binary2) const;
 
     void distribute_metadata(
             tablator::Labeled_Properties &resource_element_labeled_properties,

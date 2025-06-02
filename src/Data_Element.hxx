@@ -4,6 +4,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Column.hxx"
+#include "Utils/Table_Utils.hxx"  // JTODO
 
 // JTODO: Create struct to hold commonly used (columns, offsets) pair?
 
@@ -27,10 +28,35 @@ public:
     inline std::vector<uint8_t> &get_data() { return data_; }
 
     inline void set_data(const std::vector<uint8_t> &d) { data_ = d; }
+#if 0
+  //    inline size_t get_row_size() const { return *offsets_.rbegin(); }
+  inline size_t get_row_size() const { return tablator::get_row_size(offsets_); }
+    inline size_t get_num_rows() const { return get_data().size() / get_row_size(); }
+#endif
 
-    inline size_t row_size() const { return *offsets_.rbegin(); }
-    inline size_t num_rows() const { return get_data().size() / row_size(); }
+#if 1
+#if 0
+  inline size_t get_num_dynamic_arrays() const { return tablator::get_num_dynamic_arrays(columns_); }
+  // JTODO assertion
+  inline size_t get_row_size_without_dynamic_array_sizes() const { return tablator::get_row_size_without_dynamic_array_sizes(offsets_, columns_); }
+#endif
+#else
 
+  inline size_t get_num_dynamic_arrays() const {
+	size_t nda=0;
+	// JTODO fancy
+	for (const auto &column : columns_) {
+	  if (column.get_dynamic_array_flag()) {
+		++nda;
+	  }
+	}
+	return nda;
+  }
+  // JTODO assertion
+  inline size_t row_size_without_dynamic_array_sizes() const {
+	return get_row_size() - get_num_dynamic_arrays() * sizeof(uint32_t);
+  }
+	#endif
 private:
     std::vector<Column> columns_;
     std::vector<size_t> offsets_ = {0};

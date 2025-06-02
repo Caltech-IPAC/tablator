@@ -289,8 +289,9 @@ public:
 
     Resource_Element() : resource_type_(Resource_Type::META) {}
 
-    size_t num_rows() const { return get_main_table_element().num_rows(); }
-
+#if 0
+    size_t get_num_rows() const { return get_main_table_element().get_num_rows(); }
+#endif
     // accessors for Optional elements
 
     const ATTRIBUTES &get_attributes() const { return options_.attributes_; }
@@ -434,7 +435,8 @@ public:
     }
 
     // This function is defined in generate_property_tree.cxx. JTODO Refactor.
-    boost::property_tree::ptree generate_property_tree(bool json_prep) const;
+    boost::property_tree::ptree generate_property_tree(bool json_prep,
+                                                       bool do_binary2) const;
 
 
 private:

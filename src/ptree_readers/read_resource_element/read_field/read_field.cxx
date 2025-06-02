@@ -94,7 +94,7 @@ tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
     size_t array_size = 1;
     Field_Properties field_properties;
 
-    bool is_array_dynamic_f = false;
+    bool dynamic_array_flag = false;
 
     auto child = field_tree.begin();
     auto end = field_tree.end();
@@ -112,7 +112,7 @@ tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
                 std::string array_size_str = attribute.second.get_value<std::string>();
                 if (array_size_str == "*") {
                     array_size = std::numeric_limits<size_t>::max();
-                    is_array_dynamic_f = true;
+                    dynamic_array_flag = true;
                 } else {
                     array_size = boost::lexical_cast<size_t>(array_size_str);
                 }
@@ -138,5 +138,5 @@ tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
     child = read_links_section(links, hdf5_links, child, end, TABLE);
 
     return Field_And_Flag(Field(name, type, array_size, field_properties),
-                          is_array_dynamic_f);
+                          dynamic_array_flag);
 }

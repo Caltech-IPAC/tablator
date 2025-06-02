@@ -109,9 +109,12 @@ Table::Table(const boost::filesystem::path &input_path, const Format &format) {
     switch (format.enum_format) {
         case Format::Enums::HDF5:
             H5::Exception::dontPrint();
+			// std::cout << "Table(), before read_hdf5()" << std::endl;
             read_hdf5(input_path);
+			// std::cout << "Table(), after read_hdf5()" << std::endl;
             break;
         case Format::Enums::FITS:
+		  // std::cout << "before read_fits()" << std::endl;
             read_fits(input_path);
             break;
         case Format::Enums::IPAC_TABLE:
@@ -122,6 +125,7 @@ Table::Table(const boost::filesystem::path &input_path, const Format &format) {
             read_json5(input_path);
             break;
         case Format::Enums::VOTABLE:
+        case Format::Enums::VOTABLE_BINARY2:  // JTODO
             read_votable(input_path);
             break;
         case Format::Enums::JSON:
@@ -163,6 +167,7 @@ Table::Table(std::istream &input_stream, const Format &format) {
             read_json5(input_stream);
             break;
         case Format::Enums::VOTABLE:
+        case Format::Enums::VOTABLE_BINARY2:
             read_votable(input_stream);
             break;
         case Format::Enums::JSON:

@@ -46,23 +46,26 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
     const auto &columns = get_columns();
     const auto &offsets = get_offsets();
     const auto &data = get_data();
-    const int num_columns = columns.size();
+    const size_t num_columns = columns.size();
     if (num_columns == 0) return;
     // Skip null_bitfield_flags
-    for (int i = 1; i < num_columns; ++i) {
-        write_escaped_string(os, columns[i].get_name(), separator,
+    for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
+        write_escaped_string(os, columns[col_idx].get_name(), separator,
                              tablator::DOUBLE_QUOTE);
-        os << (i == num_columns - 1 ? '\n' : separator);
+        os << (col_idx == num_columns - 1 ? '\n' : separator);
     }
 
-    for (size_t row_offset = 0; row_offset < data.size(); row_offset += row_size())
-        for (int i = 1; i < num_columns; ++i) {
-            size_t offset = offsets[i] + row_offset;
+    for (size_t row_offset = 0; row_offset < data.size(); row_offset += get_row_size())
+        for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
+		  const auto &column = columns[col_idx];
+            size_t offset = offsets[col_idx] + row_offset;
             std::stringstream ss;
-            if (!is_null(row_offset, i)) {
+            if (!is_null(row_offset, col_idx)) {
                 tablator::Ascii_Writer::write_type_as_ascii(
-                        ss, columns[i].get_type(), columns[i].get_array_size(),
+                        ss, column.get_type(), column.get_array_size(),
+						column.get_dynamic_array_flag(),
                         data.data() + offset, tablator::Ascii_Writer::DEFAULT_SEPARATOR,
+
                         options);
             } else if (options.write_null_strings_) {
                 // Leave null entries blank by default, unlike in IPAC_TABLE format.
@@ -73,6 +76,6 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
                 outer_quote_char = '\'';
             }
             write_escaped_string(os, ss.str(), separator, outer_quote_char);
-            os << (i == num_columns - 1 ? '\n' : separator);
+            os << (col_idx == num_columns - 1 ? '\n' : separator);
         }
 }

@@ -102,7 +102,6 @@ tablator::Table_Element read_table_element(
     std::vector<Group_Element> group_elements;
     std::vector<Field> params;
     child = load_pre_data_section(field_flag_pairs, params, group_elements, child, end);
-
     if (field_flag_pairs.size() < 2) {
         throw std::runtime_error("This VOTable is empty.");
     }

@@ -52,7 +52,7 @@ void tablator::Table::write_sql_inserts(
     }
 
     for (size_t row_offset = 0; row_offset < get_data().size();
-         row_offset += row_size()) {
+         row_offset += get_row_size()) {
         write_sql_insert(os, quoted_table_name, row_offset,
                          !point_input_names.first.empty(), point_input, polygon_input,
                          options);

@@ -4,8 +4,8 @@
 #include "../../HDF5_Attribute.hxx"
 #include "../../HDF5_Property.hxx"
 
-/// This gets a bit complicated because there are variable length
-/// arrays inside variable length arrays.
+// This gets a bit complicated because there are variable length
+// arrays inside variable length arrays.
 
 void tablator::Table::write_hdf5_attributes(H5::DataSet &table) const {
     H5::StrType hdf5_string(0, H5T_VARIABLE);
