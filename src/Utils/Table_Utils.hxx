@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "../Column.hxx"
 #include "../Row.hxx"
 
@@ -72,5 +74,57 @@ inline void reserve_data(std::vector<uint8_t> &data, const size_t &new_num_rows,
 void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &array_size,
                          const size_t &column, const std::string &element,
                          const size_t &offset, const size_t &offset_end);
+
+
+// JTODO move to .cxx file
+inline void retain_only_selected_rows(std::vector<uint8_t> &data,
+                                      const std::set<size_t> &selected_row_idx_list,
+                                      size_t num_rows, uint row_size) {
+    if (data.size() != num_rows * row_size) {
+        // JTODO relax this condition?
+        throw std::runtime_error(
+                "Mismatch between data.size(), num_rows, and row_size.");
+    }
+
+    size_t num_selected_rows = selected_row_idx_list.size();
+    if (num_selected_rows > num_rows) {
+        throw std::runtime_error("Number of selected rows must not exceed " +
+                                 std::to_string(num_rows));
+    }
+
+    if (*selected_row_idx_list.rbegin() >= num_rows) {
+        throw std::runtime_error("invalid row index: " +
+                                 std::to_string(*selected_row_idx_list.rbegin()));
+    }
+
+
+    if (num_selected_rows == num_rows) {
+        return;
+    }
+
+    const auto data_start_ptr = data.data();
+    auto read_ptr = data_start_ptr;
+    auto write_ptr = data_start_ptr;
+    size_t write_idx = 0;
+    size_t prev_row_idx = 0;
+
+    for (auto row_idx : selected_row_idx_list) {
+        if (row_idx >= write_idx) {
+            if (row_idx > write_idx) {
+                // Copy row_idx-th row to begin immediately after the end of the
+                // previous copied row.
+                read_ptr += ((row_idx - prev_row_idx) * row_size);
+                std::copy(read_ptr, read_ptr + row_size, write_ptr);
+            }
+            ++write_idx;
+            write_ptr += row_size;
+            prev_row_idx = row_idx;
+        }
+    }
+
+    // Delete all data past the last row copied.
+    data.resize(std::distance(data_start_ptr, write_ptr));
+}
+
 
 }  // namespace tablator

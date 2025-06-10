@@ -138,7 +138,6 @@ void tablator::Table::insert_array_element_into_row(tablator::Row &row, size_t c
                                                     size_t elt_idx,
                                                     const uint8_t *data_ptr) const {
     validate_parameters(row, *this, col_idx, elt_idx, 1 /* num_elements_to_insert */);
-    const auto &column = get_columns().at(col_idx);
     insert_blob_to_row_internal(row, *this, col_idx, elt_idx, data_ptr, 1);
 }
 //===============================================================
