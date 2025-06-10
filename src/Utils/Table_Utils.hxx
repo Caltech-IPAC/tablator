@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "../Column.hxx"
 #include "../Row.hxx"
 
@@ -58,7 +60,7 @@ inline void append_rows(std::vector<uint8_t> &data, const std::vector<uint8_t> &
 }
 
 
-inline void resize_data(std::vector<uint8_t> &data, const size_t &new_num_rows,
+inline void adjust_num_rows(std::vector<uint8_t> &data, const size_t &new_num_rows,
                         uint row_size) {
     data.resize(new_num_rows * row_size);
 }
@@ -72,5 +74,11 @@ inline void reserve_data(std::vector<uint8_t> &data, const size_t &new_num_rows,
 void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &array_size,
                          const size_t &column, const std::string &element,
                          const size_t &offset, const size_t &offset_end);
+
+
+void retain_only_selected_rows(std::vector<uint8_t> &data,
+                               const std::set<size_t> &selected_row_idx_list,
+                               size_t num_rows, size_t row_size);
+
 
 }  // namespace tablator
