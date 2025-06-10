@@ -6,7 +6,7 @@ def options(opt):
 
 def configure(conf):
     conf.load('compiler_cxx gnu_dirs cxx14 hdf5_cxx cfitsio CCfits boost json5_parser sqlite3 vsqlitepp')
-    conf.check_boost(lib='filesystem system program_options regex')
+    conf.check_boost(lib='filesystem system program_options regex thread')
 
 def build(bld):
 
@@ -14,6 +14,7 @@ def build(bld):
         default_flags=['-Wall', '-Wextra', '-g']
     else:
         default_flags=['-Wall', '-Wextra', '-g', '-Ofast', '-fno-finite-math-only', '-DNDEBUG']
+    default_flags.append("-DBOOST_SPIRIT_THREADSAFE")
 
     use_packages=['cxx14', 'hdf5', 'hdf5_cxx', 'cfitsio', 'CCfits', 'BOOST',
                   'json5_parser', 'sqlite3', 'vsqlitepp']
@@ -71,6 +72,7 @@ def build(bld):
              'src/Ipac_Table_Writer/Ipac_Table_Writer.cxx',
              'src/Utils/Table_Utils/insert_ascii_in_row.cxx',
              'src/Utils/Table_Utils/append_column.cxx',
+             'src/Utils/Table_Utils/retain_only_selected_rows.cxx',
              'src/ptree_readers/ptree_readers.cxx',
              'src/ptree_readers/Utils.cxx',
              'src/ptree_readers/extract_attributes.cxx',

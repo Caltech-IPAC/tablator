@@ -241,7 +241,6 @@ public:
     }
 
     size_t get_column_offset(size_t col_idx) const {
-        const auto &columns = get_columns();
         validate_column_index(col_idx);
         return get_offsets().at(col_idx);
     }
@@ -675,6 +674,11 @@ public:
                                       const T &element) const {
         insert_column_value_into_row<T>(row, col_idx, element,
                                         get_columns().at(col_idx).get_array_size());
+    }
+
+    void retain_only_selected_rows(const std::set<size_t> &selected_row_idx_list) {
+        tablator::retain_only_selected_rows(get_data(), selected_row_idx_list,
+                                            get_num_rows(), get_row_size());
     }
 
     // accessors
