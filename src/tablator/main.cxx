@@ -244,8 +244,10 @@ int main(int argc, char *argv[]) {
     size_t row_id = SIZE_T_MAX;
     size_t start_row = SIZE_T_MAX;
     size_t row_count = SIZE_T_MAX;
-    std::vector<size_t> row_list;
+    std::vector<size_t> row_list;      // for writing ipac_table
+    std::set<size_t> retain_row_list;  // for modifying table in place
     std::string row_string;
+    std::string retain_row_string;
     bool call_static_f = false;
     bool exclude_cols_f = false;
     bool skip_comments_f = false;
@@ -260,7 +262,8 @@ int main(int argc, char *argv[]) {
     std::string trim_decimal_runs = "1";
     std::string counter_column_name = "";
     bool combine_tables_f = false;
-    bool append_rows_f = true;
+    bool append_rows_f = false;
+
 
     // Declare the supported options.
     boost::program_options::options_description visible_options("Options");
@@ -298,6 +301,9 @@ int main(int argc, char *argv[]) {
             "number of consecutive rows to write (output-format ipac_table only)")(
             "row-list", boost::program_options::value<std::string>(&row_string),
             "list of rows to write (output-format ipac_table only)")(
+            "retain-row-list",
+            boost::program_options::value<std::string>(&retain_row_string),
+            "list of rows to retain, dropping others")(
             "static", boost::program_options::value<bool>(&call_static_f),
             "call static function, not Table class member")(
             "column-to-extract",
@@ -399,6 +405,19 @@ int main(int argc, char *argv[]) {
             std::stringstream row_stream(row_string);
             std::copy(std::istream_iterator<size_t>(row_stream),
                       std::istream_iterator<size_t>(), std::back_inserter(row_list));
+        }
+
+        if (option_variables.count("retain-row-list")) {
+            if (option_variables.count("row-list")) {
+                std::cerr << "The parameters 'row-list' and 'retain-row-list' are "
+                             "mutually "
+                             "incompatible.\n";
+                return 1;
+            }
+            std::stringstream retain_row_stream(retain_row_string);
+            std::copy(std::istream_iterator<size_t>(retain_row_stream),
+                      std::istream_iterator<size_t>(),
+                      std::inserter(retain_row_list, retain_row_list.begin()));
         }
 
         if (!option_variables.count("column-to-extract") &&
@@ -649,6 +668,14 @@ int main(int argc, char *argv[]) {
             boost::filesystem::ofstream output_stream(output_path);
             in_table1.write(output_stream, output_path.stem().native(), output_format,
                             options);
+        } else if (!retain_row_list.empty()) {
+            // JTODO make this option incompatible with other options
+            boost::filesystem::ifstream input_stream(input_path);
+            tablator::Table in_table(input_stream, input_format);
+            in_table.retain_only_selected_rows(retain_row_list);
+            boost::filesystem::ofstream output_stream(output_path);
+            in_table.write(output_stream, output_path.stem().native(), output_format,
+                           options);
         } else {
             tablator::Table table(input_path, input_format);
             table.write(output_path, output_format, options);

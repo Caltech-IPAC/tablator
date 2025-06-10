@@ -241,7 +241,6 @@ public:
     }
 
     size_t get_column_offset(size_t col_idx) const {
-        const auto &columns = get_columns();
         validate_column_index(col_idx);
         return get_offsets().at(col_idx);
     }
@@ -677,6 +676,11 @@ public:
                                         get_columns().at(col_idx).get_array_size());
     }
 
+    void retain_only_selected_rows(const std::set<size_t> &selected_row_idx_list) {
+        tablator::retain_only_selected_rows(get_data(), selected_row_idx_list,
+                                            get_num_rows(), get_row_size());
+    }
+
     // accessors
 
     size_t get_row_size() const { return tablator::get_row_size(get_offsets()); }
@@ -686,12 +690,14 @@ public:
     size_t get_num_columns() const { return get_columns().size(); }
 
     // called by query_server to trim result set
-    void resize_data(const size_t &new_num_rows) {
-        tablator::resize_data(get_data(), new_num_rows, get_row_size());
+    void adjust_num_rows(const size_t &new_num_rows) {
+        tablator::adjust_num_rows(get_data(), new_num_rows, get_row_size());
     }
 
     // deprecated
-    inline void resize_rows(const size_t &new_num_rows) { resize_data(new_num_rows); }
+    inline void resize_rows(const size_t &new_num_rows) {
+        adjust_num_rows(new_num_rows);
+    }
     size_t row_size() const { return get_row_size(); }
     size_t num_rows() const { return get_num_rows(); }
 
