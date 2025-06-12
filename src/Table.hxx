@@ -297,7 +297,7 @@ public:
     // table modifiers
 
     void append_row(const Row &row) {
-        assert(row.data.size() == get_row_size());
+	  assert(row.get_data().size() == get_row_size());
         tablator::append_row(get_data(), row);
     }
 
@@ -1045,7 +1045,7 @@ private:
     }
 
     void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths) {
-        shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(), get_data(),
+	  shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(), // get_data(),
                                           column_widths);
     };
 
@@ -1063,7 +1063,8 @@ private:
 
     static void shrink_ipac_string_columns_to_fit(
             std::vector<Column> &columns, std::vector<size_t> &offsets,
-            std::vector<uint8_t> &data, const std::vector<size_t> &column_widths);
+			//            std::vector<uint8_t> &data,
+			const std::vector<size_t> &column_widths);
 
 
     // miscellaneous helpers for reading

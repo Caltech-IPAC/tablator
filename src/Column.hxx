@@ -7,7 +7,7 @@ namespace tablator {
 
 class Column {
 public:
-  // JTODO: is column.array_size the actual max, as opposed to the attribute which might be '*'?
+  // JTODO: is column.array_size the actual max, as opposed to the attribute value, which might be '*'?
     static constexpr char const *COL_ARRAY_SIZE = "array_size";
     static constexpr char const *COL_FIELD_PROPERTIES = "field_properties";
     static constexpr char const *COL_NAME = "name";

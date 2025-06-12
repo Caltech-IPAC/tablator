@@ -24,7 +24,7 @@
       <FIELD name="glon" datatype="double" unit="degrees"/>
       <FIELD name="glat" datatype="double" unit="degrees"/>
       <FIELD name="sso" datatype="boolean"/>
-      <FIELD name="detector" datatype="char" arraysize="*"/>
+      <FIELD name="detector" datatype="char" arraysize="3"/>
       <DATA>
         <TABLEDATA>
           <TR>

@@ -28,8 +28,8 @@ void check_bar_position(const std::vector<size_t> &bar_offsets, const std::strin
 }  // namespace
 
 size_t tablator::Table::read_ipac_header(
-        std::istream &ipac_file, std::array<std::vector<std::string>, 4> &ipac_columns,
-        std::vector<size_t> &ipac_column_offsets,
+        std::istream &ipac_file, std::array<std::vector<std::string>, 4> &incoming_columns,
+        std::vector<size_t> &incoming_column_offsets,
         std::vector<Labeled_Property> &labeled_resource_properties) {
     size_t line_num = 0;
     char first_character = ipac_file.peek();
@@ -97,25 +97,25 @@ size_t tablator::Table::read_ipac_header(
         }
 
         if (num_header_lines == 0) {
-            ipac_column_offsets = get_bar_offsets(line);
+            incoming_column_offsets = get_bar_offsets(line);
         } else {
-            check_bar_position(ipac_column_offsets, line, line_num);
+            check_bar_position(incoming_column_offsets, line, line_num);
         }
         // This split creates an empty element at the beginning and
         // end.  We keep the beginning to mark the null_bitfield_flag,
         // and pop off the end.
-        boost::split(ipac_columns[num_header_lines], line, boost::is_any_of("|"));
+        boost::split(incoming_columns[num_header_lines], line, boost::is_any_of("|"));
 
         // FIXME: I think this error can never happen, because it would
         // have been caught by check_bar_position.
-        if (ipac_columns[num_header_lines].size() < 2)
+        if (incoming_columns[num_header_lines].size() < 2)
             throw std::runtime_error(
                     "In line " + std::to_string(line_num) +
                     ", the table is missing header information in this line: '" + line +
                     "'");
-        ipac_columns[num_header_lines].pop_back();
+        incoming_columns[num_header_lines].pop_back();
 
-        for (auto &column : ipac_columns[num_header_lines]) {
+        for (auto &column : incoming_columns[num_header_lines]) {
             boost::algorithm::trim(column);
         }
 
@@ -123,28 +123,28 @@ size_t tablator::Table::read_ipac_header(
 
         if (num_header_lines == 0) {
 		  // First time through
-            ipac_columns[COL_NAME_IDX][0] = null_bitfield_flags_name;
+            incoming_columns[COL_NAME_IDX][0] = null_bitfield_flags_name;
         } else if (num_header_lines == 1) {
-            if (ipac_columns[COL_NAME_IDX].size() != ipac_columns[COL_TYPE_IDX].size())
+            if (incoming_columns[COL_NAME_IDX].size() != incoming_columns[COL_TYPE_IDX].size())
                 throw std::runtime_error(
                         "Wrong number of data types in line " +
                         std::to_string(line_num) + ". Expected " +
-                        std::to_string(ipac_columns[COL_NAME_IDX].size()) +
-                        " but found " + std::to_string(ipac_columns[COL_TYPE_IDX].size()));
-        } else if (num_header_lines == 2 && ipac_columns[COL_NAME_IDX].size() <
-                                                    ipac_columns[COL_UNIT_IDX].size()) {
+                        std::to_string(incoming_columns[COL_NAME_IDX].size()) +
+                        " but found " + std::to_string(incoming_columns[COL_TYPE_IDX].size()));
+        } else if (num_header_lines == 2 && incoming_columns[COL_NAME_IDX].size() <
+                                                    incoming_columns[COL_UNIT_IDX].size()) {
             throw std::runtime_error("Too many values for units in line  " +
                                      std::to_string(line_num) + ".  Expected at most " +
-                                     std::to_string(ipac_columns[COL_NAME_IDX].size()) +
+                                     std::to_string(incoming_columns[COL_NAME_IDX].size()) +
                                      " but found " +
-                                     std::to_string(ipac_columns[COL_UNIT_IDX].size()));
-        } else if (num_header_lines == 3 && ipac_columns[COL_NAME_IDX].size() <
-                                                    ipac_columns[COL_NULL_IDX].size()) {
+                                     std::to_string(incoming_columns[COL_UNIT_IDX].size()));
+        } else if (num_header_lines == 3 && incoming_columns[COL_NAME_IDX].size() <
+                                                    incoming_columns[COL_NULL_IDX].size()) {
             throw std::runtime_error("Too many values for null in line  " +
                                      std::to_string(line_num) + ".  Expected at most " +
-                                     std::to_string(ipac_columns[COL_NAME_IDX].size()) +
+                                     std::to_string(incoming_columns[COL_NAME_IDX].size()) +
                                      " but found " +
-                                     std::to_string(ipac_columns[COL_NULL_IDX].size()));
+                                     std::to_string(incoming_columns[COL_NULL_IDX].size()));
         }
     } // end of loop through lines beginning with '|'
 
@@ -160,8 +160,8 @@ size_t tablator::Table::read_ipac_header(
     }
 
 	// JTODO don't we have a problem if they don't already match up?  Or are we filling in blank lines?
-    ipac_columns[COL_UNIT_IDX].resize(ipac_columns[COL_NAME_IDX].size());
-    ipac_columns[COL_NULL_IDX].resize(ipac_columns[COL_NAME_IDX].size());
+    incoming_columns[COL_UNIT_IDX].resize(incoming_columns[COL_NAME_IDX].size());
+    incoming_columns[COL_NULL_IDX].resize(incoming_columns[COL_NAME_IDX].size());
 
     return line_num;
 }

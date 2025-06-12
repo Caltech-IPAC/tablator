@@ -49,20 +49,61 @@ char get_fits_type_code(tablator::Data_Type datatype_for_writing) {
 
 /**********************************************************/
 
-// Format string is array_size followed by fits_type_code.
+// Format string of fixed-length array is array_size followed by fits_type_code.
+
+// For the future (our version of CCFits doesn't support this):
+// Per https://docs.astropy.org/en/stable/io/fits/usage/unfamiliar.html#variable-length-array-tables, 
+// format string of variable-length (dynamic) array is of the form Pt(max):
+
+ // The data type specification (i.e., the value of the TFORM
+ // keyword) uses an extra letter ‘P’ (or ‘Q’) and the format is:
+ //  rPt(max)
+ // where r may be 0 or 1 (typically omitted, as it is not applicable
+ // to variable length arrays), t is one of the letter codes for
+ // basic data types (L, B, I, J, etc.; currently, the X format is
+ // not supported for variable length array field in astropy), and
+ // max is the maximum number of elements of any array in the
+ // column. So, for a variable length field of int16, the
+ // corresponding format spec is, for example, ‘PJ(100)’.
+
 
 std::string get_fits_format(tablator::Data_Type datatype_for_writing,
-                            tablator::Data_Type raw_datatype, size_t array_size) {
+                            tablator::Data_Type raw_datatype, size_t array_size
+#ifdef FUTURE
+							, bool dynamic_array_flag
+#endif
+							) {
+
     char fits_type = get_fits_type_code(datatype_for_writing);
 
-    // Set default and adjust for columns whose ulong values are slated to be written
+    // Set defaults and adjust for columns whose ulong values are slated to be written
     // as char strings.
+#ifdef FUTURE
+	bool variable_fits_array_flag = dynamic_array_flag;
     std::string array_size_str(std::to_string(array_size));
+
+    if (fits_type == 'A' && raw_datatype == tablator::Data_Type::UINT64_LE) {
+
+        array_size_str.assign(std::to_string(
+                tablator::Data_Type_Adjuster::get_char_array_size_for_uint64_col(
+                        array_size)));
+		variable_fits_array_flag = true;
+	}
+	if (variable_fits_array_flag) {
+	  std::stringstream format_ss;
+	  format_ss << "P" << fits_type << "(" << array_size_str << ")";
+	  std::cout << "fits_format: " << format_ss.str() << std::endl;
+	  return format_ss.str();
+	}
+#else
+    std::string array_size_str(std::to_string(array_size));
+
     if (fits_type == 'A' && raw_datatype == tablator::Data_Type::UINT64_LE) {
         array_size_str.assign(std::to_string(
                 tablator::Data_Type_Adjuster::get_char_array_size_for_uint64_col(
                         array_size)));
-    }
+	}
+#endif
     return array_size_str + fits_type;
 }
 
@@ -490,7 +531,12 @@ void tablator::Table::write_fits(
         }
         auto fits_format_str =
                 get_fits_format(datatypes_for_writing[col_idx], column.get_type(),
-                                column.get_array_size());
+                                column.get_array_size()
+#ifdef FUTURE
+								, column.get_dynamic_array_flag()
+#endif
+								);
+		std::cout << "col_idx: " << col_idx << ", fits_format_str: " << fits_format_str << std::endl;
         tform_helper.emplace_back(fits_format_str);
     }
 

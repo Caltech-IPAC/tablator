@@ -118,6 +118,8 @@ void write_binary2_null_for_datatype(uint8_t *&write_ptr,
             ;
         } break;
         case tablator::Data_Type::CHAR: {
+		  // JTODO
+		  write_binary2_null<char>(write_ptr, array_size);
         } break;
         default:
             throw std::runtime_error(

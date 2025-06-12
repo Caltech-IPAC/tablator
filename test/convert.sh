@@ -494,7 +494,7 @@ fi
 
 
 ${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array.json5 temp.vot &&
-${tablator_bin}  temp.vot temp.json5 && diff -w test/back_and_forth_tables/two_row_large_ulong_array_via_fits.json5 temp.json5
+${tablator_bin}  temp.vot temp.json5 && diff -w test/back_and_forth_tables/two_row_large_ulong_array_via_vot.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type ulong with large values to VOTABLE and back"
     rm -f temp.json5
@@ -534,7 +534,7 @@ else
 fi
 
 ${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.fits &&
-${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.vot
+${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/two_row_large_ulong_array_with_type_via_fits.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with resource of type results and single two-row array col of type ulong with large values to FITS and back"
     rm -f temp.fits
@@ -577,7 +577,7 @@ else
     echo "FAIL: Convert Json5 Table with single two-row array col of type unsignedByte to IPAC Table and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/single_bool_col.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff -w test/back_and_forth_tables/single_bool_col.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/single_bool_col.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff test/back_and_forth_tables/single_bool_col.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single multi-row non-array col of type bool to FITS and back"
     rm -f temp.json5
@@ -585,15 +585,16 @@ else
     echo "FAIL: Convert Json5 Table with single multi-row non-array col of type bool to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified.vot out.fits &&  ${tablator_bin}  out.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified.vot temp.fits &&  ${tablator_bin}  temp.fits temp.vot && diff test/back_and_forth_tables/fits_medium_modified.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable translated from FITS to FITS and back"
     rm -f temp.vot
+    rm -f temp.fits
 else
     echo "FAIL: Convert VOTable translated from FITS to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.fits &&  ${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.fits &&  ${tablator_bin}  temp.fits temp.vot && diff test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with unorthodox INFO property value to FITS and back"
     rm -f temp.vot
@@ -887,6 +888,30 @@ else
     echo "FAIL: Convert table with coosys and timesys from vot to FITS and back"
 fi
 
+
+${tablator_bin}  test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.vbin2 &&
+    ${tablator_bin} temp.vbin2 temp.vot &&
+    diff test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings and hex from vot to vbin2 and back"
+    rm -f temp.tbl
+    rm -f temp.tsv
+
+else
+    echo "FAIL: Convert table with null strings and hex from vot to vbin2 and back"
+fi
+
+
+${tablator_bin}  test/back_and_forth_tables/multi_row_023.tbl temp.vbin2 &&
+${tablator_bin} temp.vbin2 temp.tbl &&
+    diff test/back_and_forth_tables/multi_row_023.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with char array and assorted types from tbl to vbin2 and back"
+    rm -f temp.tbl
+    rm -f temp.tsv
+else
+    echo "FAIL: Convert table with char array and assorted types from tbl to vbin2 and back"
+fi
 
 
 #################################################################

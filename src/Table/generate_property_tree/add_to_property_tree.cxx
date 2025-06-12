@@ -158,9 +158,10 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     field_tree.add(XMLATTR_DATATYPE, datatype);
 
     size_t col_array_size = column.get_array_size();
-	// std::cout << "add_to_property_tree(), arraysize: " << col_array_size << std::endl;
+	std::cout << "add_to_property_tree(), arraysize: " << col_array_size << ", CHAR: " << Data_Type::CHAR << ", active_datatype: " << active_datatype << ", type: " << column.get_type() << std::endl;
     bool early_arraysize_f = false;
-    if (active_datatype == Data_Type::CHAR) {
+
+    if (active_datatype == Data_Type::CHAR && column.get_type() != Data_Type::CHAR) {
         field_tree.add(XMLATTR_ARRAYSIZE, "*");
         early_arraysize_f = true;
     } else if (column.get_dynamic_array_flag()) {

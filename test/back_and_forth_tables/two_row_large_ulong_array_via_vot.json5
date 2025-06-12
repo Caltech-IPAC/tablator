@@ -21,7 +21,7 @@
                             {
                                 "name": "ulong_int1",
                                 "datatype": "char",
-                                "arraysize": "39"
+                                "arraysize": "*"
                             }
                         },
                         {
@@ -29,7 +29,7 @@
                             {
                                 "name": "ulong_int2",
                                 "datatype": "char",
-                                "arraysize": "59"
+                                "arraysize": "*"
                             }
                         }
                     ],

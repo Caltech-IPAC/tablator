@@ -4,55 +4,72 @@
 #include <utility>
 
 void tablator::Table::shrink_ipac_string_columns_to_fit(
-        std::vector<Column> &columns, std::vector<size_t> &offsets,
-        std::vector<uint8_t> &data,
-        const std::vector<size_t> &minimum_column_data_widths) {
+        std::vector<Column> &old_columns, std::vector<size_t> &old_offsets,
+		//        std::vector<uint8_t> &data,
+        const std::vector<size_t> &optimal_column_data_widths) {
+													
     std::vector<size_t> new_offsets = {0};
-    std::vector<Column> new_columns(columns);
+    std::vector<Column> new_columns(old_columns);
 
-    size_t old_row_size(tablator::get_row_size(offsets));
+    size_t old_row_size(tablator::get_row_size(old_offsets));
     size_t new_row_size(0);
 	// std::cout << "shrink(), old_row_size: " << old_row_size << std::endl;
 
-	// Populate new_offsets based on column-level data.
-    for (size_t col_idx = 0; col_idx < columns.size(); ++col_idx) {
-	  size_t dynamic_array_size_size = 0; // JTODO
-        if (columns[col_idx].get_type() == Data_Type::CHAR) {
-            new_columns[col_idx].set_array_size(minimum_column_data_widths[col_idx]);
-			// std::cout << "shrink(), col_idx: " << col_idx << ", array_size: " << minimum_column_data_widths[col_idx] << std::endl;
-			if (columns[col_idx].get_dynamic_array_flag()) {
-			  dynamic_array_size_size = sizeof(uint32_t);
+	//============================================
+	//  Update offsets
+    //============================================
+
+	// Populate new_offsets based on what we learned about CHAR
+	// columns by iterating through the data: namely,
+	// dynamic_array_flag and minimum_column_data_width.
+    for (size_t col_idx = 0; col_idx < old_columns.size(); ++col_idx) {
+	  size_t extra_bytes_for_dynamic_array = 0; // JTODO
+        if (old_columns[col_idx].get_type() == Data_Type::CHAR) {
+            new_columns[col_idx].set_array_size(optimal_column_data_widths[col_idx]);
+			// std::cout << "shrink(), col_idx: " << col_idx << ", array_size: " << optimal_column_data_widths[col_idx] << std::endl;
+			if (old_columns[col_idx].get_dynamic_array_flag()) {
+			  extra_bytes_for_dynamic_array = sizeof(uint32_t);
 			}
         }
         new_row_size += new_columns[col_idx].get_data_size();
-		new_row_size += dynamic_array_size_size;
+		new_row_size += extra_bytes_for_dynamic_array;
 		// std::cout << "new_row_size: " << new_row_size << std::endl;
 		// std::cout << "pushing back new_offset: " << new_row_size << std::endl;
         new_offsets.push_back(new_row_size);
     } // end loop through columns
 
-    size_t num_rows = data.size() / old_row_size;
+	//    size_t num_rows = data.size() / old_row_size;
+
+#if 0
 
     // FIXME: Do this in place.
+
+	//============================================
+	//  Update data
+    //============================================
+
     std::vector<uint8_t> new_data(num_rows * new_row_size);
     size_t old_row_offset(0), new_row_offset(0);
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
         for (size_t col_idx = 0; col_idx < offsets.size() - 1; ++col_idx) {
+		  const auto &column = columns[col_idx];
+		  // Data have already been trimmed.
 
-		  size_t dynamic_array_size_size = (columns[col_idx].get_dynamic_array_flag() ? sizeof(uint32_t) : 0);
-
-		  // JTODO Don't we need to trim?  How do we know we're copying the relevant part of old_data?
-		  // We already trimmed while loading old_data.
+		  size_t extra_bytes_for_dynamic_array = (columns[col_idx].get_dynamic_array_flag() ? sizeof(uint32_t) : 0);
             std::copy(data.begin() + old_row_offset + offsets[col_idx],
-                      data.begin() + old_row_offset + offsets[col_idx] + dynamic_array_size_size +
+                      data.begin() + old_row_offset + offsets[col_idx] + extra_bytes_for_dynamic_array +
                               new_columns[col_idx].get_data_size(),
                       new_data.begin() + new_row_offset + new_offsets[col_idx]);
         } // end loop through columns
         old_row_offset += old_row_size;
         new_row_offset += new_row_size;
     } // end loop through rows
+
+#endif
     using namespace std;
+#if 0
     swap(data, new_data);
-    swap(columns, new_columns);
-    swap(offsets, new_offsets);
+#endif
+	swap(old_columns, new_columns);
+    swap(old_offsets, new_offsets);
 }
