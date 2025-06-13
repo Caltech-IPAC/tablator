@@ -47,7 +47,6 @@ size_t compute_max_column_width_for_type(const tablator::Table &table,
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
-
         if (table.is_null_value(requested_row_id, col_idx)) {
             // We've already accounted for the width of the null value.
             continue;
@@ -91,7 +90,6 @@ size_t compute_max_column_width_for_double(const tablator::Table &table,
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
-
         if (table.is_null_value(requested_row_id, col_idx)) {
             // We've already accounted for the width of the null value.
             continue;
@@ -134,25 +132,26 @@ size_t compute_max_column_width_for_char(const tablator::Table &table,
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
-
         if (table.is_null_value(requested_row_id, col_idx)) {
             continue;
         }
-		size_t curr_array_size = array_size;
+        size_t curr_array_size = array_size;
         size_t curr_row_start_offset = requested_row_id * table.get_row_size();
         uint8_t const *curr_col_data_ptr = col_data_start_ptr + curr_row_start_offset;
-		if (dynamic_array_flag) {
-		  curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_col_data_ptr));
-			curr_col_data_ptr += sizeof(uint32_t);
-		  if (curr_array_size > array_size) {
-			// JTODO check this when reading.
-            throw std::runtime_error(
-                    "Dynamic array size must not be larger than column.array_size.");
-		  }
-		}
-		// JTODO skip the strlen?  Not meaningful?
-		size_t curr_width = std::min(
-									 strlen(reinterpret_cast<const char *>(curr_col_data_ptr)), curr_array_size);
+        if (dynamic_array_flag) {
+            curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_col_data_ptr));
+            curr_col_data_ptr += sizeof(uint32_t);
+            if (curr_array_size > array_size) {
+                // JTODO check this when reading.
+                throw std::runtime_error(
+                        "Dynamic array size must not be larger than "
+                        "column.array_size.");
+            }
+        }
+        // JTODO skip the strlen?  Not meaningful?
+        size_t curr_width =
+                std::min(strlen(reinterpret_cast<const char *>(curr_col_data_ptr)),
+                         curr_array_size);
         max_width_sofar = std::max(max_width_sofar, curr_width);
     }
     return max_width_sofar;
@@ -258,12 +257,13 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
     uint8_t const *col_data_start_ptr = data_start_ptr + col_offset;
 
     if ((type != Data_Type::CHAR) && column.get_dynamic_array_flag()) {
-	  // JTODO
-		  // The flag might be set, but variable-length arrays are supported only for CHAR columns in ipac_table format.
-		  // If there are in fact arrays of different lengths in a column of non-CHAR type), an error will be thrown elsewhere.  JTODO.
-		  // For now, just skip the dynamic_array_size value.
-	  col_data_start_ptr += sizeof(uint32_t);
-	}
+        // JTODO
+        // The flag might be set, but variable-length arrays are supported only for CHAR
+        // columns in ipac_table format. If there are in fact arrays of different
+        // lengths in a column of non-CHAR type), an error will be thrown elsewhere.
+        // JTODO. For now, just skip the dynamic_array_size value.
+        col_data_start_ptr += sizeof(uint32_t);
+    }
 
     bool trim_decimal_runs_f = options.is_trim_decimal_runs();
     short min_run_length_for_trim = options.min_run_length_for_trim_;
@@ -386,8 +386,6 @@ std::vector<size_t> tablator::Ipac_Table_Writer::get_column_widths(
         }
 
         if (is_valid_col_idx(table, col_idx)) {
-
-
             widths.push_back(get_single_column_width(table, requested_row_ids, col_idx,
                                                      options));
             ++prev_col_idx;
@@ -469,7 +467,6 @@ void tablator::Ipac_Table_Writer::write_subtable_by_column_and_row(
 void tablator::Ipac_Table_Writer::write_subtable_by_row(
         const Table &table, std::ostream &os, size_t start_row,
         size_t requested_consecutive_row_count, const Command_Line_Options &options) {
-
     size_t true_row_count =
             get_true_row_count(table, start_row, requested_consecutive_row_count);
 
@@ -537,7 +534,6 @@ void tablator::Ipac_Table_Writer::write_single_record(
         const Table &table, std::ostream &os, const std::vector<size_t> &column_ids,
 
         size_t row_idx, const Command_Line_Options &options) {
-
     std::vector<size_t> requested_row_ids(1, row_idx);
     tablator::Ipac_Table_Writer::write_single_record_internal(
             table, os, column_ids, row_idx,

@@ -497,11 +497,11 @@ private:
 //====================================================
 
 // There is more than one way to indicate the array_size of a FITS column.
-  std::pair<size_t, bool> get_array_info(const CCfits::Column &fits_col) {
+std::pair<size_t, bool> get_array_info(const CCfits::Column &fits_col) {
     size_t array_size = 1;
-	bool dynamic_array_flag = false;
+    bool dynamic_array_flag = false;
 
-	const std::string &col_format = fits_col.format();
+    const std::string &col_format = fits_col.format();
     if (std::isdigit(col_format.at(0))) {
         array_size = std::stoll(col_format);
     } else {
@@ -513,8 +513,7 @@ private:
         if (format_contains_paren_number) {
             array_size = std::stoi(number_match[1]);
         }
-		dynamic_array_flag = (col_format.find_first_of("PQ") != std::string::npos);
-
+        dynamic_array_flag = (col_format.find_first_of("PQ") != std::string::npos);
     }
     return std::make_pair(array_size, dynamic_array_flag);
 }
@@ -540,7 +539,8 @@ public:
     template <typename T>
     void store_info_for_column(bool &got_null, T &null_value,
                                const CCfits::Column &fits_col,
-                               tablator::Data_Type tab_data_type, size_t array_size, bool dynamic_array_flag) {
+                               tablator::Data_Type tab_data_type, size_t array_size,
+                               bool dynamic_array_flag) {
         got_null = false;
         null_value = 0;
         if (is_null_value_supported(tab_data_type)) {
@@ -563,8 +563,7 @@ public:
     template <typename T>
     void retrieve_info_for_column(tablator::Data_Type &tab_data_type,
                                   size_t &array_size, bool &got_null, T &null_value,
-								  bool &dynamic_array_flag,
-                                  size_t tab_col_idx) const {
+                                  bool &dynamic_array_flag, size_t tab_col_idx) const {
         // The vector column_info_list_ is indexed from 0, but the
         // non-null_bitfield_flags columns of the tablator table are
         // indexed from 1.
@@ -576,12 +575,12 @@ public:
             null_value = retrieve_null_value_for_type<T>(tab_data_type,
                                                          col_info.null_list_idx_);
         }
-		dynamic_array_flag = col_info.dynamic_array_flag_;
+        dynamic_array_flag = col_info.dynamic_array_flag_;
     }
 
     //=====================================================
 
-  std::pair<size_t, bool> retrieve_array_info_for_column(size_t tab_col_idx) const {
+    std::pair<size_t, bool> retrieve_array_info_for_column(size_t tab_col_idx) const {
         const Column_Info &col_info = column_info_list_.at(tab_col_idx - 1);
         return std::make_pair(col_info.array_size_, col_info.dynamic_array_flag_);
     }
@@ -662,17 +661,18 @@ private:
     //=====================================================
 
     struct Column_Info {
-	  Column_Info(tablator::Data_Type tdt, size_t as, bool gn, size_t nli, bool daf)
+        Column_Info(tablator::Data_Type tdt, size_t as, bool gn, size_t nli, bool daf)
                 : tab_data_type_(tdt),
                   array_size_(as),
                   got_null_(gn),
-                  null_list_idx_(nli), dynamic_array_flag_(daf) {}
+                  null_list_idx_(nli),
+                  dynamic_array_flag_(daf) {}
 
         tablator::Data_Type tab_data_type_;
         size_t array_size_;
         bool got_null_;
         size_t null_list_idx_;
-	  bool dynamic_array_flag_;
+        bool dynamic_array_flag_;
     };
 
     // Storage for type-specific per-column null_values
@@ -699,9 +699,7 @@ public:
             : col_info_manager_(col_info_manager), offsets_(offsets){};
 
 
-
-
-  // JTODO This function is not called for CHAR.
+    // JTODO This function is not called for CHAR.
     template <typename T>
     void read_element_given_column_and_row(tablator::Row &row, fitsfile *fits_file,
                                            const CCfits::Column &fits_col,
@@ -712,13 +710,15 @@ public:
         size_t array_size;
         bool got_null = false;
         T null_value = 0;
-		bool dynamic_array_flag = false;
+        bool dynamic_array_flag = false;
         col_info_manager_.retrieve_info_for_column(tab_data_type, array_size, got_null,
-                                                   null_value, dynamic_array_flag, tab_col_idx);
+                                                   null_value, dynamic_array_flag,
+                                                   tab_col_idx);
 
-		// JTODO take dynamic_array_flag into account.  Use function for this.
-		size_t col_start_offset = tablator::get_col_start_offset(offsets_, tab_col_idx);
-        size_t col_data_start_offset = tablator::get_col_data_start_offset(offsets_, tab_col_idx, dynamic_array_flag);
+        // JTODO take dynamic_array_flag into account.  Use function for this.
+        size_t col_start_offset = tablator::get_col_start_offset(offsets_, tab_col_idx);
+        size_t col_data_start_offset = tablator::get_col_data_start_offset(
+                offsets_, tab_col_idx, dynamic_array_flag);
         size_t col_end_offset = tablator::get_col_end_offset(offsets_, tab_col_idx);
 
         auto get_matched_datatype = CCfits::FITSUtil::MatchType<T>();
@@ -731,41 +731,41 @@ public:
         fits_read_col(fits_file, get_matched_datatype(), fits_col.index(), fits_row_idx,
                       1, array_size, NULL /* nulval */, temp_array.data(), &anynul,
                       &status);
-		// JTODO
+        // JTODO
         if (anynul) {
             // Indicate that all array_size values are null.
 
             // Note: As of 13Oct23, the only value I have seen for anynul is 0.
-			// This function does what is needed for dynamic arrays.
+            // This function does what is needed for dynamic arrays.
             row.set_null(tab_data_type, array_size, tab_col_idx, col_start_offset,
                          col_end_offset, dynamic_array_flag);
 
         } else {
-
 #if 1
-		  // Do this before loop through array elements.
-		  // Overwrite if array turns out to be null?  JTODO
-		// Awkward mix of curr_ptr and offsets.  Reset curr_ptr from offsets each time?  Don't advance it?
-		  if (dynamic_array_flag) {
-			*reinterpret_cast<uint32_t *>(curr_ptr) = array_size;
-			curr_ptr += sizeof(uint32_t);
-		  }
+            // Do this before loop through array elements.
+            // Overwrite if array turns out to be null?  JTODO
+            // Awkward mix of curr_ptr and offsets.  Reset curr_ptr from offsets each
+            // time?  Don't advance it?
+            if (dynamic_array_flag) {
+                *reinterpret_cast<uint32_t *>(curr_ptr) = array_size;
+                curr_ptr += sizeof(uint32_t);
+            }
 #endif
 
             for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
                 T array_elt = temp_array[array_offset];
-				// JTODO how about a single null for the whole array?
-				if (got_null && array_elt == null_value) {
+                // JTODO how about a single null for the whole array?
+                if (got_null && array_elt == null_value) {
                     // Indicate that a single value in the array is null.
                     row.set_null(tab_data_type, 1 /* array_size */, tab_col_idx,
                                  col_data_start_offset + (array_offset * sizeof(T)),
                                  col_end_offset, false /* dynamic_array_flag */);
 
-		  } else
+                } else
 
-			if ((tab_data_type == tablator::Data_Type::FLOAT32_LE ||
-                            tab_data_type == tablator::Data_Type::FLOAT64_LE) &&
-                           std::isnan(array_elt)) {
+                        if ((tab_data_type == tablator::Data_Type::FLOAT32_LE ||
+                             tab_data_type == tablator::Data_Type::FLOAT64_LE) &&
+                            std::isnan(array_elt)) {
                     // Do these types separately, both because FITS doesn't (or didn't)
                     // allow columns of these types to specify a NULL signal and because
                     // equality check doesn't work with NaN, which appears to be the
@@ -792,9 +792,9 @@ public:
                                           const CCfits::Column &fits_col,
                                           size_t fits_row_idx, size_t tab_col_idx) {
         // array_size is the size of the column in bytes/chars.
-	  size_t array_size;
-	  bool dynamic_array_flag;
-	  std::tie(array_size, dynamic_array_flag) =
+        size_t array_size;
+        bool dynamic_array_flag;
+        std::tie(array_size, dynamic_array_flag) =
                 col_info_manager_.retrieve_array_info_for_column(tab_col_idx);
 
         size_t col_start_offset = offsets_[tab_col_idx];
@@ -836,12 +836,12 @@ public:
                          col_end_offset, dynamic_array_flag);
         } else {
             char *current = row.get_data().data() + col_start_offset;
-			// JTODO set curr_array_size, not max_array_size.
+            // JTODO set curr_array_size, not max_array_size.
 
-			if (dynamic_array_flag) {
-			  *(reinterpret_cast<uint32_t *>(current)) = array_size;
-			  current += sizeof(uint32_t);
-			}
+            if (dynamic_array_flag) {
+                *(reinterpret_cast<uint32_t *>(current)) = array_size;
+                current += sizeof(uint32_t);
+            }
 
             for (size_t i = 0; i < num_substrings; ++i) {
                 char *element = data_str[i];
@@ -869,7 +869,6 @@ private:
 //====================================================
 
 void tablator::Table::read_fits(const boost::filesystem::path &path) {
-
     CCfits::FITS fits(path.string(), CCfits::Read, false);
 
     static constexpr char const *PRIMARY_EXTNAME = "PRIMARY_EXTNAME";
@@ -961,8 +960,8 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             continue;
         }
         size_t array_size;
-		bool dynamic_array_flag;
-		std::tie(array_size, dynamic_array_flag) = get_array_info(fits_col);
+        bool dynamic_array_flag;
+        std::tie(array_size, dynamic_array_flag) = get_array_info(fits_col);
         bool got_null = false;
         // Negative type indicates array-valued column.
         int abs_fits_type = abs(fits_col.type());
@@ -971,33 +970,36 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             case CCfits::Tlogical: {
                 // std::cout << "Tlogical: " << CCfits::Tlogical << std::endl;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT8_LE, array_size, dynamic_array_flag);
-                col_info_manager.store_data_type_info_for_column(Data_Type::UINT8_LE,
-                                                                 array_size, dynamic_array_flag);
+                                        Data_Type::INT8_LE, array_size,
+                                        dynamic_array_flag);
+                col_info_manager.store_data_type_info_for_column(
+                        Data_Type::UINT8_LE, array_size, dynamic_array_flag);
             } break;
             case CCfits::Tbyte: {
                 // std::cout << "Tbyte: " << CCfits::Tbyte << std::endl;
                 uint8_t null_value = 0;
                 col_info_manager.store_info_for_column<uint8_t>(
-                        got_null, null_value, fits_col, Data_Type::INT32_LE,
-                        array_size, dynamic_array_flag);
+                        got_null, null_value, fits_col, Data_Type::INT32_LE, array_size,
+                        dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT8_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::UINT8_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tshort: {
                 // std::cout << "Tshort: " << CCfits::Tshort << std::endl;
                 int16_t null_value = 0;
                 col_info_manager.store_info_for_column<int16_t>(
-                        got_null, null_value, fits_col, Data_Type::INT16_LE,
-                        array_size, dynamic_array_flag);
+                        got_null, null_value, fits_col, Data_Type::INT16_LE, array_size,
+                        dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT16_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::INT16_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tushort: {
                 // std::cout << "Tushort: " << CCfits::Tushort << std::endl;
@@ -1009,18 +1011,20 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT16_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::UINT16_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tint: {
                 int32_t null_value = 0;
                 col_info_manager.store_info_for_column<int32_t>(
-                        got_null, null_value, fits_col, Data_Type::INT32_LE,
-                        array_size, dynamic_array_flag);
+                        got_null, null_value, fits_col, Data_Type::INT32_LE, array_size,
+                        dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT32_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::INT32_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tuint: {
                 uint32_t null_value = 0;
@@ -1031,19 +1035,21 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT32_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::UINT32_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tlong: {
                 // The Tlong type code is used for 32-bit integer columns when reading.
                 int32_t null_value = 0;
                 col_info_manager.store_info_for_column<int32_t>(
-                        got_null, null_value, fits_col, Data_Type::INT32_LE,
-                        array_size, dynamic_array_flag);
+                        got_null, null_value, fits_col, Data_Type::INT32_LE, array_size,
+                        dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT32_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::INT32_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tulong: {
                 // The Tulong type code is used for 32-bit unsigned integer columns when
@@ -1056,46 +1062,51 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::UINT32_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::UINT32_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tlonglong: {
                 int64_t null_value = 0;
                 col_info_manager.store_info_for_column<int64_t>(
-                        got_null, null_value, fits_col, Data_Type::INT64_LE,
-                        array_size, dynamic_array_flag);
+                        got_null, null_value, fits_col, Data_Type::INT64_LE, array_size,
+                        dynamic_array_flag);
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::INT64_LE, array_size, null_prop, dynamic_array_flag);
+                                        Data_Type::INT64_LE, array_size, null_prop,
+                                        dynamic_array_flag);
             } break;
             case CCfits::Tfloat: {
                 // std::cout << "Tfloat" << std::endl;
                 Field_Properties null_prop;
                 null_prop.get_values().null = DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::FLOAT32_LE, array_size, null_prop, dynamic_array_flag);
-                col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT32_LE,
-                                                                 array_size, dynamic_array_flag);
+                                        Data_Type::FLOAT32_LE, array_size, null_prop,
+                                        dynamic_array_flag);
+                col_info_manager.store_data_type_info_for_column(
+                        Data_Type::FLOAT32_LE, array_size, dynamic_array_flag);
             } break;
             case CCfits::Tdouble: {
                 // std::cout << "Tdouble" << std::endl;
                 Field_Properties null_prop;
                 null_prop.get_values().null = DEFAULT_NULL_VALUE;
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::FLOAT64_LE, array_size, null_prop, dynamic_array_flag);
-                col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT64_LE,
-                                                                 array_size, dynamic_array_flag);
+                                        Data_Type::FLOAT64_LE, array_size, null_prop,
+                                        dynamic_array_flag);
+                col_info_manager.store_data_type_info_for_column(
+                        Data_Type::FLOAT64_LE, array_size, dynamic_array_flag);
             } break;
-		case CCfits::Tstring: {
-		  // std::cout << "Tstring" << std::endl;
-			  // JTODO dynamic
+            case CCfits::Tstring: {
+                // std::cout << "Tstring" << std::endl;
+                // JTODO dynamic
                 tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::CHAR, fits_col.width(), tablator::Field_Properties(), dynamic_array_flag);
-                col_info_manager.store_data_type_info_for_column(Data_Type::CHAR,
-                                                                 array_size, dynamic_array_flag);
-		}
-                break;
+                                        Data_Type::CHAR, fits_col.width(),
+                                        tablator::Field_Properties(),
+                                        dynamic_array_flag);
+                col_info_manager.store_data_type_info_for_column(
+                        Data_Type::CHAR, array_size, dynamic_array_flag);
+            } break;
             default:
                 throw std::runtime_error(
                         "Appending columns, unsupported data type in the fits file for "

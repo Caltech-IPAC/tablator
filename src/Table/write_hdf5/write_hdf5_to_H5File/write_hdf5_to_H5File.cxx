@@ -58,13 +58,13 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
             compound_type.insertMember(columns[i].get_name(), offsets[i],
                                        *string_types.rbegin());
         } else if (columns[i].get_array_size() != 1) {
-		  // std::cout << "array_size > 1" << std::endl;  // JTODO flag
+            // std::cout << "array_size > 1" << std::endl;  // JTODO flag
             const hsize_t hsize(columns[i].get_array_size());
             array_types.emplace_back(Data_Type_to_H5(columns[i].get_type()), 1, &hsize);
             compound_type.insertMember(columns[i].get_name(), offsets[i],
                                        *array_types.rbegin());
         } else {
-		  // std::cout << "array_size 1, not char" << std::endl;  // JTODO flag
+            // std::cout << "array_size 1, not char" << std::endl;  // JTODO flag
             compound_type.insertMember(columns[i].get_name(), offsets[i],
                                        Data_Type_to_H5(columns[i].get_type()));
         }
@@ -94,6 +94,6 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     write_hdf5_columns(columns, FIELD, h5_table);
     // JTODO Top-level params? (Master doesn't.)
 
-	write_hdf5_columns(get_table_element_params(), PARAM, h5_table);
-	h5_table.write(get_data().data(), compound_type);
+    write_hdf5_columns(get_table_element_params(), PARAM, h5_table);
+    h5_table.write(get_data().data(), compound_type);
 }

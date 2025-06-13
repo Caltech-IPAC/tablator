@@ -10,9 +10,9 @@ void tablator::append_column(std::vector<Column> &columns, std::vector<size_t> &
     size_t old_row_size = *offsets.rbegin();
     size_t new_row_size = old_row_size + new_columns.rbegin()->get_data_size();
 
-	if (column.get_dynamic_array_flag()) {
-	  new_row_size += sizeof(uint32_t);
-	}
+    if (column.get_dynamic_array_flag()) {
+        new_row_size += sizeof(uint32_t);
+    }
     auto new_offsets(offsets);
     new_offsets.push_back(new_row_size);
 

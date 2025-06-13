@@ -24,7 +24,7 @@ hvl_t make_option_array(const std::vector<Option> &options,
     return hdf5_options;
 }
 
-  // column_flavor is PARAM or FIELD.
+// column_flavor is PARAM or FIELD.
 void write_hdf5_columns(const std::vector<Column> &tab_columns,
                         const std::string &column_flavor, H5::H5Location &location) {
     if (tab_columns.empty()) {
@@ -74,9 +74,9 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
                                        HOFFSET(HDF5_Field_Properties, values),
                                        hdf5_values);
 
-	//	H5::PredType hdf5_int
+    //	H5::PredType hdf5_int
 
-	// name, type, array_size etc. are class members of HD5_Column.
+    // name, type, array_size etc. are class members of HD5_Column.
     H5::CompType hdf5_column(sizeof(HDF5_Column));
     hdf5_column.insertMember(Column::COL_NAME, HOFFSET(HDF5_Column, name), hdf5_string);
     hdf5_column.insertMember(Column::COL_TYPE, HOFFSET(HDF5_Column, type), hdf5_string);
@@ -142,12 +142,11 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
 
         type_strings.push_back(to_string(field.get_type()));
 
-		bool dynamic_array_flag = field.get_dynamic_array_flag();
+        bool dynamic_array_flag = field.get_dynamic_array_flag();
 
-        hdf5_columns.emplace_back(field.get_name().c_str(),
-                                  type_strings.rbegin()->c_str(),
-                                  field.get_array_size(), hdf5_field_properties, dynamic_array_flag);
-
+        hdf5_columns.emplace_back(
+                field.get_name().c_str(), type_strings.rbegin()->c_str(),
+                field.get_array_size(), hdf5_field_properties, dynamic_array_flag);
     }
 
     hvl_t H5_columns = {hdf5_columns.size(), hdf5_columns.data()};

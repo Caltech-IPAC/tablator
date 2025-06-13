@@ -34,7 +34,6 @@ void tablator::Table::write(const boost::filesystem::path &path, const Format &f
 void tablator::Table::write(std::ostream &os, const std::string &table_name,
                             const Format &format,
                             const Command_Line_Options &options) const {
-
     // List of cols whose types must be adjusted for writing due
     // to restrictions from <format>.
     std::vector<Data_Type> datatypes_for_writing;
@@ -66,8 +65,8 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                         boost::property_tree::xml_writer_make_settings(' ', 2));
             }
             uint num_spaces = is_json ? 2 : 0;
-                splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,
-                                           num_spaces, options);
+            splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,
+                                       num_spaces, options);
         } break;
         case Format::Enums::CSV:
             write_dsv(os, ',', options);

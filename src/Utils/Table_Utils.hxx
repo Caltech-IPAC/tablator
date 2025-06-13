@@ -10,23 +10,24 @@
 namespace tablator {
 
 // column-related functions
-  inline size_t get_col_data_start_offset(const std::vector<size_t> &offsets, size_t col_idx, bool dynamic_array_flag) {
-  size_t col_offset = offsets[col_idx];
-  if (dynamic_array_flag) {
-	return col_offset + sizeof(uint32_t);
-  }
-  return col_offset;
-  }
+inline size_t get_col_data_start_offset(const std::vector<size_t> &offsets,
+                                        size_t col_idx, bool dynamic_array_flag) {
+    size_t col_offset = offsets[col_idx];
+    if (dynamic_array_flag) {
+        return col_offset + sizeof(uint32_t);
+    }
+    return col_offset;
+}
 
-  inline size_t get_col_start_offset(const std::vector<size_t> &offsets, size_t col_idx) {
-  assert (col_idx < offsets.size());
-  return offsets[col_idx];
-  }
+inline size_t get_col_start_offset(const std::vector<size_t> &offsets, size_t col_idx) {
+    assert(col_idx < offsets.size());
+    return offsets[col_idx];
+}
 
 
-inline size_t get_col_end_offset(const std::vector<size_t> &offsets, size_t col_idx) {  
-  assert (col_idx < offsets.size() - 1);
-  return offsets[col_idx + 1];
+inline size_t get_col_end_offset(const std::vector<size_t> &offsets, size_t col_idx) {
+    assert(col_idx < offsets.size() - 1);
+    return offsets[col_idx + 1];
 }
 
 void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
@@ -45,14 +46,16 @@ inline void append_column(std::vector<Column> &columns, std::vector<size_t> &off
                           const std::string &name, const Data_Type &type,
                           const size_t &size,
                           const Field_Properties &field_properties) {
-  append_column(columns, offsets, Column(name, type, size, field_properties,
-										 false /* dynamic_array_flag */));
+    append_column(
+            columns, offsets,
+            Column(name, type, size, field_properties, false /* dynamic_array_flag */));
 }
 
 inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
                           const std::string &name, const Data_Type &type,
                           const size_t &size, bool dynamic_array_flag) {
-  append_column(columns, offsets, Column(name, type, size, Field_Properties(), dynamic_array_flag));
+    append_column(columns, offsets,
+                  Column(name, type, size, Field_Properties(), dynamic_array_flag));
 }
 
 inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
@@ -119,7 +122,8 @@ inline void reserve_data(std::vector<uint8_t> &data, const size_t &new_num_rows,
 
 void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &array_size,
                          const size_t &column, const std::string &element,
-                         const size_t &offset, const size_t &offset_end, bool dynamic_array_flag);
+                         const size_t &offset, const size_t &offset_end,
+                         bool dynamic_array_flag);
 
 
 // JTODO move to .cxx file

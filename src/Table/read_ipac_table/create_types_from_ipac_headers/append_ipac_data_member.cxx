@@ -33,10 +33,9 @@ void tablator::Table::append_ipac_data_member(std::vector<Column> &columns,
         tablator::append_column(columns, offsets, name, Data_Type::FLOAT64_LE);
     } else if (std::string("char").compare(0, type_str_len, type_str) == 0 ||
                std::string("date").compare(0, type_str_len, type_str) == 0) {
-
-	  // Assume for now that CHAR column values are not dynamic
-	  // arrays; we'll update later.
-	  tablator::append_column(columns, offsets, name, Data_Type::CHAR, num_elements);
+        // Assume for now that CHAR column values are not dynamic
+        // arrays; we'll update later.
+        tablator::append_column(columns, offsets, name, Data_Type::CHAR, num_elements);
     } else {
         throw std::runtime_error("Unknown data type in IPAC table: " + data_type);
     }

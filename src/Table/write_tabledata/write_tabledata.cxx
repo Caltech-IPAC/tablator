@@ -78,12 +78,12 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
             if (!is_null_value(row_idx, col_idx)) {
                 Ascii_Writer::write_type_as_ascii(
                         td, column.get_type(), column.get_array_size(),
-						column.get_dynamic_array_flag(),
+                        column.get_dynamic_array_flag(),
                         data.data() + row_offset + offsets[col_idx],
                         Ascii_Writer::DEFAULT_SEPARATOR, options);
             } else {
-			  // std::cout << "skipping write_type(), null" << std::endl;
-			}
+                // std::cout << "skipping write_type(), null" << std::endl;
+            }
             os << td_prefix;
             switch (output_format) {
                 case Format::Enums::JSON:

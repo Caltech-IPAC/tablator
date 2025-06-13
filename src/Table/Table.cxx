@@ -201,11 +201,11 @@ Table::Table(std::istream &input_stream, const Format &format) {
             read_ipac_table(input_stream);
             break;
         case Format::Enums::JSON5:
-			try {
-            read_json5(input_stream);
-			} catch (...) {
-			throw std::runtime_error("hmm2");
-			}
+            try {
+                read_json5(input_stream);
+            } catch (...) {
+                throw std::runtime_error("hmm2");
+            }
             break;
         case Format::Enums::VOTABLE:
             read_votable(input_stream);

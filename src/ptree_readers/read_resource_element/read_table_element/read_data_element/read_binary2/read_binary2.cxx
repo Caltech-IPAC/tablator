@@ -25,10 +25,8 @@ Data_Element ptree_readers::read_binary2(
             continue;
         }
         if (stream.first != STREAM)
-            throw std::runtime_error(
-                    "Unknown element in BINARY2.  Expected " +
-                    STREAM + ", but found: " +
-                    stream.first);
+            throw std::runtime_error("Unknown element in BINARY2.  Expected " + STREAM +
+                                     ", but found: " + stream.first);
         std::string encoding;
         for (auto &stream_child : stream.second) {
             if (stream_child.first == XMLATTR) {

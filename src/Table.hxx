@@ -297,7 +297,7 @@ public:
     // table modifiers
 
     void append_row(const Row &row) {
-	  assert(row.get_data().size() == get_row_size());
+        assert(row.get_data().size() == get_row_size());
         tablator::append_row(get_data(), row);
     }
 
@@ -559,8 +559,8 @@ public:
         return val_array;
     }
 
-  // JTODO move to .cxx
-  // Note: This function does not clear the incoming val_array. JTODO
+    // JTODO move to .cxx
+    // Note: This function does not clear the incoming val_array. JTODO
     template <typename T>
     void extract_value(std::vector<T> &val_array, size_t col_idx,
                        size_t row_idx) const {
@@ -575,19 +575,19 @@ public:
         auto &column = columns[col_idx];
 
 
-		size_t row_offset = row_idx * get_row_size();
-		size_t base_offset = row_offset + get_offsets().at(col_idx);
-		uint8_t const *curr_data = get_data().data() + base_offset;
+        size_t row_offset = row_idx * get_row_size();
+        size_t base_offset = row_offset + get_offsets().at(col_idx);
+        uint8_t const *curr_data = get_data().data() + base_offset;
 
         auto array_size = column.get_array_size();
-		auto dynamic_array_flag = column.get_dynamic_array_flag();
+        auto dynamic_array_flag = column.get_dynamic_array_flag();
 
 
-		auto curr_array_size = array_size;
-		  if (dynamic_array_flag) {
-			curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_data));
-			curr_data += sizeof(uint32_t);
-		  }
+        auto curr_array_size = array_size;
+        if (dynamic_array_flag) {
+            curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_data));
+            curr_data += sizeof(uint32_t);
+        }
 
         if (is_null_value(row_idx, col_idx)) {
             for (size_t i = 0; i < curr_array_size || i < 1; ++i) {
@@ -1023,7 +1023,7 @@ private:
     }
 
     void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths) {
-	  shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(), // get_data(),
+        shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(),  // get_data(),
                                           column_widths);
     };
 
@@ -1041,8 +1041,8 @@ private:
 
     static void shrink_ipac_string_columns_to_fit(
             std::vector<Column> &columns, std::vector<size_t> &offsets,
-			//            std::vector<uint8_t> &data,
-			const std::vector<size_t> &column_widths);
+            //            std::vector<uint8_t> &data,
+            const std::vector<size_t> &column_widths);
 
 
     // miscellaneous helpers for reading

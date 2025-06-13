@@ -14,15 +14,14 @@ public:
 
     static void write_type_as_ascii(
             std::ostream &os, const Data_Type &type, size_t array_size,
-			bool dynamic_array_flag,
-            const uint8_t *data, const char &separator = DEFAULT_SEPARATOR,
+            bool dynamic_array_flag, const uint8_t *data,
+            const char &separator = DEFAULT_SEPARATOR,
             const Command_Line_Options &options = default_options);
 
     // Called by Ipac_Table_Writer when splitting array column into several columns.
     static void write_type_as_ascii_expand_array(
             std::ostream &os, const Data_Type &type, size_t array_size,
-			bool dynamic_array_flag,
-            const uint8_t *data, size_t col_width,
+            bool dynamic_array_flag, const uint8_t *data, size_t col_width,
             const Command_Line_Options &options = default_options);
 
 private:

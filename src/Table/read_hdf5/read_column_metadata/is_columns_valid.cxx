@@ -26,9 +26,9 @@ bool is_columns_valid(H5::VarLenType &columns) {
           column.getMemberClass(1) == H5T_STRING &&
           column.getMemberClass(2) == H5T_INTEGER &&
           column.getMemberDataType(2).getSize() == H5::PredType::STD_U64LE.getSize() &&
-          column.getMemberClass(3) == H5T_COMPOUND && column.getMemberClass(4) == H5T_INTEGER &&
-          column.getMemberDataType(4).getSize() == H5::PredType::STD_I8LE.getSize()
-		  )) {
+          column.getMemberClass(3) == H5T_COMPOUND &&
+          column.getMemberClass(4) == H5T_INTEGER &&
+          column.getMemberDataType(4).getSize() == H5::PredType::STD_I8LE.getSize())) {
         return false;
     }
     H5::CompType field_properties(column.getMemberCompType(3));
@@ -78,7 +78,7 @@ bool is_columns_valid(H5::VarLenType &columns) {
         return false;
     }
 
-	// JTODO sg for flag?
+    // JTODO sg for flag?
     return true;
 }
 }  // namespace tablator

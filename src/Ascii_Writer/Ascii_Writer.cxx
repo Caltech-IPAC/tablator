@@ -30,25 +30,24 @@ constexpr const char Ascii_Writer::IPAC_COLUMN_SEPARATOR;
 // array, individual elements are delimited by the single char
 // specified in the <separator> argument.
 void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
-                                       size_t array_size,
-									   bool dynamic_array_flag,
-									   const uint8_t *data,
-                                       const char &separator,
+                                       size_t array_size, bool dynamic_array_flag,
+                                       const uint8_t *data, const char &separator,
                                        const Command_Line_Options &options) {
-  size_t curr_array_size = array_size;
-  const uint8_t *array_start = data;
+    size_t curr_array_size = array_size;
+    const uint8_t *array_start = data;
 
-  if (dynamic_array_flag) {
-	curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
-	std::advance(array_start, sizeof(uint32_t));
-  }
+    if (dynamic_array_flag) {
+        curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
+        std::advance(array_start, sizeof(uint32_t));
+    }
 
     if (type != Data_Type::CHAR && curr_array_size != 1) {
         for (size_t n = 0; n < curr_array_size; ++n) {
             if (n > 0) {
                 os << separator;
             }
-            write_array_unit_as_ascii(os, type, 1, array_start + n * data_size(type), options);
+            write_array_unit_as_ascii(os, type, 1, array_start + n * data_size(type),
+                                      options);
         }
     } else {
         write_array_unit_as_ascii(os, type, curr_array_size, array_start, options);
@@ -60,36 +59,36 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
 // Called by write_single_ipac_record() as it expands a column of array
 // type to multiple columns.
 void Ascii_Writer::write_type_as_ascii_expand_array(
-        std::ostream &os, const Data_Type &type,  size_t array_size,
-		bool dynamic_array_flag,
-        const uint8_t *data, size_t col_width, const Command_Line_Options &options) {
-  const uint8_t *array_start = data;
-  size_t curr_array_size = array_size;
+        std::ostream &os, const Data_Type &type, size_t array_size,
+        bool dynamic_array_flag, const uint8_t *data, size_t col_width,
+        const Command_Line_Options &options) {
+    const uint8_t *array_start = data;
+    size_t curr_array_size = array_size;
 
-  if (dynamic_array_flag) {
-	curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
-	std::advance(array_start, sizeof(uint32_t));
-  }
+    if (dynamic_array_flag) {
+        curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
+        std::advance(array_start, sizeof(uint32_t));
+    }
 
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < curr_array_size; ++n) {
             os << std::setw(col_width);
-            write_array_unit_as_ascii(os, type, 1, array_start + n * data_size(type), options);
+            write_array_unit_as_ascii(os, type, 1, array_start + n * data_size(type),
+                                      options);
 
             if (n != curr_array_size - 1) {
                 os << IPAC_COLUMN_SEPARATOR;
             }
         }
     } else {
-	  write_array_unit_as_ascii(os, type, array_size, array_start, options);
+        write_array_unit_as_ascii(os, type, array_size, array_start, options);
     }
 }
 
 //=======================================================================
 
 void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
-											 size_t array_size,
-                                             const uint8_t *data,
+                                             size_t array_size, const uint8_t *data,
                                              const Command_Line_Options &options) {
     if (type != Data_Type::CHAR && array_size != 1) {
         throw std::runtime_error(

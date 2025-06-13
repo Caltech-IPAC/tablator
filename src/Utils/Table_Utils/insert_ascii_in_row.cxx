@@ -8,51 +8,55 @@
 
 namespace tablator {
 
-  void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &array_size,
+void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &array_size,
                          const size_t &col_idx, const std::string &element,
-                         const size_t &offset, const size_t &offset_end, bool dynamic_array_flag) {
-	std::vector<std::string> elements;
+                         const size_t &offset, const size_t &offset_end,
+                         bool dynamic_array_flag) {
+    std::vector<std::string> elements;
 
-  size_t curr_array_size = array_size;
-  size_t curr_offset = offset;
-  if (array_size != 1) {
-	if (data_type == Data_Type::CHAR) {
-	  curr_array_size = element.size();
-	} else {
-        boost::split(elements, element, boost::is_any_of(" "));
-		curr_array_size = elements.size();
-	}
-	// JTODO decide about default flag value
+    size_t curr_array_size = array_size;
+    size_t curr_offset = offset;
+    if (array_size != 1) {
+        if (data_type == Data_Type::CHAR) {
+            curr_array_size = element.size();
+        } else {
+            boost::split(elements, element, boost::is_any_of(" "));
+            curr_array_size = elements.size();
+        }
+            // JTODO decide about default flag value
 #if 0
 	if ((curr_array_size < array_size && !dynamic_array_flag) || curr_array_size > array_size)
 #else
-	  // JTODO or assume ipac_table char columns are dynamic
-	if (curr_array_size > array_size)
+        // JTODO or assume ipac_table char columns are dynamic
+        if (curr_array_size > array_size)
 #endif
-	  {
-	  throw std::runtime_error(
-							   "Expected no more than " + std::to_string(array_size) + " elements, but found " +
-							   std::to_string(curr_array_size) + ": '" + element + "'");
-	}
-  }
+        {
+            throw std::runtime_error(
+                    "Expected no more than " + std::to_string(array_size) +
+                    " elements, but found " + std::to_string(curr_array_size) + ": '" +
+                    element + "'");
+        }
+    }
 
-  if (dynamic_array_flag) {
-	row.insert(static_cast<uint32_t>(curr_array_size), curr_offset);	
-	curr_offset += sizeof(uint32_t);
-  }
-	if (curr_array_size != 1 && data_type != Data_Type::CHAR) {
+    if (dynamic_array_flag) {
+        row.insert(static_cast<uint32_t>(curr_array_size), curr_offset);
+        curr_offset += sizeof(uint32_t);
+    }
+    if (curr_array_size != 1 && data_type != Data_Type::CHAR) {
         auto element_offset = curr_offset;
         auto element_size = data_size(data_type);
         for (auto &e : elements) {
-		  insert_ascii_in_row(row, data_type, 1, col_idx, e, element_offset,
-							  element_offset + element_size, false /* dynamic_array_flag */);
+            insert_ascii_in_row(row, data_type, 1, col_idx, e, element_offset,
+                                element_offset + element_size,
+                                false /* dynamic_array_flag */);
             element_offset += element_size;
         }
     } else {
         switch (data_type) {
             case Data_Type::INT8_LE:
                 if (element == "?" || element == " " || element[0] == '\0') {
-				  row.set_null(data_type, array_size, col_idx, curr_offset, offset_end, dynamic_array_flag);
+                    row.set_null(data_type, array_size, col_idx, curr_offset,
+                                 offset_end, dynamic_array_flag);
                 } else {
                     bool result = (boost::iequals(element, "true") ||
                                    boost::iequals(element, "t") || element == "1");

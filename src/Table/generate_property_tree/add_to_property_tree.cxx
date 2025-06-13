@@ -315,7 +315,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     }
 
     // We don't add tabledata directly because it isn't in ptree format.
-	table_tree.add(DATA_TABLEDATA, TABLEDATA_PLACEHOLDER);
+    table_tree.add(DATA_TABLEDATA, TABLEDATA_PLACEHOLDER);
 
     for (const auto &info : table_element.get_trailing_info_list()) {
         add_to_property_tree(table_tree, INFO, info, json_prep);
@@ -329,7 +329,8 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           const std::vector<std::string> &comments,
-                          const Labeled_Properties &table_labeled_properties, bool json_prep) {
+                          const Labeled_Properties &table_labeled_properties,
+                          bool json_prep) {
     // std::cout << "add_to_property_tree(), Resource I" << std::endl;
     auto &resource_tree = find_or_add_tree(parent_tree, RESOURCE, json_prep);
 

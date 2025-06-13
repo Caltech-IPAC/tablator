@@ -649,11 +649,11 @@ int main(int argc, char *argv[]) {
             in_table1.write(output_stream, output_path.stem().native(), output_format,
                             options);
         } else {
-		   // std::cout << "main(), before read()" << std::endl;
+            // std::cout << "main(), before read()" << std::endl;
             tablator::Table table(input_path, input_format);
-		   // std::cout << "main(), before write()" << std::endl;
+            // std::cout << "main(), before write()" << std::endl;
             table.write(output_path, output_format, options);
-		   // std::cout << "main(), after write()" << std::endl;
+            // std::cout << "main(), after write()" << std::endl;
         }
     } catch (boost::program_options::error &exception) {
         std::cerr << exception.what() << "\n" << usage(visible_options);

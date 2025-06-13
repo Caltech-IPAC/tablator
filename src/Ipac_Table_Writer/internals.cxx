@@ -113,7 +113,6 @@ void Ipac_Table_Writer::write_single_record(
 
         const std::vector<Data_Type>& datatypes_for_writing,
         const Command_Line_Options& options) {
-
     if (row_idx >= table.get_num_rows()) {
         return;
     }
@@ -439,9 +438,9 @@ void Ipac_Table_Writer::write_single_value(
                 (null_value.empty()) ? Table::DEFAULT_NULL_VALUE : null_value;
         size_t effective_array_size =
                 get_effective_array_size(active_datatype, column.get_array_size());
-		if (active_datatype == Data_Type::CHAR && column.get_dynamic_array_flag()) {
-		  effective_array_size = 1;
-		}
+        if (active_datatype == Data_Type::CHAR && column.get_dynamic_array_flag()) {
+            effective_array_size = 1;
+        }
 
         for (size_t element = 0; element < effective_array_size; ++element) {
             os << Ascii_Writer::IPAC_COLUMN_SEPARATOR << std::setw(ipac_column_width);
@@ -452,9 +451,9 @@ void Ipac_Table_Writer::write_single_value(
         // isn't equipped to write bytes as ints, as IPAC_FORMAT
         // requires.
         size_t base_offset = curr_row_offset + offsets.at(col_idx);
-		if (column.get_dynamic_array_flag()) {
-		  base_offset += sizeof(uint32_t);
-		}
+        if (column.get_dynamic_array_flag()) {
+            base_offset += sizeof(uint32_t);
+        }
         uint8_t const* curr_data = table_data.data() + base_offset;
         size_t element_size = data_size(active_datatype);
 
@@ -476,10 +475,9 @@ void Ipac_Table_Writer::write_single_value(
 
         os << Ascii_Writer::IPAC_COLUMN_SEPARATOR << std::setw(ipac_column_width);
         std::stringstream ss_temp;
-        Ascii_Writer::write_type_as_ascii_expand_array(ss_temp, column.get_type(),
-                                                       column.get_array_size(),
-													   column.get_dynamic_array_flag(),
-                                                       curr_data, ipac_column_width, options);
+        Ascii_Writer::write_type_as_ascii_expand_array(
+                ss_temp, column.get_type(), column.get_array_size(),
+                column.get_dynamic_array_flag(), curr_data, ipac_column_width, options);
         std::string s;
         boost::replace_copy_if(ss_temp.str(), std::back_inserter(s),
                                boost::is_any_of(NEWLINES), ' ');

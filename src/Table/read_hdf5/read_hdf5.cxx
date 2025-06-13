@@ -86,7 +86,8 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
         if (datatype.getClass() == H5T_STRING) {
             tablator::append_column(columns, offsets, name, Data_Type::CHAR,
                                     datatype.getSize(),
-                                    column_metadata[i].get_field_properties(), column_metadata[i].get_dynamic_array_flag());
+                                    column_metadata[i].get_field_properties(),
+                                    column_metadata[i].get_dynamic_array_flag());
         } else if (datatype.getClass() == H5T_ARRAY) {
             auto array_type = compound.getMemberArrayType(i);
             hsize_t ndims = array_type.getArrayNDims();
@@ -99,15 +100,17 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
             }
             array_type.getArrayDims(&ndims);
             tablator::append_column(columns, offsets, name, H5_to_Data_Type(datatype),
-                                    ndims, column_metadata[i].get_field_properties(), column_metadata[i].get_dynamic_array_flag());
+                                    ndims, column_metadata[i].get_field_properties(),
+                                    column_metadata[i].get_dynamic_array_flag());
         } else {
             tablator::append_column(columns, offsets, name, H5_to_Data_Type(datatype),
-                                    1, column_metadata[i].get_field_properties(), false);
+                                    1, column_metadata[i].get_field_properties(),
+                                    false);
         }
     }
 
     std::vector<uint8_t> data;
-	// dataset.getSpace().getSimpleExtentNpoints() << std::endl;
+    // dataset.getSpace().getSimpleExtentNpoints() << std::endl;
 
     data.resize(tablator::get_row_size(offsets) *
                 dataset.getSpace().getSimpleExtentNpoints());
@@ -115,7 +118,7 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
 
     std::vector<Table_Element> table_elements;
     const auto table_element =
-	  Table_Element::Builder(columns, offsets, data)
+            Table_Element::Builder(columns, offsets, data)
                     .add_params(table_element_params)
                     .add_description(table_element_description)
                     .add_trailing_info_list(table_element_trailing_infos)
