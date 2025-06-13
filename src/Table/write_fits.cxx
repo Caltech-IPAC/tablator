@@ -51,6 +51,7 @@ char get_fits_type_code(tablator::Data_Type datatype_for_writing) {
 
 // Format string of fixed-length array is array_size followed by fits_type_code.
 
+// JTODO
 // For the future (our version of CCFits doesn't support this):
 // Per https://docs.astropy.org/en/stable/io/fits/usage/unfamiliar.html#variable-length-array-tables, 
 // format string of variable-length (dynamic) array is of the form Pt(max):
@@ -92,7 +93,6 @@ std::string get_fits_format(tablator::Data_Type datatype_for_writing,
 	if (variable_fits_array_flag) {
 	  std::stringstream format_ss;
 	  format_ss << "P" << fits_type << "(" << array_size_str << ")";
-	  std::cout << "fits_format: " << format_ss.str() << std::endl;
 	  return format_ss.str();
 	}
 #else
@@ -536,7 +536,6 @@ void tablator::Table::write_fits(
 								, column.get_dynamic_array_flag()
 #endif
 								);
-		std::cout << "col_idx: " << col_idx << ", fits_format_str: " << fits_format_str << std::endl;
         tform_helper.emplace_back(fits_format_str);
     }
 
@@ -655,13 +654,9 @@ void tablator::Table::write_fits(
             Data_Type datatype_for_writing = datatypes_for_writing[col_idx];
 
             size_t array_size = column.get_array_size();
-			// std::cout << "write_fits(), dynamic_array_flag: " << column.get_dynamic_array_flag() << std::endl;
 			if (column.get_dynamic_array_flag()) {
-			  // std::cout << "write_fits(), writing size " << array_size << " and advancing pointer" << std::endl;
 			  array_size = *(reinterpret_cast<const uint32_t *>(curr_data_ptr));
 			  curr_data_ptr += sizeof(uint32_t);
-
-			  // std::cout << "write_fits(), found dynamic array, curr size: " << array_size << ", max size: " << column.get_array_size()<< std::endl;
 			}
 
             bool null_flag_is_set = is_null_value(tab_row_idx, col_idx);

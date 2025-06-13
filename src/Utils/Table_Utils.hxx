@@ -45,11 +45,7 @@ inline void append_column(std::vector<Column> &columns, std::vector<size_t> &off
                           const std::string &name, const Data_Type &type,
                           const size_t &size,
                           const Field_Properties &field_properties) {
-  // JTODO
   append_column(columns, offsets, Column(name, type, size, field_properties,
-										 // std::cout << "append_column(), setting flag to " << (type == Data_Type::CHAR) << std::endl;  // std::cout << "append_column(), setting flag to " << (type == Data_Type::CHAR) << std::endl;
-										 
-										 //										 type == Data_Type::CHAR /* dynamic_array_flag */));));
 										 false /* dynamic_array_flag */));
 }
 
@@ -90,38 +86,11 @@ inline size_t get_num_rows(const std::vector<size_t> &offsets,
 }
 
 #if 0
-  inline size_t get_num_dynamic_arrays(const std::vector<Column> &columns) {
-	size_t nda=0;
-	// JTODO fancy
-	for (const auto &column : columns) {
-	  if (column.get_dynamic_array_flag()) {
-		++nda;
-	  }
-	}
-	return nda;
-  }
-  // JTODO assertion
-  inline size_t get_row_size_without_dynamic_array_sizes(const std::vector<size_t> &offsets, const std::vector<Column> &columns) {
-	// std::cout << "get_row_size_without(), enter" << std::endl;
-	// std::cout << "  row_size(): " << get_row_size(offsets) << std::endl;
-	// std::cout << "  num_dynamic_arrays(): " << get_num_dynamic_arrays(columns) << std::endl;
-	// std::cout << "  return row_size_wo: " << get_row_size(offsets) - get_num_dynamic_arrays(columns) * sizeof(uint32_t) << std::endl;
-	return get_row_size(offsets) - get_num_dynamic_arrays(columns) * sizeof(uint32_t);
-  }
-
   // JTODO reinstate these?
 inline void pop_row(std::vector<uint8_t> &data, uint row_size) {
     data.resize(data.size() - row_size);
 }
-
-inline void resize_rows(std::vector<uint8_t> &data, const size_t &new_num_rows,
-                        uint row_size) {
-    data.resize(new_num_rows * row_size);
-}
-
-
-
-#endif 
+#endif
 
 inline void append_row(std::vector<uint8_t> &data, const Row &row) {
     data.insert(data.end(), row.get_data().begin(), row.get_data().end());

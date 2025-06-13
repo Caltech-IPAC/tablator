@@ -215,7 +215,6 @@ void Ipac_Table_Writer::write_column_headers(
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
         size_t effective_array_size = get_effective_array_size(
                 datatypes_for_writing[col_idx], columns[col_idx].get_array_size());
-		// std::cout << "write_column_headers(), array_size: " << columns.at(col_idx).get_array_size() << ", effective_array_size: " << effective_array_size << ", ipac_column_width: " << ipac_column_widths[col_idx] << std::endl;
         total_record_width += write_column_name(
                 table, os, col_idx, ipac_column_widths[col_idx], effective_array_size);
     }
@@ -411,7 +410,6 @@ void Ipac_Table_Writer::write_single_value(
         const Table& table, std::ostream& os, size_t col_idx, size_t row_idx,
         size_t ipac_column_width, const std::vector<Data_Type>& datatypes_for_writing,
         const Command_Line_Options& options) {
-  // std::cout << "write_single_value(), enter, col_idx: " << col_idx << ", row_idx: " << row_idx << ", width: " << ipac_column_width << std::endl;
     const auto& columns = table.get_columns();
     if (!is_valid_col_idx(table, col_idx)) {
         // shouldn't happen; internal caller should have validated
@@ -436,13 +434,11 @@ void Ipac_Table_Writer::write_single_value(
 
     Data_Type active_datatype = datatypes_for_writing[col_idx];
     if (table.is_null_value(row_idx, col_idx)) {
-	  // std::cout << "is_null" << std::endl;
         auto& null_value = column.get_field_properties().get_values().null;
         const std::string& null_str =
                 (null_value.empty()) ? Table::DEFAULT_NULL_VALUE : null_value;
         size_t effective_array_size =
                 get_effective_array_size(active_datatype, column.get_array_size());
-		// std::cout << "is_null, effective_array_size: " << effective_array_size << std::endl;
 		if (active_datatype == Data_Type::CHAR && column.get_dynamic_array_flag()) {
 		  effective_array_size = 1;
 		}
@@ -480,7 +476,6 @@ void Ipac_Table_Writer::write_single_value(
 
         os << Ascii_Writer::IPAC_COLUMN_SEPARATOR << std::setw(ipac_column_width);
         std::stringstream ss_temp;
-		// std::cout << "internals(), before write_type(), width: " << ipac_column_width << std::endl;
         Ascii_Writer::write_type_as_ascii_expand_array(ss_temp, column.get_type(),
                                                        column.get_array_size(),
 													   column.get_dynamic_array_flag(),

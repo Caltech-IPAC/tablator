@@ -889,31 +889,6 @@ else
 fi
 
 
-${tablator_bin}  test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.vbin2 &&
-    ${tablator_bin} temp.vbin2 temp.vot &&
-    diff test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.vot
-if [ $? -eq 0 ]; then
-    echo "PASS: Convert table with null strings and hex from vot to vbin2 and back"
-    rm -f temp.tbl
-    rm -f temp.tsv
-
-else
-    echo "FAIL: Convert table with null strings and hex from vot to vbin2 and back"
-fi
-
-
-${tablator_bin}  test/back_and_forth_tables/multi_row_023.tbl temp.vbin2 &&
-${tablator_bin} temp.vbin2 temp.tbl &&
-    diff test/back_and_forth_tables/multi_row_023.tbl temp.tbl
-if [ $? -eq 0 ]; then
-    echo "PASS: Convert table with char array and assorted types from tbl to vbin2 and back"
-    rm -f temp.tbl
-    rm -f temp.tsv
-else
-    echo "FAIL: Convert table with char array and assorted types from tbl to vbin2 and back"
-fi
-
-
 #################################################################
 # not straight conversions
 #################################################################

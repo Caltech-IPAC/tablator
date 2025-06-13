@@ -35,46 +35,22 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
 									   const uint8_t *data,
                                        const char &separator,
                                        const Command_Line_Options &options) {
-
-#if 0
-	std::ofstream debug_stream;
-	std::string debug_file =  "/home/judith/repos/tablator/bin2/tablator/debug_write_type_ascii.txt";
-	  debug_stream.open(debug_file.c_str());
-	
-	  debug_stream << "write_type_as_ascii(), enter" << std::endl << std::flush;
-#endif
-
-  // std::cout << "write_type_as_ascii() I, enter" << std::endl;
   size_t curr_array_size = array_size;
   const uint8_t *array_start = data;
-  // debug_stream << "write_type_as_ascii(), dynamic_array_flag: " << dynamic_array_flag << std::endl;
+
   if (dynamic_array_flag) {
 	curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
-  std::advance(array_start, sizeof(uint32_t));
+	std::advance(array_start, sizeof(uint32_t));
   }
 
-
-
-  // debug_stream << "write_type_as_ascii(), curr_array_size: " << curr_array_size << std::endl;
     if (type != Data_Type::CHAR && curr_array_size != 1) {
-	  // debug_stream << "write_type_as_ascii(), not char, array_size > 1" << std::endl;
         for (size_t n = 0; n < curr_array_size; ++n) {
-		  // debug_stream << "write_type_as_ascii(), top of loop, n: " << n << ", before write_array_unit_as_ascii()" << std::endl;
-#if 0
-		  if (dynamic_array_flag && *(array_start + n * data_size(type)) == '\0') {
-			// JTODO look ahead data_size bytes
-			// debug_stream << "write_type_as_ascii(), early exit, n: " << n << std::endl;
-			break;
-		  }
-#endif
-
             if (n > 0) {
                 os << separator;
             }
             write_array_unit_as_ascii(os, type, 1, array_start + n * data_size(type), options);
         }
     } else {
-	  // debug_stream << "write_type_as_ascii(), before write_array_unit_as_ascii()" << std::endl;
         write_array_unit_as_ascii(os, type, curr_array_size, array_start, options);
     }
 }
@@ -87,18 +63,11 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
         std::ostream &os, const Data_Type &type,  size_t array_size,
 		bool dynamic_array_flag,
         const uint8_t *data, size_t col_width, const Command_Line_Options &options) {
- // std::cout << "write_type_as_ascii_expand_array(), array_size: " << array_size << ", enter" << std::endl;
-
-
   const uint8_t *array_start = data;
-
-
   size_t curr_array_size = array_size;
-	// std::cout << "write_type_as_ascii_expand_array(), incoming array_size: " << array_size << std::endl;
 
-  if (dynamic_array_flag) { // always true for CHAR
+  if (dynamic_array_flag) {
 	curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
-	// std::cout << "write_type_as_ascii_expand_array(), curr_array_size: " << curr_array_size << std::endl;
 	std::advance(array_start, sizeof(uint32_t));
   }
 
@@ -112,10 +81,7 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
             }
         }
     } else {
-
-   // std::cout << "write_ascii_expand_array(), dynamic: " << dynamic_array_flag << ", curr_array_size: " << curr_array_size << std::endl;
-
-        write_array_unit_as_ascii(os, type, array_size, array_start, options);
+	  write_array_unit_as_ascii(os, type, array_size, array_start, options);
     }
 }
 
@@ -130,7 +96,6 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
                 "write_array_unit_as_ascii() requires array_size == 1 if type is "
                 "not CHAR");
     }
-	// std::cout << "write_array_unit_as_ascii(), enter, array_size: " << array_size << std::endl;
     switch (type) {
         case Data_Type::INT8_LE:
             os << static_cast<int>(*data);
@@ -175,7 +140,6 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
             }
         } break;
         case Data_Type::CHAR:
-		  // std::cout << "write_array_unit_as_ascii(), CHAR, strlen: " << strlen(reinterpret_cast<const char *>(data)) << std::endl;
             // The number of characters in the type can be less than
             // the number of allowed bytes, so add a .c_str() that
             // will terminate the string at the first null.

@@ -16,7 +16,6 @@ void compute_column_array_sizes(
 Data_Element ptree_readers::read_binary2(
         const boost::property_tree::ptree &binary2,
         const std::vector<ptree_readers::Field_And_Flag> &field_flag_pairs) {
-  // std::cout << "read_binary2(), enter" << std::endl;
     std::vector<size_t> column_array_sizes(field_flag_pairs.size(), 1);
     const size_t null_flags_size((field_flag_pairs.size() + 6) / 8);
     column_array_sizes.at(0) = null_flags_size;

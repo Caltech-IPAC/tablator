@@ -15,19 +15,10 @@ void tablator::Table::create_types_from_ipac_headers(
     size_t num_columns = incoming_columns[COL_NAME_IDX].size();
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
 	  auto col_type = incoming_columns[COL_TYPE_IDX].at(col_idx);
-
-#if 0
-	  // Assume for now that CHAR column values are all dynamic
-	  // arrays.  We'll adjust later, at which time it will be easier
-	  // to remove dynamic-array support from data than it would be to
-	  // add it in.
-	  // 
-	  // JTODO
-#endif
-        append_ipac_data_member(columns, offsets,
-                                incoming_columns.at(COL_NAME_IDX).at(col_idx),
-                                incoming_columns.at(COL_TYPE_IDX).at(col_idx),
-                                incoming_column_widths.at(col_idx));
+	  append_ipac_data_member(columns, offsets,
+							  incoming_columns.at(COL_NAME_IDX).at(col_idx),
+							  incoming_columns.at(COL_TYPE_IDX).at(col_idx),
+							  incoming_column_widths.at(col_idx));
     }
 
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {

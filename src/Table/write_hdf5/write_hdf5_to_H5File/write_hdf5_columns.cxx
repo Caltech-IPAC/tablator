@@ -27,12 +27,9 @@ hvl_t make_option_array(const std::vector<Option> &options,
   // column_flavor is PARAM or FIELD.
 void write_hdf5_columns(const std::vector<Column> &tab_columns,
                         const std::string &column_flavor, H5::H5Location &location) {
-  // std::cout << "write_hdf5_columns(), enter, flavor: " << column_flavor << std::endl;
     if (tab_columns.empty()) {
-	// std::cout << "write_hdf5_columns(), early exit" << std::endl;
         return;
     }
-	// std::cout << "write_hdf5_columns(), after early exit" << std::endl;
 
     H5::StrType hdf5_string(0, H5T_VARIABLE);
 
@@ -62,8 +59,6 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
     hdf5_attribute.insertMember(ATTR_VALUE, hdf5_string.getSize(), hdf5_string);
 
     H5::VarLenType hdf5_attribute_array(&hdf5_attribute);
-
-	// std::cout << "write_hdf5_columns(), before field_properties()" << std::endl;
 
     H5::CompType hdf5_field_properties(sizeof(HDF5_Field_Properties));
     hdf5_field_properties.insertMember(Field_Properties::FP_DESCRIPTION,
@@ -156,7 +151,6 @@ void write_hdf5_columns(const std::vector<Column> &tab_columns,
     }
 
     hvl_t H5_columns = {hdf5_columns.size(), hdf5_columns.data()};
-	// std::cout << "write_hdf5_columns(), hdf5_columns.size(): " << hdf5_columns.size() << std::endl;
 
     H5::DataSpace column_space(H5S_SCALAR);
     H5::Attribute location_attribute =

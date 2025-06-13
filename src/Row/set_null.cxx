@@ -15,7 +15,6 @@
 size_t tablator::Row::set_null(const Data_Type &data_type, const size_t &array_size,
                              const size_t &col_idx, const size_t &offset,
                              const size_t &offset_end, bool dynamic_array_flag) {
-  // std::cout << "set_null(),  col_idx: " << col_idx << ", offset: " << offset << std::endl;
     const int byte = (col_idx - 1) / 8;
     const char mask = (128 >> ((col_idx - 1) % 8));
 

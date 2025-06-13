@@ -31,5 +31,4 @@ void tablator::Table::write_hdf5(const boost::filesystem::path &p) const {
     H5Pset_libver_bounds(fapl.getId(), H5F_LIBVER_18, H5F_LIBVER_LATEST);
     H5::H5File outfile{p.string(), H5F_ACC_TRUNC, H5::FileCreatPropList::DEFAULT, fapl};
     write_hdf5_to_H5File(outfile);
-	// std::cout << "write_hdf5(path), exit" << std::endl;
 }

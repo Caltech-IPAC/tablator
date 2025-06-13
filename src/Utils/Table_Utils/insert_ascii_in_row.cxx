@@ -11,9 +11,8 @@ namespace tablator {
   void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &array_size,
                          const size_t &col_idx, const std::string &element,
                          const size_t &offset, const size_t &offset_end, bool dynamic_array_flag) {
-	// JTODO
 	std::vector<std::string> elements;
-	// std::cout << "insert_ascii_in_row(), enter, array_size: " << array_size << ", offset: " << offset << ", offset_end: " << offset_end << ", flag: " << dynamic_array_flag << std::endl;
+
   size_t curr_array_size = array_size;
   size_t curr_offset = offset;
   if (array_size != 1) {
@@ -24,7 +23,6 @@ namespace tablator {
 		curr_array_size = elements.size();
 	}
 	// JTODO decide about default flag value
-	// std::cout << "after split, curr_array_size: " << curr_array_size << ", array_size: " << array_size << std::endl;
 #if 0
 	if ((curr_array_size < array_size && !dynamic_array_flag) || curr_array_size > array_size)
 #else
@@ -38,17 +36,11 @@ namespace tablator {
 	}
   }
 
-
-  // std::cout << "dynamic_array_flag: " << dynamic_array_flag << std::endl;
   if (dynamic_array_flag) {
-	// std::cout << "insert_ascii(), writing size to row: " << curr_array_size << std::endl;
 	row.insert(static_cast<uint32_t>(curr_array_size), curr_offset);	
 	curr_offset += sizeof(uint32_t);
   }
-
 	if (curr_array_size != 1 && data_type != Data_Type::CHAR) {
-
-		// std::cout << "insert_ascii(), curr_array_size: " << curr_array_size << ", curr_offset: " << curr_offset  << std::endl;
         auto element_offset = curr_offset;
         auto element_size = data_size(data_type);
         for (auto &e : elements) {
@@ -56,13 +48,9 @@ namespace tablator {
 							  element_offset + element_size, false /* dynamic_array_flag */);
             element_offset += element_size;
         }
-		if (curr_array_size < array_size) {
-		  // std::cout << "curr_array_size < array_size" << std::endl;
-		}
     } else {
         switch (data_type) {
             case Data_Type::INT8_LE:
-                // std::cout << "insert_ascii(), INT8_LE" << std::endl;
                 if (element == "?" || element == " " || element[0] == '\0') {
 				  row.set_null(data_type, array_size, col_idx, curr_offset, offset_end, dynamic_array_flag);
                 } else {
@@ -125,7 +113,6 @@ namespace tablator {
                 row.insert(boost::lexical_cast<double>(element), curr_offset);
                 break;
             case Data_Type::CHAR:
-			  // std::cout << "insert_ascii(), CHAR, before row.insert(), distance: " << offset_end - curr_offset << std::endl;
                 row.insert(element, curr_offset, offset_end);
                 break;
             default:

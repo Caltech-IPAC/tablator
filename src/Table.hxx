@@ -469,8 +469,6 @@ public:
     void write_tabledata(std::ostream &os, const Format::Enums &output_format,
                          const Command_Line_Options &options) const;
 
-    void write_binary2(std::ostream &os, const Format::Enums &output_format) const;
-
     void write_html(std::ostream &os, const Command_Line_Options &options) const;
 
     boost::property_tree::ptree generate_property_tree() const;
@@ -531,21 +529,8 @@ public:
                                      "; data size is " +
                                      std::to_string(get_data().size()));
         }
-		// std::cout << "is_null_value(), col_idx: " << col_idx << "< row_idx: " << row_idx << std::endl;
         return is_null_MSB(get_data(), row_offset, col_idx);
     }
-#if 0
-    // Deprecated because of the use of row_offset rather than row_idx.
-    bool is_null(size_t row_offset, size_t col_idx) const {
-        auto pos = row_offset + (col_idx - 1) / 8;
-        if (pos >= get_data().size()) {
-            throw std::runtime_error("invalid pos " + std::to_string(pos) +
-                                     "; data size is " +
-                                     std::to_string(get_data().size()));
-        }
-        return get_data().at(pos) & (128 >> ((col_idx - 1) % 8));
-    }
-#endif
 
     // extractors
 
@@ -582,7 +567,6 @@ public:
         static_assert(!std::is_same<T, char>::value,
                       "extract_value() is not supported for columns of type char; "
                       "please use extract_values_as_string().");
-		// std::cout << "extract_value(), enter, col_idx: " << col_idx << ", row_idx: " << row_idx << std::endl;
 
         validate_column_index(col_idx);
         validate_row_index(row_idx);
@@ -604,17 +588,13 @@ public:
 			curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_data));
 			curr_data += sizeof(uint32_t);
 		  }
-		  // std::cout << "extract_value, array_size: " << array_size << ", curr_array_size: " << curr_array_size << ", dynamic: " << dynamic_array_flag << std::endl;
 
-		// JTODO array_size? curr_array_size?
         if (is_null_value(row_idx, col_idx)) {
-		  // std::cout << "is_null" << std::endl;
             for (size_t i = 0; i < curr_array_size || i < 1; ++i) {
                 val_array.emplace_back(get_null<T>());
             }
         } else {
             size_t element_size = data_size(column.get_type());
-			// std::cout << "not null, elt size: " << element_size << std::endl;
             for (size_t i = 0; i < curr_array_size; ++i) {
                 val_array.emplace_back(*(reinterpret_cast<const T *>(curr_data)));
                 curr_data += element_size;
@@ -642,10 +622,8 @@ public:
         size_t row_count = num_rows();
 
         std::vector<T> col_vec;
-		// std::cout << "extract_column(), array_size: " << column.get_array_size() << std::endl;
         col_vec.reserve(row_count * column.get_array_size());
         for (size_t curr_row_idx = 0; curr_row_idx < row_count; ++curr_row_idx) {
-		  // std::cout << "before extract_value(), curr_row_idx: " << curr_row_idx << ", row_count: " << row_count << std::endl;
             extract_value<T>(col_vec, col_idx, curr_row_idx);
         }
         return col_vec;
@@ -1133,13 +1111,9 @@ private:
                                     Format::Enums enum_format, uint num_spaces_left,
                                     uint num_spaces_right,
                                     const Command_Line_Options &options) const;
-    void splice_binary2_and_write(std::ostream &os, std::stringstream &ss,
-                                  Format::Enums enum_format, uint num_spaces_left,
-                                  uint num_spaces_right) const;
 
     boost::property_tree::ptree generate_property_tree(
-            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep,
-            bool do_binary2) const;
+            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const;
 
     void distribute_metadata(
             tablator::Labeled_Properties &resource_element_labeled_properties,

@@ -33,7 +33,7 @@ private:
 
 // For backward compatibility
 // JTODO who uses this?
-#if 1
+#if 0
 inline void write_type_as_ascii(std::ostream &os, const Data_Type &type,
                                 size_t array_size, const uint8_t *data,
                                 const char &separator = Ascii_Writer::DEFAULT_SEPARATOR,
