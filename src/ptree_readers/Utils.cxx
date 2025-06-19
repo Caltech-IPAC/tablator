@@ -80,7 +80,7 @@ boost::property_tree::ptree::const_iterator read_links_section(
 
 void load_field_singleton(std::vector<tablator::Field> &params,
                           const boost::property_tree::ptree &node) {
-    params.emplace_back(tablator::ptree_readers::read_field(node).get_field());
+    params.emplace_back(tablator::ptree_readers::read_field(node));
 }
 
 void load_field_array(std::vector<tablator::Field> &params,

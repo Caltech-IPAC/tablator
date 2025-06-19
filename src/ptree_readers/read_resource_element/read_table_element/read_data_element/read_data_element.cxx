@@ -17,7 +17,7 @@ void validate_tail(boost::property_tree::ptree::const_iterator &tail_begin,
 
 tablator::Data_Element tablator::ptree_readers::read_data_element(
         const boost::property_tree::ptree &data,
-        const std::vector<ptree_readers::Field_And_Flag> &field_flag_pairs) {
+        const std::vector<tablator::Field> &fields) {
     auto child = data.begin();
     auto end = data.end();
 
@@ -26,7 +26,7 @@ tablator::Data_Element tablator::ptree_readers::read_data_element(
     }
 
     if (child->first == TABLEDATA) {
-        auto result = read_tabledata(child->second, field_flag_pairs);
+        auto result = read_tabledata(child->second, fields);
         validate_tail(++child, end);
         return result;
     } else if (child->first == BINARY) {
@@ -34,7 +34,7 @@ tablator::Data_Element tablator::ptree_readers::read_data_element(
                 "BINARY serialization inside a VOTable not "
                 "supported.");
     } else if (child->first == BINARY2) {
-        auto result = read_binary2(child->second, field_flag_pairs);
+        auto result = read_binary2(child->second, fields);
         validate_tail(++child, end);
         return result;
     } else if (child->first == FITS) {

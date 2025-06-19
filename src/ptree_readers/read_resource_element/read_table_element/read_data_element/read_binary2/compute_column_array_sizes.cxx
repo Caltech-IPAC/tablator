@@ -7,31 +7,28 @@
 
 
 namespace tablator {
-void compute_column_array_sizes(
-        const std::vector<uint8_t> &stream,
-        const std::vector<ptree_readers::Field_And_Flag> &field_flag_pairs,
-        std::vector<size_t> &column_array_sizes, size_t &num_rows) {
+void compute_column_array_sizes(const std::vector<uint8_t> &stream,
+                                const std::vector<Field> &fields,
+                                std::vector<size_t> &column_array_sizes,
+                                size_t &num_rows) {
     num_rows = 0;
-    if (field_flag_pairs.size() < 2) return;
+    if (fields.size() < 2) return;
 
-    const size_t null_flags_size((field_flag_pairs.size() + 6) / 8);
+    const size_t null_flags_size((fields.size() + 6) / 8);
     size_t position(0);
     while (position + null_flags_size < stream.size()) {
         size_t row_offset(position);
         position += null_flags_size;
         for (size_t field_idx = 1;
-             field_idx < field_flag_pairs.size() && position <= stream.size();
-             ++field_idx) {
-            const auto &field = field_flag_pairs[field_idx].get_field();
-            bool is_array_dynamic =
-                    field_flag_pairs[field_idx].get_dynamic_array_flag();
-
-            if (!is_array_dynamic) {
+             field_idx < fields.size() && position <= stream.size(); ++field_idx) {
+            const auto &field = fields[field_idx];
+            if (!field.get_dynamic_array_flag()) {
+                column_array_sizes[field_idx] = field.get_array_size();
                 position += data_size(field.get_type()) * field.get_array_size();
 
             } else {
                 if (is_null_MSB(stream, row_offset, field_idx)) {
-                    position += sizeof(uint32_t);
+				  position += sizeof(uint32_t);
                 } else {
                     // FIXME: This feels like the hard way to do things.
                     // But I can not use plain old pointers, because I
@@ -61,7 +58,9 @@ void compute_column_array_sizes(
                 }
             }
         }  // end of loop through fields
-        if (position <= stream.size()) ++num_rows;
+        if (position <= stream.size()) {
+            ++num_rows;
+        }
     }
 }
 }  // namespace tablator

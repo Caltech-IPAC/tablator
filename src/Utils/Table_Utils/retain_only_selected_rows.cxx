@@ -4,7 +4,6 @@ void tablator::retain_only_selected_rows(std::vector<uint8_t> &data,
                                          const std::set<size_t> &selected_row_idx_list,
                                          size_t num_rows, size_t row_size) {
     if (data.size() != num_rows * row_size) {
-        // JTODO relax this condition?
         throw std::runtime_error(
                 "Mismatch between data.size(), num_rows, and row_size.");
     }

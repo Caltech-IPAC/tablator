@@ -992,12 +992,15 @@ private:
     // WARNING: The private append_column() routines do not increase
     // the size of the null column.  The expectation is that the
     // number of columns is known before adding columns.
-    void append_column(const std::string &name, const Data_Type &type) {
-        append_column(name, type, 1);
-    }
     void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size) {
-        append_column(name, type, size, Field_Properties());
+                       const size_t &size, const Field_Properties &field_properties,
+                       bool dynamic_array_flag) {
+        append_column(Column(name, type, size, field_properties, dynamic_array_flag));
+    }
+
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size, bool dynamic_array_flag) {
+        append_column(Column(name, type, size, dynamic_array_flag));
     }
 
     void append_column(const std::string &name, const Data_Type &type,
@@ -1005,10 +1008,18 @@ private:
         append_column(Column(name, type, size, field_properties));
     }
 
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size) {
+        append_column(name, type, size);
+    }
+
+    void append_column(const std::string &name, const Data_Type &type) {
+        append_column(name, type);
+    }
+
     void append_column(const Column &column) {
         tablator::append_column(get_columns(), get_offsets(), column);
     }
-
 
     size_t read_ipac_header(std::istream &ipac_file,
                             std::array<std::vector<std::string>, 4> &Columns,
