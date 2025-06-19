@@ -9,10 +9,9 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../Ascii_Writer.hxx"
+#include "../Common.hxx"
 #include "../Decimal_String_Trimmer.hxx"
 #include "../data_size.hxx"
-
-#include <fstream>
 
 namespace tablator {
 // Declare static constexpr class members.
@@ -38,7 +37,7 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
 
     if (dynamic_array_flag) {
         curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
-        std::advance(array_start, sizeof(uint32_t));
+        std::advance(array_start, tablator::DYNAMIC_ARRAY_OFFSET);
     }
 
     if (type != Data_Type::CHAR && curr_array_size != 1) {
@@ -67,7 +66,7 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
 
     if (dynamic_array_flag) {
         curr_array_size = *(reinterpret_cast<const uint32_t *>(data));
-        std::advance(array_start, sizeof(uint32_t));
+        std::advance(array_start, tablator::DYNAMIC_ARRAY_OFFSET);
     }
 
     if (type != Data_Type::CHAR && array_size != 1) {

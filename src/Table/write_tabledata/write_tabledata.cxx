@@ -25,16 +25,6 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
                             const Command_Line_Options &options) const {
     std::string tr_prefix, tr_suffix, td_prefix, td_suffix;
     std::string tabledata_indent = "                    ";
-
-#if 0
-	std::ofstream debug_stream;
-	std::string debug_file =  "/home/judith/repos/tablator/bin2/tablator/debug_write_tabledata.txt";
-	  debug_stream.open(debug_file.c_str());
-	
-	  debug_stream << "write_tabledata(), enter" << std::endl << std::flush;
-#endif
-
-
     const bool is_json(output_format == Format::Enums::JSON ||
                        output_format == Format::Enums::JSON5);
     if (is_json) {
@@ -65,15 +55,16 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
     size_t num_rows = get_num_rows();
     const auto &data = get_data();
 
+    // debug_stream << "after get_data()" << std::endl;
+
     for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
-         ++row_idx, row_offset += row_size()) {
+         ++row_idx, row_offset += get_row_size()) {
         os << tr_prefix;
 
         // Skip the null bitfield flag
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
             const auto &column = columns[col_idx];
             std::stringstream td;
-
             // Leave null entries blank, unlike in IPAC_TABLE format.
             if (!is_null_value(row_idx, col_idx)) {
                 Ascii_Writer::write_type_as_ascii(
@@ -81,8 +72,6 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
                         column.get_dynamic_array_flag(),
                         data.data() + row_offset + offsets[col_idx],
                         Ascii_Writer::DEFAULT_SEPARATOR, options);
-            } else {
-                // std::cout << "skipping write_type(), null" << std::endl;
             }
             os << td_prefix;
             switch (output_format) {

@@ -658,7 +658,7 @@ void tablator::Table::write_fits(
             size_t array_size = column.get_array_size();
             if (column.get_dynamic_array_flag()) {
                 array_size = *(reinterpret_cast<const uint32_t *>(curr_data_ptr));
-                curr_data_ptr += sizeof(uint32_t);
+                curr_data_ptr += DYNAMIC_ARRAY_OFFSET;
             }
 
             bool null_flag_is_set = is_null_value(tab_row_idx, col_idx);

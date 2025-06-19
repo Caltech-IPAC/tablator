@@ -29,11 +29,12 @@ inline void insert_swapped(Row &row, size_t column_offset, const Column &column,
                           column.get_array_size(), stream, old_position);
 }
 
-void ptree_readers::append_data_from_stream(
-        std::vector<uint8_t> &data, const std::vector<Column> &columns,
-        const std::vector<size_t> &offsets, const std::vector<uint8_t> &stream,
-        const std::vector<ptree_readers::Field_And_Flag> &field_flag_pairs,
-        size_t num_rows) {
+void ptree_readers::append_data_from_stream(std::vector<uint8_t> &data,
+                                            const std::vector<Column> &columns,
+                                            const std::vector<size_t> &offsets,
+                                            const std::vector<uint8_t> &stream,
+                                            const std::vector<Field> &fields,
+                                            size_t num_rows) {
     const size_t null_flags_size((columns.size() + 6) / 8);
     size_t src_pos(0);
 
@@ -47,13 +48,12 @@ void ptree_readers::append_data_from_stream(
             auto col_array_size = column.get_array_size();
             auto col_type = column.get_type();
 
-            bool dynamic_array_flag =
-                    field_flag_pairs[col_idx].get_dynamic_array_flag();
+            bool dynamic_array_flag = fields[col_idx].get_dynamic_array_flag();
             if (is_null_MSB(stream, row_offset, col_idx)) {
                 row.set_null(col_type, col_array_size, col_idx, offsets[col_idx],
                              offsets[col_idx + 1], dynamic_array_flag);
                 if (dynamic_array_flag) {
-                    src_pos += sizeof(uint32_t);
+                    src_pos += DYNAMIC_ARRAY_OFFSET;
                 } else {
                     src_pos += data_size(col_type) * col_array_size;
                 }
@@ -61,7 +61,7 @@ void ptree_readers::append_data_from_stream(
                 auto begin = stream.begin();
                 std::advance(begin, src_pos);
                 auto end = stream.begin();
-                src_pos += sizeof(uint32_t);
+                src_pos += DYNAMIC_ARRAY_OFFSET;
                 std::advance(end, src_pos);
                 uint32_t dynamic_array_size(0);
 
@@ -75,12 +75,12 @@ void ptree_readers::append_data_from_stream(
                                          dynamic_array_size);
 
                 memcpy(row.get_data().data() + offsets[col_idx], &dynamic_array_size,
-                       sizeof(uint32_t));
+                       DYNAMIC_ARRAY_OFFSET);
 
                 // std::cout << "between insert_swapped() for dynamic, size: " <<
                 // dynamic_array_size << std::endl; Now write the array itself, again
                 // swapping from big-ended to little-ended for internal use.
-                insert_swapped(row, offsets[col_idx] + sizeof(uint32_t), col_type,
+                insert_swapped(row, offsets[col_idx] + DYNAMIC_ARRAY_OFFSET, col_type,
                                dynamic_array_size, stream, src_pos);
                 src_pos += data_size(col_type) * dynamic_array_size;
             } else {

@@ -40,7 +40,7 @@ void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &arr
 
     if (dynamic_array_flag) {
         row.insert(static_cast<uint32_t>(curr_array_size), curr_offset);
-        curr_offset += sizeof(uint32_t);
+        curr_offset += DYNAMIC_ARRAY_OFFSET;
     }
     if (curr_array_size != 1 && data_type != Data_Type::CHAR) {
         auto element_offset = curr_offset;

@@ -1,5 +1,6 @@
 #include <stdexcept>
 
+#include "../Common.hxx"
 #include "../Row.hxx"
 #include "../data_size.hxx"
 
@@ -28,7 +29,7 @@ size_t tablator::Row::set_null(const Data_Type &data_type, const size_t &array_s
         char *curr_ptr = data_.data() + curr_offset;
         *(reinterpret_cast<uint32_t *>(curr_ptr)) = 0;
 
-        curr_offset += sizeof(uint32_t);
+        curr_offset += tablator::DYNAMIC_ARRAY_OFFSET;
     } else {
         // Mark the indicated array elements as null.
         for (size_t i = 0; i < array_size; ++i) {

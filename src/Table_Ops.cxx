@@ -33,8 +33,8 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
 
     size_t src_nulls_size(src_offsets.at(1));
     size_t dest_nulls_size(dest_offsets.at(1));
-    size_t src_row_size = src_table.row_size();
-    size_t dest_row_size = dest_table.row_size();
+    size_t src_row_size = src_table.get_row_size();
+    size_t dest_row_size = dest_table.get_row_size();
 
     const auto &src_data = src_table.get_data();
 
@@ -68,8 +68,8 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
 // Src tables must have the same number of rows.
 // Dest table's set of columns consists of src1's columns followed by src2's columns.
 Table combine_tables(const Table &src1_table, const Table &src2_table) {
-    size_t num_rows = src1_table.num_rows();
-    if (src2_table.num_rows() != num_rows) {
+    size_t num_rows = src1_table.get_num_rows();
+    if (src2_table.get_num_rows() != num_rows) {
         throw std::runtime_error("src tables have different numbers of ros.");
     }
 
@@ -137,9 +137,9 @@ Table combine_tables(const Table &src1_table, const Table &src2_table) {
     size_t dest_null_flags_size = dest_offsets.at(1);
 
 
-    size_t src1_row_size = src1_table.row_size();
-    size_t src2_row_size = src2_table.row_size();
-    size_t dest_row_size = dest_table.row_size();
+    size_t src1_row_size = src1_table.get_row_size();
+    size_t src2_row_size = src2_table.get_row_size();
+    size_t dest_row_size = dest_table.get_row_size();
 
     const uint8_t *src1_data_ptr = src1_table.get_data().data();
     const uint8_t *src2_data_ptr = src2_table.get_data().data();

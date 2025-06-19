@@ -140,7 +140,7 @@ size_t compute_max_column_width_for_char(const tablator::Table &table,
         uint8_t const *curr_col_data_ptr = col_data_start_ptr + curr_row_start_offset;
         if (dynamic_array_flag) {
             curr_array_size = *(reinterpret_cast<const uint32_t *>(curr_col_data_ptr));
-            curr_col_data_ptr += sizeof(uint32_t);
+            curr_col_data_ptr += tablator::DYNAMIC_ARRAY_OFFSET;
             if (curr_array_size > array_size) {
                 // JTODO check this when reading.
                 throw std::runtime_error(
@@ -262,7 +262,7 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
         // columns in ipac_table format. If there are in fact arrays of different
         // lengths in a column of non-CHAR type), an error will be thrown elsewhere.
         // JTODO. For now, just skip the dynamic_array_size value.
-        col_data_start_ptr += sizeof(uint32_t);
+        col_data_start_ptr += tablator::DYNAMIC_ARRAY_OFFSET;
     }
 
     bool trim_decimal_runs_f = options.is_trim_decimal_runs();

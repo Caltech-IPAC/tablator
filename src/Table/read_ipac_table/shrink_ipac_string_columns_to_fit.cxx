@@ -22,7 +22,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
         if (old_columns[col_idx].get_type() == Data_Type::CHAR) {
             new_columns[col_idx].set_array_size(optimal_column_data_widths[col_idx]);
             if (old_columns[col_idx].get_dynamic_array_flag()) {
-                extra_bytes_for_dynamic_array = sizeof(uint32_t);
+                extra_bytes_for_dynamic_array = DYNAMIC_ARRAY_OFFSET;
             }
         }
         new_row_size += new_columns[col_idx].get_data_size();

@@ -741,16 +741,14 @@ public:
                          col_end_offset, dynamic_array_flag);
 
         } else {
-#if 1
             // Do this before loop through array elements.
             // Overwrite if array turns out to be null?  JTODO
             // Awkward mix of curr_ptr and offsets.  Reset curr_ptr from offsets each
             // time?  Don't advance it?
             if (dynamic_array_flag) {
                 *reinterpret_cast<uint32_t *>(curr_ptr) = array_size;
-                curr_ptr += sizeof(uint32_t);
+                curr_ptr += tablator::DYNAMIC_ARRAY_OFFSET;
             }
-#endif
 
             for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
                 T array_elt = temp_array[array_offset];
@@ -840,7 +838,7 @@ public:
 
             if (dynamic_array_flag) {
                 *(reinterpret_cast<uint32_t *>(current)) = array_size;
-                current += sizeof(uint32_t);
+                current += tablator::DYNAMIC_ARRAY_OFFSET;
             }
 
             for (size_t i = 0; i < num_substrings; ++i) {

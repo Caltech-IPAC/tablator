@@ -51,8 +51,8 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
     size_t num_rows = get_num_rows();
 
     if (num_columns == 0) {
-	  return;
-	}
+        return;
+    }
 
     // Skip null_bitfield_flags
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
@@ -62,7 +62,7 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
     }
 
     for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
-         ++row_idx, row_offset += row_size()) {
+         ++row_idx, row_offset += get_row_size()) {
         for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
             const auto &column = columns[col_idx];
             size_t offset = offsets[col_idx] + row_offset;
@@ -71,9 +71,8 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
             if (!is_null_value(row_idx, col_idx)) {
                 tablator::Ascii_Writer::write_type_as_ascii(
                         ss, column.get_type(), column.get_array_size(),
-						column.get_dynamic_array_flag(),
-                        data.data() + offset, tablator::Ascii_Writer::DEFAULT_SEPARATOR,
-                        options);
+                        column.get_dynamic_array_flag(), data.data() + offset,
+                        tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
             } else if (options.write_null_strings_) {
                 // Leave null entries blank by default, unlike in IPAC_TABLE format.
                 ss << "null";

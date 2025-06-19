@@ -9,39 +9,23 @@
 #include "../../../Utils/Vector_Utils.hxx"
 #include "../../Utils.hxx"
 
+
 namespace {
-
-void load_field_and_flag_singleton(
-        std::vector<tablator::ptree_readers::Field_And_Flag> &field_flag_pairs,
-        const boost::property_tree::ptree &node) {
-    field_flag_pairs.emplace_back(tablator::ptree_readers::read_field(node));
-}
-
-void load_field_and_flag_array(
-        std::vector<tablator::ptree_readers::Field_And_Flag> &field_flag_pairs,
-        const boost::property_tree::ptree &array_tree) {
-    for (const auto &elt : array_tree) {
-        load_field_and_flag_singleton(field_flag_pairs, elt.second);
-    }
-}
-
 
 // Helper function which handles the part of the property_tree corresponding to
 // the section of a VOTable TABLE element preceding its DATA element per the IVOA spec.
 
 boost::property_tree::ptree::const_iterator load_pre_data_section(
-        std::vector<tablator::ptree_readers::Field_And_Flag> &field_flag_pairs,
-        std::vector<tablator::Field> &params,
+        std::vector<tablator::Field> &fields, std::vector<tablator::Field> &params,
         std::vector<tablator::Group_Element> &group_elements,
         boost::property_tree::ptree::const_iterator &start,
         boost::property_tree::ptree::const_iterator &end) {
     boost::property_tree::ptree::const_iterator &iter = start;
     while (iter != end) {
         if (iter->first == tablator::FIELD) {
-            load_field_and_flag_singleton(field_flag_pairs, iter->second);
+            tablator::ptree_readers::load_field_singleton(fields, iter->second);
         } else if (iter->first == tablator::FIELD_ARRAY) {
-            load_field_and_flag_array(field_flag_pairs, iter->second);
-
+            tablator::ptree_readers::load_field_array(fields, iter->second);
         } else if (iter->first == tablator::PARAM) {
             tablator::ptree_readers::load_field_singleton(params, iter->second);
         } else if (iter->first == tablator::PARAM_ARRAY) {
@@ -93,35 +77,25 @@ tablator::Table_Element read_table_element(
         ++child;
     }
 
-    std::vector<Field_And_Flag> field_flag_pairs;
+    std::vector<Field> fields;
     // Register null column
-    field_flag_pairs.emplace_back(
-            Field(null_bitfield_flags_name, Data_Type::UINT8_LE, true,
-                  Field_Properties(null_bitfield_flags_description, {})),
-            false);
+    fields.emplace_back(null_bitfield_flags_name, Data_Type::UINT8_LE, true,
+                        Field_Properties(null_bitfield_flags_description, {}));
 
     std::vector<Group_Element> group_elements;
     std::vector<Field> params;
-    child = load_pre_data_section(field_flag_pairs, params, group_elements, child, end);
-    if (field_flag_pairs.size() < 2) {
+    child = load_pre_data_section(fields, params, group_elements, child, end);
+    if (fields.size() < 2) {
         throw std::runtime_error("This VOTable is empty.");
     }
 
     std::vector<Data_Element> data_elements;
     if (child != end && child->first == DATA) {
-        data_elements.emplace_back(read_data_element(child->second, field_flag_pairs));
+        data_elements.emplace_back(read_data_element(child->second, fields));
         ++child;
     }
     std::vector<Property> trailing_info_list;
     child = read_trailing_info_section(trailing_info_list, child, end);
-
-    // wrap up
-    std::vector<Field> fields;
-    std::transform(field_flag_pairs.begin(), field_flag_pairs.end(),
-                   std::back_inserter(fields),
-                   [&](const Field_And_Flag &field_flag) -> Field {
-                       return field_flag.get_field();
-                   });
 
     return tablator::Table_Element::Builder(data_elements)
             .add_attributes(attributes)

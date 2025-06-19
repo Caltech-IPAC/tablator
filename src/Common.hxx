@@ -154,6 +154,7 @@ static const std::string HDF5_LINK("hdf5.link.");
 
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;
 static constexpr size_t PLACEHOLDER_RIGHT_MARGIN = 5;
+static constexpr size_t DYNAMIC_ARRAY_OFFSET = sizeof(uint32_t);
 
 // No complicated sub-elements, only attributes and/or string value.
 static std::vector<std::string> PROPERTY_STYLE_LABELS = {COOSYS, INFO, TIMESYS, LINK};

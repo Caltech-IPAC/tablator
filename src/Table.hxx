@@ -619,7 +619,7 @@ public:
 
         const auto &columns = get_columns();
         auto &column = columns[col_idx];
-        size_t row_count = num_rows();
+        size_t row_count = get_num_rows();
 
         std::vector<T> col_vec;
         col_vec.reserve(row_count * column.get_array_size());
@@ -654,7 +654,7 @@ public:
                                              uint32_t curr_array_size) const;
 
     void insert_string_column_value_into_row(Row &row, size_t col_idx,
-                                             const uint8_t *data_ptr) {
+                                             const uint8_t *data_ptr) const {
         insert_string_column_value_into_row(row, col_idx, data_ptr,
                                             get_columns().at(col_idx).get_array_size());
     }
@@ -691,10 +691,12 @@ public:
         tablator::resize_data(get_data(), new_num_rows, get_row_size());
     }
 
-    // deprecated
+#if 0
+    // deprecated but still used by query_server
     inline void resize_rows(const size_t &new_num_rows) { resize_data(new_num_rows); }
     size_t row_size() const { return get_row_size(); }
     size_t num_rows() const { return get_num_rows(); }
+#endif
 
     //===========================================================
 
@@ -987,12 +989,15 @@ private:
     // WARNING: The private append_column() routines do not increase
     // the size of the null column.  The expectation is that the
     // number of columns is known before adding columns.
-    void append_column(const std::string &name, const Data_Type &type) {
-        append_column(name, type, 1);
-    }
     void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size) {
-        append_column(name, type, size, Field_Properties());
+                       const size_t &size, const Field_Properties &field_properties,
+                       bool dynamic_array_flag) {
+        append_column(Column(name, type, size, field_properties, dynamic_array_flag));
+    }
+
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size, bool dynamic_array_flag) {
+        append_column(Column(name, type, size, dynamic_array_flag));
     }
 
     void append_column(const std::string &name, const Data_Type &type,
@@ -1000,10 +1005,18 @@ private:
         append_column(Column(name, type, size, field_properties));
     }
 
+    void append_column(const std::string &name, const Data_Type &type,
+                       const size_t &size) {
+        append_column(name, type, size);
+    }
+
+    void append_column(const std::string &name, const Data_Type &type) {
+        append_column(name, type);
+    }
+
     void append_column(const Column &column) {
         tablator::append_column(get_columns(), get_offsets(), column);
     }
-
 
     size_t read_ipac_header(std::istream &ipac_file,
                             std::array<std::vector<std::string>, 4> &Columns,

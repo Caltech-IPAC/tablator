@@ -86,7 +86,7 @@ boost::property_tree::ptree::const_iterator read_links_section(
 
 }  // namespace
 
-tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
+tablator::Field tablator::ptree_readers::read_field(
         const boost::property_tree::ptree &field_tree) {
     // Set default values for Field class members and adjust as we read the ptree.
     std::string name = "";
@@ -137,6 +137,5 @@ tablator::ptree_readers::Field_And_Flag tablator::ptree_readers::read_field(
     std::vector<STRING_PAIR> &hdf5_links = field_properties.get_hdf5_links();
     child = read_links_section(links, hdf5_links, child, end, TABLE);
 
-    return Field_And_Flag(Field(name, type, array_size, field_properties),
-                          dynamic_array_flag);
+    return Field(name, type, array_size, field_properties, dynamic_array_flag);
 }

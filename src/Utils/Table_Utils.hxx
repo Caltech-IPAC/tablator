@@ -14,7 +14,7 @@ inline size_t get_col_data_start_offset(const std::vector<size_t> &offsets,
                                         size_t col_idx, bool dynamic_array_flag) {
     size_t col_offset = offsets[col_idx];
     if (dynamic_array_flag) {
-        return col_offset + sizeof(uint32_t);
+        return col_offset + DYNAMIC_ARRAY_OFFSET;
     }
     return col_offset;
 }
@@ -87,13 +87,6 @@ inline size_t get_num_rows(const std::vector<size_t> &offsets,
     }
     return data.size() / get_row_size(offsets);
 }
-
-#if 0
-  // JTODO reinstate these?
-inline void pop_row(std::vector<uint8_t> &data, uint row_size) {
-    data.resize(data.size() - row_size);
-}
-#endif
 
 inline void append_row(std::vector<uint8_t> &data, const Row &row) {
     data.insert(data.end(), row.get_data().begin(), row.get_data().end());

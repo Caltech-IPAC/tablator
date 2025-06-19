@@ -8,18 +8,27 @@
 //                 Extractors
 //==================================================================
 
+// JTODO return (array_size, ptr) pair?  Depends on whether array is dynamic.
+// planck, create_and_fill_oracle_table(), mcen.  Hide this function?
+// Request count separately?
 const uint8_t *tablator::Table::extract_value_ptr(size_t col_idx,
                                                   size_t row_idx) const {
     const auto &columns = get_columns();
     if (col_idx >= columns.size()) {
         throw std::runtime_error("Invalid column index: " + std::to_string(col_idx));
     }
-    if (row_idx >= num_rows()) {
+    if (row_idx >= get_num_rows()) {
         throw std::runtime_error("Invalid row index: " + std::to_string(row_idx));
     }
 
-    return get_data().data() + row_idx * get_row_size() + get_offsets().at(col_idx);
+    auto extract_offset = get_offsets().at(col_idx) + row_idx * get_row_size();
+    if (columns.at(col_idx).get_dynamic_array_flag()) {
+        extract_offset += tablator::DYNAMIC_ARRAY_OFFSET;
+    }
+    return get_data().data() + extract_offset;
 }
+
+//===============================================================
 
 std::string tablator::Table::extract_value_as_string(
         const std::string &col_name, size_t row_idx,
@@ -28,6 +37,7 @@ std::string tablator::Table::extract_value_as_string(
     return extract_value_as_string(col_idx, row_idx, options);
 }
 
+//===============================================================
 
 std::string tablator::Table::extract_value_as_string(
         size_t col_idx, size_t row_idx, const Command_Line_Options &options) const {
@@ -41,7 +51,7 @@ std::string tablator::Table::extract_value_as_string(
         throw std::runtime_error("Invalid row index: " + std::to_string(row_idx));
     }
 
-    size_t curr_row_offset = row_idx * row_size();
+    size_t curr_row_offset = row_idx * get_row_size();
     auto &column = columns[col_idx];
     if (is_null_value(row_idx, col_idx)) {
         auto &null_value = column.get_field_properties().get_values().null;
@@ -52,7 +62,7 @@ std::string tablator::Table::extract_value_as_string(
     // JTODO Write UINT8_LE values the way Ipac_Table_Writer does?
     tablator::Ascii_Writer::write_type_as_ascii(
             ss, column.get_type(), column.get_array_size(),
-			column.get_dynamic_array_flag(),
+            column.get_dynamic_array_flag(),
             data.data() + curr_row_offset + offsets[col_idx],
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     return ss.str();
@@ -117,6 +127,11 @@ void insert_blob_to_row_internal(tablator::Row &row, const tablator::Table &tabl
     const auto &column = table.get_columns().at(col_idx);
     auto data_size = tablator::data_size(column.get_type());
     auto insert_offset = table.get_offsets().at(col_idx) + elt_idx * data_size;
+
+    if (column.get_dynamic_array_flag()) {
+        row.insert(num_elements_to_insert, insert_offset);
+        insert_offset += tablator::DYNAMIC_ARRAY_OFFSET;
+    }
     row.insert(data_ptr, data_ptr + num_elements_to_insert * data_size, insert_offset);
 }
 }  // namespace
@@ -128,8 +143,9 @@ void tablator::Table::insert_null_into_row(tablator::Row &row, size_t col_idx,
                                            uint32_t array_size) const {
     validate_parameters(row, *this, col_idx, 0 /* elt_idx */, array_size);
     const auto &column = get_columns().at(col_idx);
-    row.set_null(column.get_type(), sizeof(uint32_t), col_idx,
-                 get_offsets().at(col_idx), get_offsets().at(col_idx + 1), column.get_dynamic_array_flag());
+    row.set_null(column.get_type(), tablator::DYNAMIC_ARRAY_OFFSET, col_idx,
+                 get_offsets().at(col_idx), get_offsets().at(col_idx + 1),
+                 column.get_dynamic_array_flag());
 }
 
 
@@ -149,6 +165,8 @@ void tablator::Table::insert_ptr_value_into_row(tablator::Row &row, size_t col_i
     validate_parameters(row, *this, col_idx, 0 /* start_elt_idx */, array_size);
     insert_blob_to_row_internal(row, *this, col_idx, 0, data_ptr, array_size);
 }
+
+//===============================================================
 
 void tablator::Table::insert_string_column_value_into_row(
         Row &row, size_t col_idx, const uint8_t *data_ptr,
