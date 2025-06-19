@@ -21,7 +21,7 @@ void tablator::ptree_readers::add_params_from_xml_string(
     boost::property_tree::ptree::const_iterator end = params_tree.end();
     while (child != end) {
         if (child->first == PARAM) {
-            params.emplace_back(read_field(child->second).get_field());
+            params.emplace_back(read_field(child->second));
         }
         ++child;
     }

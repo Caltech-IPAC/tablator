@@ -13,20 +13,42 @@ void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
 
 inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
                           const std::string &name, const Data_Type &type,
-                          const size_t &size,
+                          const size_t &array_size,
+                          const Field_Properties &field_properties,
+                          bool dynamic_array_flag) {
+    append_column(columns, offsets,
+                  Column(name, type, array_size, field_properties, dynamic_array_flag));
+}
+
+inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
+                          const std::string &name, const Data_Type &type,
+                          const size_t &array_size,
                           const Field_Properties &field_properties) {
-    append_column(columns, offsets, Column(name, type, size, field_properties));
+    append_column(columns, offsets, Column(name, type, array_size, field_properties));
+}
+
+inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
+                          const std::string &name, const Data_Type &type,
+                          const size_t &array_size, bool dynamic_array_flag) {
+    append_column(columns, offsets, Column(name, type, array_size, dynamic_array_flag));
 }
 
 inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
                           const std::string &name, const Data_Type &type,
                           const size_t &size) {
-    append_column(columns, offsets, Column(name, type, size, Field_Properties()));
+    append_column(columns, offsets, Column(name, type, size));
 }
 
 inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
+                          const std::string &name, const Data_Type &type,
+                          const Field_Properties &field_properties) {
+    append_column(columns, offsets, Column(name, type, field_properties));
+}
+
+
+inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
                           const std::string &name, const Data_Type &type) {
-    append_column(columns, offsets, name, type, 1, Field_Properties());
+    append_column(columns, offsets, Column(name, type));
 }
 
 
