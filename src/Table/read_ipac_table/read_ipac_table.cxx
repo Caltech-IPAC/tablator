@@ -72,9 +72,9 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                      element == ipac_columns[COL_NULL_IDX][col_idx]) ||
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      tab_column.get_type() != Data_Type::CHAR && element.empty())) {
-                    row_string.set_null(tab_column.get_type(),
-                                        tab_column.get_array_size(), col_idx,
-                                        offsets[col_idx], offsets[col_idx + 1]);
+                    row_string.insert_null(tab_column.get_type(),
+                                           tab_column.get_array_size(), col_idx,
+                                           offsets[col_idx], offsets[col_idx + 1]);
                 } else {
                     try {
                         insert_ascii_in_row(row_string, tab_column.get_type(),
