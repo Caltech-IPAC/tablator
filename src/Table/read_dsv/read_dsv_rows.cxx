@@ -16,9 +16,9 @@ std::vector<uint8_t> tablator::Table::read_dsv_rows(
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
             const std::string &element(dsv_row[col_idx - 1]);
             if (element.empty() || element == "null") {
-                row_string.set_null(columns[col_idx].get_type(),
-                                    columns[col_idx].get_array_size(), col_idx,
-                                    offsets[col_idx], offsets[col_idx + 1]);
+                row_string.insert_null(columns[col_idx].get_type(),
+                                       columns[col_idx].get_array_size(), col_idx,
+                                       offsets[col_idx], offsets[col_idx + 1]);
             } else {
                 insert_ascii_in_row(row_string, columns[col_idx].get_type(),
                                     columns[col_idx].get_array_size(), col_idx, element,

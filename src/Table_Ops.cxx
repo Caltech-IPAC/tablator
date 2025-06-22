@@ -44,7 +44,7 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
     for (const auto *row_pointer = src_data.data();
          row_pointer < src_data.data() + src_data.size();
          row_pointer += src_row_size, ++cntr) {
-        row.set_zero();
+        row.fill_with_zeros();
         // Copy null_bitflag column valuefrom src_table.
         // The dest_column's null_bitfield flag is never set.
         row.insert(row_pointer, row_pointer + src_nulls_size, 0);

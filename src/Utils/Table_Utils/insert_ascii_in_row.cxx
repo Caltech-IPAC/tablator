@@ -30,7 +30,7 @@ void insert_ascii_in_row(Row &row, const Data_Type &data_type, const size_t &arr
         switch (data_type) {
             case Data_Type::INT8_LE:
                 if (element == "?" || element == " " || element[0] == '\0') {
-                    row.set_null(data_type, array_size, column, offset, offset_end);
+                    row.insert_null(data_type, array_size, column, offset, offset_end);
                 } else {
                     bool result = (boost::iequals(element, "true") ||
                                    boost::iequals(element, "t") || element == "1");
