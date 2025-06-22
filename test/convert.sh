@@ -182,11 +182,11 @@ else
     rm -f temp.json5
 fi
 
-${tablator_bin} --retain-row-list "1 4" test/multi temp.vot 2> /dev/null
+${tablator_bin} --winnow-rows-list "1 4" test/multi temp.vot 2> /dev/null
 if [ $? -eq 0 ]; then
-    echo "FAIL: invalid argument to retain-row-list"
+    echo "FAIL: invalid argument to winnow-rows-list"
 else
-    echo "PASS: invalid argument to retain-row-list"
+    echo "PASS: invalid argument to winnow-rows-list"
     rm -f temp.tbl
 fi
 
@@ -1426,10 +1426,10 @@ else
     echo "FAIL: append json5 table"
 fi
 
-${tablator_bin} --retain-row-list "1 2 3" test/multi_formatted.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
+${tablator_bin} --winnow-rows-list "1 2 3" test/multi_formatted.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
 if [ $? -eq 0 ]; then
-    echo "PASS: retain rows"
+    echo "PASS: winnow rows"
     rm -f temp.json5
 else
-    echo "FAIL: retain rows"
+    echo "FAIL: winnow rows"
 fi
