@@ -37,6 +37,12 @@ public:
                   data_.data() + offset_begin);
     }
 
+
+    void insert_from_ascii(const std::string &element, const Data_Type &data_type,
+                           const size_t &array_size, const size_t &column,
+                           const size_t &offset, const size_t &offset_end);
+
+
     size_t get_size() const { return data_.size(); }
 
     const std::vector<char> &get_data() const { return data_; }
@@ -44,7 +50,7 @@ public:
 
 private:
     template <typename T>
-    void insert_null(const size_t &offset) {
+    void insert_null_internal(const size_t &offset) {
         insert(tablator::get_null<T>(), offset);
     }
 
