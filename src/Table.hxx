@@ -627,7 +627,6 @@ public:
 
 
     // inserters
-    // JTODO calls set_null()
     void insert_null_into_row(tablator::Row &row, size_t col_idx,
                               uint32_t array_size) const;
 
