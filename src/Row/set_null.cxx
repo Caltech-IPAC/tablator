@@ -3,21 +3,21 @@
 #include "../Row.hxx"
 #include "../data_size.hxx"
 
-void tablator::Row::set_null(const Data_Type &data_type, const size_t &array_size,
-                             const size_t &col_idx, const size_t &offset,
-                             const size_t &offset_end) {
+void tablator::Row::insert_null(const Data_Type &data_type, const size_t &array_size,
+                                const size_t &col_idx, const size_t &offset,
+                                const size_t &offset_end) {
     const int byte = (col_idx - 1) / 8;
     const char mask = (128 >> ((col_idx - 1) % 8));
 
     // Update the null_bitfield_flag's bit for this column.
-    data[byte] = data[byte] | mask;
+    data_[byte] = data_[byte] | mask;
 
     size_t curr_offset = offset;
     size_t data_type_size = data_size(data_type);
 
     // Mark the indicated array elements as null.
     for (size_t i = 0; i < array_size; ++i) {
-        set_null_internal(data_type, curr_offset);
+        insert_null_by_type(data_type, curr_offset);
         curr_offset += data_type_size;
         if (curr_offset >= offset_end) {
             // Shouldn't happen.
@@ -26,8 +26,8 @@ void tablator::Row::set_null(const Data_Type &data_type, const size_t &array_siz
     }
 }
 
-void tablator::Row::set_null_internal(const Data_Type &data_type,
-                                      const size_t &offset) {
+void tablator::Row::insert_null_by_type(const Data_Type &data_type,
+                                        const size_t &offset) {
     switch (data_type) {
         case Data_Type::INT8_LE:
             insert_null<int8_t>(offset);
@@ -64,6 +64,6 @@ void tablator::Row::set_null_internal(const Data_Type &data_type,
             break;
         default:
             throw std::runtime_error(
-                    "Unexpected data type in tablator::Row::set_null()");
+                    "Unexpected data type in insert_null_by_type()");
     }
 }

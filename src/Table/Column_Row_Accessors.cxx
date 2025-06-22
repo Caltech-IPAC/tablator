@@ -24,7 +24,7 @@ const uint8_t *tablator::Table::extract_value_ptr(size_t col_idx,
 std::string tablator::Table::extract_value_as_string(
         const std::string &col_name, size_t row_idx,
         const Command_Line_Options &options) const {
-    size_t col_idx = column_index(col_name);  // throws if col_name is invalid
+    size_t col_idx = get_column_index(col_name);  // throws if col_name is invalid
     return extract_value_as_string(col_idx, row_idx, options);
 }
 
@@ -61,7 +61,7 @@ std::string tablator::Table::extract_value_as_string(
 
 std::vector<std::string> tablator::Table::extract_column_values_as_strings(
         const std::string &col_name, const Command_Line_Options &options) const {
-    size_t col_idx = column_index(col_name);  // throws if col_name is invalid
+    size_t col_idx = get_column_index(col_name);  // throws if col_name is invalid
 
     std::vector<std::string> col_vals;
 
@@ -127,8 +127,8 @@ void tablator::Table::insert_null_into_row(tablator::Row &row, size_t col_idx,
                                            uint32_t array_size) const {
     validate_parameters(row, *this, col_idx, 0 /* elt_idx */, array_size);
     const auto &column = get_columns().at(col_idx);
-    row.set_null(column.get_type(), sizeof(uint32_t), col_idx,
-                 get_offsets().at(col_idx), get_offsets().at(col_idx + 1));
+    row.insert_null(column.get_type(), sizeof(uint32_t), col_idx,
+                    get_offsets().at(col_idx), get_offsets().at(col_idx + 1));
 }
 
 
