@@ -37,10 +37,10 @@ void ptree_readers::append_data_from_stream(std::vector<uint8_t> &data,
 
             bool dynamic_array_flag = fields[col_idx].get_dynamic_array_flag();
             if (is_null_MSB(stream, row_offset, col_idx)) {
-                row.set_null(col_type, col_array_size, col_idx, offsets[col_idx],
-                             offsets[col_idx + 1]);
+                row.insert_null(col_type, col_array_size, col_idx, offsets[col_idx],
+                                offsets[col_idx + 1]);
                 if (dynamic_array_flag) {
-				  src_pos += sizeof(uint32_t);
+                    src_pos += sizeof(uint32_t);
                 } else {
                     src_pos += data_size(col_type) * col_array_size;
                 }

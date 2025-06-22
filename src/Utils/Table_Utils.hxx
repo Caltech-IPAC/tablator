@@ -72,11 +72,6 @@ inline void append_row(std::vector<uint8_t> &data, const Row &row) {
     data.insert(data.end(), row.get_data().begin(), row.get_data().end());
 }
 
-inline void unsafe_append_row(std::vector<uint8_t> &data, const char *row,
-                              uint row_size) {
-    data.insert(data.end(), row, row + row_size);
-}
-
 inline void append_rows(std::vector<uint8_t> &data, const std::vector<uint8_t> &data2) {
     data.insert(data.end(), data2.begin(), data2.end());
 }

@@ -91,8 +91,8 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
             const auto &column = columns[col_idx];
             auto &element = element_list[col_idx - 1];
             if (element.empty()) {
-                row_string.set_null(column.get_type(), column.get_array_size(), col_idx,
-                                    offsets[col_idx], offsets[col_idx + 1]);
+                row_string.insert_null(column.get_type(), column.get_array_size(),
+                                       col_idx, offsets[col_idx], offsets[col_idx + 1]);
             } else
                 try {
                     insert_ascii_in_row(row_string, column.get_type(),
