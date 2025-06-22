@@ -557,7 +557,6 @@ public:
 
 
     // inserters
-    // JTODO calls set_null()
     void insert_null_into_row(tablator::Row &row, size_t col_idx,
                               uint32_t array_size) const;
 
@@ -601,8 +600,8 @@ public:
                                         get_columns().at(col_idx).get_array_size());
     }
 
-    void retain_only_selected_rows(const std::set<size_t> &selected_row_idx_list) {
-        tablator::retain_only_selected_rows(get_data(), selected_row_idx_list,
+    void winnow_rows(const std::set<size_t> &selected_row_idx_list) {
+        tablator::winnow_rows(get_data(), selected_row_idx_list,
                                             get_num_rows(), get_row_size());
     }
 

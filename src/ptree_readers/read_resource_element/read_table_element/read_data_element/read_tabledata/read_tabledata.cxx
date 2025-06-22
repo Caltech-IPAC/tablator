@@ -80,24 +80,24 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                       field.get_dynamic_array_flag());
     }
 
-    Row row_string(*offsets.rbegin());
+    Row single_row(*offsets.rbegin());
 
     // JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in
     // '\0'?
     for (size_t row_idx = 0; row_idx < element_lists_by_row.size(); ++row_idx) {
         auto &element_list = element_lists_by_row[row_idx];
-        row_string.fill_with_zeros();
+        single_row.fill_with_zeros();
         for (size_t col_idx = 1; col_idx < num_fields; ++col_idx) {
             const auto &column = columns[col_idx];
             auto &element = element_list[col_idx - 1];
             if (element.empty()) {
-                row_string.insert_null(column.get_type(), column.get_array_size(),
+                single_row.insert_null(column.get_type(), column.get_array_size(),
                                        col_idx, offsets[col_idx], offsets[col_idx + 1]);
             } else
                 try {
-                    insert_ascii_in_row(row_string, column.get_type(),
-                                        column.get_array_size(), col_idx, element,
-                                        offsets[col_idx], offsets[col_idx + 1]);
+                    single_row.insert_from_ascii(
+                            element, column.get_type(), column.get_array_size(),
+                            col_idx, offsets[col_idx], offsets[col_idx + 1]);
                 } catch (std::exception &error) {
                     throw std::runtime_error(
                             "Invalid " + to_string(fields[col_idx].get_type()) +
@@ -108,7 +108,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                             ". Error message: " + error.what());
                 }
         }
-        append_row(data, row_string);
+        append_row(data, single_row);
     }
     return Data_Element(columns, offsets, data);
 }
