@@ -106,7 +106,7 @@ void handle_extract_column(const boost::filesystem::path &input_path,
     boost::filesystem::ifstream input_stream(input_path);
     tablator::Table table(input_stream, input_format);
     boost::filesystem::ofstream output_stream(output_path);
-    auto column_id = table.column_index(column_name);
+    auto column_id = table.get_column_index(column_name);
     auto array_size = table.get_columns().at(column_id).get_array_size();
     auto num_rows = table.get_num_rows();
 

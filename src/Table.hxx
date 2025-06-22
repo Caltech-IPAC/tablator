@@ -246,14 +246,10 @@ public:
     }
 
     size_t get_column_offset(const std::string &name) const {
-        auto col_idx = column_index(name);
+        auto col_idx = get_column_index(name);
         return get_offsets().at(col_idx);
     }
 
-    // JTODO deprecated
-    size_t column_index(const std::string &name) const {
-        return get_column_index(name);
-    }
     size_t column_offset(size_t col_idx) const { return get_column_offset(col_idx); }
     size_t column_offset(const std::string &name) const {
         return get_column_offset(name);
@@ -264,7 +260,7 @@ public:
         std::vector<size_t> col_ids;
 
         for (const std::string &col_name : col_names) {
-            size_t col_id = column_index(col_name);
+            size_t col_id = get_column_index(col_name);
             col_ids.emplace_back(col_id);
         }
         return col_ids;
@@ -297,7 +293,7 @@ public:
     // table modifiers
 
     void append_row(const Row &row) {
-        assert(row.data.size() == get_row_size());
+	  assert(row.get_data().size() == get_row_size());
         tablator::append_row(get_data(), row);
     }
 
@@ -313,8 +309,6 @@ public:
                const Command_Line_Options &options = default_options) const {
         write(path, Format(path), options);
     }
-
-    // JTODO Some of these write_XXX() functions could be made private.
 
     void write_ipac_table(std::ostream &os,
                           const Command_Line_Options &options = default_options) const {
@@ -493,7 +487,7 @@ public:
 
     template <typename T>
     std::vector<T> extract_value(const std::string &col_name, size_t row_idx) const {
-        auto col_idx = column_index(col_name);
+        auto col_idx = get_column_index(col_name);
         return extract_value<T>(col_idx, row_idx);
     }
 
@@ -539,7 +533,7 @@ public:
 
     template <typename T>
     std::vector<T> extract_column(const std::string &col_name) const {
-        auto col_idx = column_index(col_name);
+        auto col_idx = get_column_index(col_name);
         return extract_column<T>(col_idx);
     }
 
@@ -563,6 +557,7 @@ public:
 
 
     // inserters
+    // JTODO calls set_null()
     void insert_null_into_row(tablator::Row &row, size_t col_idx,
                               uint32_t array_size) const;
 
@@ -868,10 +863,6 @@ public:
 
 
 private:
-    void unsafe_append_row(const char *row) {
-        tablator::unsafe_append_row(get_data(), row, get_row_size());
-    }
-
     void write_hdf5(std::ostream &os) const;
     void write_hdf5(const boost::filesystem::path &p) const;
 
