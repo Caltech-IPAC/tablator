@@ -14,7 +14,7 @@ const uint8_t *tablator::Table::extract_value_ptr(size_t col_idx,
     if (col_idx >= columns.size()) {
         throw std::runtime_error("Invalid column index: " + std::to_string(col_idx));
     }
-    if (row_idx >= num_rows()) {
+    if (row_idx >= get_num_rows()) {
         throw std::runtime_error("Invalid row index: " + std::to_string(row_idx));
     }
 
@@ -41,7 +41,7 @@ std::string tablator::Table::extract_value_as_string(
         throw std::runtime_error("Invalid row index: " + std::to_string(row_idx));
     }
 
-    size_t curr_row_offset = row_idx * row_size();
+    size_t curr_row_offset = row_idx * get_row_size();
     auto &column = columns[col_idx];
     if (is_null_value(row_idx, col_idx)) {
         auto &null_value = column.get_field_properties().get_values().null;

@@ -301,11 +301,6 @@ public:
         tablator::append_row(get_data(), row);
     }
 
-    void unsafe_append_row(const char *row) {
-        tablator::unsafe_append_row(get_data(), row, get_row_size());
-    }
-
-
     void append_rows(const Table &table2);
 
     // write functions
@@ -318,8 +313,8 @@ public:
                const Command_Line_Options &options = default_options) const {
         write(path, Format(path), options);
     }
-    void write_hdf5(std::ostream &os) const;
-    void write_hdf5(const boost::filesystem::path &p) const;
+
+    // JTODO Some of these write_XXX() functions could be made private.
 
     void write_ipac_table(std::ostream &os,
                           const Command_Line_Options &options = default_options) const {
@@ -364,7 +359,7 @@ public:
             std::ostream &os, const std::vector<size_t> &column_ids,
             const Command_Line_Options options = default_options) const {
         Ipac_Table_Writer::write_subtable_by_column_and_row(*this, os, column_ids, 0,
-                                                            num_rows(), options);
+                                                            get_num_rows(), options);
     }
 
     void write_single_ipac_record(std::ostream &os, size_t row_idx,
@@ -409,10 +404,6 @@ public:
         Ipac_Table_Writer::write_selected_records(*this, os, included_column_ids,
                                                   requested_row_ids, options);
     }
-
-
-    void write_dsv(std::ostream &os, const char &separator,
-                   const Command_Line_Options &options = default_options) const;
 
     void write_sql_create_table(std::ostream &os, const std::string &table_name,
                                 const Format::Enums &sql_type) const {
@@ -461,64 +452,6 @@ public:
     void write_sqlite_db(const boost::filesystem::path &path,
                          const Command_Line_Options &options) const;
 
-    void write_fits(std::ostream &os) const;
-
-    void write_fits(const boost::filesystem::path &filename) const;
-
-    void write_fits(fitsfile *fits_file) const;
-
-    void write_tabledata(std::ostream &os, const Format::Enums &output_format,
-                         const Command_Line_Options &options) const;
-
-    void write_html(std::ostream &os, const Command_Line_Options &options) const;
-
-    boost::property_tree::ptree generate_property_tree() const;
-
-    void read_unknown(const boost::filesystem::path &path);
-    void read_unknown(std::istream &input_stream);
-    void read_ipac_table(std::istream &input_stream);
-    void read_ipac_table(const boost::filesystem::path &path) {
-        boost::filesystem::ifstream input_stream(path);
-        read_ipac_table(input_stream);
-    }
-    void read_fits(const boost::filesystem::path &path);
-    void read_hdf5(const boost::filesystem::path &path);
-    void read_json5(std::istream &input_stream);
-    void read_json5(const boost::filesystem::path &path) {
-        boost::filesystem::ifstream input_stream(path);
-        read_json5(input_stream);
-    }
-    void read_json(std::istream &input_stream);
-    void read_json(const boost::filesystem::path &path) {
-        boost::filesystem::ifstream input_stream(path);
-        read_json(input_stream);
-    }
-
-    void read_votable(std::istream &input_stream);
-    void read_votable(const boost::filesystem::path &path) {
-        boost::filesystem::ifstream input_stream(path);
-        read_votable(input_stream);
-    }
-
-    void read_dsv(std::istream &input_stream, const Format &format);
-    void read_dsv(const boost::filesystem::path &path, const Format &format) {
-        if (path == "-") {
-            read_dsv(std::cin, format);
-        } else {
-            boost::filesystem::ifstream input_stream(path);
-            read_dsv(input_stream, format);
-        }
-    }
-
-    void read_dsv_rows(const std::list<std::vector<std::string>> &dsv) {
-        set_data(read_dsv_rows(get_columns(), get_offsets(), dsv));
-    }
-
-    void set_column_info(std::list<std::vector<std::string>> &dsv) {
-        set_column_info(get_columns(), get_offsets(), dsv);
-    };
-
-
     // Following the VOTable convention, we use the most significant
     // bit for the first column.
     bool is_null_value(size_t row_idx, size_t col_idx) const {
@@ -543,7 +476,6 @@ public:
         }
         return get_data().at(pos) & (128 >> ((col_idx - 1) % 8));
     }
-
 
     // extractors
 
@@ -620,7 +552,7 @@ public:
 
         const auto &columns = get_columns();
         auto &column = columns[col_idx];
-        size_t row_count = num_rows();
+        size_t row_count = get_num_rows();
         std::vector<T> col_vec;
         col_vec.reserve(row_count * column.get_array_size());
         for (size_t curr_row_idx = 0; curr_row_idx < row_count; ++curr_row_idx) {
@@ -650,8 +582,6 @@ public:
                                   get_columns().at(col_idx).get_array_size());
     }
 
-
-public:
     void insert_string_column_value_into_row(Row &row, size_t col_idx,
                                              const uint8_t *data_ptr,
                                              uint32_t curr_array_size) const;
@@ -938,6 +868,74 @@ public:
 
 
 private:
+    void unsafe_append_row(const char *row) {
+        tablator::unsafe_append_row(get_data(), row, get_row_size());
+    }
+
+    void write_hdf5(std::ostream &os) const;
+    void write_hdf5(const boost::filesystem::path &p) const;
+
+    void write_dsv(std::ostream &os, const char &separator,
+                   const Command_Line_Options &options = default_options) const;
+
+    void write_fits(std::ostream &os) const;
+
+    void write_fits(const boost::filesystem::path &filename) const;
+
+    void write_fits(fitsfile *fits_file) const;
+
+    void write_tabledata(std::ostream &os, const Format::Enums &output_format,
+                         const Command_Line_Options &options) const;
+
+    void write_html(std::ostream &os, const Command_Line_Options &options) const;
+
+    boost::property_tree::ptree generate_property_tree() const;
+
+    void read_unknown(const boost::filesystem::path &path);
+    void read_unknown(std::istream &input_stream);
+    void read_ipac_table(std::istream &input_stream);
+    void read_ipac_table(const boost::filesystem::path &path) {
+        boost::filesystem::ifstream input_stream(path);
+        read_ipac_table(input_stream);
+    }
+    void read_fits(const boost::filesystem::path &path);
+    void read_hdf5(const boost::filesystem::path &path);
+    void read_json5(std::istream &input_stream);
+    void read_json5(const boost::filesystem::path &path) {
+        boost::filesystem::ifstream input_stream(path);
+        read_json5(input_stream);
+    }
+    void read_json(std::istream &input_stream);
+    void read_json(const boost::filesystem::path &path) {
+        boost::filesystem::ifstream input_stream(path);
+        read_json(input_stream);
+    }
+
+    void read_votable(std::istream &input_stream);
+    void read_votable(const boost::filesystem::path &path) {
+        boost::filesystem::ifstream input_stream(path);
+        read_votable(input_stream);
+    }
+
+    void read_dsv(std::istream &input_stream, const Format &format);
+    void read_dsv(const boost::filesystem::path &path, const Format &format) {
+        if (path == "-") {
+            read_dsv(std::cin, format);
+        } else {
+            boost::filesystem::ifstream input_stream(path);
+            read_dsv(input_stream, format);
+        }
+    }
+
+    void read_dsv_rows(const std::list<std::vector<std::string>> &dsv) {
+        set_data(read_dsv_rows(get_columns(), get_offsets(), dsv));
+    }
+
+    void set_column_info(std::list<std::vector<std::string>> &dsv) {
+        set_column_info(get_columns(), get_offsets(), dsv);
+    };
+
+
     std::vector<size_t> get_column_widths(const Command_Line_Options &options) const {
         return Ipac_Table_Writer::get_column_widths(*this, options);
     }
@@ -1073,10 +1071,6 @@ private:
                                 std::vector<size_t> &offsets,
                                 std::list<std::vector<std::string>> &dsv);
 
-
-    // This function is not used internally.
-    static std::vector<STRING_PAIR> flatten_properties(
-            const Labeled_Properties &properties);
 
     Table(const std::vector<Resource_Element> &resource_elements,
           const Options &options)
