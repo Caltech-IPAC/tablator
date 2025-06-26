@@ -94,7 +94,7 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
             os << '\n';
         }
         os << tr_suffix;
-        if (is_json && row_offset < data.size() - row_size()) {
+        if (is_json && row_offset < data.size() - get_row_size()) {
             os << ',';
         }
         os << '\n';

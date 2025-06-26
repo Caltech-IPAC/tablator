@@ -21,16 +21,6 @@ public:
     Property(const std::string &Value, const ATTRIBUTES &Attributes)
             : attributes_(Attributes), value_(Value) {}
 
-    // Called internally, directly or otherwise, only by flatten_properties().
-    std::vector<STRING_PAIR> flatten(const std::string &key) const {
-        std::vector<STRING_PAIR> result;
-        result.push_back(std::make_pair(key, value_));
-        for (auto &a : attributes_)
-            result.push_back(
-                    std::make_pair(key + "." + XMLATTR_DOT + a.first, a.second));
-        return result;
-    }
-
     const ATTRIBUTES &get_attributes() const { return attributes_; }
     ATTRIBUTES &get_attributes() { return attributes_; }
 

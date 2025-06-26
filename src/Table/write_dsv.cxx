@@ -57,7 +57,7 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
     }
 
     for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
-         ++row_idx, row_offset += row_size()) {
+         ++row_idx, row_offset += get_row_size()) {
         for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
             const auto &column = columns[col_idx];
             size_t offset = offsets[col_idx] + row_offset;
