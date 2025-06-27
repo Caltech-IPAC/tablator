@@ -506,15 +506,6 @@ public:
         }
     }
 
-    void read_dsv_rows(const std::list<std::vector<std::string>> &dsv) {
-        set_data(read_dsv_rows(get_columns(), get_offsets(), dsv));
-    }
-
-    void set_column_info(std::list<std::vector<std::string>> &dsv) {
-        set_column_info(get_columns(), get_offsets(), dsv);
-    };
-
-
     // Following the VOTable convention, we use the most significant
     // bit for the first column.
     bool is_null_value(size_t row_idx, size_t col_idx) const {
@@ -757,15 +748,13 @@ public:
         return get_resource_elements().at(get_results_resource_idx());
     }
 
+  // Non-const to allow query_server to modify Field_Properties.
     std::vector<Column> &get_columns() {
         return get_results_resource_element().get_columns();
     }
+
     const std::vector<Column> &get_columns() const {
         return get_results_resource_element().get_columns();
-    }
-
-    std::vector<size_t> &get_offsets() {
-        return get_results_resource_element().get_offsets();
     }
 
     const std::vector<size_t> &get_offsets() const {
@@ -787,6 +776,7 @@ public:
     std::vector<Field> &get_table_element_params() {
         return get_results_resource_element().get_table_element_params();
     }
+
     const std::vector<Field> &get_table_element_params() const {
         return get_results_resource_element().get_table_element_params();
     }
@@ -794,10 +784,12 @@ public:
     std::vector<Field> &get_table_element_fields() {
         return get_results_resource_element().get_table_element_fields();
     }
+
     const std::vector<Field> &get_table_element_fields() const {
         return get_results_resource_element().get_table_element_fields();
     }
 
+     // Non-const to support append_row().
     std::vector<uint8_t> &get_data() {
         return get_results_resource_element().get_data();
     }
@@ -806,15 +798,15 @@ public:
         return get_results_resource_element().get_data();
     }
 
-
     Table_Element &get_main_table_element() {
         return get_results_resource_element().get_main_table_element();
     }
 
-
     const Table_Element &get_main_table_element() const {
         return get_results_resource_element().get_main_table_element();
     }
+
+
 
 
     //===========================================================
@@ -982,61 +974,10 @@ private:
     }
 
     // helpers for reading
-
-    // WARNING: The private append_column() routines do not increase
-    // the size of the null column.  The expectation is that the
-    // number of columns is known before adding columns.
-    void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size, const Field_Properties &field_properties,
-                       bool dynamic_array_flag) {
-        append_column(Column(name, type, size, field_properties, dynamic_array_flag));
-    }
-
-    void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size, bool dynamic_array_flag) {
-        append_column(Column(name, type, size, dynamic_array_flag));
-    }
-
-    void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size, const Field_Properties &field_properties) {
-        append_column(Column(name, type, size, field_properties));
-    }
-
-    void append_column(const std::string &name, const Data_Type &type,
-                       const size_t &size) {
-        append_column(name, type, size);
-    }
-
-    void append_column(const std::string &name, const Data_Type &type) {
-        append_column(name, type);
-    }
-
-    void append_column(const Column &column) {
-        tablator::append_column(get_columns(), get_offsets(), column);
-    }
-
     size_t read_ipac_header(std::istream &ipac_file,
                             std::array<std::vector<std::string>, 4> &Columns,
                             std::vector<size_t> &ipac_table_offsets,
                             Labeled_Properties &labeled_resource_properties);
-
-    void create_types_from_ipac_headers(
-            std::array<std::vector<std::string>, 4> &Columns,
-            const std::vector<size_t> &ipac_column_widths) {
-        create_types_from_ipac_headers(get_columns(), get_offsets(), Columns,
-                                       ipac_column_widths);
-    }
-
-    void append_ipac_data_member(const std::string &name, const std::string &data_type,
-                                 const size_t &size) {
-        append_ipac_data_member(get_columns(), get_offsets(), name, data_type, size);
-    }
-
-    void shrink_ipac_string_columns_to_fit(const std::vector<size_t> &column_widths) {
-        shrink_ipac_string_columns_to_fit(get_columns(), get_offsets(), get_data(),
-                                          column_widths);
-    };
-
 
     static void append_ipac_data_member(std::vector<Column> &columns,
                                         std::vector<size_t> &offsets,
