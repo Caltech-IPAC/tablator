@@ -44,7 +44,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::vector<Column> &tab_columns = field_framework.get_columns();
     std::vector<size_t> &offsets = field_framework.get_offsets();
 
-    Row row_string(tablator::get_row_size(offsets));
+    Row single_row(tablator::get_row_size(offsets));
 
     std::vector<size_t> minimum_column_widths(num_tablator_columns, 1);
     std::string line;
@@ -53,7 +53,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::vector<uint8_t> data;
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
-            row_string.fill_with_zeros();
+            single_row.fill_with_zeros();
             for (size_t col_idx = 1; col_idx < num_tablator_columns; ++col_idx) {
                 const auto &tab_column = tab_columns[col_idx];
                 if (line[ipac_column_offsets[col_idx - 1]] != ' ')
@@ -75,15 +75,15 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                      element == ipac_columns[COL_NULL_IDX][col_idx]) ||
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      tab_column.get_type() != Data_Type::CHAR && element.empty())) {
-                    row_string.insert_null(tab_column.get_type(),
+                    single_row.insert_null(tab_column.get_type(),
                                            tab_column.get_array_size(), col_idx,
                                            offsets[col_idx], offsets[col_idx + 1]);
                 } else {
                     try {
-                        insert_ascii_in_row(row_string, tab_column.get_type(),
-                                            tab_column.get_array_size(), col_idx,
-                                            element, offsets[col_idx],
-                                            offsets[col_idx + 1]);
+                        single_row.insert_from_ascii(element, tab_column.get_type(),
+                                                     tab_column.get_array_size(),
+                                                     col_idx, offsets[col_idx],
+                                                     offsets[col_idx + 1]);
                     } catch (std::exception &error) {
                         throw std::runtime_error(
                                 "Invalid " + to_string(tab_column.get_type()) +
@@ -102,7 +102,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                          ": '" + line.substr(bad_char) +
                                          "'.\n\t  Is the header not wide enough?");
 
-            tablator::append_row(data, row_string);
+            tablator::append_row(data, single_row);
         }
         ++current_line_num;
         std::getline(input_stream, line);
