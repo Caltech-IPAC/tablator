@@ -1,14 +1,14 @@
 #include "../../../Table.hxx"
 
 namespace tablator {
+
 Data_Type get_best_data_type(const Data_Type &current_type, const std::string &element);
-}
+
 
 // FIXME: A bit icky.  This modifies the dsv document (trims
 // whitespace) while extracting metadata.
-void tablator::Table::set_column_info(std::vector<Column> &columns,
-                                      std::vector<size_t> &offsets,
-                                      std::list<std::vector<std::string> > &dsv) {
+void Table::set_column_info(Field_Framework &field_framework,
+                            std::list<std::vector<std::string> > &dsv) {
     auto row(dsv.begin());
     std::vector<std::string> names;
     for (auto &name : *row) {
@@ -20,9 +20,9 @@ void tablator::Table::set_column_info(std::vector<Column> &columns,
         }
         names.push_back(trimmed_name);
     }
-    tablator::append_column(columns, offsets, null_bitfield_flags_name,
-                            Data_Type::UINT8_LE, (names.size() + 7) / 8,
-                            Field_Properties(null_bitfield_flags_description));
+    append_column(field_framework, null_bitfield_flags_name, Data_Type::UINT8_LE,
+                  (names.size() + 7) / 8,
+                  Field_Properties(null_bitfield_flags_description));
 
     // Try to infer the types of the columns.  Supported are INT8_LE
     // (bool), INT64_LE, UINT64_LE, FLOAT64_LE, and CHAR.
@@ -51,7 +51,9 @@ void tablator::Table::set_column_info(std::vector<Column> &columns,
     }
 
     for (size_t elem = 0; elem < names.size(); ++elem) {
-        tablator::append_column(columns, offsets, names[elem], types[elem],
-                                types[elem] == Data_Type::CHAR ? sizes[elem] : 1);
+        append_column(field_framework, names[elem], types[elem],
+                      types[elem] == Data_Type::CHAR ? sizes[elem] : 1);
     }
 }
+
+}  // namespace tablator

@@ -886,12 +886,10 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     // Read and store binary data
     //*********************************
 
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
+    Field_Framework field_framework;
 
     // Create null_bitfield_flags column for internal use.
-    tablator::append_column(columns, offsets, null_bitfield_flags_name,
-                            Data_Type::UINT8_LE,
+    tablator::append_column(field_framework, null_bitfield_flags_name, Data_Type::UINT8_LE,
                             bits_to_bytes(ccfits_table->column().size()),
                             Field_Properties(null_bitfield_flags_description, {}));
 
@@ -909,6 +907,10 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
 
 
     Column_Info_Manager col_info_manager;
+
+    auto &columns = field_framework.get_columns();
+    auto &offsets = field_framework.get_offsets();
+
 
     // We make two passes through the FITS file's columns.  The first
     // pass is to extract column metadata and create tablator columns;
@@ -935,7 +937,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
         switch (abs_fits_type) {
             case CCfits::Tlogical: {
                 // std::cout << "Tlogical: " << CCfits::Tlogical << std::endl;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::INT8_LE, array_size);
                 col_info_manager.store_data_type_info_for_column(Data_Type::UINT8_LE,
                                                                  array_size);
@@ -949,7 +951,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::UINT8_LE, array_size, null_prop);
             } break;
             case CCfits::Tshort: {
@@ -961,7 +963,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::INT16_LE, array_size, null_prop);
             } break;
             case CCfits::Tushort: {
@@ -973,7 +975,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::UINT16_LE, array_size, null_prop);
             } break;
             case CCfits::Tint: {
@@ -984,7 +986,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::INT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tuint: {
@@ -995,7 +997,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::UINT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tlong: {
@@ -1007,7 +1009,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::INT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tulong: {
@@ -1020,7 +1022,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::UINT32_LE, array_size, null_prop);
             } break;
             case CCfits::Tlonglong: {
@@ -1031,14 +1033,14 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 Field_Properties null_prop;
                 null_prop.get_values().null =
                         got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::INT64_LE, array_size, null_prop);
             } break;
             case CCfits::Tfloat: {
                 // std::cout << "Tfloat" << std::endl;
                 Field_Properties null_prop;
                 null_prop.get_values().null = DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::FLOAT32_LE, array_size, null_prop);
                 col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT32_LE,
                                                                  array_size);
@@ -1047,14 +1049,14 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 // std::cout << "Tdouble" << std::endl;
                 Field_Properties null_prop;
                 null_prop.get_values().null = DEFAULT_NULL_VALUE;
-                tablator::append_column(columns, offsets, fits_col.name(),
+                tablator::append_column(field_framework, fits_col.name(),
                                         Data_Type::FLOAT64_LE, array_size, null_prop);
                 col_info_manager.store_data_type_info_for_column(Data_Type::FLOAT64_LE,
                                                                  array_size);
             } break;
             case CCfits::Tstring:
-                tablator::append_column(columns, offsets, fits_col.name(),
-                                        Data_Type::CHAR, fits_col.width());
+                tablator::append_column(field_framework, fits_col.name(), Data_Type::CHAR,
+                                        fits_col.width());
                 col_info_manager.store_data_type_info_for_column(Data_Type::CHAR,
                                                                  array_size);
                 break;
@@ -1212,7 +1214,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     //*********************************************************
 
     const auto table_element =
-            Table_Element::Builder(columns, offsets, data)
+            Table_Element::Builder(field_framework, data)
                     .add_trailing_info_list(table_element_trailing_infos)
                     .add_attributes(table_element_attributes)
                     .add_params(table_element_params)

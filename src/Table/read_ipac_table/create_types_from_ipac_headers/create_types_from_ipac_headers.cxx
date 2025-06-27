@@ -3,21 +3,21 @@
 #include "../../read_ipac_table.hxx"
 
 void tablator::Table::create_types_from_ipac_headers(
-        std::vector<Column> &columns, std::vector<size_t> &offsets,
+        Field_Framework &field_framework,
         const std::array<std::vector<std::string>, 4> &ipac_columns,
         const std::vector<size_t> &ipac_column_widths) {
-    tablator::append_column(columns, offsets, ipac_columns.at(COL_NAME_IDX).at(0),
+    tablator::append_column(field_framework, ipac_columns.at(COL_NAME_IDX).at(0),
                             Data_Type::UINT8_LE, ipac_column_widths.at(0),
                             Field_Properties(null_bitfield_flags_description));
 
     size_t num_columns = ipac_columns[0].size();
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
-        append_ipac_data_member(columns, offsets,
-                                ipac_columns.at(COL_NAME_IDX).at(col_idx),
+        append_ipac_data_member(field_framework, ipac_columns.at(COL_NAME_IDX).at(col_idx),
                                 ipac_columns.at(COL_TYPE_IDX).at(col_idx),
                                 ipac_column_widths.at(col_idx));
     }
 
+    auto &columns = field_framework.get_columns();
     for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
         Field_Properties field_props({});
         if (!ipac_columns[COL_UNIT_IDX].at(col_idx).empty()) {

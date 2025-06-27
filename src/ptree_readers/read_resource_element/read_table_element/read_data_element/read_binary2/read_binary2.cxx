@@ -59,20 +59,19 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
         rows_per_stream.push_back(num_rows);
     }
 
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
+    Field_Framework field_framework;
     std::vector<uint8_t> data;
 
     for (std::size_t c = 0; c < fields.size(); ++c) {
         const auto &field = fields.at(c);
-        append_column(columns, offsets, field.get_name(), field.get_type(),
+        append_column(field_framework, field.get_name(), field.get_type(),
                       column_array_sizes[c], field.get_field_properties(),
                       field.get_dynamic_array_flag());
     }
     for (std::size_t stream = 0; stream < streams.size(); ++stream) {
-        append_data_from_stream(data, columns, offsets, streams[stream], fields,
+        append_data_from_stream(data, field_framework, streams[stream], fields,
                                 rows_per_stream[stream]);
     }
-    return Data_Element(columns, offsets, data);
+    return Data_Element(field_framework, data);
 }
 }  // namespace tablator

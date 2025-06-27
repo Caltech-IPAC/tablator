@@ -3,54 +3,51 @@
 #include <set>
 
 #include "../Column.hxx"
+#include "../Field_Framework.hxx"
 #include "../Row.hxx"
 
 namespace tablator {
 
 // column-related functions
-void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                   const Column &column);
 
-inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                          const std::string &name, const Data_Type &type,
-                          const size_t &array_size,
+void append_column(Field_Framework &field_framework, const Column &column);
+
+inline void append_column(Field_Framework &field_framework, const std::string &name,
+                          const Data_Type &type, const size_t &array_size,
                           const Field_Properties &field_properties,
                           bool dynamic_array_flag) {
-    append_column(columns, offsets,
+    append_column(field_framework,
                   Column(name, type, array_size, field_properties, dynamic_array_flag));
 }
 
-inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                          const std::string &name, const Data_Type &type,
-                          const size_t &array_size,
+inline void append_column(Field_Framework &field_framework, const std::string &name,
+                          const Data_Type &type, const size_t &array_size,
                           const Field_Properties &field_properties) {
-    append_column(columns, offsets, Column(name, type, array_size, field_properties));
+    append_column(field_framework, Column(name, type, array_size, field_properties));
 }
 
-inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                          const std::string &name, const Data_Type &type,
-                          const size_t &array_size, bool dynamic_array_flag) {
-    append_column(columns, offsets, Column(name, type, array_size, dynamic_array_flag));
+inline void append_column(Field_Framework &field_framework, const std::string &name,
+                          const Data_Type &type, const size_t &array_size,
+                          bool dynamic_array_flag) {
+    append_column(field_framework, Column(name, type, array_size, dynamic_array_flag));
 }
 
-inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                          const std::string &name, const Data_Type &type,
-                          const size_t &size) {
-    append_column(columns, offsets, Column(name, type, size));
+inline void append_column(Field_Framework &field_framework, const std::string &name,
+                          const Data_Type &type, const size_t &size) {
+    append_column(field_framework, Column(name, type, size));
 }
 
-inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                          const std::string &name, const Data_Type &type,
+inline void append_column(Field_Framework &field_framework, const std::string &name,
+                          const Data_Type &type,
                           const Field_Properties &field_properties) {
-    append_column(columns, offsets, Column(name, type, field_properties));
+    append_column(field_framework, Column(name, type, field_properties));
 }
 
 
-inline void append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                          const std::string &name, const Data_Type &type) {
-    append_column(columns, offsets, Column(name, type));
+inline void append_column(Field_Framework &field_framework, const std::string &name,
+                          const Data_Type &type) {
+    append_column(field_framework, Column(name, type));
 }
-
 
 // row-related functions
 

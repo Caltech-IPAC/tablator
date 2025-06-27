@@ -78,14 +78,12 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                 std::to_string(compound.getNmembers()));
     }
 
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
-
+    Field_Framework field_framework;
     for (int i = 0; i < compound.getNmembers(); ++i) {
         H5::DataType datatype(compound.getMemberDataType(i));
         std::string name(compound.getMemberName(i));
         if (datatype.getClass() == H5T_STRING) {
-            tablator::append_column(columns, offsets, name, Data_Type::CHAR,
+            tablator::append_column(field_framework, name, Data_Type::CHAR,
                                     datatype.getSize(),
                                     column_metadata[i].get_field_properties());
         } else if (datatype.getClass() == H5T_ARRAY) {
@@ -99,21 +97,24 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                         std::to_string(ndims));
             }
             array_type.getArrayDims(&ndims);
-            tablator::append_column(columns, offsets, name, H5_to_Data_Type(datatype),
+            tablator::append_column(field_framework, name, H5_to_Data_Type(datatype),
                                     ndims, column_metadata[i].get_field_properties());
         } else {
-            tablator::append_column(columns, offsets, name, H5_to_Data_Type(datatype),
-                                    1, column_metadata[i].get_field_properties());
+            tablator::append_column(field_framework, name, H5_to_Data_Type(datatype), 1,
+                                    column_metadata[i].get_field_properties());
         }
     }
+
+    std::vector<size_t> &offsets = field_framework.get_offsets();
     std::vector<uint8_t> data;
+
     data.resize(tablator::get_row_size(offsets) *
                 dataset.getSpace().getSimpleExtentNpoints());
     dataset.read(data.data(), compound);
 
     std::vector<Table_Element> table_elements;
     const auto table_element =
-            Table_Element::Builder(columns, offsets, data)
+            Table_Element::Builder(field_framework, data)
                     .add_params(table_element_params)
                     .add_description(table_element_description)
                     .add_trailing_info_list(table_element_trailing_infos)

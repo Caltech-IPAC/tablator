@@ -4,11 +4,14 @@
 #include <utility>
 
 void tablator::Table::shrink_ipac_string_columns_to_fit(
-        std::vector<Column> &columns, std::vector<size_t> &offsets,
-        std::vector<uint8_t> &data,
+        Field_Framework &field_framework, std::vector<uint8_t> &data,
         const std::vector<size_t> &minimum_column_data_widths) {
-    std::vector<size_t> new_offsets = {0};
+    auto &columns = field_framework.get_columns();
+    auto &offsets = field_framework.get_offsets();
+
     std::vector<Column> new_columns(columns);
+    std::vector<size_t> new_offsets = {0};
+
 
     size_t old_row_size(tablator::get_row_size(offsets));
     size_t new_row_size(0);

@@ -293,7 +293,7 @@ public:
     // table modifiers
 
     void append_row(const Row &row) {
-	  assert(row.get_data().size() == get_row_size());
+        assert(row.get_data().size() == get_row_size());
         tablator::append_row(get_data(), row);
     }
 
@@ -748,7 +748,7 @@ public:
         return get_resource_elements().at(get_results_resource_idx());
     }
 
-  // Non-const to allow query_server to modify Field_Properties.
+    // Non-const to allow query_server to modify Field_Properties.
     std::vector<Column> &get_columns() {
         return get_results_resource_element().get_columns();
     }
@@ -789,7 +789,7 @@ public:
         return get_results_resource_element().get_table_element_fields();
     }
 
-     // Non-const to support append_row().
+    // Non-const to support append_row().
     std::vector<uint8_t> &get_data() {
         return get_results_resource_element().get_data();
     }
@@ -805,8 +805,6 @@ public:
     const Table_Element &get_main_table_element() const {
         return get_results_resource_element().get_main_table_element();
     }
-
-
 
 
     //===========================================================
@@ -979,33 +977,26 @@ private:
                             std::vector<size_t> &ipac_table_offsets,
                             Labeled_Properties &labeled_resource_properties);
 
-    static void append_ipac_data_member(std::vector<Column> &columns,
-                                        std::vector<size_t> &offsets,
+    static void append_ipac_data_member(Field_Framework &field_framework,
                                         const std::string &name,
                                         const std::string &data_type,
                                         const size_t &size);
 
     static void create_types_from_ipac_headers(
-            std::vector<Column> &columns, std::vector<size_t> &offsets,
+            Field_Framework &field_framework,
             const std::array<std::vector<std::string>, 4> &ipac_columns,
             const std::vector<size_t> &ipac_column_widths);
 
     static void shrink_ipac_string_columns_to_fit(
-            std::vector<Column> &columns, std::vector<size_t> &offsets,
-            std::vector<uint8_t> &data, const std::vector<size_t> &column_widths);
-
-
-    // miscellaneous helpers for reading
-
+            Field_Framework &field_framework, std::vector<uint8_t> &data,
+            const std::vector<size_t> &column_widths);
 
     static std::vector<uint8_t> read_dsv_rows(
-            std::vector<Column> &columns, std::vector<size_t> &offsets,
-            const std::list<std::vector<std::string>> &dsv);
+            Field_Framework &field_framework, const std::list<std::vector<std::string>> &dsv);
 
 
     // used only for read_dsv()?
-    static void set_column_info(std::vector<Column> &columns,
-                                std::vector<size_t> &offsets,
+    static void set_column_info(Field_Framework &field_framework,
                                 std::list<std::vector<std::string>> &dsv);
 
 

@@ -1,12 +1,15 @@
 #include "../../Table.hxx"
 
-std::vector<uint8_t> tablator::Table::read_dsv_rows(
-        std::vector<Column> &columns, std::vector<size_t> &offsets,
-        const std::list<std::vector<std::string> > &dsv) {
+std::vector<uint8_t> tablator::Table::read_dsv_rows(Field_Framework &field_framework,
+													const std::list<std::vector<std::string> > &dsv) {
     bool skipped(false);
 
-    Row row_string(tablator::get_row_size(offsets));
     std::vector<uint8_t> data;
+
+    auto &columns = field_framework.get_columns();
+    auto &offsets = field_framework.get_offsets();
+
+    Row row_string(tablator::get_row_size(offsets));
     for (auto &dsv_row : dsv) {
         if (!skipped) {
             skipped = true;

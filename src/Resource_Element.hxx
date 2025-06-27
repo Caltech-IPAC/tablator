@@ -376,6 +376,7 @@ public:
     const std::vector<Column> &get_columns() const {
         return get_main_table_element().get_columns();
     }
+
     std::vector<Column> &get_columns() {
         return get_main_table_element().get_columns();
     }
@@ -383,13 +384,11 @@ public:
     const std::vector<size_t> &get_offsets() const {
         return get_main_table_element().get_offsets();
     }
-    std::vector<size_t> &get_offsets() {
-        return get_main_table_element().get_offsets();
-    }
 
     std::vector<Field> &get_table_element_params() {
         return get_main_table_element().get_params();
     }
+
     const std::vector<Field> &get_table_element_params() const {
         return get_main_table_element().get_params();
     }

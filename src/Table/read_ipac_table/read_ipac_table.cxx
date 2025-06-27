@@ -35,17 +35,20 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
 
     const auto ipac_column_widths = get_ipac_column_widths(ipac_column_offsets);
 
-    std::vector<Column> tab_columns;
-    std::vector<size_t> offsets = {0};
-    create_types_from_ipac_headers(tab_columns, offsets, ipac_columns,
-                                   ipac_column_widths);
+    Field_Framework field_framework;
+
+    create_types_from_ipac_headers(field_framework, ipac_columns, ipac_column_widths);
 
     size_t num_tablator_columns = ipac_columns[COL_NAME_IDX].size();
+
+    std::vector<Column> &tab_columns = field_framework.get_columns();
+    std::vector<size_t> &offsets = field_framework.get_offsets();
+
+    Row row_string(tablator::get_row_size(offsets));
 
     std::vector<size_t> minimum_column_widths(num_tablator_columns, 1);
     std::string line;
     std::getline(input_stream, line);
-    Row row_string(tablator::get_row_size(offsets));
 
     std::vector<uint8_t> data;
     while (input_stream) {
@@ -104,11 +107,9 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
         ++current_line_num;
         std::getline(input_stream, line);
     }
-    shrink_ipac_string_columns_to_fit(tab_columns, offsets, data,
-                                      minimum_column_widths);
+    shrink_ipac_string_columns_to_fit(field_framework, data, minimum_column_widths);
 
-    Table_Element table_element =
-            Table_Element::Builder(tab_columns, offsets, data).build();
+    Table_Element table_element = Table_Element::Builder(field_framework, data).build();
     add_resource_element(Resource_Element::Builder(table_element)
                                  .add_labeled_properties(labeled_resource_properties)
                                  .build());

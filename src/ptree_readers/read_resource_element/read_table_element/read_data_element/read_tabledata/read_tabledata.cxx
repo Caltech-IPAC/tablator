@@ -69,16 +69,18 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         }
     }
 
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
+    Field_Framework field_framework;
     std::vector<uint8_t> data;
 
     for (std::size_t c = 0; c < num_fields; ++c) {
         const auto &field = fields.at(c);
-        append_column(columns, offsets, field.get_name(), field.get_type(),
+        append_column(field_framework, field.get_name(), field.get_type(),
                       column_array_sizes[c], field.get_field_properties(),
                       field.get_dynamic_array_flag());
     }
+
+    std::vector<Column> &columns = field_framework.get_columns();
+    std::vector<size_t> &offsets = field_framework.get_offsets();
 
     Row row_string(*offsets.rbegin());
 
@@ -110,5 +112,5 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         }
         append_row(data, row_string);
     }
-    return Data_Element(columns, offsets, data);
+    return Data_Element(field_framework, data);
 }

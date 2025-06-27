@@ -1,10 +1,13 @@
 #include "../Table_Utils.hxx"
 
-void tablator::append_column(std::vector<Column> &columns, std::vector<size_t> &offsets,
-                             const Column &column) {
+void tablator::append_column(Field_Framework &field_framework, const Column &column) {
+    auto &offsets = field_framework.get_offsets();
+
     if (offsets.empty()) {
         throw std::runtime_error("<offsets> is empty");
     }
+    auto &columns = field_framework.get_columns();
+
     auto new_columns(columns);
     new_columns.push_back(column);
     size_t old_row_size = *offsets.rbegin();

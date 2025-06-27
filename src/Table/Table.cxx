@@ -53,76 +53,40 @@ void append_column_attributes_with_label(
 
 namespace tablator {
 
-void Table::append_rows(const Table &table2) {
-    assert(table2.get_row_size() == get_row_size());
-
-    size_t num_columns = get_num_columns();
-    assert(table2.get_num_columns() == num_columns);
-
-    const auto &columns = get_columns();
-    const auto &table2_columns = table2.get_columns();
-
-    const auto &offsets = get_offsets();
-    const auto &table2_offsets = table2.get_offsets();
+// =========================================================
+// Helper function
+// =========================================================
 
 
-    for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
-        const auto &column = columns.at(col_idx);
-        const auto &table2_column = table2_columns.at(col_idx);
-        if (column.get_name() != table2_column.get_name()) {
-            throw std::runtime_error("Column names differ at index " +
-                                     std::to_string(col_idx));
-        }
-        if (column.get_type() != table2_column.get_type()) {
-            throw std::runtime_error("Column types differ at index " +
-                                     std::to_string(col_idx));
-        }
-
-        if (offsets.at(col_idx) != table2_offsets.at(col_idx)) {
-            throw std::runtime_error("Offsets differ at index " +
-                                     std::to_string(col_idx));
-        }
-        if (col_idx == num_columns - 1) {
-            // Check final offset value
-            if (offsets.at(col_idx + 1) != table2_offsets.at(col_idx + 1)) {
-                throw std::runtime_error("Final offset values differ.");
-            }
-        }
-    }
-
-    tablator::append_rows(get_data(), table2.get_data());
-}
-
-
-Table_Element load_columns_and_offsets(const std::vector<Column> &columns) {
+Field_Framework construct_field_framework(const std::vector<Column> &columns) {
     if (columns.empty()) {
         throw std::runtime_error("This table has no columns");
     }
 
-    std::vector<Column> tabledata_columns;
-    std::vector<size_t> tabledata_offsets = {0};
-
+    Field_Framework field_framework;
     const size_t null_flags_size = bits_to_bytes(columns.size());
-    tablator::append_column(tabledata_columns, tabledata_offsets,
-                            null_bitfield_flags_name, Data_Type::UINT8_LE,
+    tablator::append_column(field_framework, null_bitfield_flags_name, Data_Type::UINT8_LE,
                             null_flags_size,
                             Field_Properties::Builder()
                                     .add_description(null_bitfield_flags_description)
                                     .build());
 
     for (auto &c : columns) {
-        tablator::append_column(tabledata_columns, tabledata_offsets, c);
+        // JTODO std::move?
+        tablator::append_column(field_framework, c);
     }
-
-    return Table_Element::Builder(tabledata_columns, tabledata_offsets,
-                                  std::vector<uint8_t>() /*  data */)
-            .build();
+    return field_framework;
 }
 
 
+// =========================================================
+// Implementation of Table member functions
+// =========================================================
+
 Table::Table(const std::vector<Column> &columns,
              const std::map<std::string, std::string> &property_map) {
-    add_resource_element(load_columns_and_offsets(columns));
+    add_resource_element(
+            Table_Element::Builder(construct_field_framework(columns)).build());
 
     for (auto &p : property_map) {
         add_labeled_property(p.first, Property(p.second));
@@ -133,7 +97,8 @@ Table::Table(const std::vector<Column> &columns,
 Table::Table(const std::vector<Column> &columns,
              const Labeled_Properties &property_pair_vec)
         : results_resource_idx_(0) {
-    add_resource_element(load_columns_and_offsets(columns));
+    add_resource_element(
+            Table_Element::Builder(construct_field_framework(columns)).build());
 
     for (const auto &label_and_prop : property_pair_vec) {
         if (boost::starts_with(label_and_prop.first, VOTABLE_RESOURCE_DOT)) {
@@ -433,6 +398,48 @@ void Table::stash_resource_element_labeled_property(
     } else {
         resource_labeled_properties.emplace_back(label, prop);
     }
+}
+
+//===========================================================
+
+void Table::append_rows(const Table &table2) {
+    assert(table2.get_row_size() == get_row_size());
+
+    size_t num_columns = get_num_columns();
+    assert(table2.get_num_columns() == num_columns);
+
+    const auto &columns = get_columns();
+    const auto &table2_columns = table2.get_columns();
+
+    const auto &offsets = get_offsets();
+    const auto &table2_offsets = table2.get_offsets();
+
+
+    for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
+        const auto &column = columns.at(col_idx);
+        const auto &table2_column = table2_columns.at(col_idx);
+        if (column.get_name() != table2_column.get_name()) {
+            throw std::runtime_error("Column names differ at index " +
+                                     std::to_string(col_idx));
+        }
+        if (column.get_type() != table2_column.get_type()) {
+            throw std::runtime_error("Column types differ at index " +
+                                     std::to_string(col_idx));
+        }
+
+        if (offsets.at(col_idx) != table2_offsets.at(col_idx)) {
+            throw std::runtime_error("Offsets differ at index " +
+                                     std::to_string(col_idx));
+        }
+        if (col_idx == num_columns - 1) {
+            // Check final offset value
+            if (offsets.at(col_idx + 1) != table2_offsets.at(col_idx + 1)) {
+                throw std::runtime_error("Final offset values differ.");
+            }
+        }
+    }
+
+    tablator::append_rows(get_data(), table2.get_data());
 }
 
 

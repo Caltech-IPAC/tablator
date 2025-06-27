@@ -96,10 +96,14 @@ public:
         Builder(const std::vector<Data_Element> &data_elements)
                 : data_elements_(data_elements) {}
 
-        Builder(const std::vector<Column> &columns, const std::vector<size_t> &offsets,
-                const std::vector<uint8_t> &data) {
-            data_elements_.emplace_back(Data_Element(columns, offsets, data));
+        Builder(const Field_Framework &field_framework, const std::vector<uint8_t> &data) {
+            data_elements_.emplace_back(Data_Element(field_framework, data));
         }
+
+        Builder(const Field_Framework &field_framework) {
+            data_elements_.emplace_back(Data_Element(field_framework));
+        }
+
 
         Table_Element build() { return Table_Element(data_elements_, options_); }
 
@@ -259,7 +263,8 @@ public:
         return get_main_data_element().get_offsets();
     }
 
-    std::vector<size_t> &get_offsets() { return get_main_data_element().get_offsets(); }
+    //    std::vector<size_t> &get_offsets() { return
+    //    get_main_data_element().get_offsets(); }
 
     const std::vector<uint8_t> &get_data() const {
         return get_main_data_element().get_data();
