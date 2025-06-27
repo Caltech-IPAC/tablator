@@ -33,12 +33,12 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
 
     size_t src_nulls_size(src_offsets.at(1));
     size_t src_row_size = src_table.get_row_size();
-	size_t num_rows = src_table.get_num_rows();
+    size_t num_rows = src_table.get_num_rows();
     const auto &src_data = src_table.get_data();
 
     size_t dest_nulls_size(dest_offsets.at(1));
     size_t dest_row_size = dest_table.get_row_size();
-	dest_table.reserve_data(num_rows);
+    dest_table.reserve_rows(num_rows);
 
     tablator::Row row(dest_row_size);
     uint64_t cntr(1);
@@ -146,7 +146,7 @@ Table combine_tables(const Table &src1_table, const Table &src2_table) {
     const uint8_t *src1_data_ptr = src1_table.get_data().data();
     const uint8_t *src2_data_ptr = src2_table.get_data().data();
 
-    dest_table.reserve_data(num_rows);
+    dest_table.reserve_rows(num_rows);
 
     // Load dest_table data.
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
