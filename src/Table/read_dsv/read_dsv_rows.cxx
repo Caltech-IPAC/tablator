@@ -1,15 +1,19 @@
 #include "../../Table.hxx"
 
 std::vector<uint8_t> tablator::Table::read_dsv_rows(
-        std::vector<Column> &columns, std::vector<size_t> &offsets,
+        Field_Framework &field_framework,
         const std::list<std::vector<std::string> > &dsv) {
-    bool skipped(false);
+    // JTODO this function should not be a Table class member.
+    auto &columns = field_framework.get_columns();
+    auto &offsets = field_framework.get_offsets();
+    size_t row_size = field_framework.get_row_size();
 
-	size_t row_size = tablator::get_row_size(offsets);
-    Row single_row(row_size);
     std::vector<uint8_t> data;
-	data.reserve(row_size * dsv.size());
+    data.reserve(row_size * dsv.size());
 
+
+    Row single_row(row_size);
+    bool skipped(false);
     for (auto &dsv_row : dsv) {
         if (!skipped) {
             skipped = true;
