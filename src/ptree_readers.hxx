@@ -8,6 +8,7 @@
 
 #include "Column.hxx"
 #include "Common.hxx"
+#include "Field_Framework.hxx"
 
 namespace tablator {
 
@@ -51,8 +52,7 @@ Data_Element read_binary2(const boost::property_tree::ptree &binary2,
                           const std::vector<Field> &fields);
 
 void append_data_from_stream(std::vector<uint8_t> &data,
-                             const std::vector<Column> &columns,
-                             const std::vector<size_t> &offsets,
+                             const Field_Framework &field_framework,
                              const std::vector<uint8_t> &stream,
                              const std::vector<Field> &fields, size_t num_rows);
 

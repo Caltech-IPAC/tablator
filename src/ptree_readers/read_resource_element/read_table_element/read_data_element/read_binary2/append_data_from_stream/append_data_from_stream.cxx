@@ -17,15 +17,17 @@ inline void insert_swapped(Row &row, size_t column_offset, const Column &column,
 }
 
 void ptree_readers::append_data_from_stream(std::vector<uint8_t> &data,
-                                            const std::vector<Column> &columns,
-                                            const std::vector<size_t> &offsets,
+                                            const Field_Framework &field_framework,
                                             const std::vector<uint8_t> &stream,
                                             const std::vector<Field> &fields,
                                             size_t num_rows) {
+    auto &columns = field_framework.get_columns();
+    auto &offsets = field_framework.get_offsets();
+
     const size_t null_flags_size((columns.size() + 6) / 8);
     size_t src_pos(0);
 
-    Row row(get_row_size(offsets));
+    Row row(field_framework.get_row_size());
     for (size_t r = 0; r < num_rows; ++r) {
         row.fill_with_zeros();
         size_t row_offset(src_pos);

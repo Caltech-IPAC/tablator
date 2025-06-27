@@ -2,18 +2,18 @@
 <VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
   <RESOURCE>
     <INFO name="ADQL" ucd="meta.adql" value="SELECT * FROM planck_toi_044 WHERE CONTAINS(POINT(&apos;J2000 GEOCENTER&apos;,ra,dec),CIRCLE(&apos;J2000 GEOCENTER&apos;,121.17440000000001,-21.572939999999999,0.01))=1 AND (mjd &gt;= 55550.0 AND mjd &lt;= 65650.5)"/>
-    <INFO name="DATE" comment="File Creation Date" ucd="time.creation" value="2016-03-18T22:02:44"/>
-    <INFO name="FREQ" comment="GHz" ucd="em.freq" value="044"/>
-    <INFO name="INSTRUME" comment="Instrument Name" ucd="instr" value="LFI"/>
-    <INFO name="OBJDEC" comment="Search Target DEC degrees" ucd="pos.eq.dec" value="-21.572939999999999"/>
-    <INFO name="OBJECT" comment="Target Name" ucd="src" value="CIRCLE(&apos;&apos;J2000 GEOCENTER&apos;&apos;,121.174,-21.5729,0.01)"/>
-    <INFO name="OBJGLAT" comment="Search Target GLAT degrees" ucd="pos.galactic.lat" value="5.3028541265890539"/>
-    <INFO name="OBJGLON" comment="Search Target GLON degrees" ucd="pos.galactic.lon" value="240.47825496346866"/>
-    <INFO name="OBJRA" comment="Search Target RA degrees" ucd="pos.eq.ra" value="121.17440000000001"/>
-    <INFO name="OBJ_TYPE" comment="Fixed or Moving" ucd="src.class" value="Fixed"/>
-    <INFO name="PROCVER" comment="Processing Version" ucd="meta.version" value="DX11D"/>
-    <INFO name="RADIUS" comment="Search Radius degrees" ucd="pos.radius" value="0.01"/>
-    <INFO name="TELESCOP" comment="Telescope Name" ucd="instr.obsty" value="PLANCK"/>
+    <INFO comment="File Creation Date" name="DATE" ucd="time.creation" value="2016-03-18T22:02:44"/>
+    <INFO comment="GHz" name="FREQ" ucd="em.freq" value="044"/>
+    <INFO comment="Instrument Name" name="INSTRUME" ucd="instr" value="LFI"/>
+    <INFO comment="Search Target DEC degrees" name="OBJDEC" ucd="pos.eq.dec" value="-21.572939999999999"/>
+    <INFO comment="Target Name" name="OBJECT" ucd="src" value="CIRCLE(&apos;&apos;&apos;&apos;J2000 GEOCENTER&apos;&apos;&apos;&apos;,121.174,-21.5729,0.01)"/>
+    <INFO comment="Search Target GLAT degrees" name="OBJGLAT" ucd="pos.galactic.lat" value="5.3028541265890539"/>
+    <INFO comment="Search Target GLON degrees" name="OBJGLON" ucd="pos.galactic.lon" value="240.47825496346866"/>
+    <INFO comment="Search Target RA degrees" name="OBJRA" ucd="pos.eq.ra" value="121.17440000000001"/>
+    <INFO comment="Fixed or Moving" name="OBJ_TYPE" ucd="src.class" value="Fixed"/>
+    <INFO comment="Processing Version" name="PROCVER" ucd="meta.version" value="DX11D"/>
+    <INFO comment="Search Radius degrees" name="RADIUS" ucd="pos.radius" value="0.01"/>
+    <INFO comment="Telescope Name" name="TELESCOP" ucd="instr.obsty" value="PLANCK"/>
     <TABLE>
       <FIELD name="ra" datatype="double" unit="degrees"/>
       <FIELD name="dec" datatype="double" unit="degrees"/>
