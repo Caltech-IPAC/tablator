@@ -53,32 +53,31 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
     }
 
     std::vector<size_t> rows_per_stream;
-	size_t total_num_rows = 0;
+    size_t total_num_rows = 0;
     for (auto &stream : streams) {
-        size_t num_rows;
-        compute_column_array_sizes(stream, fields, column_array_sizes, num_rows);
-        rows_per_stream.push_back(num_rows);
-		total_num_rows += num_rows;
+        size_t curr_num_rows;
+        compute_column_array_sizes(stream, fields, column_array_sizes, curr_num_rows);
+        rows_per_stream.push_back(curr_num_rows);
+        total_num_rows += curr_num_rows;
     }
 
     std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
-    std::vector<uint8_t> data;
-
     for (std::size_t c = 0; c < fields.size(); ++c) {
         const auto &field = fields.at(c);
-        append_column(columns, offsets, field.get_name(), field.get_type(),
-                      column_array_sizes[c], field.get_field_properties(),
-                      field.get_dynamic_array_flag());
+        columns.emplace_back(field.get_name(), field.get_type(), column_array_sizes[c],
+                             field.get_field_properties(),
+                             field.get_dynamic_array_flag());
     }
+    Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
 
-	size_t row_size = *offsets.rbegin();
-	data.reserve(row_size * total_num_rows);
+    size_t row_size = field_framework.get_row_size();
+    std::vector<uint8_t> data;
+    data.reserve(row_size * total_num_rows);
 
     for (std::size_t stream = 0; stream < streams.size(); ++stream) {
-        append_data_from_stream(data, columns, offsets, streams[stream], fields,
+        append_data_from_stream(data, field_framework, streams[stream], fields,
                                 rows_per_stream[stream]);
     }
-    return Data_Element(columns, offsets, data);
+    return Data_Element(field_framework, data);
 }
 }  // namespace tablator

@@ -373,9 +373,18 @@ public:
         return get_table_elements().at(MAIN_TABLE_ELEMENT_IDX);
     }
 
+    const Field_Framework &get_field_framework() const {
+        return get_main_table_element().get_field_framework();
+    }
+
+    Field_Framework &get_field_framework() {
+        return get_main_table_element().get_field_framework();
+    }
+
     const std::vector<Column> &get_columns() const {
         return get_main_table_element().get_columns();
     }
+
     std::vector<Column> &get_columns() {
         return get_main_table_element().get_columns();
     }
@@ -383,13 +392,24 @@ public:
     const std::vector<size_t> &get_offsets() const {
         return get_main_table_element().get_offsets();
     }
-    std::vector<size_t> &get_offsets() {
-        return get_main_table_element().get_offsets();
+
+    size_t get_row_size() const { return get_main_table_element().get_row_size(); }
+    size_t get_num_rows() const { return get_main_table_element().get_num_rows(); }
+
+    // called by query_server to trim result set
+    void resize_data(size_t &new_num_rows) {
+        get_main_table_element().resize_data(new_num_rows);
+    }
+
+    // called by query_server to trim result set
+    void reserve_data(size_t &new_num_rows) {
+        get_main_table_element().reserve_data(new_num_rows);
     }
 
     std::vector<Field> &get_table_element_params() {
         return get_main_table_element().get_params();
     }
+
     const std::vector<Field> &get_table_element_params() const {
         return get_main_table_element().get_params();
     }
