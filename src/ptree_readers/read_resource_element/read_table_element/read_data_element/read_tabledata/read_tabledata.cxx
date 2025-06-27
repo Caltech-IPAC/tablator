@@ -69,20 +69,24 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         }
     }
 
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
+    std::vector<Column> orig_columns;
 
     for (std::size_t c = 0; c < num_fields; ++c) {
         const auto &field = fields.at(c);
-        append_column(columns, offsets, field.get_name(), field.get_type(),
-                      column_array_sizes[c], field.get_field_properties(),
-                      field.get_dynamic_array_flag());
+        orig_columns.emplace_back(field.get_name(), field.get_type(),
+                                  column_array_sizes[c], field.get_field_properties(),
+                                  field.get_dynamic_array_flag());
     }
 
-	size_t row_size = *offsets.rbegin();
-	size_t num_rows = element_lists_by_row.size();
+    Field_Framework field_framework(orig_columns, true /* got_null_bitfields_column */);
+    std::vector<Column> &columns = field_framework.get_columns();
+    std::vector<size_t> &offsets = field_framework.get_offsets();
+
+    size_t num_rows = element_lists_by_row.size();
+    size_t row_size = *offsets.rbegin();
+
     std::vector<uint8_t> data;
-	data.reserve(row_size * num_rows);
+    data.reserve(row_size * num_rows);
 
     Row single_row(row_size);
     // JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in
@@ -113,5 +117,5 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         }
         append_row(data, single_row);
     }
-    return Data_Element(columns, offsets, data);
+    return Data_Element(field_framework, data);
 }
