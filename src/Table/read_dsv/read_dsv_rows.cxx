@@ -5,9 +5,10 @@ std::vector<uint8_t> tablator::Table::read_dsv_rows(
         const std::list<std::vector<std::string> > &dsv) {
     bool skipped(false);
 
+	size_t row_size = tablator::get_row_size(offsets);
+    Row single_row(row_size);
     std::vector<uint8_t> data;
-
-    Row single_row(tablator::get_row_size(offsets));
+	data.reserve(row_size * dsv.size());
 
     for (auto &dsv_row : dsv) {
         if (!skipped) {

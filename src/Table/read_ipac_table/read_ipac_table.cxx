@@ -45,10 +45,10 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::vector<size_t> minimum_column_widths(num_tablator_columns, 1);
     std::string line;
     std::getline(input_stream, line);
-
     Row single_row(tablator::get_row_size(offsets));
 
     std::vector<uint8_t> data;
+	// JTODO reserve()?
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
             single_row.fill_with_zeros();
