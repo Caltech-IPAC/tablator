@@ -35,8 +35,7 @@ void Table::read_dsv(std::istream &input_stream, const Format &format) {
             parse_dsv(input_stream, format.is_csv() ? ',' : '\t'));
 
     // Construct main resource element from table data.
-    Field_Framework field_framework;
-    set_column_info(field_framework, dsv);
+    Field_Framework field_framework = set_column_info(dsv);
     add_resource_element(
             Table_Element::Builder(field_framework, read_dsv_rows(field_framework, dsv))
                     .build());

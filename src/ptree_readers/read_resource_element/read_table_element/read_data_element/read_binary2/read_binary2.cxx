@@ -53,25 +53,30 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
     }
 
     std::vector<size_t> rows_per_stream;
+    size_t total_num_rows = 0;
     for (auto &stream : streams) {
-        size_t num_rows;
-        compute_column_array_sizes(stream, fields, column_array_sizes, num_rows);
-        rows_per_stream.push_back(num_rows);
+        size_t curr_num_rows;
+        compute_column_array_sizes(stream, fields, column_array_sizes, curr_num_rows);
+        rows_per_stream.push_back(curr_num_rows);
+        total_num_rows += curr_num_rows;
     }
 
-    Field_Framework field_framework;
-    std::vector<uint8_t> data;
-
+    std::vector<Column> columns;
     for (std::size_t c = 0; c < fields.size(); ++c) {
         const auto &field = fields.at(c);
-        append_column(field_framework, field.get_name(), field.get_type(),
-                      column_array_sizes[c], field.get_field_properties(),
-                      field.get_dynamic_array_flag());
+        columns.emplace_back(field.get_name(), field.get_type(), column_array_sizes[c],
+                             field.get_field_properties(),
+                             field.get_dynamic_array_flag());
     }
+    Field_Framework field_framework(columns,
+                                    true /* got_null_bitfields_column */);  // JTODO
+    Data_Details data_details(field_framework, total_num_rows);
+
+
     for (std::size_t stream = 0; stream < streams.size(); ++stream) {
-        append_data_from_stream(data, field_framework, streams[stream], fields,
+        append_data_from_stream(data_details, field_framework, streams[stream], fields,
                                 rows_per_stream[stream]);
     }
-    return Data_Element(field_framework, data);
+    return Data_Element(field_framework, data_details);
 }
 }  // namespace tablator

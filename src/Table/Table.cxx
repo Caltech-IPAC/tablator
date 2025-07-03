@@ -54,39 +54,16 @@ void append_column_attributes_with_label(
 namespace tablator {
 
 // =========================================================
-// Helper function
-// =========================================================
-
-
-Field_Framework construct_field_framework(const std::vector<Column> &columns) {
-    if (columns.empty()) {
-        throw std::runtime_error("This table has no columns");
-    }
-
-    Field_Framework field_framework;
-    const size_t null_flags_size = bits_to_bytes(columns.size());
-    tablator::append_column(field_framework, null_bitfield_flags_name, Data_Type::UINT8_LE,
-                            null_flags_size,
-                            Field_Properties::Builder()
-                                    .add_description(null_bitfield_flags_description)
-                                    .build());
-
-    for (auto &c : columns) {
-        // JTODO std::move?
-        tablator::append_column(field_framework, c);
-    }
-    return field_framework;
-}
-
-
-// =========================================================
 // Implementation of Table member functions
 // =========================================================
 
 Table::Table(const std::vector<Column> &columns,
-             const std::map<std::string, std::string> &property_map) {
+             const std::map<std::string, std::string> &property_map,
+             bool got_null_bitfields_column, size_t num_rows) {
     add_resource_element(
-            Table_Element::Builder(construct_field_framework(columns)).build());
+            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column),
+                                   num_rows)
+                    .build());
 
     for (auto &p : property_map) {
         add_labeled_property(p.first, Property(p.second));
@@ -95,10 +72,13 @@ Table::Table(const std::vector<Column> &columns,
 
 
 Table::Table(const std::vector<Column> &columns,
-             const Labeled_Properties &property_pair_vec)
+             const Labeled_Properties &property_pair_vec,
+             bool got_null_bitfields_column, size_t num_rows)
         : results_resource_idx_(0) {
     add_resource_element(
-            Table_Element::Builder(construct_field_framework(columns)).build());
+            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column),
+                                   num_rows)
+                    .build());
 
     for (const auto &label_and_prop : property_pair_vec) {
         if (boost::starts_with(label_and_prop.first, VOTABLE_RESOURCE_DOT)) {
@@ -402,44 +382,47 @@ void Table::stash_resource_element_labeled_property(
 
 //===========================================================
 
-void Table::append_rows(const Table &table2) {
-    assert(table2.get_row_size() == get_row_size());
+// Helper function
 
-    size_t num_columns = get_num_columns();
-    assert(table2.get_num_columns() == num_columns);
+bool close_enough_to_append_rows(const Field_Framework &ff1,
+                                 const Field_Framework &ff2) {
+    if (ff1.get_row_size() != ff2.get_row_size()) {
+        return false;
+    }
+    const auto &ff1_columns = ff1.get_columns();
+    const auto &ff2_columns = ff2.get_columns();
 
-    const auto &columns = get_columns();
-    const auto &table2_columns = table2.get_columns();
+    if (ff1_columns.size() != ff2_columns.size()) {
+        return false;
+    }
+    const auto &ff1_offsets = ff1.get_offsets();
+    const auto &ff2_offsets = ff2.get_offsets();
 
-    const auto &offsets = get_offsets();
-    const auto &table2_offsets = table2.get_offsets();
 
+    for (size_t col_idx = 0; col_idx < ff1_columns.size(); ++col_idx) {
+        const auto &ff1_column = ff1_columns.at(col_idx);
+        const auto &ff2_column = ff2_columns.at(col_idx);
 
-    for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
-        const auto &column = columns.at(col_idx);
-        const auto &table2_column = table2_columns.at(col_idx);
-        if (column.get_name() != table2_column.get_name()) {
-            throw std::runtime_error("Column names differ at index " +
-                                     std::to_string(col_idx));
-        }
-        if (column.get_type() != table2_column.get_type()) {
-            throw std::runtime_error("Column types differ at index " +
-                                     std::to_string(col_idx));
-        }
-
-        if (offsets.at(col_idx) != table2_offsets.at(col_idx)) {
-            throw std::runtime_error("Offsets differ at index " +
-                                     std::to_string(col_idx));
-        }
-        if (col_idx == num_columns - 1) {
-            // Check final offset value
-            if (offsets.at(col_idx + 1) != table2_offsets.at(col_idx + 1)) {
-                throw std::runtime_error("Final offset values differ.");
-            }
+        if ((ff1_column.get_name() != ff2_column.get_name()) ||
+            (ff1_column.get_type() != ff2_column.get_type()) ||
+            (ff1_column.get_array_size() != ff2_column.get_array_size()) ||
+            (ff1_column.get_dynamic_array_flag() !=
+             ff2_column.get_dynamic_array_flag()) ||
+            (ff1_offsets.at(col_idx) != ff2_offsets.at(col_idx))) {
+            // Never mind comparing field_properties for now. 01Jul25
+            return false;
         }
     }
+    // Check final offset value.
+    return (ff1_offsets.back() == ff2_offsets.back());
+}
 
-    tablator::append_rows(get_data(), table2.get_data());
+void Table::append_rows(const Table &table2) {
+    if (!close_enough_to_append_rows(get_field_framework(),
+                                     table2.get_field_framework())) {
+        throw std::runtime_error("The tables are not similar enough to append rows.");
+    }
+    get_data_details().append_rows(table2.get_data_details());
 }
 
 

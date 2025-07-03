@@ -5,6 +5,9 @@
 #include "../HDF5_Attribute.hxx"
 #include "../HDF5_Property.hxx"
 
+
+// As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
+
 namespace {
 const std::string read_description(const H5::DataSet &dataset,
                                    const std::string desc_label) {
@@ -78,14 +81,15 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                 std::to_string(compound.getNmembers()));
     }
 
-    Field_Framework field_framework;
+
+    std::vector<Column> columns;
+
     for (int i = 0; i < compound.getNmembers(); ++i) {
         H5::DataType datatype(compound.getMemberDataType(i));
         std::string name(compound.getMemberName(i));
         if (datatype.getClass() == H5T_STRING) {
-            tablator::append_column(field_framework, name, Data_Type::CHAR,
-                                    datatype.getSize(),
-                                    column_metadata[i].get_field_properties());
+            columns.emplace_back(name, Data_Type::CHAR, datatype.getSize(),
+                                 column_metadata[i].get_field_properties());
         } else if (datatype.getClass() == H5T_ARRAY) {
             auto array_type = compound.getMemberArrayType(i);
             hsize_t ndims = array_type.getArrayNDims();
@@ -97,24 +101,26 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                         std::to_string(ndims));
             }
             array_type.getArrayDims(&ndims);
-            tablator::append_column(field_framework, name, H5_to_Data_Type(datatype),
-                                    ndims, column_metadata[i].get_field_properties());
+            columns.emplace_back(name, H5_to_Data_Type(datatype), ndims,
+                                 column_metadata[i].get_field_properties());
         } else {
-            tablator::append_column(field_framework, name, H5_to_Data_Type(datatype), 1,
-                                    column_metadata[i].get_field_properties());
+            columns.emplace_back(name, H5_to_Data_Type(datatype), 1,
+                                 column_metadata[i].get_field_properties());
         }
     }
 
-    std::vector<size_t> &offsets = field_framework.get_offsets();
-    std::vector<uint8_t> data;
+    Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
 
-    data.resize(tablator::get_row_size(offsets) *
-                dataset.getSpace().getSimpleExtentNpoints());
-    dataset.read(data.data(), compound);
+    size_t num_rows = dataset.getSpace().getSimpleExtentNpoints();
+    Data_Details data_details(field_framework, num_rows);
+
+    // Resize, don't just reserve.
+    data_details.adjust_num_rows(num_rows);
+    dataset.read(data_details.get_data().data(), compound);
 
     std::vector<Table_Element> table_elements;
     const auto table_element =
-            Table_Element::Builder(field_framework, data)
+            Table_Element::Builder(field_framework, data_details)
                     .add_params(table_element_params)
                     .add_description(table_element_description)
                     .add_trailing_info_list(table_element_trailing_infos)

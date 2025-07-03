@@ -3,14 +3,18 @@
 #include "../Row.hxx"
 #include "../data_size.hxx"
 
-void tablator::Row::insert_null(const Data_Type &data_type, const size_t &array_size,
-                                const size_t &col_idx, const size_t &offset,
-                                const size_t &offset_end) {
+void tablator::Row::insert_null(Data_Type data_type, size_t array_size, size_t col_idx,
+                                size_t offset, size_t offset_end,
+                                size_t index_in_dynamic_cols_list) {
     const int byte = (col_idx - 1) / 8;
     const char mask = (128 >> ((col_idx - 1) % 8));
 
     // Update the null_bitfield_flag's bit for this column.
     data_[byte] = data_[byte] | mask;
+
+    if (index_in_dynamic_cols_list != DEFAULT_INDEX_IN_DYNAMIC_COLS_LIST) {
+        set_dynamic_array_size(index_in_dynamic_cols_list, 0);
+    }
 
     size_t curr_offset = offset;
     size_t data_type_size = data_size(data_type);
@@ -26,44 +30,42 @@ void tablator::Row::insert_null(const Data_Type &data_type, const size_t &array_
     }
 }
 
-void tablator::Row::insert_null_by_type(const Data_Type &data_type,
-                                        const size_t &offset) {
+void tablator::Row::insert_null_by_type(Data_Type data_type, size_t offset) {
     switch (data_type) {
         case Data_Type::INT8_LE:
-            insert_null<int8_t>(offset);
+            insert_null_internal<int8_t>(offset);
             break;
         case Data_Type::UINT8_LE:
-            insert_null<uint8_t>(offset);
+            insert_null_internal<uint8_t>(offset);
             break;
         case Data_Type::INT16_LE:
-            insert_null<int16_t>(offset);
+            insert_null_internal<int16_t>(offset);
             break;
         case Data_Type::UINT16_LE:
-            insert_null<uint16_t>(offset);
+            insert_null_internal<uint16_t>(offset);
             break;
         case Data_Type::INT32_LE:
-            insert_null<int32_t>(offset);
+            insert_null_internal<int32_t>(offset);
             break;
         case Data_Type::UINT32_LE:
-            insert_null<uint32_t>(offset);
+            insert_null_internal<uint32_t>(offset);
             break;
         case Data_Type::INT64_LE:
-            insert_null<int64_t>(offset);
+            insert_null_internal<int64_t>(offset);
             break;
         case Data_Type::UINT64_LE:
-            insert_null<uint64_t>(offset);
+            insert_null_internal<uint64_t>(offset);
             break;
         case Data_Type::FLOAT32_LE:
-            insert_null<float>(offset);
+            insert_null_internal<float>(offset);
             break;
         case Data_Type::FLOAT64_LE:
-            insert_null<double>(offset);
+            insert_null_internal<double>(offset);
             break;
         case Data_Type::CHAR:
             insert('\0', offset);
             break;
         default:
-            throw std::runtime_error(
-                    "Unexpected data type in insert_null_by_type()");
+            throw std::runtime_error("Unexpected data type in insert_null_by_type()");
     }
 }

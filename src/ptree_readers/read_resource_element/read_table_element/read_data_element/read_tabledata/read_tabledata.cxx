@@ -69,24 +69,28 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         }
     }
 
-    Field_Framework field_framework;
-    std::vector<uint8_t> data;
+    std::vector<Column> orig_columns;
 
     for (std::size_t c = 0; c < num_fields; ++c) {
         const auto &field = fields.at(c);
-        append_column(field_framework, field.get_name(), field.get_type(),
-                      column_array_sizes[c], field.get_field_properties(),
-                      field.get_dynamic_array_flag());
+        orig_columns.emplace_back(field.get_name(), field.get_type(),
+                                  column_array_sizes[c], field.get_field_properties(),
+                                  field.get_dynamic_array_flag());
     }
 
+    Field_Framework field_framework(orig_columns,
+                                    true /* got_null_bitfields_column */);  // JTODO
     std::vector<Column> &columns = field_framework.get_columns();
     std::vector<size_t> &offsets = field_framework.get_offsets();
 
+    size_t num_rows = element_lists_by_row.size();
+
+    Data_Details data_details(field_framework, num_rows);
     Row single_row(*offsets.rbegin());
 
     // JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in
     // '\0'?
-    for (size_t row_idx = 0; row_idx < element_lists_by_row.size(); ++row_idx) {
+    for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
         auto &element_list = element_lists_by_row[row_idx];
         single_row.fill_with_zeros();
         for (size_t col_idx = 1; col_idx < num_fields; ++col_idx) {
@@ -110,7 +114,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                             ". Error message: " + error.what());
                 }
         }
-        append_row(data, single_row);
+        data_details.append_row(single_row);
     }
-    return Data_Element(field_framework, data);
+    return Data_Element(field_framework, data_details);
 }

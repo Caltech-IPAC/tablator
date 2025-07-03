@@ -1,16 +1,21 @@
 #include "../../Table.hxx"
 
-std::vector<uint8_t> tablator::Table::read_dsv_rows(
-        Field_Framework &field_framework,
-        const std::list<std::vector<std::string> > &dsv) {
-    bool skipped(false);
+namespace tablator {
 
-    std::vector<uint8_t> data;
+// JTODO this function should not be a Table class member.
+Data_Details Table::read_dsv_rows(Field_Framework &field_framework,
+                                  const std::list<std::vector<std::string> > &dsv) {
+    bool skipped(false);
 
     auto &columns = field_framework.get_columns();
     auto &offsets = field_framework.get_offsets();
 
-    Row single_row(tablator::get_row_size(offsets));
+    Data_Details data_details(field_framework, dsv.size());
+
+    Row single_row(
+            field_framework.get_row_size(),
+            field_framework.get_num_dynamic_columns);
+
     for (auto &dsv_row : dsv) {
         if (!skipped) {
             skipped = true;
@@ -29,7 +34,9 @@ std::vector<uint8_t> tablator::Table::read_dsv_rows(
                                              offsets[col_idx], offsets[col_idx + 1]);
             }
         }
-        tablator::append_row(data, single_row);
+        data_details.append_row(single_row);
     }
-    return data;
+    return data_details;
 }
+
+}  // namespace tablator
