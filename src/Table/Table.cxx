@@ -65,7 +65,6 @@ void Table::append_rows(const Table &table2) {
     const auto &offsets = get_offsets();
     const auto &table2_offsets = table2.get_offsets();
 
-
     for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
         const auto &column = columns.at(col_idx);
         const auto &table2_column = table2_columns.at(col_idx);
@@ -89,7 +88,7 @@ void Table::append_rows(const Table &table2) {
             }
         }
     }
-
+	get_data().reserve(get_data().size() + table2.get_data().size());
     tablator::append_rows(get_data(), table2.get_data());
 }
 

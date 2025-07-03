@@ -32,11 +32,13 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
 
 
     size_t src_nulls_size(src_offsets.at(1));
-    size_t dest_nulls_size(dest_offsets.at(1));
     size_t src_row_size = src_table.get_row_size();
-    size_t dest_row_size = dest_table.get_row_size();
-
+	size_t num_rows = src_table.get_num_rows();
     const auto &src_data = src_table.get_data();
+
+    size_t dest_nulls_size(dest_offsets.at(1));
+    size_t dest_row_size = dest_table.get_row_size();
+	dest_table.reserve_data(num_rows);
 
     tablator::Row row(dest_row_size);
     uint64_t cntr(1);

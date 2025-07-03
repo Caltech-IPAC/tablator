@@ -53,10 +53,12 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
     }
 
     std::vector<size_t> rows_per_stream;
+	size_t total_num_rows = 0;
     for (auto &stream : streams) {
         size_t num_rows;
         compute_column_array_sizes(stream, fields, column_array_sizes, num_rows);
         rows_per_stream.push_back(num_rows);
+		total_num_rows += num_rows;
     }
 
     std::vector<Column> columns;
@@ -69,6 +71,10 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
                       column_array_sizes[c], field.get_field_properties(),
                       field.get_dynamic_array_flag());
     }
+
+	size_t row_size = *offsets.rbegin();
+	data.reserve(row_size * total_num_rows);
+
     for (std::size_t stream = 0; stream < streams.size(); ++stream) {
         append_data_from_stream(data, columns, offsets, streams[stream], fields,
                                 rows_per_stream[stream]);
