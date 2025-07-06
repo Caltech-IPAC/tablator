@@ -2,13 +2,13 @@
 
 #include <set>
 
+#include "Row.hxx"
 #include "Table.hxx"
 
 //==================================================================
 
 namespace tablator {
 //============================================================================
-
 
 Table add_counter_column(const Table &src_table, const std::string &col_name) {
     const auto &src_columns = src_table.get_columns();
@@ -23,22 +23,27 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
         }
         dest_columns.push_back(src_columns[col_idx]);
     }
+    // Append the new column.
+    dest_columns.emplace_back(col_name, Data_Type::UINT64_LE, 1 /* array_size */,
+                              false /* dynamic_array_flag */);
 
-    dest_columns.emplace_back(col_name, Data_Type::UINT64_LE, 1 /* array_size */);
-
-    tablator::Table dest_table(dest_columns);
+    tablator::Table dest_table(dest_columns, false /* got_null_bitfields_column */);
     const auto &src_offsets = src_table.get_offsets();
     const auto &dest_offsets = dest_table.get_offsets();
 
 
     size_t src_nulls_size(src_offsets.at(1));
-    size_t src_row_size = src_table.get_row_size();
-	size_t num_rows = src_table.get_num_rows();
-    const auto &src_data = src_table.get_data();
-
     size_t dest_nulls_size(dest_offsets.at(1));
+    size_t src_row_size = src_table.get_row_size();
     size_t dest_row_size = dest_table.get_row_size();
-	dest_table.reserve_data(num_rows);
+    size_t num_rows = src_table.get_num_rows();
+
+    // JTODO Data_Details function to handle this?
+    const auto &src_data = src_table.get_data_details().get_data();
+
+    auto &dest_data_details = dest_table.get_data_details();
+    dest_data_details.reserve_rows(num_rows);
+    auto &dest_data = dest_data_details.get_data();
 
     tablator::Row row(dest_row_size);
     uint64_t cntr(1);
@@ -56,7 +61,6 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
         // end of dest_table's null_bitflag entry.
         row.insert(row_pointer + src_nulls_size, row_pointer + src_row_size,
                    dest_nulls_size);
-
         // Add the new column value.
         row.insert(cntr, dest_offsets[num_src_columns]);
 
@@ -64,6 +68,7 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
     }
     return dest_table;
 }
+
 
 //=====================================================================
 
@@ -74,7 +79,6 @@ Table combine_tables(const Table &src1_table, const Table &src2_table) {
     if (src2_table.get_num_rows() != num_rows) {
         throw std::runtime_error("src tables have different numbers of rows.");
     }
-
     const std::vector<Column> &src1_columns = src1_table.get_columns();
     size_t num_src1_columns = src1_columns.size();
 
@@ -116,18 +120,19 @@ Table combine_tables(const Table &src1_table, const Table &src2_table) {
 
     // Load combined_columns with visible columns (all but null-flag one) of src1
     for (size_t col_idx = 1; col_idx < num_src1_columns; ++col_idx) {
-        combined_columns.push_back(src1_columns[col_idx]);
+        combined_columns.emplace_back(src1_columns[col_idx]);
     }
 
     // Same for columns of src2_table.
     for (size_t col_idx = 1; col_idx < num_src2_columns; ++col_idx) {
-        combined_columns.push_back(src2_columns[col_idx]);
+        combined_columns.emplace_back(src2_columns[col_idx]);
     }
 
-    // Construct dest_table.
-    Table dest_table(combined_columns);
-    std::vector<Column> dest_columns = dest_table.get_columns();
+    // JTODO Add lower-level functions to handle the copying?
 
+    // Construct dest_table.
+    Table dest_table(combined_columns, false /* got_null_bitfields_flag */, num_rows);
+    std::vector<Column> &dest_columns = dest_table.get_columns();
 
     // Prepare to load dest_table data.
     const std::vector<size_t> &src1_offsets = src1_table.get_offsets();
@@ -146,11 +151,10 @@ Table combine_tables(const Table &src1_table, const Table &src2_table) {
     const uint8_t *src1_data_ptr = src1_table.get_data().data();
     const uint8_t *src2_data_ptr = src2_table.get_data().data();
 
-    dest_table.reserve_data(num_rows);
-
     // Load dest_table data.
+
+    Row curr_row(dest_row_size);
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
-        Row curr_row(dest_row_size);
         curr_row.fill_with_zeros();
 
         size_t src1_row_start_offset = row_idx * src1_row_size;
@@ -158,14 +162,13 @@ Table combine_tables(const Table &src1_table, const Table &src2_table) {
 
         uint8_t *row_data_ptr = reinterpret_cast<uint8_t *>(curr_row.get_data().data());
 
-
         // Copy src1's null bitfield data for this row.
         memcpy(row_data_ptr, src1_data_ptr + src1_row_start_offset,
                src1_null_flags_size);
 
         // Starting where previous memcpy left off, copy src2's null bitfield data for
         // this row.
-        if (num_src1_columns % 8 == 1) {
+        if (num_src1_columns % 8 == 1) {  // i.e. (num_visible_columns % 8) == 0
             memcpy(row_data_ptr + src1_null_flags_size,
                    src2_data_ptr + src2_row_start_offset, src2_null_flags_size);
         } else {
@@ -203,10 +206,9 @@ Table combine_tables(const Table &src1_table, const Table &src2_table) {
                src2_row_size - src2_null_flags_size);
 
         // Make curr_row official
-        tablator::append_row(dest_table.get_data(), curr_row);
+        dest_table.get_data_details().append_row(curr_row);
     }
     return dest_table;
 }
-
 
 }  // namespace tablator

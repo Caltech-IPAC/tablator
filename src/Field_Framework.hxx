@@ -46,7 +46,6 @@ public:
     inline const std::vector<size_t> &get_offsets() const { return offsets_; }
     inline std::vector<size_t> &get_offsets() { return offsets_; }
 
-
 private:
     void append_column(const Column &column) {
         columns_.emplace_back(column);

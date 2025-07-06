@@ -70,7 +70,6 @@ def build(bld):
              'src/Table_Ops.cxx',
              'src/Ipac_Table_Writer/internals.cxx',
              'src/Ipac_Table_Writer/Ipac_Table_Writer.cxx',
-             'src/Utils/Table_Utils/append_column.cxx',
              'src/Utils/Table_Utils/winnow_rows.cxx',
              'src/ptree_readers/ptree_readers.cxx',
              'src/ptree_readers/Utils.cxx',

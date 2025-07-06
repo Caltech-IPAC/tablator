@@ -1,5 +1,8 @@
 #include "../Table_Utils.hxx"
 
+#include <string>
+#include <stdexcept>
+
 void tablator::winnow_rows(std::vector<uint8_t> &data,
                                          const std::set<size_t> &selected_row_idx_list,
                                          size_t num_rows, size_t row_size) {
