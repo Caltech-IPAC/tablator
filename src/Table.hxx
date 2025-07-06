@@ -196,16 +196,15 @@ public:
     // constructors
     Table(const std::vector<Column> &Columns,
           const std::map<std::string, std::string> &property_map,
-          bool got_null_bitfields_column = false);
+          bool got_null_bitfields_column = false, size_t num_rows = 0);
 
     Table(const std::vector<Column> &Columns,
           const tablator::Labeled_Properties &property_pair_vec,
-          bool got_null_bitfields_column = false);
-
-    Table(const std::vector<Column> &Columns, bool got_null_bitfields_column = false)
+          bool got_null_bitfields_column = false, size_t num_rows = 0);
+    Table(const std::vector<Column> &Columns, bool got_null_bitfields_column = false,
+          size_t num_rows = 0)
             : Table(Columns, std::map<std::string, std::string>(),
-                    got_null_bitfields_column) {}
-
+                    got_null_bitfields_column, num_rows) {}
 
     Table(const boost::filesystem::path &input_path, const Format &format);
     Table(const boost::filesystem::path &input_path) { read_unknown(input_path); }
@@ -297,10 +296,8 @@ public:
 
     // table modifiers
 
-    void append_row(const Row &row) {
-        assert(row.get_data().size() == get_row_size());
-        tablator::append_row(get_data(), row);
-    }
+    // query_server and ZTF-mtc-utils call this function.
+    void append_row(const Row &row) { get_data_details().append_row(row); }
 
     void append_rows(const Table &table2);
 
@@ -314,7 +311,6 @@ public:
                const Command_Line_Options &options = default_options) const {
         write(path, Format(path), options);
     }
-
     void write_ipac_table(std::ostream &os,
                           const Command_Line_Options &options = default_options) const {
         Ipac_Table_Writer::write(*this, os, options);
@@ -451,6 +447,7 @@ public:
     void write_sqlite_db(const boost::filesystem::path &path,
                          const Command_Line_Options &options) const;
 
+
     // Following the VOTable convention, we use the most significant
     // bit for the first column.
     bool is_null_value(size_t row_idx, size_t col_idx) const {
@@ -475,6 +472,7 @@ public:
         }
         return get_data().at(pos) & (128 >> ((col_idx - 1) % 8));
     }
+
 
     // extractors
 
@@ -612,6 +610,10 @@ public:
 
     // accessors
 
+    size_t get_num_columns() const { return get_columns().size(); }
+
+    //===========================================================
+
     // getters for Optional elements
 
     ATTRIBUTES &get_attributes() { return options_.attributes_; }
@@ -672,12 +674,21 @@ public:
         return get_resource_elements().at(get_results_resource_idx());
     }
 
+
     Field_Framework &get_field_framework() {
         return get_results_resource_element().get_field_framework();
     }
 
     const Field_Framework &get_field_framework() const {
         return get_results_resource_element().get_field_framework();
+    }
+
+    Data_Details &get_data_details() {
+        return get_results_resource_element().get_data_details();
+    }
+
+    const Data_Details &get_data_details() const {
+        return get_results_resource_element().get_data_details();
     }
 
     // called by query_server to trim result set
@@ -708,11 +719,10 @@ public:
     std::vector<Column> &get_columns() {
         return get_results_resource_element().get_columns();
     }
+
     const std::vector<Column> &get_columns() const {
         return get_results_resource_element().get_columns();
     }
-
-    size_t get_num_columns() const { return get_columns().size(); }
 
     const std::vector<size_t> &get_offsets() const {
         return get_results_resource_element().get_offsets();
@@ -721,6 +731,7 @@ public:
     size_t get_row_size() const {
         return get_results_resource_element().get_row_size();
     }
+
     size_t get_num_rows() const {
         return get_results_resource_element().get_num_rows();
     }
@@ -741,6 +752,7 @@ public:
     std::vector<Field> &get_table_element_params() {
         return get_results_resource_element().get_table_element_params();
     }
+
     const std::vector<Field> &get_table_element_params() const {
         return get_results_resource_element().get_table_element_params();
     }
@@ -748,6 +760,7 @@ public:
     std::vector<Field> &get_table_element_fields() {
         return get_results_resource_element().get_table_element_fields();
     }
+
     const std::vector<Field> &get_table_element_fields() const {
         return get_results_resource_element().get_table_element_fields();
     }
@@ -761,11 +774,9 @@ public:
         return get_results_resource_element().get_data();
     }
 
-
     Table_Element &get_main_table_element() {
         return get_results_resource_element().get_main_table_element();
     }
-
 
     const Table_Element &get_main_table_element() const {
         return get_results_resource_element().get_main_table_element();
@@ -942,6 +953,7 @@ private:
         }
     }
 
+
     std::vector<size_t> get_column_widths(const Command_Line_Options &options) const {
         return Ipac_Table_Writer::get_column_widths(*this, options);
     }
@@ -987,7 +999,6 @@ private:
     }
 
     // helpers for reading
-
     size_t read_ipac_header(std::istream &ipac_file,
                             std::array<std::vector<std::string>, 4> &Columns,
                             std::vector<size_t> &ipac_table_offsets,
@@ -1003,15 +1014,14 @@ private:
             const std::vector<size_t> &ipac_column_widths);
 
     static void shrink_ipac_string_columns_to_fit(
-            Field_Framework &field_framework, std::vector<uint8_t> &data,
+            Field_Framework &field_framework, Data_Details &data_details,
             const std::vector<size_t> &column_widths);
 
-    static std::vector<uint8_t> read_dsv_rows(
-            Field_Framework &field_framework,
-            const std::list<std::vector<std::string>> &dsv);
+    static Data_Details read_dsv_rows(Field_Framework &field_framework,
+                                      const std::list<std::vector<std::string>> &dsv);
 
 
-    // used only for read_dsv()?
+    // used only for read_dsv()
     static Field_Framework set_column_info(std::list<std::vector<std::string>> &dsv);
 
     Table(const std::vector<Resource_Element> &resource_elements,

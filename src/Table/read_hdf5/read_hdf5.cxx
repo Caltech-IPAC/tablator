@@ -5,6 +5,7 @@
 #include "../HDF5_Attribute.hxx"
 #include "../HDF5_Property.hxx"
 
+
 // As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
 
 namespace {
@@ -80,6 +81,7 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                 std::to_string(compound.getNmembers()));
     }
 
+
     std::vector<Column> columns;
 
     for (int i = 0; i < compound.getNmembers(); ++i) {
@@ -108,16 +110,17 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
     }
 
     Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
-    std::vector<uint8_t> data;
+
+    size_t num_rows = dataset.getSpace().getSimpleExtentNpoints();
+    Data_Details data_details(field_framework, num_rows);
 
     // Resize, don't just reserve.
-    size_t num_rows = dataset.getSpace().getSimpleExtentNpoints();
-    data.resize(field_framework.get_row_size() * num_rows);
-    dataset.read(data.data(), compound);
+    data_details.adjust_num_rows(num_rows);
+    dataset.read(data_details.get_data().data(), compound);
 
     std::vector<Table_Element> table_elements;
     const auto table_element =
-            Table_Element::Builder(field_framework, data)
+            Table_Element::Builder(field_framework, data_details)
                     .add_params(table_element_params)
                     .add_description(table_element_description)
                     .add_trailing_info_list(table_element_trailing_infos)

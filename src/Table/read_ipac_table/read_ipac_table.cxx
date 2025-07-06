@@ -5,6 +5,7 @@
 #include <vector>
 
 
+#include "../../Utils/Table_Utils.hxx"
 #include "../../to_string.hxx"
 #include "../read_ipac_table.hxx"
 
@@ -36,20 +37,18 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                              labeled_resource_properties);
 
     const auto ipac_column_widths = get_ipac_column_widths(ipac_column_offsets);
-
     Field_Framework field_framework =
             create_types_from_ipac_headers(ipac_columns, ipac_column_widths);
 
     size_t num_tab_columns = ipac_columns[COL_NAME_IDX].size();
+    std::vector<size_t> minimum_column_widths(num_tab_columns, 1);
+
     std::vector<Column> &tab_columns = field_framework.get_columns();
     std::vector<size_t> &offsets = field_framework.get_offsets();
+    Data_Details data_details(field_framework);
 
-    std::vector<size_t> minimum_column_widths(num_tab_columns, 1);
     std::string line;
     std::getline(input_stream, line);
-
-    std::vector<uint8_t> data;
-    // JTODO reserve()
 
     Row single_row(field_framework.get_row_size());
     while (input_stream) {
@@ -103,14 +102,15 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                          ": '" + line.substr(bad_char) +
                                          "'.\n\t  Is the header not wide enough?");
 
-            tablator::append_row(data, single_row);
+            data_details.append_row(single_row);
         }
         ++current_line_num;
         std::getline(input_stream, line);
     }
-    shrink_ipac_string_columns_to_fit(field_framework, data, minimum_column_widths);
-
-    Table_Element table_element = Table_Element::Builder(field_framework, data).build();
+    shrink_ipac_string_columns_to_fit(field_framework, data_details,
+                                      minimum_column_widths);
+    Table_Element table_element =
+            Table_Element::Builder(field_framework, data_details).build();
     add_resource_element(Resource_Element::Builder(table_element)
                                  .add_labeled_properties(labeled_resource_properties)
                                  .build());

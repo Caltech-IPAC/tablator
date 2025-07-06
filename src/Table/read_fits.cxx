@@ -3,6 +3,9 @@
 
 #include <CCfits/CCfits>
 
+#include "../Common.hxx"
+#include "../Data_Details.hxx"
+#include "../Field_Framework.hxx"
 #include "../Table.hxx"
 #include "../fits_keyword_ucd_mapping.hxx"
 #include "../string_to_Data_Type.hxx"
@@ -1066,8 +1069,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     size_t row_size = field_framework.get_row_size();
     size_t num_rows = ccfits_table->rows();
 
-    std::vector<uint8_t> data;
-    data.reserve(row_size * num_rows);
+    tablator::Data_Details data_details(field_framework, num_rows);
 
     // CCfits dies in read_element_given_column_and_row() if there is no data in the
     // table. :(
@@ -1175,7 +1177,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                             "unit", fits_col.unit());
                 }
             }
-            tablator::append_row(data, curr_row);
+            data_details.append_row(curr_row);
         }
     }
 
@@ -1184,7 +1186,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
     //*********************************************************
 
     const auto table_element =
-            Table_Element::Builder(field_framework, data)
+            Table_Element::Builder(field_framework, data_details)
                     .add_trailing_info_list(table_element_trailing_infos)
                     .add_attributes(table_element_attributes)
                     .add_params(table_element_params)

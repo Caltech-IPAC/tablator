@@ -1,3 +1,4 @@
+#include "../../../Field_Framework.hxx"
 #include "../../../Table.hxx"
 
 #include "../../read_ipac_table.hxx"
@@ -21,7 +22,6 @@ Field_Framework Table::create_types_from_ipac_headers(
                                 ipac_columns.at(COL_TYPE_IDX).at(col_idx),
                                 ipac_column_widths.at(col_idx));
     }
-
     Field_Framework field_framework(orig_columns, true /* got_null_bitfields_column */);
     auto &columns = field_framework.get_columns();
     for (size_t col_idx = 1; col_idx < num_ipac_columns; ++col_idx) {

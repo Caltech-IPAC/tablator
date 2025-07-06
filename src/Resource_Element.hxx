@@ -381,6 +381,16 @@ public:
         return get_main_table_element().get_field_framework();
     }
 
+
+    const Data_Details &get_data_details() const {
+        return get_main_table_element().get_data_details();
+    }
+
+    Data_Details &get_data_details() {
+        return get_main_table_element().get_data_details();
+    }
+
+
     const std::vector<Column> &get_columns() const {
         return get_main_table_element().get_columns();
     }

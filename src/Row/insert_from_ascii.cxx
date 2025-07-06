@@ -8,7 +8,7 @@
 
 namespace tablator {
 void Row::insert_from_ascii(const std::string &element, const Data_Type &data_type,
-                            const size_t &array_size, const size_t &column,
+                            const size_t &array_size, const size_t &col_idx,
                             const size_t &offset, const size_t &offset_end) {
     if (array_size != 1 && data_type != Data_Type::CHAR) {
         std::vector<std::string> elements;
@@ -22,7 +22,7 @@ void Row::insert_from_ascii(const std::string &element, const Data_Type &data_ty
         auto element_offset = offset;
         auto element_size = data_size(data_type);
         for (auto &e : elements) {
-            insert_from_ascii(e, data_type, 1, column, element_offset,
+            insert_from_ascii(e, data_type, 1, col_idx, element_offset,
                               element_offset + element_size);
             element_offset += element_size;
         }
@@ -30,7 +30,7 @@ void Row::insert_from_ascii(const std::string &element, const Data_Type &data_ty
         switch (data_type) {
             case Data_Type::INT8_LE:
                 if (element == "?" || element == " " || element[0] == '\0') {
-                    insert_null(data_type, array_size, column, offset, offset_end);
+                    insert_null(data_type, array_size, col_idx, offset, offset_end);
                 } else {
                     bool result = (boost::iequals(element, "true") ||
                                    boost::iequals(element, "t") || element == "1");
