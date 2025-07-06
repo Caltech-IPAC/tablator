@@ -97,9 +97,14 @@ public:
                 : data_elements_(data_elements) {}
 
         Builder(const Field_Framework &field_framework,
-                const std::vector<uint8_t> &data) {
-            data_elements_.emplace_back(Data_Element(field_framework, data));
+                const Data_Details &data_details) {
+            data_elements_.emplace_back(Data_Element(field_framework, data_details));
         }
+
+        Builder(const Field_Framework &field_framework, size_t num_rows) {
+            data_elements_.emplace_back(Data_Element(field_framework, num_rows));
+        }
+
 
         Builder(const Field_Framework &field_framework) {
             data_elements_.emplace_back(Data_Element(field_framework));
@@ -262,6 +267,15 @@ public:
         return get_main_data_element().get_field_framework();
     }
 
+    const Data_Details &get_data_details() const {
+        return get_main_data_element().get_data_details();
+    }
+
+    Data_Details &get_data_details() {
+        return get_main_data_element().get_data_details();
+    }
+
+
     const std::vector<Column> &get_columns() const {
         return get_main_data_element().get_columns();
     }
@@ -270,9 +284,6 @@ public:
     const std::vector<size_t> &get_offsets() const {
         return get_main_data_element().get_offsets();
     }
-
-    //    std::vector<size_t> &get_offsets() { return
-    //    get_main_data_element().get_offsets(); }
 
     size_t get_row_size() const { return get_main_data_element().get_row_size(); }
     size_t get_num_rows() const { return get_main_data_element().get_num_rows(); }
@@ -285,6 +296,7 @@ public:
     void reserve_rows(const size_t &new_num_rows) {
         get_main_data_element().reserve_rows(new_num_rows);
     }
+
 
     const std::vector<uint8_t> &get_data() const {
         return get_main_data_element().get_data();

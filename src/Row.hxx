@@ -3,24 +3,25 @@
 #include <cassert>
 #include <vector>
 
+#include "Common.hxx"
 #include "Data_Type.hxx"
-#include "unsafe_copy_to_row.hxx"
 
 namespace tablator {
 class Row {
 public:
-    Row(const size_t &size) : data_(size) {}
+    Row(const size_t &data_size) : data_(data_size) {}
 
     void fill_with_zeros() { std::fill(data_.begin(), data_.end(), 0); }
 
-    void insert_null(const Data_Type &type, const size_t &array_size,
-                     const size_t &col_idx, const size_t &offset,
-                     const size_t &offset_end);
+    void insert_null(Data_Type type, const size_t &array_size, const size_t &col_idx,
+                     const size_t &offset, const size_t &offset_end);
 
     template <typename T>
     void insert(const T &element, const size_t &offset) {
         assert(offset + sizeof(T) <= data_.size());
-        unsafe_copy_to_row(element, offset, data_.data());
+        std::copy(reinterpret_cast<const char *>(&element),
+                  reinterpret_cast<const char *>(&element) + sizeof(T),
+                  data_.data() + offset);
     }
 
     template <typename T>
@@ -28,6 +29,7 @@ public:
         assert(offset + std::distance(begin, end) <= data_.size());
         std::copy(begin, end, data_.data() + offset);
     }
+
 
     void insert(const std::string &element, const size_t &offset_begin,
                 const size_t &offset_end) {
@@ -54,7 +56,7 @@ private:
         insert(tablator::get_null<T>(), offset);
     }
 
-    void insert_null_by_type(const Data_Type &data_type, const size_t &offset);
+    void insert_null_by_type(Data_Type data_type, const size_t &offset);
 
     std::vector<char> data_;
 };

@@ -3,9 +3,9 @@
 #include "../Row.hxx"
 #include "../data_size.hxx"
 
-void tablator::Row::insert_null(const Data_Type &data_type, const size_t &array_size,
-                                const size_t &col_idx, const size_t &offset,
-                                const size_t &offset_end) {
+void tablator::Row::insert_null(Data_Type data_type, const size_t& array_size,
+                                const size_t& col_idx, const size_t& offset,
+                                const size_t& offset_end) {
     const int byte = (col_idx - 1) / 8;
     const char mask = (128 >> ((col_idx - 1) % 8));
 
@@ -26,8 +26,7 @@ void tablator::Row::insert_null(const Data_Type &data_type, const size_t &array_
     }
 }
 
-void tablator::Row::insert_null_by_type(const Data_Type &data_type,
-                                        const size_t &offset) {
+void tablator::Row::insert_null_by_type(Data_Type data_type, const size_t& offset) {
     switch (data_type) {
         case Data_Type::INT8_LE:
             insert_null_internal<int8_t>(offset);
@@ -63,7 +62,6 @@ void tablator::Row::insert_null_by_type(const Data_Type &data_type,
             insert('\0', offset);
             break;
         default:
-            throw std::runtime_error(
-                    "Unexpected data type in insert_null_by_type()");
+            throw std::runtime_error("Unexpected data type in insert_null_by_type()");
     }
 }

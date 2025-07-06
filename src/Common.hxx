@@ -64,6 +64,7 @@ static const std::string PARAMREF("PARAMref");
 static const std::string QUERY_STATUS("QUERY_STATUS");
 static const std::string REF("ref");
 static const std::string RESOURCE("RESOURCE");
+static const std::string STREAM("STREAM");
 static const std::string TABLE("TABLE");
 static const std::string TABLEDATA("TABLEDATA");
 static const std::string TIMESYS("TIMESYS");

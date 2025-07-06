@@ -83,12 +83,10 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
     std::vector<size_t> &offsets = field_framework.get_offsets();
 
     size_t num_rows = element_lists_by_row.size();
-    size_t row_size = *offsets.rbegin();
 
-    std::vector<uint8_t> data;
-    data.reserve(row_size * num_rows);
+    Data_Details data_details(field_framework, num_rows);
+    Row single_row(*offsets.rbegin());
 
-    Row single_row(row_size);
     // JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in
     // '\0'?
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
@@ -115,7 +113,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                             ". Error message: " + error.what());
                 }
         }
-        append_row(data, single_row);
+        data_details.append_row(single_row);
     }
-    return Data_Element(field_framework, data);
+    return Data_Element(field_framework, data_details);
 }

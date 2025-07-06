@@ -43,11 +43,6 @@ public:
 
     Column(const std::string &name, const Data_Type &type) : Column(name, type, 1) {}
 
-
-    inline size_t get_data_size() const {
-        return tablator::data_size(type_) * array_size_;
-    }
-
     // accessors
     inline const std::string &get_name() const { return name_; }
     inline const Data_Type &get_type() const { return type_; }
@@ -84,6 +79,10 @@ public:
     }
     inline bool get_dynamic_array_flag() const { return dynamic_array_flag_; }
     inline void set_dynamic_array_flag(bool b) { dynamic_array_flag_ = b; }
+
+    inline size_t get_data_size() const {
+        return tablator::data_size(type_) * array_size_;
+    }
 
 private:
     std::string name_;
