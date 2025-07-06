@@ -4,42 +4,51 @@
 #include <utility>
 
 void tablator::Table::shrink_ipac_string_columns_to_fit(
-        Field_Framework &field_framework, std::vector<uint8_t> &data,
+        Field_Framework &old_field_framework, Data_Details &old_data_details,
         const std::vector<size_t> &minimum_column_data_widths) {
-    auto &columns = field_framework.get_columns();
-    auto &offsets = field_framework.get_offsets();
-    size_t old_row_size(field_framework.get_row_size());
+    auto &old_columns = old_field_framework.get_columns();
+    auto &old_offsets = old_field_framework.get_offsets();
+    size_t num_columns = old_columns.size();
+    size_t old_row_size(old_field_framework.get_row_size());
 
-    std::vector<Column> new_columns(columns);
-    std::vector<size_t> new_offsets = {0};
-    size_t new_row_size(0);
+    std::vector<uint8_t> &old_data = old_data_details.get_data();
+    size_t num_rows = old_data_details.get_num_rows();
 
-    for (size_t col_idx = 0; col_idx < columns.size(); ++col_idx) {
+    for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
         // Populate new_offsets based on column-level data.
-        if (columns[col_idx].get_type() == Data_Type::CHAR) {
-            new_columns[col_idx].set_array_size(minimum_column_data_widths[col_idx]);
+        if (old_columns[col_idx].get_type() == Data_Type::CHAR) {
+            old_columns[col_idx].set_array_size(minimum_column_data_widths[col_idx]);
         }
-        new_row_size += new_columns[col_idx].get_data_size();
-        new_offsets.push_back(new_row_size);
     }
 
-    size_t num_rows = data.size() / old_row_size;
+    Field_Framework new_field_framework(old_columns,
+                                        true /* got_null_bitfields_column */);
+    std::vector<Column> &new_columns = new_field_framework.get_columns();
+    std::vector<size_t> &new_offsets = new_field_framework.get_offsets();
+
+    size_t new_row_size = new_field_framework.get_row_size();
+
+    if (old_row_size == new_row_size) {
+        // Nothing can be shrunk.
+        return;
+    }
 
     // FIXME: Do this in place.
-    std::vector<uint8_t> new_data(num_rows * new_row_size);
+    Data_Details new_data_details(new_row_size, num_rows);
+    std::vector<uint8_t> &new_data = new_data_details.get_data();
+
     size_t old_row_offset(0), new_row_offset(0);
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
-        for (size_t col_idx = 0; col_idx < offsets.size() - 1; ++col_idx) {
-            std::copy(data.begin() + old_row_offset + offsets[col_idx],
-                      data.begin() + old_row_offset + offsets[col_idx] +
+        for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
+            std::copy(old_data.begin() + old_row_offset + old_offsets[col_idx],
+                      old_data.begin() + old_row_offset + old_offsets[col_idx] +
                               new_columns[col_idx].get_data_size(),
-                      new_data.begin() + new_row_offset + new_offsets[col_idx]);
+                      std::back_inserter(new_data));
         }
         old_row_offset += old_row_size;
         new_row_offset += new_row_size;
     }
-    using namespace std;
-    swap(data, new_data);
-    swap(columns, new_columns);
-    swap(offsets, new_offsets);
+
+    std::swap(old_field_framework, new_field_framework);
+    std::swap(old_data_details, new_data_details);
 }

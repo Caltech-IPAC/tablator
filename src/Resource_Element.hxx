@@ -381,6 +381,16 @@ public:
         return get_main_table_element().get_field_framework();
     }
 
+
+    const Data_Details &get_data_details() const {
+        return get_main_table_element().get_data_details();
+    }
+
+    Data_Details &get_data_details() {
+        return get_main_table_element().get_data_details();
+    }
+
+
     const std::vector<Column> &get_columns() const {
         return get_main_table_element().get_columns();
     }
@@ -397,13 +407,12 @@ public:
     size_t get_num_rows() const { return get_main_table_element().get_num_rows(); }
 
     // called by query_server to trim result set
-    void resize_data(size_t &new_num_rows) {
-        get_main_table_element().resize_data(new_num_rows);
+    void adjust_num_rows(const size_t &new_num_rows) {
+        get_main_table_element().adjust_num_rows(new_num_rows);
     }
 
-    // called by query_server to trim result set
-    void reserve_data(size_t &new_num_rows) {
-        get_main_table_element().reserve_data(new_num_rows);
+    void reserve_rows(const size_t &new_num_rows) {
+        get_main_table_element().reserve_rows(new_num_rows);
     }
 
     std::vector<Field> &get_table_element_params() {
