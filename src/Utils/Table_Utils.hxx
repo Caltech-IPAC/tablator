@@ -8,16 +8,7 @@
 
 namespace tablator {
 
-// column-related functions
-// row-related functions
-inline void append_row(std::vector<uint8_t> &data, const Row &row) {
-    data.insert(data.end(), row.get_data().begin(), row.get_data().end());
-}
-
-inline void append_rows(std::vector<uint8_t> &data, const std::vector<uint8_t> &data2) {
-    data.insert(data.end(), data2.begin(), data2.end());
-}
-
+// JTODO Move to Data_Details
 void winnow_rows(std::vector<uint8_t> &data,
 				 const std::set<size_t> &selected_row_idx_list,
 				 size_t num_rows, uint row_size);

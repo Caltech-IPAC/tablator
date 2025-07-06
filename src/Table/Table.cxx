@@ -59,9 +59,10 @@ namespace tablator {
 
 Table::Table(const std::vector<Column> &columns,
              const std::map<std::string, std::string> &property_map,
-             bool got_null_bitfields_column) {
+             bool got_null_bitfields_column, size_t num_rows) {
     add_resource_element(
-            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column))
+            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column),
+                                   num_rows)
                     .build());
 
     for (auto &p : property_map) {
@@ -72,10 +73,11 @@ Table::Table(const std::vector<Column> &columns,
 
 Table::Table(const std::vector<Column> &columns,
              const Labeled_Properties &property_pair_vec,
-             bool got_null_bitfields_column)
+             bool got_null_bitfields_column, size_t num_rows)
         : results_resource_idx_(0) {
     add_resource_element(
-            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column))
+            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column),
+                                   num_rows)
                     .build());
 
     for (const auto &label_and_prop : property_pair_vec) {
@@ -415,14 +417,12 @@ bool close_enough_to_append_rows(const Field_Framework &ff1,
     return (ff1_offsets.back() == ff2_offsets.back());
 }
 
-
 void Table::append_rows(const Table &table2) {
     if (!close_enough_to_append_rows(get_field_framework(),
                                      table2.get_field_framework())) {
         throw std::runtime_error("The tables are not similar enough to append rows.");
     }
-    get_data().reserve(get_data().size() + table2.get_data().size());
-    tablator::append_rows(get_data(), table2.get_data());
+    get_data_details().append_rows(table2.get_data_details());
 }
 
 

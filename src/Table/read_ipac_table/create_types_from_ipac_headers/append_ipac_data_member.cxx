@@ -1,8 +1,6 @@
 #include "../../../Table.hxx"
-
-namespace tablator {
 // JTODO rename
-
+namespace tablator {
 void Table::append_ipac_data_member(std::vector<Column> &columns,
                                     const std::string &name,
                                     const std::string &data_type,

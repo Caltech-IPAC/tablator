@@ -4,7 +4,6 @@ namespace tablator {
 
 Data_Type get_best_data_type(const Data_Type &current_type, const std::string &element);
 
-
 // FIXME: A bit icky.  This modifies the dsv document (trims
 // whitespace) while extracting metadata.
 Field_Framework Table::set_column_info(std::list<std::vector<std::string> > &dsv) {

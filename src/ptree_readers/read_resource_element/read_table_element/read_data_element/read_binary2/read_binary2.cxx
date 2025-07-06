@@ -68,16 +68,15 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
                              field.get_field_properties(),
                              field.get_dynamic_array_flag());
     }
-    Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
+    Field_Framework field_framework(columns,
+                                    true /* got_null_bitfields_column */);  // JTODO
+    Data_Details data_details(field_framework, total_num_rows);
 
-    size_t row_size = field_framework.get_row_size();
-    std::vector<uint8_t> data;
-    data.reserve(row_size * total_num_rows);
 
     for (std::size_t stream = 0; stream < streams.size(); ++stream) {
-        append_data_from_stream(data, field_framework, streams[stream], fields,
+        append_data_from_stream(data_details, field_framework, streams[stream], fields,
                                 rows_per_stream[stream]);
     }
-    return Data_Element(field_framework, data);
+    return Data_Element(field_framework, data_details);
 }
 }  // namespace tablator
