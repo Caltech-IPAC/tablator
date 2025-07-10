@@ -56,7 +56,7 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
     const auto &data = get_data();
 
     for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
-         ++row_idx, row_offset += row_size()) {
+         ++row_idx, row_offset += get_row_size()) {
         os << tr_prefix;
 
         // Skip the null bitfield flag
@@ -94,7 +94,7 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
             os << '\n';
         }
         os << tr_suffix;
-        if (is_json && row_offset < data.size() - row_size()) {
+        if (is_json && row_offset < data.size() - get_row_size()) {
             os << ',';
         }
         os << '\n';

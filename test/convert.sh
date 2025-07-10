@@ -168,18 +168,26 @@ fi
 
 ${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_float_array.vot test/back_and_forth_tables/two_row_double_array.vot temp.json5 2> /dev/null
 if [ $? -eq 0 ]; then
-    echo "FAIL: combine tables whose corresponding columns are of different types"
+    echo "FAIL: append rows of table whose corresponding columns are of different types"
 else
-    echo "PASS: combine tables whose corresponding columns are of different types"
+    echo "PASS: append rows of table whose corresponding columns are of different types"
     rm -f temp.json5
 fi
 
 ${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_double_array.vot test/back_and_forth_tables/two_row_double_array_II.vot out.tbl 2> /dev/null
 if [ $? -eq 0 ]; then
-    echo "FAIL: combine tables whose corresponding offsets don't match"
+    echo "FAIL: append rows of tables whose corresponding offsets don't match"
 else
-    echo "PASS: combine tables whose corresponding offsets don't match"
+    echo "PASS: append rows of tables whose corresponding offsets don't match"
     rm -f temp.json5
+fi
+
+${tablator_bin} --retain-row-list "1 4" test/multi temp.vot 2> /dev/null
+if [ $? -eq 0 ]; then
+    echo "FAIL: invalid argument to retain-row-list"
+else
+    echo "PASS: invalid argument to retain-row-list"
+    rm -f temp.tbl
 fi
 
 
@@ -1418,3 +1426,10 @@ else
     echo "FAIL: append json5 table"
 fi
 
+${tablator_bin} --retain-row-list "1 2 3" test/multi_formatted.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: retain rows"
+    rm -f temp.json5
+else
+    echo "FAIL: retain rows"
+fi

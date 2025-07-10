@@ -5,8 +5,11 @@
 #include <vector>
 
 
+#include "../../Utils/Table_Utils.hxx"
 #include "../../to_string.hxx"
 #include "../read_ipac_table.hxx"
+
+// As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
 
 namespace {
 
@@ -34,24 +37,24 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                              labeled_resource_properties);
 
     const auto ipac_column_widths = get_ipac_column_widths(ipac_column_offsets);
+    Field_Framework field_framework =
+            create_types_from_ipac_headers(ipac_columns, ipac_column_widths);
 
-    std::vector<Column> tab_columns;
-    std::vector<size_t> offsets = {0};
-    create_types_from_ipac_headers(tab_columns, offsets, ipac_columns,
-                                   ipac_column_widths);
+    size_t num_tab_columns = ipac_columns[COL_NAME_IDX].size();
+    std::vector<size_t> minimum_column_widths(num_tab_columns, 1);
 
-    size_t num_tablator_columns = ipac_columns[COL_NAME_IDX].size();
+    std::vector<Column> &tab_columns = field_framework.get_columns();
+    std::vector<size_t> &offsets = field_framework.get_offsets();
+    Data_Details data_details(field_framework);
 
-    std::vector<size_t> minimum_column_widths(num_tablator_columns, 1);
     std::string line;
     std::getline(input_stream, line);
-    Row row_string(tablator::get_row_size(offsets));
 
-    std::vector<uint8_t> data;
+    Row single_row(field_framework.get_row_size());
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
-            row_string.fill_with_zeros();
-            for (size_t col_idx = 1; col_idx < num_tablator_columns; ++col_idx) {
+            single_row.fill_with_zeros();
+            for (size_t col_idx = 1; col_idx < num_tab_columns; ++col_idx) {
                 const auto &tab_column = tab_columns[col_idx];
                 if (line[ipac_column_offsets[col_idx - 1]] != ' ')
                     throw std::runtime_error(
@@ -72,15 +75,15 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                      element == ipac_columns[COL_NULL_IDX][col_idx]) ||
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      tab_column.get_type() != Data_Type::CHAR && element.empty())) {
-                    row_string.set_null(tab_column.get_type(),
-                                        tab_column.get_array_size(), col_idx,
-                                        offsets[col_idx], offsets[col_idx + 1]);
+                    single_row.insert_null(tab_column.get_type(),
+                                           tab_column.get_array_size(), col_idx,
+                                           offsets[col_idx], offsets[col_idx + 1]);
                 } else {
                     try {
-                        insert_ascii_in_row(row_string, tab_column.get_type(),
-                                            tab_column.get_array_size(), col_idx,
-                                            element, offsets[col_idx],
-                                            offsets[col_idx + 1]);
+                        single_row.insert_from_ascii(element, tab_column.get_type(),
+                                                     tab_column.get_array_size(),
+                                                     col_idx, offsets[col_idx],
+                                                     offsets[col_idx + 1]);
                     } catch (std::exception &error) {
                         throw std::runtime_error(
                                 "Invalid " + to_string(tab_column.get_type()) +
@@ -91,7 +94,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 }
             }
             std::size_t bad_char(line.find_first_not_of(
-                    " \t\r", ipac_column_offsets[num_tablator_columns - 1]));
+                    " \t\r", ipac_column_offsets[num_tab_columns - 1]));
             if (bad_char != std::string::npos)
                 throw std::runtime_error("Non-whitespace found at the end of line " +
                                          std::to_string(current_line_num) +
@@ -99,16 +102,15 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                          ": '" + line.substr(bad_char) +
                                          "'.\n\t  Is the header not wide enough?");
 
-            tablator::append_row(data, row_string);
+            data_details.append_row(single_row);
         }
         ++current_line_num;
         std::getline(input_stream, line);
     }
-    shrink_ipac_string_columns_to_fit(tab_columns, offsets, data,
+    shrink_ipac_string_columns_to_fit(field_framework, data_details,
                                       minimum_column_widths);
-
     Table_Element table_element =
-            Table_Element::Builder(tab_columns, offsets, data).build();
+            Table_Element::Builder(field_framework, data_details).build();
     add_resource_element(Resource_Element::Builder(table_element)
                                  .add_labeled_properties(labeled_resource_properties)
                                  .build());

@@ -11,9 +11,9 @@ size_t count_elements(const std::string &entry, const Data_Type &type);
 
 tablator::Data_Element tablator::ptree_readers::read_tabledata(
         const boost::property_tree::ptree &tabledata,
-        const std::vector<Field_And_Flag> &field_flag_pairs) {
+        const std::vector<Field> &fields) {
     std::vector<std::vector<std::string> > element_lists_by_row;
-    size_t num_fields = field_flag_pairs.size();
+    size_t num_fields = fields.size();
 
     // Need to set the size to at least 1, because H5::StrType can not
     // handle zero sized strings.
@@ -25,6 +25,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         if (tr.first == "TR" || tr.first.empty()) {
             // Add something for the null_bitfields_flag
             element_lists_by_row.push_back({});
+
             auto td = tr.second.begin();
             while (td != tr.second.end() && td->first == XMLATTR_DOT + ID) {
                 ++td;
@@ -37,7 +38,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                             ".  Expected " + std::to_string(num_fields - 1) +
                             ", but only got " + std::to_string(c - 1) + ".");
                 }
-                const auto &field = field_flag_pairs.at(c).get_field();
+                const auto &field = fields.at(c);
                 if (td->first == "TD" || td->first.empty()) {
                     std::string temp = td->second.get_value<std::string>();
                     if (field.get_array_size() != 1) {
@@ -58,7 +59,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
             if (td != tr.second.end()) {
                 throw std::runtime_error("Too many elements in row " +
                                          std::to_string(element_lists_by_row.size()) +
-                                         ".  Only expected " +
+                                         ".  Expected only " +
                                          std::to_string(num_fields - 1) + ".");
             }
         } else if (tr.first != XMLATTR_DOT + "encoding" && tr.first != XMLCOMMENT) {
@@ -68,37 +69,43 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         }
     }
 
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
-    std::vector<uint8_t> data;
+    std::vector<Column> orig_columns;
 
     for (std::size_t c = 0; c < num_fields; ++c) {
-        const auto &field = field_flag_pairs.at(c).get_field();
-        append_column(columns, offsets, field.get_name(), field.get_type(),
-                      column_array_sizes[c], field.get_field_properties());
+        const auto &field = fields.at(c);
+        orig_columns.emplace_back(field.get_name(), field.get_type(),
+                                  column_array_sizes[c], field.get_field_properties(),
+                                  field.get_dynamic_array_flag());
     }
 
-    Row row_string(*offsets.rbegin());
+    Field_Framework field_framework(orig_columns, true /* got_null_bitfields_column */);
+    std::vector<Column> &columns = field_framework.get_columns();
+    std::vector<size_t> &offsets = field_framework.get_offsets();
 
-    for (size_t row_idx = 0; row_idx < element_lists_by_row.size(); ++row_idx) {
+    size_t num_rows = element_lists_by_row.size();
+
+    Data_Details data_details(field_framework, num_rows);
+    Row single_row(*offsets.rbegin());
+
+    // JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in
+    // '\0'?
+    for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
         auto &element_list = element_lists_by_row[row_idx];
-        row_string.fill_with_zeros();
+        single_row.fill_with_zeros();
         for (size_t col_idx = 1; col_idx < num_fields; ++col_idx) {
             const auto &column = columns[col_idx];
             auto &element = element_list[col_idx - 1];
             if (element.empty()) {
-                row_string.set_null(column.get_type(), column.get_array_size(), col_idx,
-                                    offsets[col_idx], offsets[col_idx + 1]);
+                single_row.insert_null(column.get_type(), column.get_array_size(),
+                                       col_idx, offsets[col_idx], offsets[col_idx + 1]);
             } else
                 try {
-                    insert_ascii_in_row(row_string, column.get_type(),
-                                        column.get_array_size(), col_idx, element,
-                                        offsets[col_idx], offsets[col_idx + 1]);
+                    single_row.insert_from_ascii(
+                            element, column.get_type(), column.get_array_size(),
+                            col_idx, offsets[col_idx], offsets[col_idx + 1]);
                 } catch (std::exception &error) {
                     throw std::runtime_error(
-                            "Invalid " +
-                            to_string(
-                                    field_flag_pairs[col_idx].get_field().get_type()) +
+                            "Invalid " + to_string(fields[col_idx].get_type()) +
                             " value " + element + " in element_list " +
                             std::to_string(row_idx + 1) + ", field " +
                             std::to_string(col_idx) +
@@ -106,7 +113,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                             ". Error message: " + error.what());
                 }
         }
-        append_row(data, row_string);
+        data_details.append_row(single_row);
     }
-    return Data_Element(columns, offsets, data);
+    return Data_Element(field_framework, data_details);
 }

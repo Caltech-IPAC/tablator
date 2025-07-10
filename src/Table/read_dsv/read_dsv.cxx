@@ -35,12 +35,9 @@ void Table::read_dsv(std::istream &input_stream, const Format &format) {
             parse_dsv(input_stream, format.is_csv() ? ',' : '\t'));
 
     // Construct main resource element from table data.
-
-    std::vector<Column> columns;
-    std::vector<size_t> offsets = {0};
-    set_column_info(columns, offsets, dsv);
-    add_resource_element(Table_Element::Builder(columns, offsets,
-                                                read_dsv_rows(columns, offsets, dsv))
-                                 .build());
+    Field_Framework field_framework = set_column_info(dsv);
+    add_resource_element(
+            Table_Element::Builder(field_framework, read_dsv_rows(field_framework, dsv))
+                    .build());
 }
 }  // namespace tablator

@@ -7,27 +7,41 @@ namespace tablator {
 
 class Column {
 public:
+    // These constexprs are used by HDF5-support code.
     static constexpr char const *COL_ARRAY_SIZE = "array_size";
     static constexpr char const *COL_FIELD_PROPERTIES = "field_properties";
     static constexpr char const *COL_NAME = "name";
     static constexpr char const *COL_TYPE = "type";
+    static constexpr char const *COL_DYNAMIC_ARRAY_FLAG = "dynamic_array_flag";
 
-    Column(const std::string &Name, const Data_Type &Type, const size_t &Array_size)
-            : Column(Name, Type, Array_size, Field_Properties()) {}
+    Column(const std::string &name, const Data_Type &type, const size_t &array_size,
+           const Field_Properties &field_properties, bool dynamic_array_flag)
+            : name_(name),
+              type_(type),
+              array_size_(array_size),
+              field_properties_(field_properties),
+              dynamic_array_flag_(dynamic_array_flag) {}
 
-    Column(const std::string &Name, const Data_Type &Type, const size_t &Array_size,
-           const Field_Properties &Field_properties)
-            : name_(Name),
-              type_(Type),
-              array_size_(Array_size),
-              field_properties_(Field_properties) {}
+    Column(const std::string &name, const Data_Type &type, const size_t &array_size,
+           const Field_Properties &field_properties)
+            : Column(name, type, array_size, field_properties,
+                     ((type == Data_Type::CHAR) ||
+                      (array_size == std::numeric_limits<size_t>::max()))) {}
 
-    inline size_t get_data_size() const {
-        return tablator::data_size(type_) * array_size_;
-    }
+    Column(const std::string &name, const Data_Type &type, const size_t &array_size,
+           bool dynamic_array_flag)
+            : Column(name, type, array_size, Field_Properties(), dynamic_array_flag) {}
 
-    // deprecated
-    inline size_t data_size() const { return get_data_size(); }
+
+    Column(const std::string &name, const Data_Type &type, const size_t &array_size)
+            : Column(name, type, array_size, Field_Properties()) {}
+
+
+    Column(const std::string &name, const Data_Type &type,
+           const Field_Properties &field_properties)
+            : Column(name, type, 1, field_properties) {}
+
+    Column(const std::string &name, const Data_Type &type) : Column(name, type, 1) {}
 
     // accessors
     inline const std::string &get_name() const { return name_; }
@@ -63,7 +77,12 @@ public:
     inline ATTRIBUTES &get_field_property_attributes() {
         return get_field_properties().get_attributes();
     }
+    inline bool get_dynamic_array_flag() const { return dynamic_array_flag_; }
+    inline void set_dynamic_array_flag(bool b) { dynamic_array_flag_ = b; }
 
+    inline size_t get_data_size() const {
+        return tablator::data_size(type_) * array_size_;
+    }
 
 private:
     std::string name_;
@@ -72,6 +91,7 @@ private:
     // Actual array_size for fixed-length arrays; maximum array_size otherwise.
     size_t array_size_;
     Field_Properties field_properties_;
+    bool dynamic_array_flag_;
 };
 
 

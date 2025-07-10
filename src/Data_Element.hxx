@@ -1,37 +1,67 @@
 #pragma once
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-
 #include "Column.hxx"
-
-// JTODO: Create struct to hold commonly used (columns, offsets) pair?
+#include "Data_Details.hxx"
+#include "Field_Framework.hxx"
 
 namespace tablator {
 
 class Data_Element {
 public:
-    Data_Element(const std::vector<Column> &columns, const std::vector<size_t> &offsets,
-                 const std::vector<uint8_t> &data)
-            : columns_(columns), offsets_(offsets), data_(data) {}
+    Data_Element(const Field_Framework &field_framework,
+                 const Data_Details &data_details)
+            : field_framework_(field_framework), data_details_(data_details) {}
+
+    Data_Element(const Field_Framework &field_framework, size_t num_rows = 0)
+            : Data_Element(field_framework, Data_Details(field_framework, num_rows)) {}
 
     // accessors
-    inline const std::vector<Column> &get_columns() const { return columns_; }
-    inline std::vector<Column> &get_columns() { return columns_; }
+    const Field_Framework &get_field_framework() const { return field_framework_; }
 
-    inline const std::vector<size_t> &get_offsets() const { return offsets_; }
-    inline std::vector<size_t> &get_offsets() { return offsets_; }
+    Field_Framework &get_field_framework() { return field_framework_; }
 
 
-    inline const std::vector<uint8_t> &get_data() const { return data_; }
-    inline std::vector<uint8_t> &get_data() { return data_; }
+    const Data_Details &get_data_details() const { return data_details_; }
 
-    inline void set_data(const std::vector<uint8_t> &d) { data_ = d; }
+    Data_Details &get_data_details() { return data_details_; }
+
+    inline const std::vector<Column> &get_columns() const {
+        return field_framework_.get_columns();
+    }
+
+    // Non-const to allow query_server to modify field_properties.
+    inline std::vector<Column> &get_columns() { return field_framework_.get_columns(); }
+
+    inline const std::vector<size_t> &get_offsets() const {
+        return field_framework_.get_offsets();
+    }
+
+    size_t get_row_size() const { return field_framework_.get_row_size(); }
+    size_t get_num_rows() const { return data_details_.get_num_rows(); }
+
+    void adjust_num_rows(const size_t &new_num_rows) {
+        data_details_.adjust_num_rows(new_num_rows);
+    }
+
+    void reserve_rows(const size_t &new_num_rows) {
+        get_data_details().reserve_rows(new_num_rows);
+    }
+
+    inline const std::vector<uint8_t> &get_data() const {
+        return data_details_.get_data();
+    }
+
+    // Non-const to support append_rows().
+    inline std::vector<uint8_t> &get_data() { return data_details_.get_data(); }
+
+    inline void set_data(const std::vector<uint8_t> &d) { data_details_.set_data(d); }
 
 private:
-    std::vector<Column> columns_;
-    std::vector<size_t> offsets_ = {0};
-    std::vector<uint8_t> data_;
+    // Non-const to allow query_server to update column's field_properties.
+    Field_Framework field_framework_;
+
+    // Non-const because of append_rows().
+    Data_Details data_details_;
 };
 
 }  // namespace tablator
