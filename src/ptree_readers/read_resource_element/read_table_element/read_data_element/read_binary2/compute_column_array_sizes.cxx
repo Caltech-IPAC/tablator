@@ -28,7 +28,7 @@ void compute_column_array_sizes(const std::vector<uint8_t> &stream,
 
             } else {
                 if (is_null_MSB(stream, row_offset, field_idx)) {
-				  position += sizeof(uint32_t);
+                    position += sizeof(uint32_t);
                 } else {
                     // FIXME: This feels like the hard way to do things.
                     // But I can not use plain old pointers, because I

@@ -1,0 +1,12 @@
+\fixlen = T
+\RowsRetrieved = 5
+\type = 'results'
+|  ID|
+| int|
+|    |
+|null|
+    0 
+    4 
+    6 
+    8 
+    9 

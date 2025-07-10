@@ -1,0 +1,11 @@
+\fixlen = T
+\RowsRetrieved = 4
+\type = 'results'
+|  ID|
+| int|
+|    |
+|null|
+    2 
+    3 
+    5 
+    7 
