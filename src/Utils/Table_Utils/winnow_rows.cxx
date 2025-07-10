@@ -1,11 +1,11 @@
 #include "../Table_Utils.hxx"
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 void tablator::winnow_rows(std::vector<uint8_t> &data,
-                                         const std::set<size_t> &selected_row_idx_list,
-                                         size_t num_rows, size_t row_size) {
+                           const std::set<size_t> &selected_row_idx_list,
+                           size_t num_rows, size_t row_size) {
     if (data.size() != num_rows * row_size) {
         throw std::runtime_error(
                 "Mismatch between data.size(), num_rows, and row_size.");
@@ -31,7 +31,7 @@ void tablator::winnow_rows(std::vector<uint8_t> &data,
 
     for (auto row_idx : selected_row_idx_list) {
         if (row_idx >= write_idx) {
-		  read_ptr += ((row_idx - prev_row_idx) * row_size);
+            read_ptr += ((row_idx - prev_row_idx) * row_size);
             if (row_idx > write_idx) {
                 // Copy row_idx-th row to begin immediately after the end of the
                 // previous copied row.
