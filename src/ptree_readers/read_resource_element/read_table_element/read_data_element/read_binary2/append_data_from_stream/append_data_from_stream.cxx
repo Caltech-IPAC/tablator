@@ -52,22 +52,15 @@ void ptree_readers::append_data_from_stream(std::vector<uint8_t> &data,
                 std::advance(end, src_pos);
                 uint32_t dynamic_array_size(0);
 
-                // Parse big-ended dynamic_array_size and write it
-                // to <row> (and eventually to <data>)
-                // little-endedly, since <data> is for internal
-                // use only.  We'll swap back if we later write
-                // this table in binary2 format.
-
+                // Extract dynamic_array_size, swapping from big-ended
+                // to little-ended for internal use.
                 boost::spirit::qi::parse(begin, end, boost::spirit::qi::big_dword,
                                          dynamic_array_size);
 
-                memcpy(row.get_data().data() + offsets[col_idx], &dynamic_array_size,
-                       sizeof(uint32_t));
-
                 // Now write the array itself, again swapping from
                 // big-ended to little-ended for internal use.
-                insert_swapped(row, offsets[col_idx] + sizeof(uint32_t), col_type,
-                               dynamic_array_size, stream, src_pos);
+                insert_swapped(row, offsets[col_idx], col_type, dynamic_array_size,
+                               stream, src_pos);
                 src_pos += data_size(col_type) * dynamic_array_size;
             } else {
                 insert_swapped(row, offsets[col_idx], column, stream, src_pos);
