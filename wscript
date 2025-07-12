@@ -26,6 +26,7 @@ def build(bld):
              'src/Row/Row.cxx',
              'src/Row/insert_null.cxx',
              'src/Row/insert_from_ascii.cxx',
+             'src/Row/insert_from_bigendian.cxx',
              'src/H5_to_Data_Type.cxx',
              'src/quote_sql_string.cxx',
              'src/Table/Table.cxx',
@@ -90,7 +91,6 @@ def build(bld):
              'src/ptree_readers/read_resource_element/read_table_element/read_data_element/read_binary2/decode_base64_stream.cxx',
              'src/ptree_readers/read_resource_element/read_table_element/read_data_element/read_binary2/compute_column_array_sizes.cxx',
              'src/ptree_readers/read_resource_element/read_table_element/read_data_element/read_binary2/append_data_from_stream/append_data_from_stream.cxx',
-             'src/ptree_readers/read_resource_element/read_table_element/read_data_element/read_binary2/append_data_from_stream/insert_swapped.cxx',
              'src/Ascii_Writer/Ascii_Writer.cxx',
              'src/Decimal_String_Trimmer/Decimal_String_Trimmer.cxx'
 	     ]
