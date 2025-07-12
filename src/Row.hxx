@@ -3,6 +3,8 @@
 #include <cassert>
 #include <vector>
 
+#include <boost/spirit/include/qi.hpp>
+
 #include "Common.hxx"
 #include "Data_Type.hxx"
 
@@ -40,9 +42,15 @@ public:
     }
 
 
-    void insert_from_ascii(const std::string &element, const Data_Type &data_type,
-                           const size_t &array_size, const size_t &column,
+    void insert_from_ascii(const std::string &value, const Data_Type &data_type,
+                           const size_t &array_size, const size_t &col_idx,
                            const size_t &offset, const size_t &offset_end);
+
+
+    void insert_from_bigendian(const std::vector<uint8_t> &stream,
+                               size_t starting_src_pos, const Data_Type &data_type,
+                               const size_t &array_size,
+                               const size_t &offset);
 
 
     size_t get_size() const { return data_.size(); }
@@ -51,6 +59,12 @@ public:
     std::vector<char> &get_data() { return data_; }
 
 private:
+    template <class T, class Rule>
+    void insert_from_bigendian_internal(size_t column_offset, const Rule &rule,
+                                        size_t array_size,
+                                        const std::vector<uint8_t> &stream,
+                                        size_t starting_src_pos);
+
     template <typename T>
     void insert_null_internal(const size_t &offset) {
         insert(tablator::get_null<T>(), offset);

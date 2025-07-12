@@ -25,6 +25,7 @@ def build(bld):
              'src/Format/content_type.cxx',
              'src/Row/insert_null.cxx',
              'src/Row/insert_from_ascii.cxx',
+             'src/Row/insert_from_bigendian.cxx',
              'src/H5_to_Data_Type.cxx',
              'src/quote_sql_string.cxx',
              'src/Table/Table.cxx',
