@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Common.hxx"
-#include "Field_Framework.hxx"
 #include "Row.hxx"
 
 namespace tablator {
+
+class Field_Framework;
 
 class Data_Details {
 public:
@@ -12,9 +13,7 @@ public:
         init(num_rows);
     }
 
-    Data_Details(const Field_Framework &field_framework, size_t num_rows = 0)
-            : Data_Details(field_framework.get_row_size(), num_rows) {}
-
+    Data_Details(const Field_Framework &field_framework, size_t num_rows = 0);
 
     void append_row(const Row &row) {
         assert(row.get_data().size() == get_row_size());
@@ -60,9 +59,7 @@ public:
 
 
 private:
-    void init(const size_t &new_num_rows) {
-	  reserve_rows(new_num_rows);
-    }
+    void init(const size_t &new_num_rows) { reserve_rows(new_num_rows); }
 
     // Can't be const because of append_rows().
     std::vector<uint8_t> data_;
