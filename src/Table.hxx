@@ -523,7 +523,7 @@ public:
             // JTODO what if an element is null?  Assume already has get_null() value?
             size_t base_offset = row_offset + get_offsets().at(col_idx);
             uint8_t const *curr_data = get_data().data() + base_offset;
-            size_t element_size = data_size(column.get_type());
+            size_t element_size = get_data_size(column.get_type());
 
             for (size_t i = 0; i < array_size; ++i) {
                 val_array.emplace_back(*(reinterpret_cast<const T *>(curr_data)));
@@ -695,22 +695,7 @@ public:
         get_results_resource_element().adjust_num_rows(new_num_rows);
     }
 
-    // deprecated
-    void resize_data(const size_t &new_num_rows) {
-        get_results_resource_element().adjust_num_rows(new_num_rows);
-    }
-
-    // deprecated
-    void resize_rows(const size_t &new_num_rows) {
-        get_results_resource_element().adjust_num_rows(new_num_rows);
-    }
-
     void reserve_rows(const size_t &new_num_rows) {
-        get_results_resource_element().reserve_rows(new_num_rows);
-    }
-
-    // deprecated
-    void reserve_data(const size_t &new_num_rows) {
         get_results_resource_element().reserve_rows(new_num_rows);
     }
 
@@ -727,14 +712,16 @@ public:
         return get_results_resource_element().get_offsets();
     }
 
+    size_t get_num_dynamic_columns() const {
+        return get_results_resource_element().get_num_dynamic_columns();
+    }
+
     size_t get_row_size() const {
         return get_results_resource_element().get_row_size();
     }
-
     size_t get_num_rows() const {
         return get_results_resource_element().get_num_rows();
     }
-
 
     Labeled_Properties &get_resource_element_labeled_properties() {
         return get_results_resource_element().get_labeled_properties();
@@ -952,7 +939,6 @@ private:
         }
     }
 
-
     std::vector<size_t> get_column_widths(const Command_Line_Options &options) const {
         return Ipac_Table_Writer::get_column_widths(*this, options);
     }
@@ -1020,7 +1006,7 @@ private:
                                       const std::list<std::vector<std::string>> &dsv);
 
 
-    // used only for read_dsv()
+    // Used only for read_dsv()
     static Field_Framework set_column_info(std::list<std::vector<std::string>> &dsv);
 
     Table(const std::vector<Resource_Element> &resource_elements,

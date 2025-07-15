@@ -424,7 +424,7 @@ void Ipac_Table_Writer::write_single_value(
         // requires.
         size_t base_offset = curr_row_offset + offsets.at(col_idx);
         uint8_t const* curr_data = table_data.data() + base_offset;
-        size_t element_size = data_size(active_datatype);
+        size_t element_size = get_data_size(active_datatype);
 
         for (size_t element = 0; element < column.get_array_size(); ++element) {
             os << Ascii_Writer::IPAC_COLUMN_SEPARATOR << std::setw(width);

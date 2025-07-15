@@ -3,17 +3,21 @@
 #include "../Row.hxx"
 #include "../data_size.hxx"
 
-void tablator::Row::insert_null(Data_Type data_type, const size_t& array_size,
-                                const size_t& col_idx, const size_t& offset,
-                                const size_t& offset_end) {
+void tablator::Row::insert_null(Data_Type data_type, const size_t &array_size,
+                                const size_t &offset, const size_t &offset_end,
+                                const size_t &col_idx, bool dynamic_array_flag) {
     const int byte = (col_idx - 1) / 8;
     const char mask = (128 >> ((col_idx - 1) % 8));
 
     // Update the null_bitfield_flag's bit for this column.
     data_[byte] = data_[byte] | mask;
 
+    if (dynamic_array_flag) {
+        set_dynamic_array_size(col_idx, 0);
+    }
+
     size_t curr_offset = offset;
-    size_t data_type_size = data_size(data_type);
+    size_t data_type_size = get_data_size(data_type);
 
     // Mark the indicated array elements as null.
     for (size_t i = 0; i < array_size; ++i) {
@@ -26,7 +30,9 @@ void tablator::Row::insert_null(Data_Type data_type, const size_t& array_size,
     }
 }
 
-void tablator::Row::insert_null_by_type(Data_Type data_type, const size_t& offset) {
+//=========================================================
+
+void tablator::Row::insert_null_by_type(Data_Type data_type, const size_t &offset) {
     switch (data_type) {
         case Data_Type::INT8_LE:
             insert_null_internal<int8_t>(offset);

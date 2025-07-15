@@ -7,9 +7,16 @@
 #include "../data_size.hxx"
 
 namespace tablator {
+
+// Caller has handled nulls (except possibly for INT8_LE).
 void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type,
-                            const size_t &array_size, const size_t &col_idx,
-                            const size_t &offset, const size_t &offset_end) {
+                            const size_t &array_size, const size_t &offset,
+                            const size_t &offset_end, const size_t &col_idx,
+                            bool dynamic_array_flag) {
+    if (dynamic_array_flag) {
+        set_dynamic_array_size(col_idx, array_size);
+    }
+
     if (array_size != 1 && data_type != Data_Type::CHAR) {
         std::vector<std::string> elements;
         boost::split(elements, value, boost::is_any_of(" "));
@@ -20,17 +27,19 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                     std::to_string(num_elements) + ": '" + value + "'");
         }
         auto element_offset = offset;
-        auto element_size = data_size(data_type);
+        auto element_size = get_data_size(data_type);
         for (auto &e : elements) {
-            insert_from_ascii(e, data_type, 1, col_idx, element_offset,
-                              element_offset + element_size);
+            insert_from_ascii(e, data_type, 1, element_offset,
+                              element_offset + element_size, col_idx,
+                              dynamic_array_flag);
             element_offset += element_size;
         }
     } else {
         switch (data_type) {
             case Data_Type::INT8_LE:
                 if (value == "?" || value == " " || value[0] == '\0') {
-                    insert_null(data_type, array_size, col_idx, offset, offset_end);
+                    insert_null(data_type, array_size, offset, offset_end, col_idx,
+                                dynamic_array_flag);
                 } else {
                     bool result = (boost::iequals(value, "true") ||
                                    boost::iequals(value, "t") || value == "1");
@@ -90,7 +99,7 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                 insert(boost::lexical_cast<double>(value), offset);
                 break;
             case Data_Type::CHAR:
-                insert(value, offset, offset_end);
+                insert(value, offset, offset_end, col_idx, dynamic_array_flag);
                 break;
             default:
                 throw std::runtime_error("Unknown data type in insert_from_ascii(): " +
@@ -98,4 +107,6 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
         }
     }
 }
+
+
 }  // namespace tablator

@@ -73,21 +73,23 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                      element == ipac_columns[COL_NULL_IDX][col_idx]) ||
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      tab_column.get_type() != Data_Type::CHAR && element.empty())) {
-                    single_row.insert_null(tab_column.get_type(),
-                                           tab_column.get_array_size(), col_idx,
-                                           offsets[col_idx], offsets[col_idx + 1]);
+                    single_row.insert_null(
+                            tab_column.get_type(), tab_column.get_array_size(),
+                            offsets[col_idx], offsets[col_idx + 1], col_idx,
+                            tab_column.get_dynamic_array_flag());
                 } else {
                     try {
-                        single_row.insert_from_ascii(element, tab_column.get_type(),
-                                                     tab_column.get_array_size(),
-                                                     col_idx, offsets[col_idx],
-                                                     offsets[col_idx + 1]);
+                        single_row.insert_from_ascii(
+                                element, tab_column.get_type(),
+                                tab_column.get_array_size(), offsets[col_idx],
+                                offsets[col_idx + 1], col_idx,
+                                tab_column.get_dynamic_array_flag());
                     } catch (std::exception &error) {
                         throw std::runtime_error(
-                                "Invalid " + to_string(tab_column.get_type()) +
+                                "Failed to insert " + to_string(tab_column.get_type()) +
                                 " for field '" + tab_column.get_name() + "' in line " +
-                                std::to_string(current_line_num + 1) + ".  Found '" +
-                                element + "'");
+                                std::to_string(current_line_num + 1) + ": '" + element +
+                                "'. Error: " + error.what());
                     }
                 }
             }
