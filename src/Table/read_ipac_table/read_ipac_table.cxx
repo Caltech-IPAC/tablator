@@ -28,6 +28,7 @@ std::vector<size_t> get_ipac_column_widths(
 
 
 void tablator::Table::read_ipac_table(std::istream &input_stream) {
+    // std::cout << "read_ipac_table(), enter" << std::endl;
     std::array<std::vector<std::string>, 4> ipac_columns;
     std::vector<size_t> ipac_column_offsets;
 
@@ -45,12 +46,13 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
 
     std::vector<Column> &tab_columns = field_framework.get_columns();
     std::vector<size_t> &offsets = field_framework.get_offsets();
+    size_t row_size = field_framework.get_row_size();
     Data_Details data_details(field_framework);
 
     std::string line;
     std::getline(input_stream, line);
 
-    Row single_row(field_framework.get_row_size());
+    Row single_row(row_size, 0 /* num_dynamic_arrays */);
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
             single_row.fill_with_zeros();
@@ -80,10 +82,12 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                            offsets[col_idx], offsets[col_idx + 1]);
                 } else {
                     try {
-                        single_row.insert_from_ascii(element, tab_column.get_type(),
-                                                     tab_column.get_array_size(),
-                                                     col_idx, offsets[col_idx],
-                                                     offsets[col_idx + 1]);
+                        // std::cout << "read_ipac_table(), before insert_from_ascii()"
+                        // << std::endl;
+                        single_row.insert_from_ascii(
+                                element, tab_column.get_type(),
+                                tab_column.get_array_size(), col_idx, offsets[col_idx],
+                                offsets[col_idx + 1], DEFAULT_IDX_IN_DYNAMIC_COLS_LIST);
                     } catch (std::exception &error) {
                         throw std::runtime_error(
                                 "Invalid " + to_string(tab_column.get_type()) +

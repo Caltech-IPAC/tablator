@@ -9,7 +9,7 @@ template <class T, class Rule>
 T parse_bigendian_element(const Rule &rule,
                           std::vector<uint8_t>::const_iterator &src_iter) {
     T element = 0;
-	boost::spirit::qi::parse(src_iter, src_iter + sizeof(T), rule, element);
+    boost::spirit::qi::parse(src_iter, src_iter + sizeof(T), rule, element);
     return element;
 }
 
@@ -39,10 +39,14 @@ void Row::insert_from_bigendian_internal(size_t column_offset, const Rule &rule,
 
 //============================================================
 
+
+// Caller has handled nulls.
 void Row::insert_from_bigendian(const std::vector<uint8_t> &stream,
                                 size_t starting_src_pos, const Data_Type &data_type,
-                                const size_t &array_size,
-                                const size_t &offset) {
+                                const size_t &array_size, const size_t &offset,
+                                const size_t &idx_in_dynamic_cols_list) {
+    set_array_size_if_dynamic(idx_in_dynamic_cols_list, array_size);
+
     const size_t data_type_size(data_size(data_type));
     const bool is_bool(data_type == Data_Type::INT8_LE);
 

@@ -10,6 +10,10 @@ void compute_column_array_sizes(const std::vector<uint8_t> &stream,
                                 std::vector<size_t> &column_array_sizes,
                                 size_t &num_rows);
 
+void append_data_from_stream(Data_Details &data_details,
+                             const Field_Framework &field_framework,
+                             const std::vector<uint8_t> &stream, size_t num_rows);
+
 
 //==============================================================
 
@@ -68,13 +72,11 @@ Data_Element ptree_readers::read_binary2(const boost::property_tree::ptree &bina
                              field.get_field_properties(),
                              field.get_dynamic_array_flag());
     }
-    Field_Framework field_framework(columns,
-                                    true /* got_null_bitfields_column */);  // JTODO
+    Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
     Data_Details data_details(field_framework, total_num_rows);
 
-
     for (std::size_t stream = 0; stream < streams.size(); ++stream) {
-        append_data_from_stream(data_details, field_framework, streams[stream], fields,
+        append_data_from_stream(data_details, field_framework, streams[stream],
                                 rows_per_stream[stream]);
     }
     return Data_Element(field_framework, data_details);

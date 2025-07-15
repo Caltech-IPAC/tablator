@@ -4,6 +4,7 @@
 
 #include "../Ascii_Writer.hxx"
 
+
 //==================================================================
 //                 Extractors
 //==================================================================
@@ -109,14 +110,16 @@ void validate_parameters(const tablator::Row &row, const tablator::Table &table,
 
 //======================================================
 
-void insert_blob_to_row_internal(tablator::Row &row, const tablator::Table &table,
-                                 size_t col_idx, size_t elt_idx,
-                                 const uint8_t *data_ptr,
-                                 uint32_t num_elements_to_insert) {
+void insert_column_element_to_row_internal(tablator::Row &row,
+                                           const tablator::Table &table, size_t col_idx,
+                                           size_t elt_idx, const uint8_t *data_ptr,
+                                           uint32_t num_elements_to_insert) {
+    // std::cout << "insert_to_row_internal(), col_idx: " << col_idx << std::endl;
     const auto &column = table.get_columns().at(col_idx);
     auto data_size = tablator::data_size(column.get_type());
     auto insert_offset = table.get_offsets().at(col_idx) + elt_idx * data_size;
-    row.insert(data_ptr, data_ptr + num_elements_to_insert * data_size, insert_offset);
+    row.insert(data_ptr, data_ptr + num_elements_to_insert * data_size, insert_offset,
+               table.get_idx_in_dynamic_cols_list(col_idx));
 }
 }  // namespace
 
@@ -128,7 +131,8 @@ void tablator::Table::insert_null_into_row(tablator::Row &row, size_t col_idx,
     validate_parameters(row, *this, col_idx, 0 /* elt_idx */, array_size);
     const auto &column = get_columns().at(col_idx);
     row.insert_null(column.get_type(), sizeof(uint32_t), col_idx,
-                    get_offsets().at(col_idx), get_offsets().at(col_idx + 1));
+                    get_offsets().at(col_idx), get_offsets().at(col_idx + 1),
+                    get_idx_in_dynamic_cols_list(col_idx));
 }
 
 
@@ -138,20 +142,37 @@ void tablator::Table::insert_array_element_into_row(tablator::Row &row, size_t c
                                                     size_t elt_idx,
                                                     const uint8_t *data_ptr) const {
     validate_parameters(row, *this, col_idx, elt_idx, 1 /* num_elements_to_insert */);
-    insert_blob_to_row_internal(row, *this, col_idx, elt_idx, data_ptr, 1);
+    insert_column_element_to_row_internal(row, *this, col_idx, elt_idx, data_ptr, 1);
 }
+
 //===============================================================
 
 void tablator::Table::insert_ptr_value_into_row(tablator::Row &row, size_t col_idx,
                                                 const uint8_t *data_ptr,
                                                 uint32_t array_size) const {
     validate_parameters(row, *this, col_idx, 0 /* start_elt_idx */, array_size);
-    insert_blob_to_row_internal(row, *this, col_idx, 0, data_ptr, array_size);
+    insert_column_element_to_row_internal(row, *this, col_idx, 0, data_ptr, array_size);
 }
+
+//===============================================================
 
 void tablator::Table::insert_string_column_value_into_row(
         Row &row, size_t col_idx, const uint8_t *data_ptr,
         uint32_t curr_array_size) const {
+    assert(col_idx < get_offsets().size() - 1);
+    assert(curr_array_size <= get_columns().at(col_idx).get_array_size());
+    // std::cout << "insert_string_column_value(), col_idx: " << col_idx << std::endl;
+#if 1
+    // JTODO is this copy necessary?  Row is pre-filled with '\0's.
+    std::string val_copy(reinterpret_cast<const char *>(data_ptr));
+    size_t offset_begin = get_offsets().at(col_idx);
+    size_t offset_end = get_offsets().at(col_idx + 1);
+    val_copy.resize(offset_end - offset_begin, '\0');
+    insert_ptr_value_into_row(row, col_idx,
+                              reinterpret_cast<const uint8_t *>(val_copy.data()),
+                              curr_array_size);
+#else
     insert_ptr_value_into_row(row, col_idx, reinterpret_cast<const uint8_t *>(data_ptr),
                               curr_array_size);
+#endif
 }

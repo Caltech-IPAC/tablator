@@ -297,7 +297,13 @@ public:
     // table modifiers
 
     // query_server and ZTF-mtc-utils call this function.
-    void append_row(const Row &row) { get_data_details().append_row(row); }
+    void append_row(const Row &row) {
+        if ((get_num_dynamic_columns() > 0) && row.get_dynamic_array_sizes().empty()) {
+            // caller hasn't been updated to use new Row constructor
+            get_data_details().append_row(row, get_field_framework());
+        }
+        get_data_details().append_row(row);
+    }
 
     void append_rows(const Table &table2);
 
@@ -604,8 +610,8 @@ public:
     }
 
     void winnow_rows(const std::set<size_t> &selected_row_idx_list) {
-        tablator::winnow_rows(get_data(), selected_row_idx_list,
-                                            get_num_rows(), get_row_size());
+        tablator::winnow_rows(get_data(), selected_row_idx_list, get_num_rows(),
+                              get_row_size());
     }
 
     // accessors
@@ -691,14 +697,8 @@ public:
         return get_results_resource_element().get_data_details();
     }
 
-    void adjust_num_rows(const size_t &new_num_rows) {
-        get_results_resource_element().adjust_num_rows(new_num_rows);
-    }
-
-
-    // deprecated
     // called by query_server to trim result set
-    void resize_data(const size_t &new_num_rows) {
+    void adjust_num_rows(const size_t &new_num_rows) {
         get_results_resource_element().adjust_num_rows(new_num_rows);
     }
 
@@ -715,10 +715,17 @@ public:
         return get_results_resource_element().get_offsets();
     }
 
+    size_t get_num_dynamic_columns() const {
+        return get_results_resource_element().get_num_dynamic_columns();
+    }
+
+    size_t get_idx_in_dynamic_cols_list(size_t col_idx) const {
+        return get_field_framework().get_idx_in_dynamic_cols_list(col_idx);
+    }
+
     size_t get_row_size() const {
         return get_results_resource_element().get_row_size();
     }
-
     size_t get_num_rows() const {
         return get_results_resource_element().get_num_rows();
     }
@@ -940,7 +947,6 @@ private:
         }
     }
 
-
     std::vector<size_t> get_column_widths(const Command_Line_Options &options) const {
         return Ipac_Table_Writer::get_column_widths(*this, options);
     }
@@ -1008,7 +1014,7 @@ private:
                                       const std::list<std::vector<std::string>> &dsv);
 
 
-    // used only for read_dsv()
+    // Used only for read_dsv()
     static Field_Framework set_column_info(std::list<std::vector<std::string>> &dsv);
 
     Table(const std::vector<Resource_Element> &resource_elements,

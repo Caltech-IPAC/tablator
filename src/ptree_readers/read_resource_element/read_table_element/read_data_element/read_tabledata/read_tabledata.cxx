@@ -8,10 +8,11 @@
 namespace tablator {
 size_t count_elements(const std::string &entry, const Data_Type &type);
 }
-
+// JTODO std::cout
 tablator::Data_Element tablator::ptree_readers::read_tabledata(
         const boost::property_tree::ptree &tabledata,
         const std::vector<Field> &fields) {
+    //  std::cout << "read_tabledata(), enter" << std::endl;
     std::vector<std::vector<std::string> > element_lists_by_row;
     size_t num_fields = fields.size();
 
@@ -83,10 +84,10 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
     std::vector<size_t> &offsets = field_framework.get_offsets();
 
     size_t num_rows = element_lists_by_row.size();
-
     Data_Details data_details(field_framework, num_rows);
-    Row single_row(*offsets.rbegin());
 
+    size_t num_dynamic_columns = field_framework.get_num_dynamic_columns();
+    Row single_row(field_framework.get_row_size(), num_dynamic_columns);
     // JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in
     // '\0'?
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
@@ -102,7 +103,8 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                 try {
                     single_row.insert_from_ascii(
                             element, column.get_type(), column.get_array_size(),
-                            col_idx, offsets[col_idx], offsets[col_idx + 1]);
+                            col_idx, offsets[col_idx], offsets[col_idx + 1],
+                            field_framework.get_idx_in_dynamic_cols_list(col_idx));
                 } catch (std::exception &error) {
                     throw std::runtime_error(
                             "Invalid " + to_string(fields[col_idx].get_type()) +

@@ -155,6 +155,9 @@ static const std::string HDF5_LINK("hdf5.link.");
 static constexpr size_t PLACEHOLDER_LEFT_MARGIN = 4;
 static constexpr size_t PLACEHOLDER_RIGHT_MARGIN = 5;
 
+static constexpr size_t DEFAULT_IDX_IN_DYNAMIC_COLS_LIST =
+        std::numeric_limits<size_t>::max();
+
 // No complicated sub-elements, only attributes and/or string value.
 static std::vector<std::string> PROPERTY_STYLE_LABELS = {COOSYS, INFO, TIMESYS, LINK};
 inline bool is_property_style_label(const std::string &label) {

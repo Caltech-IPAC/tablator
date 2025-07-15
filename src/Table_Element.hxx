@@ -285,6 +285,19 @@ public:
         return get_main_data_element().get_offsets();
     }
 
+    const std::vector<uint8_t> &get_data() const {
+        return get_main_data_element().get_data();
+    }
+    std::vector<uint8_t> &get_data() { return get_main_data_element().get_data(); }
+
+    void set_data(const std::vector<uint8_t> &d) {
+        get_main_data_element().set_data(d);
+    }
+
+    size_t get_num_dynamic_columns() const {
+        return get_main_data_element().get_num_dynamic_columns();
+    }
+
     size_t get_row_size() const { return get_main_data_element().get_row_size(); }
     size_t get_num_rows() const { return get_main_data_element().get_num_rows(); }
 
@@ -295,16 +308,6 @@ public:
 
     void reserve_rows(const size_t &new_num_rows) {
         get_main_data_element().reserve_rows(new_num_rows);
-    }
-
-
-    const std::vector<uint8_t> &get_data() const {
-        return get_main_data_element().get_data();
-    }
-    std::vector<uint8_t> &get_data() { return get_main_data_element().get_data(); }
-
-    void set_data(const std::vector<uint8_t> &d) {
-        get_main_data_element().set_data(d);
     }
 
 private:

@@ -1088,7 +1088,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             size_t fits_row_idx = j + 1;
 
             // Row by row, we'll populate <curr_row> and append it to <data>.
-            Row curr_row(row_size);
+            Row curr_row(row_size, 0 /* num_dynamic_arrays */);
 
             curr_row.fill_with_zeros();
 

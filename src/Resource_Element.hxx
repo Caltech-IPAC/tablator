@@ -403,18 +403,6 @@ public:
         return get_main_table_element().get_offsets();
     }
 
-    size_t get_row_size() const { return get_main_table_element().get_row_size(); }
-    size_t get_num_rows() const { return get_main_table_element().get_num_rows(); }
-
-    // called by query_server to trim result set
-    void adjust_num_rows(const size_t &new_num_rows) {
-        get_main_table_element().adjust_num_rows(new_num_rows);
-    }
-
-    void reserve_rows(const size_t &new_num_rows) {
-        get_main_table_element().reserve_rows(new_num_rows);
-    }
-
     std::vector<Field> &get_table_element_params() {
         return get_main_table_element().get_params();
     }
@@ -447,6 +435,23 @@ public:
     void set_data(const std::vector<uint8_t> &d) {
         get_main_table_element().set_data(d);
     }
+
+    size_t get_row_size() const { return get_main_table_element().get_row_size(); }
+    size_t get_num_rows() const { return get_main_table_element().get_num_rows(); }
+
+    size_t get_num_dynamic_columns() const {
+        return get_main_table_element().get_num_dynamic_columns();
+    }
+
+    // called by query_server to trim result set
+    void adjust_num_rows(const size_t &new_num_rows) {
+        get_main_table_element().adjust_num_rows(new_num_rows);
+    }
+
+    void reserve_rows(const size_t &new_num_rows) {
+        get_main_table_element().reserve_rows(new_num_rows);
+    }
+
 
     Resource_Type get_resource_type() const { return resource_type_; };
 
