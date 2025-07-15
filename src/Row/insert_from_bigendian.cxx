@@ -39,10 +39,15 @@ void Row::insert_from_bigendian_internal(size_t column_offset, const Rule &rule,
 
 //============================================================
 
+
+// Caller has handled nulls.
 void Row::insert_from_bigendian(const std::vector<uint8_t> &stream,
                                 size_t starting_src_pos, const Data_Type &data_type,
-                                const size_t &array_size, const size_t &offset) {
-    const size_t data_type_size(data_size(data_type));
+                                const size_t &array_size, const size_t &offset,
+                                const size_t &idx_in_dynamic_cols_list) {
+    set_array_size_if_dynamic(idx_in_dynamic_cols_list, array_size);
+
+    const size_t data_type_size(get_data_size(data_type));
     const bool is_bool(data_type == Data_Type::INT8_LE);
 
     if ((data_type_size == 1) && !is_bool) {

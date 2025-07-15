@@ -52,11 +52,6 @@ Data_Element read_tabledata(const boost::property_tree::ptree &tabledata,
 Data_Element read_binary2(const boost::property_tree::ptree &binary2,
                           const std::vector<Field> &fields);
 
-void append_data_from_stream(Data_Details &data_details,
-                             const Field_Framework &field_framework,
-                             const std::vector<uint8_t> &stream,
-                             const std::vector<Field> &fields, size_t num_rows);
-
 boost::property_tree::ptree read_xml_string_as_property_tree(
         const std::string &ptree_xml);
 void add_params_from_xml_string(std::vector<Field> &params,

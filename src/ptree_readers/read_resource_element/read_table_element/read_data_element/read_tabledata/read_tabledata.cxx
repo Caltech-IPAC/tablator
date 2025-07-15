@@ -82,7 +82,6 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
     std::vector<size_t> &offsets = field_framework.get_offsets();
 
     size_t num_rows = element_lists_by_row.size();
-
     Data_Details data_details(field_framework, num_rows);
     Row single_row(field_framework);
 
@@ -101,7 +100,8 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                 try {
                     single_row.insert_from_ascii(
                             element, column.get_type(), column.get_array_size(),
-                            col_idx, offsets[col_idx], offsets[col_idx + 1]);
+                            col_idx, offsets[col_idx], offsets[col_idx + 1],
+                            field_framework.get_idx_in_dynamic_cols_list(col_idx));
                 } catch (std::exception &error) {
                     throw std::runtime_error(
                             "Invalid " + to_string(fields[col_idx].get_type()) +

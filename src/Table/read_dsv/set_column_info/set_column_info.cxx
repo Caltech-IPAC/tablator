@@ -58,4 +58,5 @@ Field_Framework Table::set_column_info(std::list<std::vector<std::string> > &dsv
     return Field_Framework(columns, true /* got_null_bitfields_column */);
 }
 
+
 }  // namespace tablator

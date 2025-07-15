@@ -10,6 +10,7 @@
 namespace tablator {
 //============================================================================
 
+
 Table add_counter_column(const Table &src_table, const std::string &col_name) {
     const auto &src_columns = src_table.get_columns();
     size_t num_src_columns = src_columns.size();
@@ -23,12 +24,12 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
         }
         dest_columns.push_back(src_columns[col_idx]);
     }
+
     // Append the new column.
     dest_columns.emplace_back(col_name, Data_Type::UINT64_LE, 1 /* array_size */,
                               false /* dynamic_array_flag */);
 
     tablator::Table dest_table(dest_columns, false /* got_null_bitfields_column */);
-
     dest_table.get_data_details().add_cntr_column(dest_table.get_field_framework(),
                                                   src_table.get_field_framework(),
                                                   src_table.get_data_details());
@@ -41,6 +42,7 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
 
 // Src tables must have the same number of rows.
 // Dest table's set of columns consists of src1's columns followed by src2's columns.
+
 Table combine_tables(const Table &src1_table, const Table &src2_table) {
     size_t num_rows = src1_table.get_num_rows();
     if (src2_table.get_num_rows() != num_rows) {

@@ -78,10 +78,10 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                            offsets[col_idx], offsets[col_idx + 1]);
                 } else {
                     try {
-                        single_row.insert_from_ascii(element, tab_column.get_type(),
-                                                     tab_column.get_array_size(),
-                                                     col_idx, offsets[col_idx],
-                                                     offsets[col_idx + 1]);
+                        single_row.insert_from_ascii(
+                                element, tab_column.get_type(),
+                                tab_column.get_array_size(), col_idx, offsets[col_idx],
+                                offsets[col_idx + 1], DEFAULT_IDX_IN_DYNAMIC_COLS_LIST);
                     } catch (std::exception &error) {
                         throw std::runtime_error(
                                 "Invalid " + to_string(tab_column.get_type()) +

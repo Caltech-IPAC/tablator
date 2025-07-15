@@ -4,7 +4,7 @@
 #include "to_string.hxx"
 
 namespace tablator {
-inline size_t data_size(const Data_Type &data_type) {
+inline size_t get_data_size(const Data_Type &data_type) {
     switch (data_type) {
         case Data_Type::INT8_LE:
         case Data_Type::UINT8_LE:
@@ -27,4 +27,13 @@ inline size_t data_size(const Data_Type &data_type) {
                                      to_string(data_type));
     }
 }
+
+
+#if 0
+  // JTODO data_size
+  // deprecated
+  inline size_t data_size(const Data_Type &data_type) {
+	return get_data_size(data_type);
+  }
+#endif
 }  // namespace tablator

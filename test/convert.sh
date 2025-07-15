@@ -1409,12 +1409,29 @@ else
     echo "FAIL: add counter column to vot and write as tbl"
 fi
 
+${tablator_bin} --counter-column=my_cntr test/multi temp.tbl && diff test/multi_with_cntr.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: add counter column to vot and write as tbl"
+    rm -f temp.tbl
+else
+    echo "FAIL: add counter column to vot and write as tbl"
+fi
+
 ${tablator_bin} --combine-tables=1 test/back_and_forth_tables/two_row_array_with_nulls.vot test/back_and_forth_tables/two_row_large_ulong_array_from_json5.vot temp.tbl && diff test/back_and_forth_tables/combined_two_row_table.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: combine vot tables and write as tbl"
     rm -f temp.tbl
 else
     echo "FAIL: combine vot tables and write as tbl"
+fi
+
+
+${tablator_bin} --combine-tables=1 test/ra.tbl test/dec.tbl temp.tbl && diff test/ra_dec.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: combine tbl tables and write as tbl"
+    rm -f temp.tbl
+else
+    echo "FAIL: combine tbl tables and write as tbl"
 fi
 
 

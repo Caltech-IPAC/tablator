@@ -9,11 +9,9 @@
 
 namespace tablator {
 
-void ptree_readers::append_data_from_stream(Data_Details &data_details,
-                                            const Field_Framework &field_framework,
-                                            const std::vector<uint8_t> &stream,
-                                            const std::vector<Field> &fields,
-                                            size_t num_rows) {
+void append_data_from_stream(Data_Details &data_details,
+                             const Field_Framework &field_framework,
+                             const std::vector<uint8_t> &stream, size_t num_rows) {
     const auto &columns = field_framework.get_columns();
     const auto &offsets = field_framework.get_offsets();
 
@@ -31,7 +29,7 @@ void ptree_readers::append_data_from_stream(Data_Details &data_details,
             auto curr_array_size = col_array_size;
             auto col_type = column.get_type();
 
-            bool dynamic_array_flag = fields[col_idx].get_dynamic_array_flag();
+            bool dynamic_array_flag = field_framework.get_dynamic_array_flag(col_idx);
 
             if (is_null_MSB(stream, row_offset, col_idx)) {
                 single_row.insert_null(col_type, col_array_size, col_idx,
@@ -39,7 +37,7 @@ void ptree_readers::append_data_from_stream(Data_Details &data_details,
                 if (dynamic_array_flag) {
                     src_pos += sizeof(uint32_t);
                 } else {
-                    src_pos += data_size(col_type) * col_array_size;
+                    src_pos += get_data_size(col_type) * col_array_size;
                 }
             } else {
                 if (dynamic_array_flag) {
@@ -65,9 +63,10 @@ void ptree_readers::append_data_from_stream(Data_Details &data_details,
                 }
                 // Now write the array itself, again swapping from
                 // big-ended to little-ended for internal use.
-                single_row.insert_from_bigendian(stream, src_pos, col_type,
-                                                 curr_array_size, offsets[col_idx]);
-                src_pos += data_size(col_type) * curr_array_size;
+                single_row.insert_from_bigendian(
+                        stream, src_pos, col_type, curr_array_size, offsets[col_idx],
+                        field_framework.get_idx_in_dynamic_cols_list(col_idx));
+                src_pos += get_data_size(col_type) * curr_array_size;
             }
         }  // end loop through columns
         if (src_pos <= stream.size()) {

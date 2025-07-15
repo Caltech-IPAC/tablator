@@ -434,6 +434,7 @@ public:
     std::vector<Field> &get_table_element_fields() {
         return get_main_table_element().get_fields();
     }
+
     const std::vector<Field> &get_table_element_fields() const {
         return get_main_table_element().get_fields();
     }
@@ -446,6 +447,10 @@ public:
 
     void set_data(const std::vector<uint8_t> &d) {
         get_main_table_element().set_data(d);
+    }
+
+    size_t get_num_dynamic_columns() const {
+        return get_main_table_element().get_num_dynamic_columns();
     }
 
     Resource_Type get_resource_type() const { return resource_type_; };

@@ -25,9 +25,13 @@ public:
                                   .add_description(null_bitfield_flags_description)
                                   .build());
         }
-
+        uint col_idx = got_null_bitfields_column ? 0 : 1;
         for (auto &col : incoming_columns) {
             append_column(col);
+            if (col.get_dynamic_array_flag()) {
+                dynamic_column_ids_.push_back(col_idx);
+            }
+            ++col_idx;
         }
     }
 
@@ -45,6 +49,37 @@ public:
 
     inline const std::vector<size_t> &get_offsets() const { return offsets_; }
     inline std::vector<size_t> &get_offsets() { return offsets_; }
+
+    inline const std::vector<size_t> &get_dynamic_column_ids() const {
+        return dynamic_column_ids_;
+    }
+    inline std::vector<size_t> &get_dynamic_column_ids() { return dynamic_column_ids_; }
+
+    inline size_t get_num_dynamic_columns() const { return dynamic_column_ids_.size(); }
+
+    inline bool get_dynamic_array_flag(size_t col_idx) const {
+        return columns_.at(col_idx).get_dynamic_array_flag();
+    }
+
+    inline size_t get_idx_in_dynamic_cols_list(size_t col_idx) const {
+        // std::cout << "get_idx_in_dynamic_cols_list(), enter, col_idx: " << col_idx <<
+        // ", dyn_col_ids.size(): " << dynamic_column_ids_.size() << std::endl;
+        const auto &column = columns_.at(col_idx);
+        if (column.get_dynamic_array_flag()) {
+            const auto iter = std::find(dynamic_column_ids_.begin(),
+                                        dynamic_column_ids_.end(), col_idx);
+            if (iter == dynamic_column_ids_.end()) {
+                throw std::runtime_error(
+                        "Indicated dynamic column is not in dynamic cols "
+                        "list.");
+            }
+            // std::cout << "get_idx_in_dynamic_cols_list(), is_dynamic, return: " <<
+            // std::distance(dynamic_column_ids_.begin(), iter) << std::endl;
+            return std::distance(dynamic_column_ids_.begin(), iter);
+        }
+        // std::cout << "get_idx_in_dynamic_cols_list(), not dynamic" << std::endl;
+        return DEFAULT_IDX_IN_DYNAMIC_COLS_LIST;
+    }
 
 private:
     void append_column(const Column &column) {
@@ -90,6 +125,8 @@ private:
 
     std::vector<Column> columns_;
     std::vector<size_t> offsets_;
+
+    std::vector<size_t> dynamic_column_ids_;
 };
 
 }  // namespace tablator

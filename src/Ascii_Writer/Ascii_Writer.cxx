@@ -33,7 +33,8 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
                                        const Command_Line_Options &options) {
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
-            write_array_unit_as_ascii(os, type, 1, data + n * data_size(type), options);
+            write_array_unit_as_ascii(os, type, 1, data + n * get_data_size(type),
+                                      options);
 
             if (n != array_size - 1) {
                 os << separator;
@@ -54,7 +55,8 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
             os << std::setw(col_width);
-            write_array_unit_as_ascii(os, type, 1, data + n * data_size(type), options);
+            write_array_unit_as_ascii(os, type, 1, data + n * get_data_size(type),
+                                      options);
 
             if (n != array_size - 1) {
                 os << IPAC_COLUMN_SEPARATOR;
