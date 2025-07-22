@@ -7,9 +7,15 @@
 #include "Data_Type.hxx"
 
 namespace tablator {
+
+class Field_Framework;
+class Table;
+
 class Row {
 public:
     Row(const size_t &data_size) : data_(data_size) {}
+    Row(const Field_Framework &field_framework);
+    Row(const Table &table);
 
     void fill_with_zeros() { std::fill(data_.begin(), data_.end(), 0); }
 
