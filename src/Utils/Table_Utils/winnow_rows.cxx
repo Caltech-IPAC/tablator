@@ -28,10 +28,10 @@ void tablator::winnow_rows(std::vector<uint8_t> &data,
 
     for (auto row_idx : selected_row_idx_list) {
         if (row_idx >= write_idx) {
+		  read_ptr += ((row_idx - prev_row_idx) * row_size);
             if (row_idx > write_idx) {
                 // Copy row_idx-th row to begin immediately after the end of the
                 // previous copied row.
-                read_ptr += ((row_idx - prev_row_idx) * row_size);
                 std::copy(read_ptr, read_ptr + row_size, write_ptr);
             }
             ++write_idx;

@@ -1428,8 +1428,32 @@ fi
 
 ${tablator_bin} --winnow-rows-list "1 2 3" test/multi_formatted.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
 if [ $? -eq 0 ]; then
-    echo "PASS: winnow rows"
+    echo "PASS: winnow rows 1-3"
     rm -f temp.json5
 else
-    echo "FAIL: winnow rows"
+    echo "FAIL: winnow rows 1-3"
+fi
+
+${tablator_bin} --winnow-rows-list "0 2 4 6 8" test/winnow.tbl temp.tbl && diff test/winnow_even.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: winnow even rows"
+    rm -f temp.json5
+else
+    echo "FAIL: winnow even rows"
+fi
+
+${tablator_bin} --winnow-rows-list "0 4 6 8 9" test/winnow.tbl temp.tbl && diff test/winnow_composite.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: winnow composite rows"
+    rm -f temp.json5
+else
+    echo "FAIL: winnow composite rows"
+fi
+
+${tablator_bin} --winnow-rows-list "2 3 5 7" test/winnow.tbl temp.tbl && diff test/winnow_prime.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: winnow prime rows"
+    rm -f temp.json5
+else
+    echo "FAIL: winnow prime rows"
 fi
