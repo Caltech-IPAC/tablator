@@ -23,6 +23,7 @@ def build(bld):
              'src/Data_Type_Adjuster.cxx',
              'src/Format/set_from_extension.cxx',
              'src/Format/content_type.cxx',
+             'src/Row/Row.cxx',
              'src/Row/insert_null.cxx',
              'src/Row/insert_from_ascii.cxx',
              'src/H5_to_Data_Type.cxx',
