@@ -110,14 +110,33 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
     }
 
     Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
-
+	size_t row_size = field_framework.get_row_size();
     size_t num_rows = dataset.getSpace().getSimpleExtentNpoints();
+
+#if 0
     Data_Details data_details(field_framework, num_rows);
 
     // Resize, don't just reserve.
     data_details.adjust_num_rows(num_rows);
     dataset.read(data_details.get_data().data(), compound);
+#else
+	// Extract the data all at once and then divide it into rows.
+	std::vector<char> temp_data_vec(num_rows * row_size);
+    dataset.read(temp_data_vec.data(), compound);
 
+    Data_Details data_details(field_framework, num_rows);
+	auto &table_data = data_details.get_data();
+	auto curr_data_start = temp_data_vec.data();
+
+	for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
+	  auto curr_data_end = curr_data_start + row_size;
+		  table_data.emplace_back();
+		  table_data.back().reserve(row_size);
+		  table_data.back().insert(table_data.back().end(), curr_data_start, curr_data_end);
+		  curr_data_start = curr_data_end;
+	}
+
+#endif
     std::vector<Table_Element> table_elements;
     const auto table_element =
             Table_Element::Builder(field_framework, data_details)

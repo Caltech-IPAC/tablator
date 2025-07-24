@@ -56,6 +56,7 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
         os << (col_idx == num_columns - 1 ? '\n' : separator);
     }
 
+#if 0
     for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
          ++row_idx, row_offset += get_row_size()) {
         for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
@@ -80,4 +81,29 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
             os << (col_idx == num_columns - 1 ? '\n' : separator);
         }
     }
+#else
+    for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
+        for (size_t col_idx = 1; col_idx < num_columns; ++col_idx) {
+            const auto &column = columns[col_idx];
+            size_t offset = offsets[col_idx];
+            std::stringstream ss;
+
+            if (!is_null_value(row_idx, col_idx)) {
+                tablator::Ascii_Writer::write_type_as_ascii(
+                        ss, column.get_type(), column.get_array_size(),
+                        data.at(row_idx).data() + offset, tablator::Ascii_Writer::DEFAULT_SEPARATOR,
+                        options);
+            } else if (options.write_null_strings_) {
+                // Leave null entries blank by default, unlike in IPAC_TABLE format.
+                ss << "null";
+            }
+            char outer_quote_char = '\"';
+            if (!ss.str().empty() && ss.str()[0] == '\'') {
+                outer_quote_char = '\'';
+            }
+            write_escaped_string(os, ss.str(), separator, outer_quote_char);
+            os << (col_idx == num_columns - 1 ? '\n' : separator);
+        }
+    }
+#endif
 }

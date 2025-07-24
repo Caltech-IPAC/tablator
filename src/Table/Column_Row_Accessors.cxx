@@ -9,7 +9,7 @@
 //                 Extractors
 //==================================================================
 
-const uint8_t *tablator::Table::extract_value_ptr(size_t col_idx,
+const char *tablator::Table::extract_value_ptr(size_t col_idx,
                                                   size_t row_idx) const {
     const auto &columns = get_columns();
     if (col_idx >= columns.size()) {
@@ -19,7 +19,7 @@ const uint8_t *tablator::Table::extract_value_ptr(size_t col_idx,
         throw std::runtime_error("Invalid row index: " + std::to_string(row_idx));
     }
 
-    return get_data().data() + row_idx * get_row_size() + get_offsets().at(col_idx);
+    return get_data().at(row_idx).data() + get_offsets().at(col_idx);
 }
 
 std::string tablator::Table::extract_value_as_string(
@@ -42,7 +42,9 @@ std::string tablator::Table::extract_value_as_string(
         throw std::runtime_error("Invalid row index: " + std::to_string(row_idx));
     }
 
+#if 0
     size_t curr_row_offset = row_idx * get_row_size();
+#endif
     auto &column = columns[col_idx];
     if (is_null_value(row_idx, col_idx)) {
         auto &null_value = column.get_field_properties().get_values().null;
@@ -53,7 +55,11 @@ std::string tablator::Table::extract_value_as_string(
     // JTODO Write UINT8_LE values the way Ipac_Table_Writer does?
     tablator::Ascii_Writer::write_type_as_ascii(
             ss, column.get_type(), column.get_array_size(),
+#if 0
             data.data() + curr_row_offset + offsets[col_idx],
+#else
+			data.at(row_idx).data() + offsets[col_idx],
+#endif
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     return ss.str();
 }
@@ -112,7 +118,7 @@ void validate_parameters(const tablator::Row &row, const tablator::Table &table,
 
 void insert_column_element_to_row_internal(tablator::Row &row,
                                            const tablator::Table &table, size_t col_idx,
-                                           size_t elt_idx, const uint8_t *data_ptr,
+                                           size_t elt_idx, const char *data_ptr,
                                            uint32_t num_elements_to_insert) {
     // std::cout << "insert_to_row_internal(), col_idx: " << col_idx << std::endl;
     const auto &column = table.get_columns().at(col_idx);
@@ -140,7 +146,7 @@ void tablator::Table::insert_null_into_row(tablator::Row &row, size_t col_idx,
 
 void tablator::Table::insert_array_element_into_row(tablator::Row &row, size_t col_idx,
                                                     size_t elt_idx,
-                                                    const uint8_t *data_ptr) const {
+                                                    const char *data_ptr) const {
     validate_parameters(row, *this, col_idx, elt_idx, 1 /* num_elements_to_insert */);
     insert_column_element_to_row_internal(row, *this, col_idx, elt_idx, data_ptr, 1);
 }
@@ -148,7 +154,7 @@ void tablator::Table::insert_array_element_into_row(tablator::Row &row, size_t c
 //===============================================================
 
 void tablator::Table::insert_ptr_value_into_row(tablator::Row &row, size_t col_idx,
-                                                const uint8_t *data_ptr,
+                                                const char *data_ptr,
                                                 uint32_t array_size) const {
     validate_parameters(row, *this, col_idx, 0 /* start_elt_idx */, array_size);
     insert_column_element_to_row_internal(row, *this, col_idx, 0, data_ptr, array_size);
@@ -157,7 +163,7 @@ void tablator::Table::insert_ptr_value_into_row(tablator::Row &row, size_t col_i
 //===============================================================
 
 void tablator::Table::insert_string_column_value_into_row(
-        Row &row, size_t col_idx, const uint8_t *data_ptr,
+        Row &row, size_t col_idx, const char *data_ptr,
         uint32_t curr_array_size) const {
     assert(col_idx < get_offsets().size() - 1);
     assert(curr_array_size <= get_columns().at(col_idx).get_array_size());
@@ -169,10 +175,10 @@ void tablator::Table::insert_string_column_value_into_row(
     size_t offset_end = get_offsets().at(col_idx + 1);
     val_copy.resize(offset_end - offset_begin, '\0');
     insert_ptr_value_into_row(row, col_idx,
-                              reinterpret_cast<const uint8_t *>(val_copy.data()),
+                              reinterpret_cast<const char *>(val_copy.data()),
                               curr_array_size);
 #else
-    insert_ptr_value_into_row(row, col_idx, reinterpret_cast<const uint8_t *>(data_ptr),
+    insert_ptr_value_into_row(row, col_idx, reinterpret_cast<const char *>(data_ptr),
                               curr_array_size);
 #endif
 }

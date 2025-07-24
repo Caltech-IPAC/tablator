@@ -36,6 +36,7 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                             const Command_Line_Options &options) const {
     // List of cols whose types must be adjusted for writing due
     // to restrictions from <format>.
+  // std::cout << "write(), enter" << std::endl;
     std::vector<Data_Type> datatypes_for_writing;
     switch (format.enum_format) {
         case Format::Enums::FITS:
@@ -49,6 +50,7 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
         case Format::Enums::JSON:
         case Format::Enums::JSON5:
         case Format::Enums::VOTABLE: {
+		  // std::cout << "write(), json/vot, before datatypes()" << std::endl;
             datatypes_for_writing = Data_Type_Adjuster(*this).get_datatypes_for_writing(
                     format.enum_format);
             bool is_json(format.enum_format != Format::Enums::VOTABLE);
@@ -64,8 +66,10 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                         boost::property_tree::xml_writer_make_settings(' ', 2));
             }
             uint num_spaces = is_json ? 2 : 0;
+			// std::cout << "write(), before splice_tabledata()" << std::endl;
             splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,
                                        num_spaces, options);
+			// std::cout << "write(), after splice_tabledata()" << std::endl;
         } break;
         case Format::Enums::CSV:
             write_dsv(os, ',', options);

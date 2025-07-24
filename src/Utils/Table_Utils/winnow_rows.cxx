@@ -1,9 +1,9 @@
 #include "../Table_Utils.hxx"
-
+#if 0
 #include <string>
 #include <stdexcept>
 
-void tablator::winnow_rows(std::vector<uint8_t> &data,
+void tablator::winnow_rows(std::vector<std::vector<char>> &data,
                                          const std::set<size_t> &selected_row_idx_list,
                                          size_t num_rows, size_t row_size) {
     if (data.size() != num_rows * row_size) {
@@ -23,19 +23,26 @@ void tablator::winnow_rows(std::vector<uint8_t> &data,
         return;
     }
 
+
     const auto data_start_ptr = data.data();
     auto read_ptr = data_start_ptr;
     auto write_ptr = data_start_ptr;
+
     size_t write_idx = 0;
     size_t prev_row_idx = 0;
 
     for (auto row_idx : selected_row_idx_list) {
         if (row_idx >= write_idx) {
             if (row_idx > write_idx) {
+#if 0
+
                 // Copy row_idx-th row to begin immediately after the end of the
                 // previous copied row.
                 read_ptr += ((row_idx - prev_row_idx) * row_size);
                 std::copy(read_ptr, read_ptr + row_size, write_ptr);
+#else
+				data.at(write_idx).swap(data.at(row_idx);
+#endif
             }
             ++write_idx;
             write_ptr += row_size;
@@ -46,3 +53,4 @@ void tablator::winnow_rows(std::vector<uint8_t> &data,
     // Delete all data past the last row copied.
     data.resize(std::distance(data_start_ptr, write_ptr));
 }
+#endif

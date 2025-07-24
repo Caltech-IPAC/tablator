@@ -23,6 +23,7 @@ void Table::splice_tabledata_and_write(std::ostream &os, std::stringstream &ss,
 
 void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format,
                             const Command_Line_Options &options) const {
+  // std::cout << "write_tabledata(), enter" << std::endl;
     std::string tr_prefix, tr_suffix, td_prefix, td_suffix;
     std::string tabledata_indent = "                    ";
     const bool is_json(output_format == Format::Enums::JSON ||
@@ -54,9 +55,13 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
     const auto &offsets = get_offsets();
     size_t num_rows = get_num_rows();
     const auto &data = get_data();
-
+#if 0
     for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
-         ++row_idx, row_offset += get_row_size()) {
+         ++row_idx, row_offset += get_row_size())
+#else
+    for (size_t row_idx = 0; row_idx < num_rows;  ++row_idx)
+#endif
+ {
         os << tr_prefix;
 
         // Skip the null bitfield flag
@@ -67,7 +72,11 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
             if (!is_null_value(row_idx, col_idx)) {
                 Ascii_Writer::write_type_as_ascii(
                         td, column.get_type(), column.get_array_size(),
-                        data.data() + row_offset + offsets[col_idx],
+#if 0
+						data.data()  + row_offset + offsets[col_idx],
+#else
+                        data.at(row_idx).data() + offsets[col_idx],
+#endif
                         Ascii_Writer::DEFAULT_SEPARATOR, options);
             }
             os << td_prefix;
@@ -94,7 +103,12 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
             os << '\n';
         }
         os << tr_suffix;
-        if (is_json && row_offset < data.size() - get_row_size()) {
+#if 0
+        if (is_json && row_offset < data.size() - get_row_size())
+#else
+		  if (is_json && (row_idx < num_rows - 1))
+#endif
+		  {
             os << ',';
         }
         os << '\n';
@@ -103,5 +117,6 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
     if (is_json) {
         os << "]\n";
     }
+	// std::cout << "write_tabledata(), exit" << std::endl;
 }
 }  // namespace tablator

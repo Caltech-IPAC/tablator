@@ -5,6 +5,7 @@
 #include "../../../../../data_size.hxx"
 #include "../../../../../ptree_readers.hxx"
 
+// JTODO is stream necessarily vector of uint8_t, not char?
 
 namespace tablator {
 void compute_column_array_sizes(const std::vector<uint8_t> &stream,

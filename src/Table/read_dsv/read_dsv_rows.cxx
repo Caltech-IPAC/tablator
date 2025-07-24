@@ -12,9 +12,8 @@ Data_Details Table::read_dsv_rows(Field_Framework &field_framework,
 
     Data_Details data_details(field_framework, dsv.size());
 
-    Row single_row(field_framework.get_row_size(),
-                   field_framework.get_num_dynamic_columns());
-
+    Row single_row(field_framework.get_row_size());
+	// std::cout << "read_dsv_rows(), before loop, row_size: " << single_row.get_size() << std::endl;
     for (auto &dsv_row : dsv) {
         if (!skipped) {
             skipped = true;
@@ -34,7 +33,9 @@ Data_Details Table::read_dsv_rows(Field_Framework &field_framework,
                                              DEFAULT_IDX_IN_DYNAMIC_COLS_LIST);
             }
         }
+	// std::cout << "read_dsv_rows(), before append, row_size: " << single_row.get_size() << std::endl;
         data_details.append_row(single_row);
+	// std::cout << "read_dsv_rows(), after append, row_size: " << single_row.get_size() << std::endl;
     }
     return data_details;
 }

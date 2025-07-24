@@ -12,6 +12,7 @@ namespace tablator {
 
 
 Table add_counter_column(const Table &src_table, const std::string &col_name) {
+  // std::cout << "add_counter_column(), enter, num_rows: " << src_table.get_num_rows() << ", row_size: " << src_table.get_row_size() << std::endl;
     const auto &src_columns = src_table.get_columns();
     size_t num_src_columns = src_columns.size();
 
@@ -29,8 +30,9 @@ Table add_counter_column(const Table &src_table, const std::string &col_name) {
     dest_columns.emplace_back(col_name, Data_Type::UINT64_LE, 1 /* array_size */,
                               false /* dynamic_array_flag */);
 
-    tablator::Table dest_table(dest_columns, false /* got_null_bitfields_column */);
+    tablator::Table dest_table(dest_columns, false /* got_null_bitfields_column */, src_table.get_num_rows());
     auto &dest_data_details = dest_table.get_data_details();
+	// std::cout << "dst_table row size: " << dest_table.get_row_size() << std::endl;
     dest_data_details.add_cntr_column(dest_table.get_field_framework(),
                                       src_table.get_field_framework(),
                                       src_table.get_data_details());

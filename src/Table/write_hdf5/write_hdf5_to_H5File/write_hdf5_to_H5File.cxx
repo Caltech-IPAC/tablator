@@ -31,7 +31,10 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     H5::Group group(outfile.createGroup("RESOURCE_0"));
     write_hdf5_columns(get_resource_element_params(), PARAM, group);
 
-    std::array<hsize_t, 1> dims = {{get_num_rows()}};
+	size_t num_rows = get_num_rows();
+	size_t row_size = get_row_size();
+
+    std::array<hsize_t, 1> dims = {{num_rows}};
     H5::DataSpace dataspace(dims.size(), dims.data());
 
     const auto &columns = get_columns();
@@ -39,7 +42,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
 
     std::vector<H5::StrType> string_types;
     std::vector<H5::ArrayType> array_types;
-    H5::CompType compound_type(get_row_size());
+    H5::CompType compound_type(row_size);
     std::vector<std::string> unique_names;
 
     unique_names.reserve(columns.size());
@@ -94,5 +97,13 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     // JTODO Top-level params? (Master doesn't.)
     write_hdf5_columns(get_table_element_params(), PARAM, h5_table);
 
-    h5_table.write(get_data().data(), compound_type);
+	// JTODO figure out a better way to handle this
+	std::vector<char> combined_data_rows;
+	combined_data_rows.reserve(num_rows * row_size);
+	for (const auto &row : get_data_details().get_data()) {
+	  combined_data_rows.insert(combined_data_rows.end(), row.begin(), row.end());
+	}
+
+
+    h5_table.write(combined_data_rows.data(), compound_type);
 }

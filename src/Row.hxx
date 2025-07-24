@@ -21,7 +21,7 @@ class Field_Framework;
 class Row {
 public:
     Row(const size_t &data_size, const size_t &num_dynamic_columns = 0)
-            : data_(data_size), dynamic_array_sizes_(num_dynamic_columns, 0) {}
+	  : data_(data_size, 0), dynamic_array_sizes_(num_dynamic_columns, 0) {}
 
     Row(const Table &table);
 
@@ -41,8 +41,7 @@ public:
     void insert(
             const T &element, const size_t &offset,
             const size_t &idx_in_dynamic_cols_list = DEFAULT_IDX_IN_DYNAMIC_COLS_LIST) {
-        // std::cout << "Row::insert(element, offset), idx_in: " <<
-        // idx_in_dynamic_cols_list  << std::endl;
+        // std::cout << "Row::insert(element, offset), idx_in: " << idx_in_dynamic_cols_list  << std::endl;
         assert(offset + sizeof(T) <= data_.size());
         std::copy(reinterpret_cast<const char *>(&element),
                   reinterpret_cast<const char *>(&element) + sizeof(T),
@@ -56,16 +55,16 @@ public:
     void insert(
             const T &begin, const T &end, const size_t &offset,
             const size_t &idx_in_dynamic_cols_list = DEFAULT_IDX_IN_DYNAMIC_COLS_LIST) {
-        // std::cout << "Row::insert(begin, end, offset)" <<std::endl;
+	  // std::cout << "Row::insert(begin, end, offset)" <<std::endl;
         assert(offset + std::distance(begin, end) <= data_.size());
-        std::copy(begin, end, data_.data() + offset);
+		 std::copy(begin, end, data_.data() + offset);
 
         set_array_size_if_dynamic(idx_in_dynamic_cols_list,
                                   std::distance(begin, end) / sizeof(T));
     }
 
     // Called by add_cntr_column()
-    void insert_data_only(const uint8_t *begin, const uint8_t *end,
+    void insert_data_only(const char *begin, const char *end,
                           const size_t &offset) {
         assert(offset + std::distance(begin, end) <= data_.size());
         std::copy(reinterpret_cast<const char *>(begin),
@@ -122,16 +121,14 @@ public:
     inline void set_dynamic_array_size(const size_t &dyn_col_idx,
                                        const size_t &dyn_size) {
         if (dynamic_array_sizes_.size() < dyn_col_idx + 1) {
-        // std::cout << "set_dynamic, sizes.size(): " << dynamic_array_sizes_.size() <<
-        // ", dyn_col_idx: " << dyn_col_idx << std::endl;
+        // std::cout << "set_dynamic, sizes.size(): " << dynamic_array_sizes_.size() << ", dyn_col_idx: " << dyn_col_idx << std::endl;
 #ifdef FORGIVE_IF_EMPTY
             if (!dynamic_array_sizes_.empty()) {
                 throw std::runtime_error(
                         "set_dynamic_array_size(): dynamic_array_sizes vector "
                         "improperly initialized");
             } else {
-                // std::cout << "set_dynamic, sizes.size() = 0, skipping for now" <<
-                // std::endl;
+                // std::cout << "set_dynamic, sizes.size() = 0, skipping for now" << std::endl;
                 return;
             }
         }
@@ -146,16 +143,13 @@ public:
     inline void increment_dynamic_array_size(const size_t &dyn_col_idx) {
         if (dynamic_array_sizes_.size() < dyn_col_idx + 1) {
 #ifdef FORGIVE_IF_EMPTY
-            // std::cout << "increment_dynamic, sizes.size(): " <<
-            // dynamic_array_sizes_.size() << ", dyn_col_idx: " << dyn_col_idx <<
-            // std::endl;
+            // std::cout << "increment_dynamic, sizes.size(): " << dynamic_array_sizes_.size() << ", dyn_col_idx: " << dyn_col_idx << std::endl;
             if (!dynamic_array_sizes_.empty()) {
                 throw std::runtime_error(
                         "increment_dynamic_array_size(): dynamic_array_sizes vector "
                         "improperly initialized");
             } else {
-                // std::cout << "increment_dynamic, sizes.size() = 0, skipping for now"
-                // << std::endl;
+                // std::cout << "increment_dynamic, sizes.size() = 0, skipping for now" << std::endl;
                 return;
             }
 #else
@@ -181,7 +175,17 @@ public:
         }
     }
 
+  void refresh(const size_t &row_size, const size_t &num_dynamic_columns) {
+		  data_.reserve(row_size);
+		  data_.assign(row_size, 0);
+        if (num_dynamic_columns > 0) {
+            dynamic_array_sizes_.reserve(num_dynamic_columns);
+            dynamic_array_sizes_.assign(num_dynamic_columns, 0);
+        }
+    }
+
 private:
+
     template <class T, class Rule>
     void insert_from_bigendian_internal(size_t column_offset, const Rule &rule,
                                         size_t array_size,
@@ -196,7 +200,7 @@ private:
     void insert_null_by_type(Data_Type data_type, const size_t &offset);
 
 
-    // JTODO Make this vector<uint8_t>, like Data_Details.data_.
+    // JTODO Make this vector<char>, like Data_Details.data_.
     std::vector<char> data_;
     std::vector<uint32_t> dynamic_array_sizes_;
 };

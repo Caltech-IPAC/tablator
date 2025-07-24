@@ -13,9 +13,19 @@ inline size_t bits_to_bytes(size_t n) { return (n + 7) / 8; }
 
   // Following the VOTable convention, we use the most significant
   // bit for the first column.
+
+
+  // JTODO deprecated?  No, needed for binary2.
 inline bool is_null_MSB(const std::vector<uint8_t> &data, const size_t &row_offset,
                         const size_t &col_idx) {
     return data[row_offset + (col_idx - 1) / 8] & (128 >> ((col_idx - 1) % 8));
 }
+
+inline bool is_null_MSB(const std::vector<char> &row_data,
+                        const size_t &col_idx) {
+  //  std::cout << "is_null_MSB(), row_data.size(): " << row_data.size() << std::endl;
+    return row_data[(col_idx - 1) / 8] & (128 >> ((col_idx - 1) % 8));
+}
+
 
 }  // namespace tablator

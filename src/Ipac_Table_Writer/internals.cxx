@@ -390,18 +390,26 @@ void Ipac_Table_Writer::write_single_value(
         return;
     }
 
+	if (row_idx >= table.get_num_rows()) {
+        // shouldn't happen; internal caller should have validated
+        return;
+	}
+
     auto row_size = table.get_row_size();
-    const std::vector<uint8_t>& table_data = table.get_data();
-    if (table_data.size() < row_size) {
-        throw std::runtime_error("table_data.size() less than table.get_row_size()");
+    const std::vector<char> &row_data = table.get_data().at(row_idx);
+
+    if (row_data.size() < row_size) {
+        throw std::runtime_error("row_data.size() less than table.get_row_size()");
     }
 
+#if 0
     size_t curr_row_offset = row_idx * row_size;
     size_t final_row_offset = table_data.size() - row_size;
     if (curr_row_offset > final_row_offset) {
         // shouldn't happen; internal caller should have validated
         return;
     }
+#endif
 
     const auto& offsets = table.get_offsets();
     const auto& column = columns.at(col_idx);
@@ -422,19 +430,26 @@ void Ipac_Table_Writer::write_single_value(
         // Do this case manually because write_type_as_ascii()
         // isn't equipped to write bytes as ints, as IPAC_FORMAT
         // requires.
+#if 0
         size_t base_offset = curr_row_offset + offsets.at(col_idx);
-        uint8_t const* curr_data = table_data.data() + base_offset;
+        char const* curr_data = table_data.data() + base_offset;
+#else
+		char const *curr_data = row_data.data() + offsets.at(col_idx);
+#endif
         size_t element_size = data_size(active_datatype);
 
         for (size_t element = 0; element < column.get_array_size(); ++element) {
             os << Ascii_Writer::IPAC_COLUMN_SEPARATOR << std::setw(width);
-            os << static_cast<uint16_t>(*curr_data);
+            os << (static_cast<uint16_t>(*curr_data) & 0xFF);
             curr_data += element_size;
         }
     } else {
+#if 0
         size_t base_offset = curr_row_offset + offsets.at(col_idx);
-        uint8_t const* curr_data = table_data.data() + base_offset;
-
+        char const* curr_data = table_data.data() + base_offset;
+#else
+		char const *curr_data = row_data.data() + offsets.at(col_idx);
+#endif
         os << Ascii_Writer::IPAC_COLUMN_SEPARATOR << std::setw(width);
         std::stringstream ss_temp;
         Ascii_Writer::write_type_as_ascii_expand_array(ss_temp, column.get_type(),
@@ -456,7 +471,9 @@ void Ipac_Table_Writer::write_single_record_internal(
         const std::vector<size_t>& ipac_column_widths,
         const std::vector<Data_Type>& datatypes_for_writing,
         const Command_Line_Options& options) {
-    const std::vector<uint8_t>& table_data = table.get_data();
+    const std::vector<std::vector<char>> &table_data = table.get_data();
+
+#if 0
     size_t final_row_offset = table_data.size() - table.get_row_size();
     size_t curr_row_offset = row_idx * table.get_row_size();
 
@@ -464,7 +481,12 @@ void Ipac_Table_Writer::write_single_record_internal(
         // shouldn't happen; internal caller should have validated
         return;
     }
-
+#else
+	if  (row_idx >= table.get_num_rows()) {
+        // shouldn't happen; internal caller should have validated
+        return;
+	}
+#endif
     // Skip the null bitfield flag
     std::vector<size_t>::const_iterator cols_iter = included_column_ids.begin();
     for (/* */; cols_iter != included_column_ids.end(); ++cols_iter) {

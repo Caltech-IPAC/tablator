@@ -76,8 +76,8 @@ void Row::insert_from_bigendian(const std::vector<uint8_t> &stream,
                             "integer representation is " +
                             std::to_string(*src_iter));
                 insert((*src_iter == 't' || *src_iter == 'T' || *src_iter == '1')
-                               ? static_cast<uint8_t>(1)
-                               : static_cast<uint8_t>(0),
+                               ? static_cast<char>(1)
+                               : static_cast<char>(0),
                        curr_offset);
                 std::advance(src_iter, 1 /* data_type_size */);
                 curr_offset += 1 /* data_type_size */;

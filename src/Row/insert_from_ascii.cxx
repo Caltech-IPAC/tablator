@@ -13,8 +13,7 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                             const size_t &array_size, const size_t &col_idx,
                             const size_t &offset, const size_t &offset_end,
                             const size_t &idx_in_dynamic_cols_list) {
-    // std::cout << "insert_from_ascii(), enter, value: " << value << ", size: " <<
-    // array_size << ", idx: " << col_idx << std::endl;
+    // std::cout << "insert_from_ascii(), enter, value: " << value << ", size: " << array_size << ", idx: " << col_idx << std::endl;
     set_array_size_if_dynamic(idx_in_dynamic_cols_list, array_size);
 
     if (array_size != 1 && data_type != Data_Type::CHAR) {
@@ -39,6 +38,7 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
         // std::cout << "insert_from_ascii(),  1 or CHAR" << std::endl;
         switch (data_type) {
             case Data_Type::INT8_LE:
+                 // std::cout << "insert_from_ascii(), INT8_LE" << std::endl;
                 if (value == "?" || value == " " || value[0] == '\0') {
                     insert_null(data_type, array_size, col_idx, offset, offset_end);
                 } else {
@@ -53,8 +53,9 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                 break;
             case Data_Type::UINT8_LE: {
                 /// Allow hex and octal input
-                int result = std::stoi(value, nullptr, 0);
-                if (result > std::numeric_limits<uint8_t>::max() ||
+                 // std::cout << "insert_from_ascii(), UINT8_LE" << std::endl;
+				 int result = std::stoi(value, nullptr, 0);
+				 if (result > std::numeric_limits<uint8_t>::max() ||
                     result < std::numeric_limits<uint8_t>::lowest())
                     throw std::exception();
                 insert(static_cast<uint8_t>(result), offset);
@@ -88,9 +89,11 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                 insert(static_cast<uint32_t>(result), offset);
             } break;
             case Data_Type::INT64_LE:
+                 // std::cout << "insert_from_ascii(), INT64" << std::endl;
                 insert(boost::lexical_cast<int64_t>(value), offset);
                 break;
             case Data_Type::UINT64_LE:
+                 // std::cout << "insert_from_ascii(), UINT64" << std::endl;
                 insert(boost::lexical_cast<uint64_t>(value), offset);
                 break;
             case Data_Type::FLOAT32_LE:
@@ -100,7 +103,7 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                 insert(boost::lexical_cast<double>(value), offset);
                 break;
             case Data_Type::CHAR:
-                // std::cout << "insert_from_ascii(), char" << std::endl;
+                 // std::cout << "insert_from_ascii(), char" << std::endl;
                 insert(value, offset, offset_end, DEFAULT_IDX_IN_DYNAMIC_COLS_LIST);
                 // std::cout << "insert_from_ascii(), char, after" << std::endl;
                 break;

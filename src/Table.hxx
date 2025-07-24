@@ -297,12 +297,13 @@ public:
     // table modifiers
 
     // query_server and ZTF-mtc-utils call this function.
-    void append_row(const Row &row) {
+    void append_row(Row &row) {
         if ((get_num_dynamic_columns() > 0) && row.get_dynamic_array_sizes().empty()) {
             // caller hasn't been updated to use new Row constructor
             get_data_details().append_row(row, get_field_framework());
-        }
+        } else {
         get_data_details().append_row(row);
+		}
     }
 
     void append_rows(const Table &table2);
@@ -457,6 +458,7 @@ public:
     // Following the VOTable convention, we use the most significant
     // bit for the first column.
     bool is_null_value(size_t row_idx, size_t col_idx) const {
+#if 0
         auto row_offset = row_idx * get_row_size();
         auto col_bit_offset = (col_idx - 1) / 8;
         auto pos = row_offset + col_bit_offset;
@@ -466,8 +468,20 @@ public:
                                      std::to_string(get_data().size()));
         }
         return is_null_MSB(get_data(), row_offset, col_idx);
+#else
+		const auto &curr_row = get_data().at(row_idx);
+        auto col_bit_offset = (col_idx - 1) / 8;		
+		if (col_bit_offset >= get_row_size()) {
+            throw std::runtime_error("invalid row/col combo ( " + std::to_string(row_idx) +
+                                     ", " + std::to_string(col_idx) + ")");
+		}
+		//		std::cout << "is_null_value(), before is_null_MSB()" << std::endl;
+
+        return is_null_MSB(curr_row, col_idx);
+#endif
     }
 
+#if 0
     // Deprecated because of the use of row_offset rather than row_idx.
     bool is_null(size_t row_offset, size_t col_idx) const {
         auto pos = row_offset + (col_idx - 1) / 8;
@@ -478,7 +492,7 @@ public:
         }
         return get_data().at(pos) & (128 >> ((col_idx - 1) % 8));
     }
-
+#endif
 
     // extractors
 
@@ -520,15 +534,21 @@ public:
         const auto &columns = get_columns();
         auto &column = columns[col_idx];
         auto array_size = column.get_array_size();
+#if 0
         size_t row_offset = row_idx * get_row_size();
+#endif
         if (is_null_value(row_idx, col_idx)) {
             for (size_t i = 0; i < array_size; ++i) {
                 val_array.emplace_back(get_null<T>());
             }
         } else {
             // JTODO what if an element is null?  Assume already has get_null() value?
+#if 0
             size_t base_offset = row_offset + get_offsets().at(col_idx);
-            uint8_t const *curr_data = get_data().data() + base_offset;
+            char const *curr_data = get_data().data() + base_offset;
+#else
+			const char *curr_data = get_data().at(row_idx).data() + get_offsets().at(col_idx);
+#endif
             size_t element_size = data_size(column.get_type());
 
             for (size_t i = 0; i < array_size; ++i) {
@@ -538,7 +558,7 @@ public:
         }
     }
 
-    const uint8_t *extract_value_ptr(size_t col_idx, size_t row_idx) const;
+    const char *extract_value_ptr(size_t col_idx, size_t row_idx) const;
 
     template <typename T>
     std::vector<T> extract_column(const std::string &col_name) const {
@@ -574,23 +594,23 @@ public:
     }
 
     void insert_array_element_into_row(tablator::Row &row, size_t col_idx,
-                                       size_t elt_idx, const uint8_t *data_ptr) const;
+                                       size_t elt_idx, const char *data_ptr) const;
 
-    void insert_ptr_value_into_row(Row &row, size_t col_idx, const uint8_t *data_ptr,
+    void insert_ptr_value_into_row(Row &row, size_t col_idx, const char *data_ptr,
                                    uint32_t array_size) const;
 
     void insert_ptr_value_into_row(Row &row, size_t col_idx,
-                                   const uint8_t *data_ptr) const {
+                                   const char *data_ptr) const {
         insert_ptr_value_into_row(row, col_idx, data_ptr,
                                   get_columns().at(col_idx).get_array_size());
     }
 
     void insert_string_column_value_into_row(Row &row, size_t col_idx,
-                                             const uint8_t *data_ptr,
+                                             const char *data_ptr,
                                              uint32_t curr_array_size) const;
 
     void insert_string_column_value_into_row(Row &row, size_t col_idx,
-                                             const uint8_t *data_ptr) {
+                                             const char *data_ptr) {
         insert_string_column_value_into_row(row, col_idx, data_ptr,
                                             get_columns().at(col_idx).get_array_size());
     }
@@ -599,7 +619,7 @@ public:
     void insert_column_value_into_row(Row &row, size_t col_idx, const T &element,
                                       uint32_t array_size) const {
         insert_ptr_value_into_row(
-                row, col_idx, reinterpret_cast<const uint8_t *>(&element), array_size);
+                row, col_idx, reinterpret_cast<const char *>(&element), array_size);
     }
 
     template <typename T>
@@ -610,8 +630,12 @@ public:
     }
 
     void winnow_rows(const std::set<size_t> &selected_row_idx_list) {
+#if 0
         tablator::winnow_rows(get_data(), selected_row_idx_list, get_num_rows(),
                               get_row_size());
+#else
+		get_data_details().winnow_rows(selected_row_idx_list);
+#endif
     }
 
     // accessors
@@ -702,6 +726,10 @@ public:
         get_results_resource_element().adjust_num_rows(new_num_rows);
     }
 
+  // deprecated
+  void resize_rows(const size_t &new_num_rows) {
+	adjust_num_rows(new_num_rows);
+  }
     // Non-const to allow query_server to modify Field_Properties.
     std::vector<Column> &get_columns() {
         return get_results_resource_element().get_columns();
@@ -760,11 +788,11 @@ public:
     }
 
     // Non-const to support append_row().
-    std::vector<uint8_t> &get_data() {
+    std::vector<std::vector<char>> &get_data() {
         return get_results_resource_element().get_data();
     }
 
-    const std::vector<uint8_t> &get_data() const {
+    const std::vector<std::vector<char>> &get_data() const {
         return get_results_resource_element().get_data();
     }
 
@@ -865,7 +893,7 @@ public:
         get_results_resource_element().set_table_element_params(params);
     }
 
-    void set_data(const std::vector<uint8_t> &d) {
+    void set_data(const std::vector<std::vector<char>> &d) {
         get_results_resource_element().set_data(d);
     }
 

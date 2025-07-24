@@ -64,13 +64,15 @@ bool tablator::Data_Type_Adjuster::contains_large_uint64_val(size_t col_idx) con
     auto col_offset = table_offsets.at(col_idx);
 
     const auto &table_data = table_.get_data();
-    auto total_data_size = table_data.size();
-
-    auto row_size = table_.get_row_size();
+	auto num_rows = table_.get_num_rows();
 
     // Iterate through the elements of the indicated column and return
     // true if any of these elements is too large to be represented as
     // an int64_t; otherwise, return false.
+#if 0
+    auto total_data_size = table_data.size();
+    auto row_size = table_.get_row_size();
+
     for (size_t table_row_offset(0); table_row_offset < total_data_size;
          table_row_offset += row_size) {
         auto curr_ptr = table_data.data() + table_row_offset + col_offset;
@@ -83,5 +85,19 @@ bool tablator::Data_Type_Adjuster::contains_large_uint64_val(size_t col_idx) con
             curr_ptr += sizeof(uint64_t);
         }
     }
+#else
+    for (size_t row_idx = 0; row_idx < num_rows; ++ row_idx) {
+	  auto curr_ptr = table_data.at(row_idx).data() + col_offset;
+
+        for (size_t j = 0; j < array_size; ++j) {
+            uint64_t val = *reinterpret_cast<const uint64_t *>(curr_ptr);
+            if (val > std::numeric_limits<int64_t>::max()) {
+                return true;
+            }
+            curr_ptr += sizeof(uint64_t);
+        }
+    }
+
+#endif
     return false;
 }

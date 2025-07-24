@@ -631,12 +631,15 @@ int main(int argc, char *argv[]) {
         } else if (!counter_column_name.empty()) {
             // JTODO make this option incompatible with other options
             boost::filesystem::ifstream input_stream(input_path);
+		  // std::cout << "before read()" << std::endl;
             tablator::Table in_table(input_stream, input_format);
             tablator::Table out_table =
                     tablator::add_counter_column(in_table, counter_column_name);
             boost::filesystem::ofstream output_stream(output_path);
+			// std::cout << "before write()" << std::endl;
             out_table.write(output_stream, output_path.stem().native(), output_format,
                             options);
+		  // std::cout << "after write()" << std::endl;
         } else if (combine_tables_f) {
             // JTODO make this option incompatible with other options
             boost::filesystem::ifstream input_stream(input_path);
@@ -676,8 +679,11 @@ int main(int argc, char *argv[]) {
             in_table.write(output_stream, output_path.stem().native(), output_format,
                            options);
         } else {
+		  // std::cout << "before read()" << std::endl;
             tablator::Table table(input_path, input_format);
+		  // std::cout << "before write()" << std::endl;
             table.write(output_path, output_format, options);
+		  // std::cout << "after write()" << std::endl;
         }
     } catch (boost::program_options::error &exception) {
         std::cerr << exception.what() << "\n" << usage(visible_options);

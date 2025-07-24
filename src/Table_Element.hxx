@@ -285,12 +285,12 @@ public:
         return get_main_data_element().get_offsets();
     }
 
-    const std::vector<uint8_t> &get_data() const {
+    const std::vector<std::vector<char>> &get_data() const {
         return get_main_data_element().get_data();
     }
-    std::vector<uint8_t> &get_data() { return get_main_data_element().get_data(); }
+    std::vector<std::vector<char>> &get_data() { return get_main_data_element().get_data(); }
 
-    void set_data(const std::vector<uint8_t> &d) {
+    void set_data(const std::vector<std::vector<char>> &d) {
         get_main_data_element().set_data(d);
     }
 

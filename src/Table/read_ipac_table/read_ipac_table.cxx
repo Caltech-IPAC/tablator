@@ -28,7 +28,7 @@ std::vector<size_t> get_ipac_column_widths(
 
 
 void tablator::Table::read_ipac_table(std::istream &input_stream) {
-    // std::cout << "read_ipac_table(), enter" << std::endl;
+   // std::cout << "read_ipac_table(), enter" << std::endl;
     std::array<std::vector<std::string>, 4> ipac_columns;
     std::vector<size_t> ipac_column_offsets;
 
@@ -52,9 +52,10 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::string line;
     std::getline(input_stream, line);
 
-    Row single_row(row_size, 0 /* num_dynamic_arrays */);
     while (input_stream) {
+	  // std::cout << "read_ipac_able(): top of input_stream loop" << std::endl;
         if (line.find_first_not_of(" \t") != std::string::npos) {
+		  Row single_row(row_size, 0 /* num_dynamic_arrays */);
             single_row.fill_with_zeros();
             for (size_t col_idx = 1; col_idx < num_tab_columns; ++col_idx) {
                 const auto &tab_column = tab_columns[col_idx];
@@ -70,9 +71,10 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 std::string element = line.substr(ipac_column_offsets[col_idx - 1] + 1,
                                                   ipac_column_widths[col_idx]);
                 boost::algorithm::trim(element);
+				// std::cout << "read_ipac_table(), trimmed element: " << element << std::endl;
                 minimum_column_widths[col_idx] =
                         std::max(minimum_column_widths[col_idx], element.size());
-
+				// std::cout << "min_col_width: " << minimum_column_widths[col_idx] << std::endl;
                 if ((!ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      element == ipac_columns[COL_NULL_IDX][col_idx]) ||
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
@@ -83,11 +85,12 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 } else {
                     try {
                         // std::cout << "read_ipac_table(), before insert_from_ascii()"
-                        // << std::endl;
+					  // << std::endl;
                         single_row.insert_from_ascii(
                                 element, tab_column.get_type(),
                                 tab_column.get_array_size(), col_idx, offsets[col_idx],
                                 offsets[col_idx + 1], DEFAULT_IDX_IN_DYNAMIC_COLS_LIST);
+                        // std::cout << "read_ipac_table(), after insert_from_ascii(), size: " << single_row.get_data().size()	 << std::endl;
                     } catch (std::exception &error) {
                         throw std::runtime_error(
                                 "Invalid " + to_string(tab_column.get_type()) +
@@ -107,15 +110,20 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                                          "'.\n\t  Is the header not wide enough?");
 
             data_details.append_row(single_row);
+			// std::cout << "read_ipac_table(), after append_row()" << std::endl;
+			// std::cout << "read_ipac_table(), bottom of loop, dd.back.size(): " << data_details.get_data().back().size() << ", num_rows: " << data_details.get_data().size()  << std::endl;
         }
         ++current_line_num;
         std::getline(input_stream, line);
     }
+	  // std::cout << "read_ipac_table(): after input_stream loop" << std::endl;
     shrink_ipac_string_columns_to_fit(field_framework, data_details,
                                       minimum_column_widths);
+	// std::cout << "read_ipac_table(), after shrink()" << std::endl;
     Table_Element table_element =
             Table_Element::Builder(field_framework, data_details).build();
     add_resource_element(Resource_Element::Builder(table_element)
                                  .add_labeled_properties(labeled_resource_properties)
                                  .build());
+	// std::cout << "read_ipac_table(), exit" << std::endl;
 }

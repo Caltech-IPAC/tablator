@@ -36,14 +36,14 @@ public:
         return field_framework_.get_offsets();
     }
 
-    inline const std::vector<uint8_t> &get_data() const {
+    inline const std::vector<std::vector<char>> &get_data() const {
         return data_details_.get_data();
     }
 
     // Non-const to support append_rows().
-    inline std::vector<uint8_t> &get_data() { return data_details_.get_data(); }
+    inline std::vector<std::vector<char>> &get_data() { return data_details_.get_data(); }
 
-    inline void set_data(const std::vector<uint8_t> &d) { data_details_.set_data(d); }
+    inline void set_data(const std::vector<std::vector<char>> &d) { data_details_.set_data(d); }
 
     size_t get_row_size() const { return field_framework_.get_row_size(); }
     size_t get_num_rows() const { return data_details_.get_num_rows(); }

@@ -28,9 +28,11 @@ constexpr const char Ascii_Writer::IPAC_COLUMN_SEPARATOR;
 // array, individual elements are delimited by the single char
 // specified in the <separator> argument.
 void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
-                                       const size_t &array_size, const uint8_t *data,
+                                       const size_t &array_size, const char *data,
                                        const char &separator,
                                        const Command_Line_Options &options) {
+  // std::cout << "AW::write_type_as_ascii(), enter" << std::endl;
+
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
             write_array_unit_as_ascii(os, type, 1, data + n * data_size(type), options);
@@ -50,7 +52,7 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
 // type to multiple columns.
 void Ascii_Writer::write_type_as_ascii_expand_array(
         std::ostream &os, const Data_Type &type, const size_t &array_size,
-        const uint8_t *data, size_t col_width, const Command_Line_Options &options) {
+        const char *data, size_t col_width, const Command_Line_Options &options) {
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
             os << std::setw(col_width);
@@ -69,7 +71,7 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
 
 void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
                                              const size_t &array_size,
-                                             const uint8_t *data,
+                                             const char *data,
                                              const Command_Line_Options &options) {
     if (type != Data_Type::CHAR && array_size != 1) {
         throw std::runtime_error(
@@ -78,29 +80,39 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
     }
     switch (type) {
         case Data_Type::INT8_LE:
+		  // std::cout << "AW: INT8_LE" << std::endl;
             os << static_cast<int>(*data);
             break;
         case Data_Type::UINT8_LE: {
+		  // std::cout << "AW: UINT8_LE" << std::endl;
             std::stringstream ss;
-            ss << "0x" << std::hex << static_cast<uint16_t>(*data) << std::dec;
+			//            ss << "0x" << std::hex << static_cast<uint16_t>(*data) << std::dec;  // JTODO
+            ss << "0x" << std::hex << (static_cast<uint16_t>(*data) & 0xFF) << std::dec;
+			// std::cout << "ss.str(): " << ss.str() << std::endl;
             os << ss.str();
         } break;
         case Data_Type::INT16_LE:
+		  // std::cout << "AW: INT16_LE" << std::endl;
             os << *reinterpret_cast<const int16_t *>(data);
             break;
         case Data_Type::UINT16_LE:
+		  // std::cout << "AW: UINT16_LE" << std::endl;
             os << *reinterpret_cast<const uint16_t *>(data);
             break;
         case Data_Type::INT32_LE:
+		  // std::cout << "AW: INT32_LE" << std::endl;
             os << *reinterpret_cast<const int32_t *>(data);
             break;
         case Data_Type::UINT32_LE:
+		  // std::cout << "AW: UINT32_LE" << std::endl;
             os << *reinterpret_cast<const uint32_t *>(data);
             break;
         case Data_Type::INT64_LE:
+		  // std::cout << "AW: INT64_LE" << std::endl;
             os << *reinterpret_cast<const int64_t *>(data);
             break;
         case Data_Type::UINT64_LE: {
+		  // std::cout << "AW: UINT64_LE" << std::endl;
             os << *reinterpret_cast<const uint64_t *>(data);
         } break;
         case Data_Type::FLOAT32_LE: {

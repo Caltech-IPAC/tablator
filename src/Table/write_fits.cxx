@@ -147,7 +147,7 @@ template <typename data_type>
 
 void write_element_given_column_and_row(fitsfile *fits_file, int fits_type,
                                         size_t fits_col_idx, size_t fits_row_idx,
-                                        uint8_t *data_ptr, size_t array_size) {
+                                        char *data_ptr, size_t array_size) {
     int status = 0;
     fits_write_col(fits_file, fits_type, fits_col_idx, fits_row_idx, 1, array_size,
                    reinterpret_cast<data_type *>(data_ptr), &status);
@@ -588,15 +588,20 @@ void tablator::Table::write_fits(
     const auto &offsets = get_offsets();
     const size_t number_of_rows(get_num_rows());
 
+#if 0
     // Retrieve table's data pointer.
-    const uint8_t *data_start_ptr = get_data().data();
-
+    const char *data_start_ptr = get_data().data();
     // Cast away const, as FITS functions require.
-    uint8_t *row_start_ptr = const_cast<uint8_t *>(data_start_ptr);
+    char *row_start_ptr = const_cast<char *>(data_start_ptr);
+
+#else
+	const std::vector<std::vector<char>> &table_data = get_data();
+#endif
+
 
     // FITS row index is 1-based.
     for (size_t fits_row_idx = 1; fits_row_idx <= number_of_rows;
-         ++fits_row_idx, row_start_ptr += get_row_size()) {
+         ++fits_row_idx /* , row_start_ptr += get_row_size() */ ) {
         // Skip null_bitfield_flags column.  Corresponding
         // columns of the tablator and FITS tables have the same (1-based)
         // index.
@@ -604,7 +609,11 @@ void tablator::Table::write_fits(
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
             auto &column = columns[col_idx];
 
-            uint8_t *curr_data_ptr = row_start_ptr + offsets[col_idx];
+#if 0
+            char *curr_data_ptr = row_start_ptr + offsets[col_idx];
+#else
+			char *curr_data_ptr = const_cast<char *>(table_data.at(tab_row_idx).data()) + offsets[col_idx];
+#endif
             Data_Type datatype_for_writing = datatypes_for_writing[col_idx];
 
             size_t array_size = column.get_array_size();

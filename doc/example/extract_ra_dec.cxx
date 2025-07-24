@@ -2,6 +2,8 @@
 /// g++ extract_ra_dec.cxx -o extract_ra_dec -I/usr/include/hdf5/serial/ -std=c++11
 /// -ltablator -lboost_filesystem -lboost_system
 
+// JTODO Update this
+
 #include <tablator/Table.hxx>
 
 int main(int argc, char *argv[]) {
