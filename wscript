@@ -73,7 +73,6 @@ def build(bld):
 	     'src/Data_Details/Data_Details.cxx',
              'src/Ipac_Table_Writer/internals.cxx',
              'src/Ipac_Table_Writer/Ipac_Table_Writer.cxx',
-             'src/Utils/Table_Utils/winnow_rows.cxx',
              'src/ptree_readers/ptree_readers.cxx',
              'src/ptree_readers/Utils.cxx',
              'src/ptree_readers/extract_attributes.cxx',

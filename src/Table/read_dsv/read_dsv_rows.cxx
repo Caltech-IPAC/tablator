@@ -10,7 +10,7 @@ Data_Details Table::read_dsv_rows(Field_Framework &field_framework,
 
     Data_Details data_details(field_framework, dsv.size());
 
-    Row single_row(field_framework.get_row_size());
+    Row single_row(field_framework);
 
     bool skipped(false);
     for (auto &dsv_row : dsv) {

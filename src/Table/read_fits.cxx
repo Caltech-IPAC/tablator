@@ -1088,15 +1088,13 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
             size_t fits_row_idx = j + 1;
 
             // Row by row, we'll populate <curr_row> and append it to <data>.
-            Row curr_row(row_size);
-
+            Row curr_row(field_framework);
             curr_row.fill_with_zeros();
-
             for (size_t i = 0; i < ccfits_table->column().size(); ++i) {
                 size_t fits_col_idx = i + 1;
                 size_t tab_col_idx = fits_col_idx;
-
                 CCfits::Column &fits_col = ccfits_table->column(fits_col_idx);
+
                 switch (abs(fits_col.type())) {
                     case CCfits::Tlogical: {
                         // Use template type uint8_t here; FITS doesn't support int8_t.
