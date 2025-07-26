@@ -29,7 +29,6 @@
 #include "Row.hxx"
 #include "Table_Element.hxx"
 #include "Utils/Null_Utils.hxx"
-#include "Utils/Table_Utils.hxx"
 
 namespace tablator {
 
@@ -605,8 +604,7 @@ public:
     }
 
     void winnow_rows(const std::set<size_t> &selected_row_idx_list) {
-        tablator::winnow_rows(get_data(), selected_row_idx_list, get_num_rows(),
-                              get_row_size());
+        get_data_details().winnow_rows(selected_row_idx_list);
     }
 
     // accessors

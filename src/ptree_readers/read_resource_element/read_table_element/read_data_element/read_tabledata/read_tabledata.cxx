@@ -2,7 +2,6 @@
 
 #include "../../../../../Common.hxx"
 #include "../../../../../Data_Element.hxx"
-#include "../../../../../Utils/Table_Utils.hxx"
 #include "../../../../../to_string.hxx"
 
 namespace tablator {
@@ -85,7 +84,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
     size_t num_rows = element_lists_by_row.size();
 
     Data_Details data_details(field_framework, num_rows);
-    Row single_row(*offsets.rbegin());
+    Row single_row(field_framework);
 
     // JTODO Are we allowing for non-CHAR dynamic arrays?  Should all arrays end in
     // '\0'?

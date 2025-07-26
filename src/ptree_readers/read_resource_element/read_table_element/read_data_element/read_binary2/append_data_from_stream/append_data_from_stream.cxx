@@ -6,7 +6,6 @@
 #include "../../../../../../Field_Framework.hxx"
 #include "../../../../../../Row.hxx"
 #include "../../../../../../Utils/Null_Utils.hxx"
-#include "../../../../../../Utils/Table_Utils.hxx"
 
 namespace tablator {
 
@@ -17,12 +16,11 @@ void ptree_readers::append_data_from_stream(Data_Details &data_details,
                                             size_t num_rows) {
     const auto &columns = field_framework.get_columns();
     const auto &offsets = field_framework.get_offsets();
-    auto &data = data_details.get_data();
 
     const size_t null_flags_size((columns.size() + 6) / 8);
     size_t src_pos(0);
 
-    Row single_row(field_framework.get_row_size());
+    Row single_row(field_framework);
     for (size_t r = 0; r < num_rows; ++r) {
         single_row.fill_with_zeros();
         size_t row_offset(src_pos);
@@ -68,8 +66,7 @@ void ptree_readers::append_data_from_stream(Data_Details &data_details,
                 // Now write the array itself, again swapping from
                 // big-ended to little-ended for internal use.
                 single_row.insert_from_bigendian(stream, src_pos, col_type,
-                                                 curr_array_size,
-                                                 offsets[col_idx]);
+                                                 curr_array_size, offsets[col_idx]);
                 src_pos += data_size(col_type) * curr_array_size;
             }
         }  // end loop through columns

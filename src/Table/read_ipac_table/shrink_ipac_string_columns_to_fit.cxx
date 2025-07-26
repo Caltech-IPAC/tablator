@@ -15,7 +15,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
     size_t num_rows = old_data_details.get_num_rows();
 
     for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
-        // Populate new_offsets based on column-level data.
+        // Set array_sizes of CHAR columns to the optimal calculated widths.
         if (old_columns[col_idx].get_type() == Data_Type::CHAR) {
             old_columns[col_idx].set_array_size(minimum_column_data_widths[col_idx]);
         }
@@ -24,8 +24,6 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
     Field_Framework new_field_framework(old_columns,
                                         true /* got_null_bitfields_column */);
     std::vector<Column> &new_columns = new_field_framework.get_columns();
-    std::vector<size_t> &new_offsets = new_field_framework.get_offsets();
-
     size_t new_row_size = new_field_framework.get_row_size();
 
     if (old_row_size == new_row_size) {

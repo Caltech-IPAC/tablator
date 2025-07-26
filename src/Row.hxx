@@ -15,7 +15,6 @@ class Table;
 
 class Row {
 public:
-    Row(const size_t &data_size) : data_(data_size) {}
     Row(const Field_Framework &field_framework);
     Row(const Table &table);
 
@@ -55,8 +54,7 @@ public:
 
     void insert_from_bigendian(const std::vector<uint8_t> &stream,
                                size_t starting_src_pos, const Data_Type &data_type,
-                               const size_t &array_size,
-                               const size_t &offset);
+                               const size_t &array_size, const size_t &offset);
 
 
     size_t get_size() const { return data_.size(); }

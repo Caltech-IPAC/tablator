@@ -4,8 +4,6 @@
 #include <limits>
 #include <vector>
 
-
-#include "../../Utils/Table_Utils.hxx"
 #include "../../to_string.hxx"
 #include "../read_ipac_table.hxx"
 
@@ -50,7 +48,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     std::string line;
     std::getline(input_stream, line);
 
-    Row single_row(field_framework.get_row_size());
+    Row single_row(field_framework);
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
             single_row.fill_with_zeros();

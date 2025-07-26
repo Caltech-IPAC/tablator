@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "Common.hxx"
 #include "Row.hxx"
 
@@ -20,13 +22,26 @@ public:
         data_.insert(data_.end(), row.get_data().begin(), row.get_data().end());
     }
 
-
+    // This function is called only by Table::append_rows(), which
+    // checks that the Field_Frameworks of the two tables are
+    // compatible.
     void append_rows(const Data_Details &other) {
         assert(other.get_row_size() == get_row_size());
 
         data_.reserve(data_.size() + other.get_data().size());
         data_.insert(data_.end(), other.get_data().begin(), other.get_data().end());
     }
+
+    void add_cntr_column(const Field_Framework &dest_ff, const Field_Framework &src_ff,
+                         const Data_Details &src_dd);
+
+    void combine_data_details(const Field_Framework &dest_ff,
+                              const Field_Framework &src1_ff,
+                              const Field_Framework &src2_ff,
+                              const Data_Details &src1_dd, const Data_Details &src2_dd);
+
+    void winnow_rows(const std::set<size_t> &selected_row_idx_list);
+
 
     void adjust_num_rows(const size_t new_num_rows) {
         data_.resize(new_num_rows * get_row_size());

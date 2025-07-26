@@ -3,7 +3,6 @@
 #include "../../Group_Element.hxx"
 #include "../../Resource_Element.hxx"
 #include "../../Table_Element.hxx"
-#include "../../Utils/Table_Utils.hxx"
 #include "../Utils.hxx"
 
 // FIXME: Refactor to reduce cyclomatic complexity.

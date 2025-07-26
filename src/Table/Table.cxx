@@ -384,7 +384,7 @@ void Table::stash_resource_element_labeled_property(
 
 //===========================================================
 
-// Helper function
+// Helper function for append_rows()
 
 bool close_enough_to_append_rows(const Field_Framework &ff1,
                                  const Field_Framework &ff2) {
@@ -399,7 +399,6 @@ bool close_enough_to_append_rows(const Field_Framework &ff1,
     }
     const auto &ff1_offsets = ff1.get_offsets();
     const auto &ff2_offsets = ff2.get_offsets();
-
 
     for (size_t col_idx = 0; col_idx < ff1_columns.size(); ++col_idx) {
         const auto &ff1_column = ff1_columns.at(col_idx);
@@ -418,6 +417,8 @@ bool close_enough_to_append_rows(const Field_Framework &ff1,
     // Check final offset value.
     return (ff1_offsets.back() == ff2_offsets.back());
 }
+
+//===========================================================
 
 void Table::append_rows(const Table &table2) {
     if (!close_enough_to_append_rows(get_field_framework(),
