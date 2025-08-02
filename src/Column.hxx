@@ -24,9 +24,19 @@ public:
 
     Column(const std::string &name, const Data_Type &type, const size_t &array_size,
            const Field_Properties &field_properties)
-            : Column(name, type, array_size, field_properties,
-                     ((type == Data_Type::CHAR) ||
-                      (array_size == std::numeric_limits<size_t>::max()))) {}
+            : Column(name, type, array_size, field_properties, [&]() {
+                  if (type == Data_Type::CHAR) {
+                      return true;
+                  }
+                  if (array_size == std::numeric_limits<size_t>::max()) {
+                      return true;
+                  }
+                  const auto iter = field_properties.get_attributes().find("arraysize");
+                  if (iter != field_properties.get_attributes().end()) {
+                      return (iter->second == "*");
+                  }
+                  return false;
+              }()) {}
 
     Column(const std::string &name, const Data_Type &type, const size_t &array_size,
            bool dynamic_array_flag)

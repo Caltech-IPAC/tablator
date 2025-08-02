@@ -1414,7 +1414,7 @@ if [ $? -eq 0 ]; then
     echo "PASS: combine vot tables and write as tbl"
     rm -f temp.tbl
 else
-    echo "PASS: combine vot tables and write as tbl"
+    echo "FAIL: combine vot tables and write as tbl"
 fi
 
 

@@ -129,7 +129,7 @@ public:
     public:
         // JTODO check that resource_elements contains at least one Table_Element?
         Builder(std::vector<Resource_Element> &resource_elements)
-                : resource_elements_(resource_elements) {}
+                : resource_elements_(std::move(resource_elements)) {}
 
         Table build() { return Table(resource_elements_, options_); }
 
@@ -201,6 +201,7 @@ public:
     Table(const std::vector<Column> &Columns,
           const tablator::Labeled_Properties &property_pair_vec,
           bool got_null_bitfields_column = false, size_t num_rows = 0);
+
     Table(const std::vector<Column> &Columns, bool got_null_bitfields_column = false,
           size_t num_rows = 0)
             : Table(Columns, std::map<std::string, std::string>(),
@@ -856,7 +857,7 @@ public:
     }
 
     void add_resource_element(const Resource_Element &resource_element) {
-        resource_elements_.emplace_back(resource_element);
+        resource_elements_.emplace_back(std::move(resource_element));
         arrange_resources();
     }
 
@@ -1026,7 +1027,8 @@ private:
 
     Table(const std::vector<Resource_Element> &resource_elements,
           const Options &options)
-            : resource_elements_(resource_elements), options_(options) {
+            : resource_elements_(std::move(resource_elements)),
+              options_(std::move(options)) {
         arrange_resources();
     }
 

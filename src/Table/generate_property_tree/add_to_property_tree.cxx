@@ -160,7 +160,9 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 
     size_t col_array_size = column.get_array_size();
     bool early_arraysize_f = false;
-    if (active_datatype == Data_Type::CHAR) {
+
+    if ((active_datatype == Data_Type::CHAR && column.get_type() != Data_Type::CHAR) ||
+        column.get_dynamic_array_flag()) {
         field_tree.add(XMLATTR_ARRAYSIZE, "*");
         early_arraysize_f = true;
     } else if (col_array_size != 1) {
