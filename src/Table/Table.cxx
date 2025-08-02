@@ -57,14 +57,17 @@ namespace tablator {
 // Implementation of Table member functions
 // =========================================================
 
+// Constructors
+
 Table::Table(const std::vector<Column> &columns,
              const std::map<std::string, std::string> &property_map,
              bool got_null_bitfields_column, size_t num_rows) {
     add_resource_element(
-            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column),
-                                   num_rows)
+            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column))
                     .build());
-
+    // Call reserve() after constructing Table_Element as std::move()
+    // does not necessarily preserve capacity.
+    reserve_rows(num_rows);
     for (auto &p : property_map) {
         add_labeled_property(p.first, Property(p.second));
     }
@@ -76,10 +79,9 @@ Table::Table(const std::vector<Column> &columns,
              bool got_null_bitfields_column, size_t num_rows)
         : results_resource_idx_(0) {
     add_resource_element(
-            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column),
-                                   num_rows)
+            Table_Element::Builder(Field_Framework(columns, got_null_bitfields_column))
                     .build());
-
+    reserve_rows(num_rows);
     for (const auto &label_and_prop : property_pair_vec) {
         if (boost::starts_with(label_and_prop.first, VOTABLE_RESOURCE_DOT)) {
             add_resource_element_labeled_property(

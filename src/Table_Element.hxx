@@ -90,24 +90,24 @@ public:
         Builder() {}
 
         Builder(const Data_Element &data_element) {
-            data_elements_.emplace_back(data_element);
+            data_elements_.emplace_back(std::move(data_element));
         }
 
         Builder(const std::vector<Data_Element> &data_elements)
-                : data_elements_(data_elements) {}
+                : data_elements_(std::move(data_elements)) {}
 
         Builder(const Field_Framework &field_framework,
                 const Data_Details &data_details) {
-            data_elements_.emplace_back(Data_Element(field_framework, data_details));
+            data_elements_.emplace_back(field_framework, data_details);
         }
 
         Builder(const Field_Framework &field_framework, size_t num_rows) {
-            data_elements_.emplace_back(Data_Element(field_framework, num_rows));
+            data_elements_.emplace_back(field_framework, num_rows);
         }
 
 
         Builder(const Field_Framework &field_framework) {
-            data_elements_.emplace_back(Data_Element(field_framework));
+            data_elements_.emplace_back(field_framework);
         }
 
         Table_Element build() { return Table_Element(data_elements_, options_); }
@@ -310,7 +310,7 @@ public:
 private:
     Table_Element(const std::vector<Data_Element> &data_elements,
                   const Options &options)
-            : data_elements_(data_elements), options_(options) {
+            : data_elements_(std::move(data_elements)), options_(std::move(options)) {
         // JTODO  What exactly is our restriction on Table_Elements?
         if (data_elements_.empty() || get_columns().empty()) {
             throw std::runtime_error("Table_Element must have non-empty Data_Element.");

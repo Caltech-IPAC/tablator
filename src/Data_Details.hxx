@@ -17,7 +17,6 @@ public:
 
     void append_row(const Row &row) {
         assert(row.get_data().size() == get_row_size());
-        data_.reserve(data_.size() + row.get_data().size());
         data_.insert(data_.end(), row.get_data().begin(), row.get_data().end());
     }
 

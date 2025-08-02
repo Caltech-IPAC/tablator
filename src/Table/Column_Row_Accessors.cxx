@@ -90,8 +90,8 @@ void validate_parameters(const tablator::Row &row, const tablator::Table &table,
     }
     if (row.get_size() != table.get_row_size()) {
         std::stringstream msg_ss;
-        msg_ss << "Invalid col_idx: " << std::to_string(col_idx)
-               << ", num_columns: " << table_columns.size();
+        msg_ss << "Invalid row size: " << row.get_size()
+               << ", table row size: " << table.get_row_size();
         ;
         throw std::runtime_error(msg_ss.str());
     }
@@ -114,8 +114,8 @@ void insert_blob_to_row_internal(tablator::Row &row, const tablator::Table &tabl
                                  const uint8_t *data_ptr,
                                  uint32_t num_elements_to_insert) {
     const auto &column = table.get_columns().at(col_idx);
-    auto data_size = tablator::data_size(column.get_type());
-    auto insert_offset = table.get_offsets().at(col_idx) + elt_idx * data_size;
+    const auto data_size = tablator::data_size(column.get_type());
+    const auto insert_offset = table.get_offsets().at(col_idx) + elt_idx * data_size;
     row.insert(data_ptr, data_ptr + num_elements_to_insert * data_size, insert_offset);
 }
 }  // namespace

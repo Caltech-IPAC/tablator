@@ -163,7 +163,7 @@ private:
         }
 
         void add_table_element(const Table_Element &table_element) {
-            table_elements_.emplace_back(table_element);
+            table_elements_.emplace_back(std::move(table_element));
         }
 
         void add_trailing_info_list(const std::vector<Property> &trailing_info_list) {
@@ -183,11 +183,11 @@ public:
         Builder() {}
 
         Builder(const std::vector<Table_Element> &table_elements) {
-            options_.table_elements_ = table_elements;
+            options_.table_elements_ = std::move(table_elements);
         }
 
         Builder(const Table_Element &table_element) {
-            options_.table_elements_.emplace_back(table_element);
+            options_.table_elements_.emplace_back(std::move(table_element));
         }
 
         Resource_Element build() { return Resource_Element(options_); }
@@ -284,7 +284,7 @@ public:
     Resource_Element(const Table_Element &table_element)
             : resource_type_(Resource_Type::RESULTS) {
         assert(!table_element.get_columns().empty());
-        get_table_elements().emplace_back(table_element);
+        get_table_elements().emplace_back(std::move(table_element));
     }
 
     Resource_Element() : resource_type_(Resource_Type::META) {}
@@ -466,7 +466,7 @@ public:
 
 private:
     Resource_Element(const Options &options)
-            : options_(options),
+            : options_(std::move(options)),
               resource_type_(determine_resource_type(options_.table_elements_,
                                                      options_.attributes_)) {}
     Options options_;

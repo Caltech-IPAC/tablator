@@ -10,7 +10,8 @@ class Data_Element {
 public:
     Data_Element(const Field_Framework &field_framework,
                  const Data_Details &data_details)
-            : field_framework_(field_framework), data_details_(data_details) {}
+            : field_framework_(std::move(field_framework)),
+              data_details_(std::move(data_details)) {}
 
     Data_Element(const Field_Framework &field_framework, size_t num_rows = 0)
             : Data_Element(field_framework, Data_Details(field_framework, num_rows)) {}
