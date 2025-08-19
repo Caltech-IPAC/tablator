@@ -62,8 +62,6 @@ public:
     }
 
     inline size_t get_idx_in_dynamic_cols_list(size_t col_idx) const {
-        // std::cout << "get_idx_in_dynamic_cols_list(), enter, col_idx: " << col_idx <<
-        // ", dyn_col_ids.size(): " << dynamic_column_ids_.size() << std::endl;
         const auto &column = columns_.at(col_idx);
         if (column.get_dynamic_array_flag()) {
             const auto iter = std::find(dynamic_column_ids_.begin(),
@@ -73,11 +71,8 @@ public:
                         "Indicated dynamic column is not in dynamic cols "
                         "list.");
             }
-            // std::cout << "get_idx_in_dynamic_cols_list(), is_dynamic, return: " <<
-            // std::distance(dynamic_column_ids_.begin(), iter) << std::endl;
             return std::distance(dynamic_column_ids_.begin(), iter);
         }
-        // std::cout << "get_idx_in_dynamic_cols_list(), not dynamic" << std::endl;
         return DEFAULT_IDX_IN_DYNAMIC_COLS_LIST;
     }
 

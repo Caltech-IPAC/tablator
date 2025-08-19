@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <vector>
+#include <unordered_map>
 
 #include <boost/spirit/include/qi.hpp>
 
@@ -28,6 +29,8 @@ public:
         std::fill(data_.begin(), data_.end(), 0);
         std::fill(dynamic_array_sizes_.begin(), dynamic_array_sizes_.end(), 0);
     }
+
+#if 0
 
     void insert_null(
             Data_Type type, const size_t &array_size, const size_t &col_idx,
@@ -57,6 +60,47 @@ public:
                                   std::distance(begin, end) / sizeof(T));
     }
 
+#endif
+  // JTODO
+
+      void insert_null(
+            Data_Type type, const size_t &array_size,
+            const size_t &offset, const size_t &offset_end, const size_t &col_idx, bool dynamic_array_flag);
+
+    template <typename T>
+    void insert(
+				const T &element, const size_t &offset, const size_t &col_idx, bool dynamic_array_flag) {
+
+        assert(offset + sizeof(T) <= data_.size());
+        std::copy(reinterpret_cast<const char *>(&element),
+                  reinterpret_cast<const char *>(&element) + sizeof(T),
+                  data_.data() + offset);
+
+
+		//        increment_array_size_if_dynamic(idx_in_dynamic_cols_list);
+		if (dynamic_array_flag) {
+		  increment_dynamic_array_size(col_idx);
+		}
+    }
+
+    template <typename T>
+    void insert(
+				const T &begin, const T &end, const size_t &offset, const size_t &col_idx, bool dynamic_array_flag) {
+        assert(offset + std::distance(begin, end) <= data_.size());
+        std::copy(begin, end, data_.data() + offset);
+
+		if (dynamic_array_flag) {
+		  set_dynamic_array_size(col_idx, std::distance(begin, end) / sizeof(T));
+		}
+    }
+
+    template <typename T>
+    void insert(const T &element, const size_t &offset) {
+	  insert (element, offset, 1 /* random col_idx */, false /* dynamic_array_flag */);
+	}
+
+
+
     // Called by add_cntr_column()
     void insert_data_only(const uint8_t *begin, const uint8_t *end,
                           const size_t &offset) {
@@ -71,7 +115,7 @@ public:
                                     new_sizes.end());
     }
 
-
+#if 0
     // called by insert_from_ascii()
     void insert(
             const std::string &element, const size_t &offset_begin,
@@ -98,6 +142,40 @@ public:
                                const size_t &array_size, const size_t &offset,
                                const size_t &idx_in_dynamic_cols_list);
 
+#endif
+
+
+
+    // called by insert_from_ascii()
+    void insert(
+				const std::string &element, const size_t &offset_begin,
+            const size_t &offset_end, const size_t &col_idx,
+			bool dynamic_array_flag) {
+        std::string element_copy(element);
+        element_copy.resize(offset_end - offset_begin, '\0');
+        std::copy(element_copy.begin(), element_copy.end(),
+                  data_.data() + offset_begin);
+
+		if (dynamic_array_flag) {
+        set_dynamic_array_size(col_idx,
+					   std::distance(element_copy.begin(), element_copy.end()));
+		}
+    }
+
+    void insert_from_ascii(const std::string &value, const Data_Type &data_type,
+                           const size_t &array_size,
+                           const size_t &offset, const size_t &offset_end, const size_t &col_idx,
+                           bool dynamic_array_flag);
+
+
+    void insert_from_bigendian(const std::vector<uint8_t> &stream,
+                               size_t starting_src_pos, const Data_Type &data_type,
+                               const size_t &array_size, const size_t &offset, const size_t &col_idx,
+							   bool dynamic_array_flag);
+
+
+
+  
     size_t get_size() const { return data_.size(); }
 
     const std::vector<char> &get_data() const { return data_; }
@@ -110,6 +188,7 @@ public:
     std::vector<uint32_t> &get_dynamic_array_sizes() { return dynamic_array_sizes_; }
 
 
+#if 0
     inline void set_dynamic_array_size(const size_t &dyn_col_idx,
                                        const size_t &dyn_size) {
         if (dynamic_array_sizes_.size() < dyn_col_idx + 1) {
@@ -120,6 +199,7 @@ public:
         dynamic_array_sizes_.at(dyn_col_idx) = dyn_size;
     }
 
+
     inline void increment_dynamic_array_size(const size_t &dyn_col_idx) {
         if (dynamic_array_sizes_.size() < dyn_col_idx + 1) {
             throw std::runtime_error(
@@ -127,9 +207,40 @@ public:
                     "improperly initialized");
         }
         dynamic_array_sizes_.at(dyn_col_idx) = dynamic_array_sizes_.at(dyn_col_idx) + 1;
+	}
+#endif
+
+    inline void set_dynamic_array_size(const size_t &col_idx,
+                                       const size_t &dyn_size) {
+	  col_idx_to_dynamic_array_size_[col_idx] = dyn_size;
     }
 
 
+
+  inline void increment_dynamic_array_size(const size_t &col_idx) {
+		const auto iter = col_idx_to_dynamic_array_size_.find(col_idx);
+		if (iter == col_idx_to_dynamic_array_size_.end()) {
+		  col_idx_to_dynamic_array_size_[col_idx] = 1;
+		} else {
+		  iter->second = (iter->second) + 1;
+		}
+    }
+
+#if 0
+    void set_array_size_if_dynamic(const size_t &dyn_col_idx,
+                                   const size_t &array_size) {
+        if (dyn_col_idx != DEFAULT_IDX_IN_DYNAMIC_COLS_LIST) {
+            set_dynamic_array_size(dyn_col_idx, array_size);
+        }
+    }
+
+    void increment_array_size_if_dynamic(const size_t &dyn_col_idx) {
+        if (dyn_col_idx != DEFAULT_IDX_IN_DYNAMIC_COLS_LIST) {
+            increment_dynamic_array_size(dyn_col_idx);
+        }
+    }
+#else
+#if 0
     void set_array_size_if_dynamic(const size_t &dyn_col_idx,
                                    const size_t &array_size) {
         if (dyn_col_idx != DEFAULT_IDX_IN_DYNAMIC_COLS_LIST) {
@@ -143,6 +254,10 @@ public:
         }
     }
 
+#endif
+#endif
+
+  std::unordered_map<size_t, uint32_t> col_idx_to_dynamic_array_size_;
 private:
     template <class T, class Rule>
     void insert_from_bigendian_internal(size_t column_offset, const Rule &rule,
@@ -161,6 +276,7 @@ private:
     // JTODO Make this vector<uint8_t>, like Data_Details.data_.
     std::vector<char> data_;
     std::vector<uint32_t> dynamic_array_sizes_;
+  //  std::unordered_map<size_t, uint32_t> col_idx_to_dynamic_array_size_;
 };
 
 

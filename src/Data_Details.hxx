@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <unordered_map>
 
 #include "Common.hxx"
 #include "Row.hxx"
@@ -75,7 +76,7 @@ public:
         return get_dynamic_array_sizes_by_row().at(row_idx);
     }
 
-
+  std::unordered_map<size_t, std::vector<uint32_t>> col_idx_to_dynamic_array_sizes_;
 private:
     void init(const size_t &new_num_rows) {
         reserve_rows(new_num_rows);
@@ -86,6 +87,11 @@ private:
                 dynamic_array_sizes_by_row_.emplace_back();
                 dynamic_array_sizes_by_row_.back().reserve(get_num_dynamic_columns());
             }
+
+
+			// JTODO if we knew the ids of the dynamic columns....
+
+
         }
     }
 
@@ -93,6 +99,8 @@ private:
     // JTODO data_ could also be made 2-dim'l.
     std::vector<uint8_t> data_;
     std::vector<std::vector<uint32_t>> dynamic_array_sizes_by_row_;
+  //  std::unordered_map<size_t, std::vector<uint32_t>> col_idx_to_dynamic_array_sizes_;
+
     size_t num_dynamic_columns_;
     size_t row_size_;
 };

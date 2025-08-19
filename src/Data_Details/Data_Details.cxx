@@ -13,14 +13,23 @@ Data_Details::Data_Details(const Field_Framework &field_framework, size_t num_ro
 void Data_Details::append_row(const Row &row) {
     assert(row.get_data().size() == get_row_size());
     assert(row.get_dynamic_array_sizes().size() == get_num_dynamic_columns());
-
+	//	std::cout << "append_row(), num-dyn_cols: " << get_num_dynamic_columns() << std::endl;
+	//	std::cout << "row data size: " << row.get_data().size() << std::endl;
     data_.insert(data_.end(), row.get_data().begin(), row.get_data().end());
 
     if (got_dynamic_columns()) {
+#if 0
         dynamic_array_sizes_by_row_.emplace_back();
         auto &new_sizes = dynamic_array_sizes_by_row_.back();
         new_sizes.insert(new_sizes.end(), row.get_dynamic_array_sizes().begin(),
                          row.get_dynamic_array_sizes().end());
+#else
+		for (const auto &pair : row.col_idx_to_dynamic_array_size_) {
+		  // JTODO validate
+		  col_idx_to_dynamic_array_sizes_[pair.first].push_back(pair.second);
+		}
+
+#endif
     }
 }
 
@@ -35,7 +44,8 @@ void Data_Details::append_rows(const Data_Details &other) {
     data_.reserve(data_.size() + other.get_data().size());
     data_.insert(data_.end(), other.get_data().begin(), other.get_data().end());
 
-    if (got_dynamic_columns() > 0) {
+    if (got_dynamic_columns()) {
+#if 0
         dynamic_array_sizes_by_row_.reserve(
                 dynamic_array_sizes_by_row_.size() +
                 other.get_dynamic_array_sizes_by_row().size());
@@ -44,6 +54,16 @@ void Data_Details::append_rows(const Data_Details &other) {
                 dynamic_array_sizes_by_row_.end(),
                 other.get_dynamic_array_sizes_by_row().begin(),
                 other.get_dynamic_array_sizes_by_row().end());
+#else
+
+		for (const auto &pair : other.col_idx_to_dynamic_array_sizes_) {
+		  // JTODO validate
+		  col_idx_to_dynamic_array_sizes_[pair.first].insert(col_idx_to_dynamic_array_sizes_[pair.first].end(),
+															 pair.second.begin(), pair.second.end());
+		}
+
+
+#endif
     }
 }
 
@@ -79,8 +99,18 @@ void Data_Details::winnow_rows(const std::set<size_t> &selected_row_idx_list) {
                 std::copy(read_ptr, read_ptr + row_size_, write_ptr);
 
                 if (get_num_dynamic_columns() > 0) {
+#if 0
                     dynamic_array_sizes_by_row_.at(write_idx).swap(
                             dynamic_array_sizes_by_row_.at(row_idx));
+#else
+		for (const auto &pair : col_idx_to_dynamic_array_sizes_) {
+
+		  col_idx_to_dynamic_array_sizes_[pair.first][write_idx] =
+			col_idx_to_dynamic_array_sizes_[pair.first][row_idx];
+
+		}
+
+#endif
                 }
             }
 
@@ -94,7 +124,9 @@ void Data_Details::winnow_rows(const std::set<size_t> &selected_row_idx_list) {
     data_.resize(std::distance(data_start_ptr, write_ptr));
 
     if (got_dynamic_columns() > 0) {
-        dynamic_array_sizes_by_row_.resize(num_selected_rows);
+	  for (const auto &pair : col_idx_to_dynamic_array_sizes_) {
+		col_idx_to_dynamic_array_sizes_[pair.first].resize(num_selected_rows);
+	  }
     }
 }
 
@@ -111,7 +143,6 @@ void Data_Details::add_cntr_column(const Field_Framework &dest_ff,
 
     const auto &dest_offsets = dest_ff.get_offsets();
     size_t dest_nulls_size(dest_offsets.at(1));
-    size_t dest_row_size = get_row_size();
 
     reserve_rows(num_rows);
     tablator::Row row(dest_ff);

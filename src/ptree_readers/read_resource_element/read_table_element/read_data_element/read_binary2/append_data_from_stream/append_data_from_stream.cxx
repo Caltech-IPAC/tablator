@@ -32,8 +32,8 @@ void append_data_from_stream(Data_Details &data_details,
             bool dynamic_array_flag = field_framework.get_dynamic_array_flag(col_idx);
 
             if (is_null_MSB(stream, row_offset, col_idx)) {
-                single_row.insert_null(col_type, col_array_size, col_idx,
-                                       offsets[col_idx], offsets[col_idx + 1]);
+			  single_row.insert_null(col_type, col_array_size,
+                                       offsets[col_idx], offsets[col_idx + 1], col_idx, dynamic_array_flag);
                 if (dynamic_array_flag) {
                     src_pos += sizeof(uint32_t);
                 } else {
@@ -65,7 +65,7 @@ void append_data_from_stream(Data_Details &data_details,
                 // big-ended to little-ended for internal use.
                 single_row.insert_from_bigendian(
                         stream, src_pos, col_type, curr_array_size, offsets[col_idx],
-                        field_framework.get_idx_in_dynamic_cols_list(col_idx));
+						col_idx, dynamic_array_flag);
                 src_pos += get_data_size(col_type) * curr_array_size;
             }
         }  // end loop through columns

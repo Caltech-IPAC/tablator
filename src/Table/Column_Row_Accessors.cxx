@@ -119,7 +119,7 @@ void insert_column_element_to_row_internal(tablator::Row &row,
     const auto data_size = tablator::get_data_size(column.get_type());
     const auto insert_offset = table.get_offsets().at(col_idx) + elt_idx * data_size;
     row.insert(data_ptr, data_ptr + num_elements_to_insert * data_size, insert_offset,
-               table.get_idx_in_dynamic_cols_list(col_idx));
+			   col_idx, column.get_dynamic_array_flag());
 }
 }  // namespace
 

@@ -74,14 +74,15 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      tab_column.get_type() != Data_Type::CHAR && element.empty())) {
                     single_row.insert_null(tab_column.get_type(),
-                                           tab_column.get_array_size(), col_idx,
-                                           offsets[col_idx], offsets[col_idx + 1]);
+                                           tab_column.get_array_size(),
+                                           offsets[col_idx], offsets[col_idx + 1], col_idx, tab_column.get_dynamic_array_flag());
                 } else {
                     try {
+					  //					  std::cout << "read_ipac_table(), before insert_from_ascii()" << std::endl;
                         single_row.insert_from_ascii(
                                 element, tab_column.get_type(),
-                                tab_column.get_array_size(), col_idx, offsets[col_idx],
-                                offsets[col_idx + 1], DEFAULT_IDX_IN_DYNAMIC_COLS_LIST);
+                                tab_column.get_array_size(), offsets[col_idx],
+                                offsets[col_idx + 1], col_idx, tab_column.get_dynamic_array_flag());
                     } catch (std::exception &error) {
                         throw std::runtime_error(
                                 "Invalid " + to_string(tab_column.get_type()) +
