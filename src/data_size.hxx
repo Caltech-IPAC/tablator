@@ -28,12 +28,9 @@ inline size_t get_data_size(const Data_Type &data_type) {
     }
 }
 
-
-#if 0
-  // JTODO data_size
   // deprecated
   inline size_t data_size(const Data_Type &data_type) {
 	return get_data_size(data_type);
   }
-#endif
+
 }  // namespace tablator

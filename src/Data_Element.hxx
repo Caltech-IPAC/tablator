@@ -62,7 +62,6 @@ public:
 
     inline void set_data(const std::vector<uint8_t> &d) { data_details_.set_data(d); }
 
-
 private:
     // Non-const to allow query_server to update column's field_properties.
     Field_Framework field_framework_;

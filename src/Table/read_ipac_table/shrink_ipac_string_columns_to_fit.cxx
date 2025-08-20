@@ -36,7 +36,7 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
     size_t num_rows = old_data_details.get_num_rows();
 
     // FIXME: Do this in place.
-    Data_Details new_data_details(old_data_details.get_num_dynamic_columns(),
+    Data_Details new_data_details(old_data_details.get_dynamic_col_idx_lookup(),
                                   new_row_size, num_rows);
     std::vector<uint8_t> &new_data = new_data_details.get_data();
 

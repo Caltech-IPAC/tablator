@@ -5,7 +5,7 @@
 namespace tablator {
 
 Data_Details::Data_Details(const Field_Framework &field_framework, size_t num_rows)
-        : Data_Details(field_framework.get_num_dynamic_columns(),
+        : Data_Details(field_framework.get_dynamic_col_idx_lookup(),
                        field_framework.get_row_size(), num_rows) {}
 
 //==================================================================
@@ -13,23 +13,14 @@ Data_Details::Data_Details(const Field_Framework &field_framework, size_t num_ro
 void Data_Details::append_row(const Row &row) {
     assert(row.get_data().size() == get_row_size());
     assert(row.get_dynamic_array_sizes().size() == get_num_dynamic_columns());
-	//	std::cout << "append_row(), num-dyn_cols: " << get_num_dynamic_columns() << std::endl;
-	//	std::cout << "row data size: " << row.get_data().size() << std::endl;
+
     data_.insert(data_.end(), row.get_data().begin(), row.get_data().end());
 
     if (got_dynamic_columns()) {
-#if 0
         dynamic_array_sizes_by_row_.emplace_back();
         auto &new_sizes = dynamic_array_sizes_by_row_.back();
         new_sizes.insert(new_sizes.end(), row.get_dynamic_array_sizes().begin(),
                          row.get_dynamic_array_sizes().end());
-#else
-		for (const auto &pair : row.col_idx_to_dynamic_array_size_) {
-		  // JTODO validate
-		  col_idx_to_dynamic_array_sizes_[pair.first].push_back(pair.second);
-		}
-
-#endif
     }
 }
 
@@ -45,7 +36,6 @@ void Data_Details::append_rows(const Data_Details &other) {
     data_.insert(data_.end(), other.get_data().begin(), other.get_data().end());
 
     if (got_dynamic_columns()) {
-#if 0
         dynamic_array_sizes_by_row_.reserve(
                 dynamic_array_sizes_by_row_.size() +
                 other.get_dynamic_array_sizes_by_row().size());
@@ -54,16 +44,6 @@ void Data_Details::append_rows(const Data_Details &other) {
                 dynamic_array_sizes_by_row_.end(),
                 other.get_dynamic_array_sizes_by_row().begin(),
                 other.get_dynamic_array_sizes_by_row().end());
-#else
-
-		for (const auto &pair : other.col_idx_to_dynamic_array_sizes_) {
-		  // JTODO validate
-		  col_idx_to_dynamic_array_sizes_[pair.first].insert(col_idx_to_dynamic_array_sizes_[pair.first].end(),
-															 pair.second.begin(), pair.second.end());
-		}
-
-
-#endif
     }
 }
 
@@ -99,18 +79,8 @@ void Data_Details::winnow_rows(const std::set<size_t> &selected_row_idx_list) {
                 std::copy(read_ptr, read_ptr + row_size_, write_ptr);
 
                 if (get_num_dynamic_columns() > 0) {
-#if 0
                     dynamic_array_sizes_by_row_.at(write_idx).swap(
                             dynamic_array_sizes_by_row_.at(row_idx));
-#else
-		for (const auto &pair : col_idx_to_dynamic_array_sizes_) {
-
-		  col_idx_to_dynamic_array_sizes_[pair.first][write_idx] =
-			col_idx_to_dynamic_array_sizes_[pair.first][row_idx];
-
-		}
-
-#endif
                 }
             }
 
@@ -123,12 +93,11 @@ void Data_Details::winnow_rows(const std::set<size_t> &selected_row_idx_list) {
     // Delete all data past the last row copied.
     data_.resize(std::distance(data_start_ptr, write_ptr));
 
-    if (got_dynamic_columns() > 0) {
-	  for (const auto &pair : col_idx_to_dynamic_array_sizes_) {
-		col_idx_to_dynamic_array_sizes_[pair.first].resize(num_selected_rows);
-	  }
+    if (got_dynamic_columns()) {
+        dynamic_array_sizes_by_row_.resize(num_selected_rows);
     }
 }
+
 
 //==================================================================
 
@@ -205,7 +174,7 @@ void Data_Details::combine_data_details(const Field_Framework &dest_ff,
 
     // Load dest_table data.
     size_t num_rows = src1_dd.get_num_rows();
-	reserve_rows(num_rows);
+    reserve_rows(num_rows);
 
     Row single_row(dest_ff);
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
@@ -272,8 +241,8 @@ void Data_Details::combine_data_details(const Field_Framework &dest_ff,
 
 
                 row_dynamic_array_sizes.insert(row_dynamic_array_sizes.end(),
-                                                src1_dynamic_array_sizes.begin(),
-                                                src1_dynamic_array_sizes.end());
+                                               src1_dynamic_array_sizes.begin(),
+                                               src1_dynamic_array_sizes.end());
             }
 
             if (src2_dd.got_dynamic_columns()) {
@@ -284,8 +253,8 @@ void Data_Details::combine_data_details(const Field_Framework &dest_ff,
 
 
                 row_dynamic_array_sizes.insert(row_dynamic_array_sizes.end(),
-                                                src2_dynamic_array_sizes.begin(),
-                                                src2_dynamic_array_sizes.end());
+                                               src2_dynamic_array_sizes.begin(),
+                                               src2_dynamic_array_sizes.end());
             }
         }
         // Make single_row official

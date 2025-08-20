@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "Column.hxx"
 #include "Utils/Null_Utils.hxx"
 
@@ -23,15 +25,11 @@ public:
                           null_flags_size,
                           Field_Properties::Builder()
                                   .add_description(null_bitfield_flags_description)
-                                  .build());
+                                  .build(),
+                          false /* dynamic_array_flag */);
         }
-        uint col_idx = got_null_bitfields_column ? 0 : 1;
         for (auto &col : incoming_columns) {
             append_column(col);
-            if (col.get_dynamic_array_flag()) {
-                dynamic_column_ids_.push_back(col_idx);
-            }
-            ++col_idx;
         }
     }
 
@@ -50,39 +48,34 @@ public:
     inline const std::vector<size_t> &get_offsets() const { return offsets_; }
     inline std::vector<size_t> &get_offsets() { return offsets_; }
 
-    inline const std::vector<size_t> &get_dynamic_column_ids() const {
-        return dynamic_column_ids_;
+    inline const std::unordered_map<size_t, size_t> &get_dynamic_col_idx_lookup()
+            const {
+        return dynamic_col_idx_lookup_;
     }
-    inline std::vector<size_t> &get_dynamic_column_ids() { return dynamic_column_ids_; }
 
-    inline size_t get_num_dynamic_columns() const { return dynamic_column_ids_.size(); }
+    inline size_t get_num_dynamic_columns() const {
+        return dynamic_col_idx_lookup_.size();
+    }
 
     inline bool get_dynamic_array_flag(size_t col_idx) const {
         return columns_.at(col_idx).get_dynamic_array_flag();
     }
 
-    inline size_t get_idx_in_dynamic_cols_list(size_t col_idx) const {
-        const auto &column = columns_.at(col_idx);
-        if (column.get_dynamic_array_flag()) {
-            const auto iter = std::find(dynamic_column_ids_.begin(),
-                                        dynamic_column_ids_.end(), col_idx);
-            if (iter == dynamic_column_ids_.end()) {
-                throw std::runtime_error(
-                        "Indicated dynamic column is not in dynamic cols "
-                        "list.");
-            }
-            return std::distance(dynamic_column_ids_.begin(), iter);
-        }
-        return DEFAULT_IDX_IN_DYNAMIC_COLS_LIST;
-    }
-
 private:
     void append_column(const Column &column) {
+        size_t col_idx = columns_.size();
         columns_.emplace_back(column);
+
         size_t old_row_size = *offsets_.rbegin();
         size_t new_row_size = old_row_size + columns_.rbegin()->get_data_size();
         offsets_.push_back(new_row_size);
+
+        if (column.get_dynamic_array_flag()) {
+            size_t num_dynamic_cols_sofar = dynamic_col_idx_lookup_.size();
+            dynamic_col_idx_lookup_[col_idx] = num_dynamic_cols_sofar;
+        }
     }
+
 
     inline void append_column(const std::string &name, const Data_Type &type,
                               const size_t &array_size,
@@ -92,36 +85,10 @@ private:
                 Column(name, type, array_size, field_properties, dynamic_array_flag));
     }
 
-    inline void append_column(const std::string &name, const Data_Type &type,
-                              const size_t &array_size,
-                              const Field_Properties &field_properties) {
-        append_column(Column(name, type, array_size, field_properties));
-    }
-
-    inline void append_column(const std::string &name, const Data_Type &type,
-                              const size_t &array_size, bool dynamic_array_flag) {
-        append_column(Column(name, type, array_size, dynamic_array_flag));
-    }
-
-    inline void append_column(const std::string &name, const Data_Type &type,
-                              const size_t &size) {
-        append_column(Column(name, type, size));
-    }
-
-    inline void append_column(const std::string &name, const Data_Type &type,
-                              const Field_Properties &field_properties) {
-        append_column(Column(name, type, field_properties));
-    }
-
-
-    inline void append_column(const std::string &name, const Data_Type &type) {
-        append_column(Column(name, type));
-    }
-
     std::vector<Column> columns_;
     std::vector<size_t> offsets_;
 
-    std::vector<size_t> dynamic_column_ids_;
+    std::unordered_map<size_t, size_t> dynamic_col_idx_lookup_;
 };
 
 }  // namespace tablator

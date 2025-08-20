@@ -12,12 +12,16 @@ class Field_Framework;
 
 class Data_Details {
 public:
-    Data_Details(size_t num_dynamic_columns, size_t row_size, size_t num_rows = 0)
-            : num_dynamic_columns_(num_dynamic_columns), row_size_(row_size) {
+    Data_Details(const std::unordered_map<size_t, size_t> &dynamic_col_idx_lookup,
+                 size_t row_size, size_t num_rows = 0)
+            : dynamic_col_idx_lookup_(dynamic_col_idx_lookup),
+              num_dynamic_columns_(dynamic_col_idx_lookup.size()),
+              row_size_(row_size) {
         init(num_rows);
     }
 
     Data_Details(const Field_Framework &field_framework, size_t num_rows = 0);
+
 
     void append_row(const Row &row);
 
@@ -64,11 +68,13 @@ public:
 
     inline size_t get_row_size() const { return row_size_; }
 
+    inline const std::unordered_map<size_t, size_t> &get_dynamic_col_idx_lookup()
+            const {
+        return dynamic_col_idx_lookup_;
+    }
+
     inline const std::vector<std::vector<uint32_t>> &get_dynamic_array_sizes_by_row()
             const {
-        return dynamic_array_sizes_by_row_;
-    }
-    inline std::vector<std::vector<uint32_t>> &get_dynamic_array_sizes_by_row() {
         return dynamic_array_sizes_by_row_;
     }
 
@@ -76,7 +82,6 @@ public:
         return get_dynamic_array_sizes_by_row().at(row_idx);
     }
 
-  std::unordered_map<size_t, std::vector<uint32_t>> col_idx_to_dynamic_array_sizes_;
 private:
     void init(const size_t &new_num_rows) {
         reserve_rows(new_num_rows);
@@ -87,19 +92,14 @@ private:
                 dynamic_array_sizes_by_row_.emplace_back();
                 dynamic_array_sizes_by_row_.back().reserve(get_num_dynamic_columns());
             }
-
-
-			// JTODO if we knew the ids of the dynamic columns....
-
-
         }
     }
 
     // Can't be const because of append_rows().
     // JTODO data_ could also be made 2-dim'l.
     std::vector<uint8_t> data_;
+    std::unordered_map<size_t, size_t> dynamic_col_idx_lookup_;
     std::vector<std::vector<uint32_t>> dynamic_array_sizes_by_row_;
-  //  std::unordered_map<size_t, std::vector<uint32_t>> col_idx_to_dynamic_array_sizes_;
 
     size_t num_dynamic_columns_;
     size_t row_size_;

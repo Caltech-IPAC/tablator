@@ -119,7 +119,7 @@ void insert_column_element_to_row_internal(tablator::Row &row,
     const auto data_size = tablator::get_data_size(column.get_type());
     const auto insert_offset = table.get_offsets().at(col_idx) + elt_idx * data_size;
     row.insert(data_ptr, data_ptr + num_elements_to_insert * data_size, insert_offset,
-			   col_idx, column.get_dynamic_array_flag());
+               col_idx, column.get_dynamic_array_flag());
 }
 }  // namespace
 
@@ -130,9 +130,9 @@ void tablator::Table::insert_null_into_row(tablator::Row &row, size_t col_idx,
                                            uint32_t array_size) const {
     validate_parameters(row, *this, col_idx, 0 /* elt_idx */, array_size);
     const auto &column = get_columns().at(col_idx);
-    row.insert_null(column.get_type(), sizeof(uint32_t), col_idx,
-                    get_offsets().at(col_idx), get_offsets().at(col_idx + 1),
-                    get_idx_in_dynamic_cols_list(col_idx));
+    row.insert_null(column.get_type(), sizeof(uint32_t), get_offsets().at(col_idx),
+                    get_offsets().at(col_idx + 1), col_idx,
+                    column.get_dynamic_array_flag());
 }
 
 
@@ -162,7 +162,6 @@ void tablator::Table::insert_string_column_value_into_row(
     assert(col_idx < get_offsets().size() - 1);
     assert(curr_array_size <= get_columns().at(col_idx).get_array_size());
 
-#if 1
     // JTODO is this copy necessary?  Row is pre-filled with '\0's.
     std::string val_copy(reinterpret_cast<const char *>(data_ptr));
     size_t offset_begin = get_offsets().at(col_idx);
@@ -171,8 +170,4 @@ void tablator::Table::insert_string_column_value_into_row(
     insert_ptr_value_into_row(row, col_idx,
                               reinterpret_cast<const uint8_t *>(val_copy.data()),
                               curr_array_size);
-#else
-    insert_ptr_value_into_row(row, col_idx, reinterpret_cast<const uint8_t *>(data_ptr),
-                              curr_array_size);
-#endif
 }

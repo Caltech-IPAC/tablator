@@ -297,9 +297,7 @@ public:
     // table modifiers
 
     // query_server and ZTF-mtc-utils call this function.
-    void append_row(const Row &row) {
-        get_data_details().append_row(row);
-    }
+    void append_row(const Row &row) { get_data_details().append_row(row); }
 
     void append_rows(const Table &table2);
 
@@ -718,17 +716,12 @@ public:
         return get_results_resource_element().get_num_dynamic_columns();
     }
 
-    size_t get_idx_in_dynamic_cols_list(size_t col_idx) const {
-        return get_field_framework().get_idx_in_dynamic_cols_list(col_idx);
-    }
-
     size_t get_row_size() const {
         return get_results_resource_element().get_row_size();
     }
     size_t get_num_rows() const {
         return get_results_resource_element().get_num_rows();
     }
-
 
     Labeled_Properties &get_resource_element_labeled_properties() {
         return get_results_resource_element().get_labeled_properties();
