@@ -110,6 +110,7 @@ Table::Table(const boost::filesystem::path &input_path, const Format &format) {
             read_json5(input_path);
             break;
         case Format::Enums::VOTABLE:
+        case Format::Enums::VOTABLE_BINARY2:
             read_votable(input_path);
             break;
         case Format::Enums::JSON:

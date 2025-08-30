@@ -501,22 +501,31 @@ public:
         return val_array;
     }
 
+
+    // Note: This function does not clear the incoming val_array. JTODO
     template <typename T>
     void extract_value(std::vector<T> &val_array, size_t col_idx,
                        size_t row_idx) const {
         static_assert(!std::is_same<T, char>::value,
                       "extract_value() is not supported for columns of type char; "
                       "please use extract_values_as_string().");
-
         validate_column_index(col_idx);
         validate_row_index(row_idx);
 
         const auto &columns = get_columns();
         auto &column = columns[col_idx];
+
         auto array_size = column.get_array_size();
+        auto dynamic_array_flag = column.get_dynamic_array_flag();
+
+        auto curr_array_size = array_size;
+        if (dynamic_array_flag) {
+            curr_array_size =
+                    get_data_details().get_dynamic_array_size(row_idx, col_idx);
+        }
         size_t row_offset = row_idx * get_row_size();
         if (is_null_value(row_idx, col_idx)) {
-            for (size_t i = 0; i < array_size; ++i) {
+            for (size_t i = 0; i < std::max(size_t(1), curr_array_size); ++i) {
                 val_array.emplace_back(get_null<T>());
             }
         } else {
@@ -525,7 +534,7 @@ public:
             uint8_t const *curr_data = get_data().data() + base_offset;
             size_t element_size = get_data_size(column.get_type());
 
-            for (size_t i = 0; i < array_size; ++i) {
+            for (size_t i = 0; i < curr_array_size; ++i) {
                 val_array.emplace_back(*(reinterpret_cast<const T *>(curr_data)));
                 curr_data += element_size;
             }
@@ -899,6 +908,8 @@ private:
     void write_tabledata(std::ostream &os, const Format::Enums &output_format,
                          const Command_Line_Options &options) const;
 
+    void write_binary2(std::ostream &os) const;
+
     void write_html(std::ostream &os, const Command_Line_Options &options) const;
 
     boost::property_tree::ptree generate_property_tree() const;
@@ -1000,7 +1011,8 @@ private:
 
     static void shrink_ipac_string_columns_to_fit(
             Field_Framework &field_framework, Data_Details &data_details,
-            const std::vector<size_t> &column_widths);
+            const std::vector<size_t> &column_widths,
+            std::vector<std::vector<uint32_t>> &dynamic_array_sizes_by_row);
 
     static Data_Details read_dsv_rows(Field_Framework &field_framework,
                                       const std::list<std::vector<std::string>> &dsv);
@@ -1059,9 +1071,12 @@ private:
                                     uint num_spaces_right,
                                     const Command_Line_Options &options) const;
 
+    void splice_binary2_and_write(std::ostream &os, std::stringstream &ss,
+                                  uint num_spaces_left, uint num_spaces_right) const;
 
     boost::property_tree::ptree generate_property_tree(
-            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const;
+            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep,
+            bool do_binary2) const;
 
     void distribute_metadata(
             tablator::Labeled_Properties &resource_element_labeled_properties,

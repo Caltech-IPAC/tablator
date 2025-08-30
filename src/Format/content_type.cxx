@@ -31,6 +31,11 @@ std::string tablator::Format::content_type() const {
             return "Content-type: application/x-votable+xml\r\n\r\n";
             break;
 
+        case Enums::VOTABLE_BINARY2:
+            return "Content-type: "
+                   "application/x-votable+xml;serialization=BINARY2\r\n\r\n";
+            break;
+
         case Enums::FITS:
             return "Content-type: application/fits\r\n\r\n";
             break;

@@ -5,7 +5,6 @@
 #include "../HDF5_Attribute.hxx"
 #include "../HDF5_Property.hxx"
 
-
 // As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
 
 namespace {
@@ -20,16 +19,13 @@ const std::string read_description(const H5::DataSet &dataset,
     }
     return desc_str;
 }
-
 }  // namespace
-////
 
 namespace tablator {
 Labeled_Properties read_metadata(const H5::DataSet &dataset);
 
 std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                                          const std::string &section);
-
 
 }  // namespace tablator
 
@@ -62,7 +58,6 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
     std::vector<Property> table_element_trailing_infos;
     ATTRIBUTES table_element_attributes;
 
-
     distribute_metadata(resource_element_labeled_properties,
                         resource_element_trailing_infos, resource_element_attributes,
                         table_element_trailing_infos, table_element_attributes,
@@ -81,7 +76,6 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                 std::to_string(compound.getNmembers()));
     }
 
-
     std::vector<Column> columns;
 
     for (int i = 0; i < compound.getNmembers(); ++i) {
@@ -89,7 +83,8 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
         std::string name(compound.getMemberName(i));
         if (datatype.getClass() == H5T_STRING) {
             columns.emplace_back(name, Data_Type::CHAR, datatype.getSize(),
-                                 column_metadata[i].get_field_properties());
+                                 column_metadata[i].get_field_properties(),
+                                 column_metadata[i].get_dynamic_array_flag());
         } else if (datatype.getClass() == H5T_ARRAY) {
             auto array_type = compound.getMemberArrayType(i);
             hsize_t ndims = array_type.getArrayNDims();
@@ -102,23 +97,24 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
             }
             array_type.getArrayDims(&ndims);
             columns.emplace_back(name, H5_to_Data_Type(datatype), ndims,
-                                 column_metadata[i].get_field_properties());
+                                 column_metadata[i].get_field_properties(),
+                                 column_metadata[i].get_dynamic_array_flag());
         } else {
             columns.emplace_back(name, H5_to_Data_Type(datatype), 1,
-                                 column_metadata[i].get_field_properties());
+                                 column_metadata[i].get_field_properties(),
+                                 column_metadata[i].get_dynamic_array_flag());
         }
     }
 
-    Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
-
     size_t num_rows = dataset.getSpace().getSimpleExtentNpoints();
+    Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
     Data_Details data_details(field_framework, num_rows);
 
     // Resize, don't just reserve.
     data_details.adjust_num_rows(num_rows);
+
     dataset.read(data_details.get_data().data(), compound);
 
-    std::vector<Table_Element> table_elements;
     const auto table_element =
             Table_Element::Builder(field_framework, data_details)
                     .add_params(table_element_params)
@@ -126,6 +122,7 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                     .add_trailing_info_list(table_element_trailing_infos)
                     .add_attributes(table_element_attributes)
                     .build();
+
     add_resource_element(
             Resource_Element::Builder(table_element)
                     .add_params(resource_params)

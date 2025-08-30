@@ -13,11 +13,8 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                             const size_t &array_size, const size_t &offset,
                             const size_t &offset_end, const size_t &col_idx,
                             bool dynamic_array_flag) {
-    if (dynamic_array_flag) {
-        set_dynamic_array_size(col_idx, array_size);
-    }
-
     if (array_size != 1 && data_type != Data_Type::CHAR) {
+        // Insert elements one at a time.
         std::vector<std::string> elements;
         boost::split(elements, value, boost::is_any_of(" "));
         size_t num_elements = elements.size();
@@ -26,15 +23,25 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                     "Expected " + std::to_string(array_size) + " elements, but found " +
                     std::to_string(num_elements) + ": '" + value + "'");
         }
+        if (dynamic_array_flag) {
+            set_dynamic_array_size(col_idx, array_size);
+        }
+
         auto element_offset = offset;
         auto element_size = get_data_size(data_type);
         for (auto &e : elements) {
+            // Recurse and wind up in the other block with array_size == 1.
             insert_from_ascii(e, data_type, 1, element_offset,
                               element_offset + element_size, col_idx,
-                              dynamic_array_flag);
+                              false /* dynamic_array_flag */);
             element_offset += element_size;
         }
     } else {
+        // array_size == 1 OR data_type = char.  Insert all at once.
+        if (dynamic_array_flag) {
+            set_dynamic_array_size(col_idx, array_size);
+        }
+
         switch (data_type) {
             case Data_Type::INT8_LE:
                 if (value == "?" || value == " " || value[0] == '\0') {
@@ -51,7 +58,7 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                 }
                 break;
             case Data_Type::UINT8_LE: {
-                /// Allow hex and octal input
+                // Allow hex and octal input
                 int result = std::stoi(value, nullptr, 0);
                 if (result > std::numeric_limits<uint8_t>::max() ||
                     result < std::numeric_limits<uint8_t>::lowest())

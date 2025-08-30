@@ -20,7 +20,6 @@ void Min_Max_to_xml(boost::property_tree::ptree &tree, const std::string &min_ma
 
 // If json_prep is true, find (or, if none exists, create) a tree with
 // label <label>_ARRAY, add an un-labeled subtree to that, and return
-
 // the subtree.  Otherwise, add and return a subtree with label
 // <label> whether or not a subtree already exists with that label.
 boost::property_tree::ptree &find_or_add_tree(boost::property_tree::ptree &parent_tree,
@@ -148,6 +147,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::string &col_label, const Column &column,
                           const Data_Type &active_datatype, bool json_prep) {
+    // std::cout << "add_to_property_tree(), column" << std::endl;
     auto &field_tree = find_or_add_tree(parent_tree, col_label, json_prep);
 
     // Attributes first, starting with those that do not (ordinarily)
@@ -277,7 +277,8 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Table_Element &table_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
-                          const std::vector<std::string> &comments, bool json_prep) {
+                          const std::vector<std::string> &comments, bool json_prep,
+                          bool do_binary2) {
     // std::cout << "add_to_property_tree(), Table" << std::endl;
     boost::property_tree::ptree &table_tree = parent_tree.add(TABLE, "");
 
@@ -316,8 +317,15 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                              json_prep);
     }
 
-    // We don't add tabledata directly because it is not in ptree format.
-    table_tree.add(DATA_TABLEDATA, TABLEDATA_PLACEHOLDER);
+    // We don't add tabledata and binary2 directly because they aren't in ptree format.
+    if (do_binary2) {
+        table_tree.add(DATA_BINARY2_STREAM, BINARY2_PLACEHOLDER);
+        table_tree.add(DATA_BINARY2_STREAM + DOT + XMLATTR_DOT + "encoding", "base64");
+
+    } else {
+        table_tree.add(DATA_TABLEDATA, TABLEDATA_PLACEHOLDER);
+    }
+
     for (const auto &info : table_element.get_trailing_info_list()) {
         add_to_property_tree(table_tree, INFO, info, json_prep);
     }
@@ -331,7 +339,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           const std::vector<std::string> &comments,
                           const Labeled_Properties &table_labeled_properties,
-                          bool json_prep) {
+                          bool json_prep, bool do_binary2) {
     // std::cout << "add_to_property_tree(), Resource I" << std::endl;
     auto &resource_tree = find_or_add_tree(parent_tree, RESOURCE, json_prep);
 
@@ -370,7 +378,7 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
         // write only one table_element
         const auto &table_element = resource_element.get_main_table_element();
         add_to_property_tree(resource_tree, table_element, datatypes_for_writing,
-                             comments, json_prep);
+                             comments, json_prep, do_binary2);
     }
 
     for (const auto &info : resource_element.get_trailing_info_list()) {
@@ -388,16 +396,19 @@ static const Labeled_Properties DEFAULT_TABLE_LABELED_PROPERTIES = Labeled_Prope
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
-                          bool json_prep) {
+                          bool json_prep, bool do_binary2) {
     // std::cout << "add_to_property_tree(), Resource II" << std::endl;
     add_to_property_tree(parent_tree, resource_element, datatypes_for_writing,
-                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES, json_prep);
+                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES, json_prep,
+                         do_binary2);
 }
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const Resource_Element &resource_element, bool json_prep) {
+                          const Resource_Element &resource_element, bool json_prep,
+                          bool do_binary2) {
     add_to_property_tree(parent_tree, resource_element, {} /* datatypes_for_writing */,
-                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES, json_prep);
+                         DEFAULT_COMMENTS, DEFAULT_TABLE_LABELED_PROPERTIES, json_prep,
+                         do_binary2);
 }
 
 

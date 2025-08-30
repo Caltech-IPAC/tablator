@@ -4,24 +4,28 @@
 
 namespace tablator {
 
-Data_Details::Data_Details(const Field_Framework &field_framework, size_t num_rows)
+Data_Details::Data_Details(const Field_Framework &field_framework,
+                           size_t num_initial_rows)
         : Data_Details(field_framework.get_dynamic_col_idx_lookup(),
-                       field_framework.get_row_size(), num_rows) {}
+                       field_framework.get_row_size(), num_initial_rows) {}
 
 //==================================================================
 
 void Data_Details::append_row(const Row &row) {
     assert(row.get_data().size() == get_row_size());
     assert(row.get_dynamic_array_sizes().size() == get_num_dynamic_columns());
-
     data_.insert(data_.end(), row.get_data().begin(), row.get_data().end());
 
     if (got_dynamic_columns()) {
-        dynamic_array_sizes_by_row_.emplace_back();
-        auto &new_sizes = dynamic_array_sizes_by_row_.back();
+        if (get_num_rows_inserted() >= get_num_initial_rows()) {
+            dynamic_array_sizes_by_row_.emplace_back();
+        }
+
+        auto &new_sizes = dynamic_array_sizes_by_row_.at(get_num_rows_inserted());
         new_sizes.insert(new_sizes.end(), row.get_dynamic_array_sizes().begin(),
                          row.get_dynamic_array_sizes().end());
     }
+    ++num_rows_inserted_;
 }
 
 //==================================================================

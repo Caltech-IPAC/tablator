@@ -120,8 +120,7 @@ public:
         const auto iter = dynamic_col_idx_lookup_.find(col_idx);
         if (iter == dynamic_col_idx_lookup_.end()) {
             throw std::runtime_error(
-                    "set_dynamic_array_size(): dynamic_array_sizes vector improperly "
-                    "initialized");
+                    "set_dynamic_array_size(): no lookup entry for col_idx");
         }
         dynamic_array_sizes_.at(iter->second) = dyn_size;
     }
@@ -131,17 +130,15 @@ public:
         const auto iter = dynamic_col_idx_lookup_.find(dyn_col_idx);
         if (iter == dynamic_col_idx_lookup_.end()) {
             throw std::runtime_error(
-                    "set_dynamic_array_size(): dynamic_array_sizes vector improperly "
-                    "initialized");
+                    "increment_dynamic_array_size(): no lookup entry for col_idx");
         }
         dynamic_array_sizes_.at(iter->second) =
                 dynamic_array_sizes_.at(iter->second) + 1;
     }
 
 private:
-    template <class T, class Rule>
-    void insert_from_bigendian_internal(size_t column_offset, const Rule &rule,
-                                        size_t array_size,
+    template <class T>
+    void insert_from_bigendian_internal(size_t column_offset, size_t array_size,
                                         const std::vector<uint8_t> &stream,
                                         size_t starting_src_pos);
 

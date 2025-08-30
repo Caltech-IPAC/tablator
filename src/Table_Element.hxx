@@ -105,7 +105,6 @@ public:
             data_elements_.emplace_back(field_framework, num_rows);
         }
 
-
         Builder(const Field_Framework &field_framework) {
             data_elements_.emplace_back(field_framework);
         }
