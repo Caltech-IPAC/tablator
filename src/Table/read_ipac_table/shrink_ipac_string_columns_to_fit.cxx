@@ -3,12 +3,11 @@
 #include <stdexcept>
 #include <utility>
 
-// No need to adjust dynamic_array_sizes for now, since we don't
-// support dynamic array columns in IPAC tables.  13Jul25
 
 void tablator::Table::shrink_ipac_string_columns_to_fit(
         Field_Framework &old_field_framework, Data_Details &old_data_details,
-        const std::vector<size_t> &minimum_column_data_widths) {
+        const std::vector<size_t> &minimum_column_data_widths,
+        std::vector<std::vector<uint32_t>> &dynamic_array_sizes_by_row) {
     auto &old_columns = old_field_framework.get_columns();
     auto &old_offsets = old_field_framework.get_offsets();
     size_t num_columns = old_columns.size();
@@ -50,6 +49,11 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
         }
         old_row_offset += old_row_size;
         new_row_offset += new_row_size;
+    }
+
+    if (new_data_details.got_dynamic_columns()) {
+        new_data_details.get_dynamic_array_sizes_by_row().swap(
+                dynamic_array_sizes_by_row);
     }
 
     std::swap(old_field_framework, new_field_framework);

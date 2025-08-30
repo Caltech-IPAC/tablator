@@ -22,11 +22,13 @@ bool is_columns_valid(H5::VarLenType &columns) {
     }
 
     H5::CompType column(columns_super.getId());
-    if (!(column.getNmembers() == 4 && column.getMemberClass(0) == H5T_STRING &&
+    if (!(column.getNmembers() == 5 && column.getMemberClass(0) == H5T_STRING &&
           column.getMemberClass(1) == H5T_STRING &&
           column.getMemberClass(2) == H5T_INTEGER &&
           column.getMemberDataType(2).getSize() == H5::PredType::STD_U64LE.getSize() &&
-          column.getMemberClass(3) == H5T_COMPOUND)) {
+          column.getMemberClass(3) == H5T_COMPOUND &&
+          column.getMemberClass(4) == H5T_INTEGER &&
+          column.getMemberDataType(4).getSize() == H5::PredType::STD_I8LE.getSize())) {
         return false;
     }
 
@@ -69,9 +71,11 @@ bool is_columns_valid(H5::VarLenType &columns) {
 
     H5::VarLenType options = values.getMemberVarLenType(6);
     H5::DataType options_super = options.getSuper();
+
     if (options_super.getClass() != H5T_COMPOUND) {
         return false;
     }
+
     if (!is_key_value_type(H5::CompType(options_super.getId()))) {
         return false;
     }

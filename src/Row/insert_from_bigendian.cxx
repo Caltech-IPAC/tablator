@@ -2,37 +2,27 @@
 
 #include <stdexcept>
 
+#include "../Utils/Endian_Utils.hxx"
 #include "../data_size.hxx"
-
-namespace {
-template <class T, class Rule>
-T parse_bigendian_element(const Rule &rule,
-                          std::vector<uint8_t>::const_iterator &src_iter) {
-    T element = 0;
-    boost::spirit::qi::parse(src_iter, src_iter + sizeof(T), rule, element);
-    return element;
-}
-
-}  // namespace
-
 
 namespace tablator {
 
-template <class T, class Rule>
-void Row::insert_from_bigendian_internal(size_t column_offset, const Rule &rule,
-                                         size_t array_size,
+template <class T>
+void Row::insert_from_bigendian_internal(size_t column_offset, size_t array_size,
                                          const std::vector<uint8_t> &stream,
                                          size_t starting_src_pos) {
     const size_t data_type_size = sizeof(T);
     size_t curr_offset = column_offset;
 
-    auto src_iter = stream.begin();
-    std::advance(src_iter, starting_src_pos);
-
+    auto src_ptr = stream.data();
+    std::advance(src_ptr, starting_src_pos);
     for (size_t index = 0; index < array_size; ++index) {
-        insert<T>(parse_bigendian_element<T>(rule, src_iter), curr_offset);
+        T element;
+        copy_swapped_bytes(reinterpret_cast<uint8_t *>(&element), src_ptr,
+                           data_type_size);
+        insert<T>(element, curr_offset);
 
-        std::advance(src_iter, data_type_size);
+        std::advance(src_ptr, data_type_size);
         curr_offset += data_type_size;
     }
 }
@@ -84,19 +74,19 @@ void Row::insert_from_bigendian(const std::vector<uint8_t> &stream,
             }
         } break;
         case 2: {
-            insert_from_bigendian_internal<uint16_t>(
-                    offset, boost::spirit::qi::big_word, array_size, stream,
-                    starting_src_pos);
+            // std::cout << "data_type_size = 2" << std::endl;
+            insert_from_bigendian_internal<uint16_t>(offset, array_size, stream,
+                                                     starting_src_pos);
         } break;
         case 4: {
-            insert_from_bigendian_internal<uint32_t>(
-                    offset, boost::spirit::qi::big_dword, array_size, stream,
-                    starting_src_pos);
+            // std::cout << "data_type_size = 4" << std::endl;
+            insert_from_bigendian_internal<uint32_t>(offset, array_size, stream,
+                                                     starting_src_pos);
         } break;
         case 8: {
-            insert_from_bigendian_internal<uint64_t>(
-                    offset, boost::spirit::qi::big_qword, array_size, stream,
-                    starting_src_pos);
+            // std::cout << "data_type_size = 8" << std::endl;
+            insert_from_bigendian_internal<uint64_t>(offset, array_size, stream,
+                                                     starting_src_pos);
         } break;
         default: {
             throw std::runtime_error("Invalid value for data_type_size: " +

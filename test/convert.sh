@@ -246,7 +246,7 @@ fi
 # Test one-way conversions
 
 
-${tablator_bin} --input-format=hdf5 --output-format=ipac_table test/h5_as_csv.csv temp.h5
+${tablator_bin} --input-format=hdf5 --output-format=ipac_table test/multi_hdf5_mislabeled.csv temp.h5 &&
 ${tablator_bin} --input-format=ipac_table temp.h5 temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Explicit format specified"
@@ -255,13 +255,20 @@ else
     echo "FAIL: Explicit format specified"
 fi
 
-
 ${tablator_bin} --output-format=votable test/recursive_param.xml temp.vot && diff test/recursive_param.xml temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: recursive param tabledata"
     rm -f temp.vot
 else
     echo "FAIL: recursive param tabledata"
+fi
+
+${tablator_bin} --input-format=ipac_table test/multi temp.tbl && diff test/multi_formatted.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: format multi as ipac_table"
+    rm -f temp.vot
+else
+    echo "FAIL: format multi as ipac_table"
 fi
 
 ${tablator_bin} --output-format=votable test/recursive_param_binary2.xml temp.vot && diff test/recursive_param.xml temp.vot
@@ -399,10 +406,10 @@ else
 fi
 
 
-${tablator_bin} test/int_types_with_duplicate_keys.json5 out.json5 && diff -w test/int_types.json5 out.json5
+${tablator_bin} test/int_types_with_duplicate_keys.json5 temp.json5 && diff -w test/int_types.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert duplicate keys in JSON5 format to array"
-    rm -f out.json5
+    rm -f temp.json5
 else
     echo "FAIL: Convert duplicate keys in JSON5 format to array"
 fi
@@ -421,7 +428,7 @@ else
 fi
 
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_int_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/two_row_int_array.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_int_array.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff -w test/back_and_forth_tables/two_row_int_array.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type int to FITS and back"
     rm -f temp.json5
@@ -475,7 +482,7 @@ else
     echo "FAIL: Convert Json5 Table with single two-row array col of type long to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_ulong_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/two_row_ulong_array_via_fits.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_ulong_array.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff -w test/back_and_forth_tables/two_row_ulong_array_via_fits.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type ulong to FITS and back"
     rm -f temp.json5
@@ -483,7 +490,7 @@ else
     echo "FAIL: Convert Json5 Table with single two-row array col of type ulong to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_large_ulong_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/two_row_large_ulong_array_via_fits.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_large_ulong_array.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff -w test/back_and_forth_tables/two_row_large_ulong_array_via_fits.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type ulong with large values to FITS and back"
     rm -f temp.json5
@@ -513,7 +520,7 @@ else
 fi
 
 ${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array.vot temp.fits &&
-${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/two_row_large_ulong_array.vot temp.vot
+${tablator_bin}  temp.fits temp.vot && diff test/back_and_forth_tables/two_row_large_ulong_array.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with single two-row array col of type ulong with large values to FITS and back"
     rm -f temp.fits
@@ -522,8 +529,18 @@ else
     echo "FAIL: Convert VOTable with single two-row array col of type ulong with large values to FITS and back"
 fi
 
+${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array.vot temp.hdf5 &&
+${tablator_bin}  temp.hdf5 temp.vot && diff test/back_and_forth_tables/two_row_large_ulong_array.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with single two-row array col of type ulong with large values to HDF5 and back"
+    rm -f temp.hdf5
+    rm -f temp.vot
+else
+    echo "FAIL: Convert VOTable with single two-row array col of type ulong with large values to FITS and back"
+fi
+
 ${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.fits &&
-${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.vot
+${tablator_bin}  temp.fits temp.vot && diff test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with resource of type results and single two-row array col of type ulong with large values to FITS and back"
     rm -f temp.fits
@@ -533,7 +550,7 @@ else
 fi
 
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/one_row_bool_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/one_row_bool_array.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/one_row_bool_array.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff test/back_and_forth_tables/one_row_bool_array.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single one-row array col of type bool to FITS and back"
     rm -f temp.json5
@@ -541,7 +558,7 @@ else
     echo "FAIL: Convert Json5 Table with single one-row array col of type bool to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_bool_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/two_row_bool_array.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_bool_array.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff test/back_and_forth_tables/two_row_bool_array.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type bool to FITS and back"
     rm -f temp.json5
@@ -549,7 +566,7 @@ else
     echo "FAIL: Convert Json5 Table with single two-row array col of type bool to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_byte_array.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/two_row_byte_array.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_byte_array.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff test/back_and_forth_tables/two_row_byte_array.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type unsignedByte to FITS and back"
     rm -f temp.json5
@@ -557,7 +574,7 @@ else
     echo "FAIL: Convert Json5 Table with single two-row array col of type unsignedByte to FITS and back"
 fi
 
-${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/two_row_byte_array.json5 temp.tbl && ${tablator_bin} --input-format=ipac_table temp.tbl temp.json5 && diff -w test/back_and_forth_tables/two_row_byte_array_via_ipac.json5 temp.json5
+${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/two_row_byte_array.json5 temp.tbl && ${tablator_bin} --input-format=ipac_table temp.tbl temp.json5 && diff test/back_and_forth_tables/two_row_byte_array_via_ipac.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single two-row array col of type unsignedByte to IPAC Table and back"
     rm -f temp.json5
@@ -566,7 +583,7 @@ else
     echo "FAIL: Convert Json5 Table with single two-row array col of type unsignedByte to IPAC Table and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/single_bool_col.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/single_bool_col.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/single_bool_col.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff test/back_and_forth_tables/single_bool_col.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with single multi-row non-array col of type bool to FITS and back"
     rm -f temp.json5
@@ -574,7 +591,7 @@ else
     echo "FAIL: Convert Json5 Table with single multi-row non-array col of type bool to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified.vot out.fits &&  ${tablator_bin}  out.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified.vot out.fits &&  ${tablator_bin}  out.fits temp.vot && diff test/back_and_forth_tables/fits_medium_modified.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable translated from FITS to FITS and back"
     rm -f temp.vot
@@ -582,7 +599,7 @@ else
     echo "FAIL: Convert VOTable translated from FITS to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.fits &&  ${tablator_bin}  temp.fits temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.fits &&  ${tablator_bin}  temp.fits temp.vot && diff test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with unorthodox INFO property value to FITS and back"
     rm -f temp.vot
@@ -591,7 +608,7 @@ else
     echo "FAIL: Convert VOTable with unorthodox INFO property value to FITS and back"
 fi
 
-${tablator_bin} --output-format=json test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.json &&  ${tablator_bin}  temp.json temp.vot && diff -w test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
+${tablator_bin} --output-format=json test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.json &&  ${tablator_bin}  temp.json temp.vot && diff test/back_and_forth_tables/fits_medium_modified_with_value.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with unorthodox INFO property value to JSON and back"
     rm -f temp.vot
@@ -601,8 +618,7 @@ else
 fi
 
 
-# JTODO: Field-level INFO section would still not survive the round trip via fits.
-${tablator_bin} --output-format=fits test/back_and_forth_tables/small_integer_type_arrays.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/small_integer_type_arrays.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/small_integer_type_arrays.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff test/back_and_forth_tables/small_integer_type_arrays.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with assorted small-valued int-type array cols to FITS and back"
     rm -f temp.json5
@@ -613,7 +629,7 @@ fi
 
 
 # JTODO: descriptions and field-level attrs still do not survive the round trip via FITS.
-${tablator_bin} --output-format=fits test/back_and_forth_tables/desc_attrs_no_info.xml - | ${tablator_bin} --input-format=fits - temp.vot && diff -w test/back_and_forth_tables/desc_attrs_no_info_via_fits.xml temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/desc_attrs_no_info.xml temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.vot && diff test/back_and_forth_tables/desc_attrs_no_info_via_fits.xml temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with elements FITS can't handle to FITS and back"
     rm -f temp.vot
@@ -622,7 +638,7 @@ else
 fi
 
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/small_fits_unsupported_integer_type_arrays.json5 - | ${tablator_bin} --input-format=fits - temp.json5 && diff -w test/back_and_forth_tables/small_fits_unsupported_integer_type_arrays_via_fits.json5 temp.json5
+${tablator_bin} --output-format=fits test/back_and_forth_tables/small_fits_unsupported_integer_type_arrays.json5 temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.json5 && diff test/back_and_forth_tables/small_fits_unsupported_integer_type_arrays_via_fits.json5 temp.json5
 if [ $? -eq 0 ]; then
     echo "PASS: Convert Json5 Table with assorted small-valued array cols of types not supported by FITS to FITS and back"
     rm -f temp.json5
@@ -631,7 +647,7 @@ else
 fi
 
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/partial_euclid.vot - | ${tablator_bin} --input-format=fits - temp.vot && diff -w test/back_and_forth_tables/partial_euclid.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/partial_euclid.vot temp.fits && ${tablator_bin} --input-format=fits temp.fits temp.vot && diff test/back_and_forth_tables/partial_euclid.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with array col of type supported by FITS to FITS and back"
     rm -f temp.vot
@@ -640,7 +656,7 @@ else
 fi
 
 
-${tablator_bin} test/back_and_forth_tables/partial_euclid.fits temp.vot && ${tablator_bin} temp.vot temp.fits && diff -w test/back_and_forth_tables/partial_euclid.fits temp.fits
+${tablator_bin} test/back_and_forth_tables/partial_euclid.fits temp.vot && ${tablator_bin} temp.vot temp.fits && diff test/back_and_forth_tables/partial_euclid.fits temp.fits
 if [ $? -eq 0 ]; then
     echo "PASS: Convert FITS file with array col to VOTable and back"
     rm -f temp.vot
@@ -650,7 +666,7 @@ else
 fi
 
 # TODO: comments don't survive round trip via IPAC format.
-${tablator_bin} test/back_and_forth_tables/partial_euclid.fits temp.tbl && diff -w test/back_and_forth_tables/partial_euclid.tbl temp.tbl
+${tablator_bin} test/back_and_forth_tables/partial_euclid.fits temp.tbl && diff test/back_and_forth_tables/partial_euclid.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: Convert FITS file with array col to IPAC Table"
     rm -f temp.tbl
@@ -711,7 +727,7 @@ else
 fi
 
 ${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/col_descriptions_with_newlines.xml temp.out &&
-${tablator_bin} --input-format=ipac_table temp.out temp.vot && diff -w test/back_and_forth_tables/col_descriptions_with_newlines.round_trip.xml temp.vot
+${tablator_bin} --input-format=ipac_table temp.out temp.vot && diff test/back_and_forth_tables/col_descriptions_with_newlines.round_trip.xml temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable with newlines in column descriptions to IPAC Table and back"
     rm -f temp.vot
@@ -746,7 +762,7 @@ ${tablator_bin} test/back_and_forth_tables/multiple_group_example.vot temp.json5
 ${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_group_example.vot out.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with multiple group metadata from VOTable to JSON5 and back"
-    rm -f temp_json5
+    rm -f temp.json5
     rm -f out.vot
 else
     echo "FAIL: Convert table with multiple group metadata from VOTable to JSON5 and back"
@@ -756,7 +772,7 @@ ${tablator_bin} test/back_and_forth_tables/multiple_resource_results_last.vot te
 ${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_resource_results_last.vot out.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with multiple resource elements from VOTable to JSON5 and back"
-    rm -f temp_json5
+    rm -f temp.json5
     rm -f out.vot
 else
     echo "FAIL: Convert table with multiple resource elements from VOTable to JSON5 and back"
@@ -766,7 +782,7 @@ ${tablator_bin} test/back_and_forth_tables/multiple_resource_results_middle.vot 
 ${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_resource_results_middle.vot out.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with resource element in the middle from VOTable to JSON5 and back"
-    rm -f temp_json5
+    rm -f temp.json5
     rm -f out.vot
 else
     echo "FAIL: Convert table with resource element in the middle from VOTable to JSON5 and back"
@@ -873,6 +889,55 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: Convert table with coosys and timesys from vot to FITS and back"
 fi
+
+${tablator_bin}  test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.bin2 &&
+    ${tablator_bin} temp.bin2 temp.vot &&
+    diff test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings and hex from vot to bin2 and back"
+    rm -f temp.tbl
+    rm -f temp.vot
+
+else
+    echo "FAIL: Convert table with null strings and hex from vot to bin2 and back"
+fi
+
+
+${tablator_bin}  test/back_and_forth_tables/multi_row_023.tbl temp.bin2 &&
+${tablator_bin} temp.bin2 temp.tbl &&
+    diff test/back_and_forth_tables/multi_row_023.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with char array and assorted types from tbl to bin2 and back"
+    rm -f temp.tbl
+    rm -f temp.bin2
+else
+    echo "FAIL: Convert table with char array and assorted types from tbl to bin2 and back"
+fi
+
+${tablator_bin}  test/back_and_forth_tables/partial_euclid.vot temp.bin2 &&
+${tablator_bin} temp.bin2 temp.vot &&
+    diff test/back_and_forth_tables/partial_euclid.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with array col from vot to bin2 and back"
+    rm -f temp.bin2
+    rm -f temp.vot
+else
+    echo "FAIL: Convert table with array col from vot to bin2 and back"
+fi
+
+
+${tablator_bin}  test/back_and_forth_tables/two_row_int_array.json5 temp.bin2 &&
+${tablator_bin} temp.bin2 temp.json5 &&
+    diff test/back_and_forth_tables/two_row_int_array.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with array col from json5 to bin2 and back"
+    rm -f temp.bin2
+    rm -f temp.json5
+else
+    echo "PASS: Convert table with array col from json5 to bin2 and back"
+fi
+
+
 
 
 
@@ -983,7 +1048,7 @@ fi
 
 # skip-comments
 
-${tablator_bin}  --skip-comments 1  --column-names "Index ra dec" --exclude-cols 0 test/back_and_forth_tables/partial_auriga.tbl temp.tbl && diff -w test/back_and_forth_tables/partial_auriga_no_flux.tbl temp.tbl
+${tablator_bin}  --skip-comments 1  --column-names "Index ra dec" --exclude-cols 0 test/back_and_forth_tables/partial_auriga.tbl temp.tbl && diff test/back_and_forth_tables/partial_auriga_no_flux.tbl temp.tbl
 
 if [ $? -eq 0 ]; then
     echo "PASS: Extract columns, skipping headers"
@@ -1411,10 +1476,10 @@ fi
 
 ${tablator_bin} --counter-column=my_cntr test/multi temp.tbl && diff test/multi_with_cntr.tbl temp.tbl
 if [ $? -eq 0 ]; then
-    echo "PASS: add counter column to vot and write as tbl"
+    echo "PASS: add counter column to tbl and write as tbl"
     rm -f temp.tbl
 else
-    echo "FAIL: add counter column to vot and write as tbl"
+    echo "FAIL: add counter column to tbl and write as tbl"
 fi
 
 ${tablator_bin} --combine-tables=1 test/back_and_forth_tables/two_row_array_with_nulls.vot test/back_and_forth_tables/two_row_large_ulong_array_from_json5.vot temp.tbl && diff test/back_and_forth_tables/combined_two_row_table.tbl temp.tbl
@@ -1437,10 +1502,34 @@ fi
 
 ${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_int_array.json5 test/back_and_forth_tables/two_row_int_array_II.json5 temp.json5 && diff test/back_and_forth_tables/two_row_int_array_appended.json5 temp.json5
 if [ $? -eq 0 ]; then
-    echo "PASS: append json5 table"
+    echo "PASS: append rows of json5 table to json5 table, write as json5"
     rm -f temp.json5
 else
-    echo "FAIL: append json5 table"
+    echo "FAIL: append rows of json5 table to json5 table, write as json5"
+fi
+
+${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_int_array.vot test/back_and_forth_tables/two_row_int_array_II.json5 temp.json5 && diff test/back_and_forth_tables/two_row_int_array_appended.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: append rows of json5 table to vot table, write as json5"
+    rm -f temp.json5
+else
+    echo "FAIL: append rows of json5 table to vot table, write as json5"
+fi
+
+${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_int_array.json5 test/back_and_forth_tables/two_row_int_array_II.vot temp.vot && diff test/back_and_forth_tables/two_row_int_array_appended.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: append rows of vot table to json5 table, write as vot"
+    rm -f temp.vot
+else
+    echo "FAIL: append rows of vot table to json5 table, write as vot"
+fi
+
+${tablator_bin} --append-rows=1 test/back_and_forth_tables/two_row_int_array.vot test/back_and_forth_tables/two_row_int_array_II.vot temp.json5 && diff test/back_and_forth_tables/two_row_int_array_appended.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: append rows of vot table to vot table, write as json5"
+    rm -f temp.vot
+else
+    echo "FAIL: append rows of vot table to vot table, write as json5"
 fi
 
 ${tablator_bin} --winnow-rows-list "1 2 3" test/multi_formatted.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl

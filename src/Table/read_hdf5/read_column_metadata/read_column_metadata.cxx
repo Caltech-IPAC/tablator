@@ -22,6 +22,7 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
     if (attribute.getTypeClass() != H5T_VLEN) {
         return result;
     }
+
     H5::VarLenType columns = attribute.getVarLenType();
     if (!is_columns_valid(columns)) {
         return result;
@@ -29,6 +30,7 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
 
     hvl_t hdf5_columns;
     attribute.read(columns, &hdf5_columns);
+
     for (size_t col_idx = 0; col_idx < hdf5_columns.len; ++col_idx) {
         HDF5_Column &hdf5_column =
                 reinterpret_cast<HDF5_Column *>(hdf5_columns.p)[col_idx];
@@ -78,8 +80,10 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
                         .build();
 
         result.emplace_back(hdf5_column.name, string_to_Data_Type(hdf5_column.type),
-                            hdf5_column.array_size, field_properties);
+                            hdf5_column.array_size, field_properties,
+                            hdf5_column.dynamic_array_flag);
     }
+
     return result;
 }
 }  // namespace tablator

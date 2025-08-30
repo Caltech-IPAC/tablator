@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE type="results">
+    <TABLE>
+      <FIELD name="ulong_int1" datatype="char" arraysize="32"/>
+      <FIELD name="ulong_int2" datatype="char" arraysize="35"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>16446744073709551616 1</TD>
+            <TD>6446744073709 551616123 987</TD>
+          </TR>
+          <TR>
+            <TD>18446744073701345678 23423423424</TD>
+            <TD>84467440 24680 16446744073709551616</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

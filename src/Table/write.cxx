@@ -48,12 +48,16 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
             break;
         case Format::Enums::JSON:
         case Format::Enums::JSON5:
-        case Format::Enums::VOTABLE: {
+        case Format::Enums::VOTABLE:
+        case Format::Enums::VOTABLE_BINARY2: {
             datatypes_for_writing = Data_Type_Adjuster(*this).get_datatypes_for_writing(
                     format.enum_format);
-            bool is_json(format.enum_format != Format::Enums::VOTABLE);
+            bool is_json = (format.enum_format == Format::Enums::JSON ||
+                            format.enum_format == Format::Enums::JSON5);
+            bool do_binary2 = (format.enum_format == Format::Enums::VOTABLE_BINARY2);
+
             boost::property_tree::ptree tree(
-                    generate_property_tree(datatypes_for_writing, is_json));
+                    generate_property_tree(datatypes_for_writing, is_json, do_binary2));
             std::stringstream ss;
 
             if (is_json) {
@@ -64,8 +68,14 @@ void tablator::Table::write(std::ostream &os, const std::string &table_name,
                         boost::property_tree::xml_writer_make_settings(' ', 2));
             }
             uint num_spaces = is_json ? 2 : 0;
-            splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,
-                                       num_spaces, options);
+
+            if (do_binary2) {
+                // Command_Line_Options are not relevant in this case.
+                splice_binary2_and_write(os, ss, num_spaces, num_spaces);
+            } else {
+                splice_tabledata_and_write(os, ss, format.enum_format, num_spaces,
+                                           num_spaces, options);
+            }
         } break;
         case Format::Enums::CSV:
             write_dsv(os, ',', options);

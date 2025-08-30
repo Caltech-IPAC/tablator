@@ -69,7 +69,6 @@ private:
         size_t old_row_size = *offsets_.rbegin();
         size_t new_row_size = old_row_size + columns_.rbegin()->get_data_size();
         offsets_.push_back(new_row_size);
-
         if (column.get_dynamic_array_flag()) {
             size_t num_dynamic_cols_sofar = dynamic_col_idx_lookup_.size();
             dynamic_col_idx_lookup_[col_idx] = num_dynamic_cols_sofar;

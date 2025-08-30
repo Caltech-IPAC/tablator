@@ -87,7 +87,6 @@ inline tablator::Resource_Type determine_resource_type(
     if (!has_results_table_element) {
         return attr_rtype;
     }
-
     return Resource_Type::RESULTS;
 }
 
@@ -466,7 +465,8 @@ public:
     }
 
     // This function is defined in generate_property_tree.cxx. JTODO Refactor.
-    boost::property_tree::ptree generate_property_tree(bool json_prep) const;
+    boost::property_tree::ptree generate_property_tree(bool json_prep = false,
+                                                       bool do_binary2 = false) const;
 
 
 private:
@@ -474,6 +474,7 @@ private:
             : options_(std::move(options)),
               resource_type_(determine_resource_type(options_.table_elements_,
                                                      options_.attributes_)) {}
+
     Options options_;
     Resource_Type resource_type_;
 };  // class Resource_Element
