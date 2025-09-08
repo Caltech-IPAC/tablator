@@ -17,14 +17,18 @@ namespace {
 boost::property_tree::ptree::const_iterator load_pre_data_section(
         std::vector<tablator::Field> &fields, std::vector<tablator::Field> &params,
         std::vector<tablator::Group_Element> &group_elements,
+        bool &has_dynamic_array_column,
         boost::property_tree::ptree::const_iterator &start,
         boost::property_tree::ptree::const_iterator &end) {
+    has_dynamic_array_column = false;
     boost::property_tree::ptree::const_iterator &iter = start;
     while (iter != end) {
         if (iter->first == tablator::FIELD) {
-            tablator::ptree_readers::load_field_singleton(fields, iter->second);
+            has_dynamic_array_column |=
+                    tablator::ptree_readers::load_field_singleton(fields, iter->second);
         } else if (iter->first == tablator::FIELD_ARRAY) {
-            tablator::ptree_readers::load_field_array(fields, iter->second);
+            has_dynamic_array_column |=
+                    tablator::ptree_readers::load_field_array(fields, iter->second);
         } else if (iter->first == tablator::PARAM) {
             tablator::ptree_readers::load_field_singleton(params, iter->second);
         } else if (iter->first == tablator::PARAM_ARRAY) {
@@ -83,14 +87,17 @@ tablator::Table_Element read_table_element(
 
     std::vector<Group_Element> group_elements;
     std::vector<Field> params;
-    child = load_pre_data_section(fields, params, group_elements, child, end);
+    bool record_dynamic_array_sizes_f = false;
+    child = load_pre_data_section(fields, params, group_elements,
+                                  record_dynamic_array_sizes_f, child, end);
     if (fields.size() < 2) {
         throw std::runtime_error("This VOTable is empty.");
     }
 
     std::vector<Data_Element> data_elements;
     if (child != end && child->first == DATA) {
-        data_elements.emplace_back(read_data_element(child->second, fields));
+        data_elements.emplace_back(
+                read_data_element(child->second, fields, record_dynamic_array_sizes_f));
         ++child;
     }
     std::vector<Property> trailing_info_list;

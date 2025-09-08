@@ -27,13 +27,13 @@ namespace {
 
 void write_bigendian_null_array(uint8_t *&write_ptr,
                                 tablator::Data_Type datatype_for_writing,
-                                size_t array_size) {
+                                uint32_t array_size) {
     const uint8_t *bigendian_null_ptr =
             tablator::Bigendian_Null_Lookup::get_bigendian_null_ptr(
                     datatype_for_writing);
 
     size_t datatype_size = get_data_size(datatype_for_writing);
-    for (size_t i = 0; i < array_size; ++i) {
+    for (uint32_t i = 0; i < array_size; ++i) {
         memcpy(write_ptr, bigendian_null_ptr, datatype_size);
         write_ptr += datatype_size;
     }
@@ -44,14 +44,14 @@ void write_bigendian_null_array(uint8_t *&write_ptr,
 //============================================================
 
 template <typename data_type>
-void write_element(uint8_t *&write_ptr, const uint8_t *data_ptr, size_t array_size) {
+void write_element(uint8_t *&write_ptr, const uint8_t *data_ptr, uint32_t array_size) {
     size_t data_size = sizeof(data_type);
     if (data_size == 1) {
         memcpy(write_ptr, data_ptr, array_size);
         write_ptr += array_size;
         data_ptr += array_size;
     } else {
-        for (size_t i = 0; i < array_size; ++i) {
+        for (uint32_t i = 0; i < array_size; ++i) {
             tablator::copy_swapped_bytes(write_ptr, data_ptr, data_size);
             write_ptr += data_size;
             data_ptr += data_size;
@@ -115,7 +115,7 @@ void Table::write_binary2(std::ostream &os) const {
          ++row_idx, row_start_ptr += get_row_size()) {
         for (size_t col_idx = 0; col_idx < columns.size(); ++col_idx) {
             auto &column = columns[col_idx];
-            size_t array_size = column.get_array_size();
+            uint32_t array_size = column.get_array_size();
             bool dynamic_array_flag = column.get_dynamic_array_flag();
 
             const uint8_t *curr_data_ptr = row_start_ptr + offsets[col_idx];
@@ -140,7 +140,7 @@ void Table::write_binary2(std::ostream &os) const {
                 }
             }  // end col_idx > 0
 
-            size_t curr_array_size = array_size;
+            uint32_t curr_array_size = array_size;
             if (dynamic_array_flag) {
                 curr_array_size =
                         get_data_details().get_dynamic_array_size(row_idx, col_idx);
@@ -154,7 +154,7 @@ void Table::write_binary2(std::ostream &os) const {
             switch (datatype_for_writing) {
                 case Data_Type::INT8_LE: {
                     // std::cout << "INT8_LE" << std::endl;
-                    for (size_t i = 0; i < array_size; ++i) {
+                    for (uint32_t i = 0; i < array_size; ++i) {
                         uint8_t element =
                                 *(reinterpret_cast<const uint8_t *>(curr_data_ptr));
                         bool result =

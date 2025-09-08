@@ -814,18 +814,9 @@ public:
                             next_col_offset, tab_col_idx,
                             false /* dynamic_array_flag */);
         } else {
-            char *current = row.get_data().data() + col_offset;
-            for (size_t i = 0; i < num_substrings; ++i) {
-                char *element = data_str[i];
-                size_t elt_length = strlen(element);
-                size_t j = 0;
-                for (/* */; j < elt_length && j < substring_size; ++j) {
-                    *(current + j) = *(element + j);
-                }
-                for (/* */; j < substring_size; ++j) {
-                    *(current + j) = '\0';
-                }
-            }
+            row.insert_char_array_from_fits(
+                    data_vec, array_size, col_offset, next_col_offset, tab_col_idx,
+                    substring_size, num_substrings, true /* dynamic_array_flag */);
         }
     }
 

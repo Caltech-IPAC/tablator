@@ -10,10 +10,10 @@ class Group_Element;
 
 namespace ptree_readers {
 
-void load_field_singleton(std::vector<tablator::Field> &params,
+bool load_field_singleton(std::vector<tablator::Field> &params,
                           const boost::property_tree::ptree &node);
 
-void load_field_array(std::vector<tablator::Field> &params,
+bool load_field_array(std::vector<tablator::Field> &params,
                       const boost::property_tree::ptree &array_tree);
 
 

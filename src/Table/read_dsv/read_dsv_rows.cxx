@@ -26,10 +26,15 @@ Data_Details Table::read_dsv_rows(Field_Framework &field_framework,
                                        offsets[col_idx], offsets[col_idx + 1], col_idx,
                                        column.get_dynamic_array_flag());
             } else {
-                single_row.insert_from_ascii(element, column.get_type(),
-                                             column.get_array_size(), offsets[col_idx],
-                                             offsets[col_idx + 1], col_idx,
-                                             column.get_dynamic_array_flag());
+                // The only variable-size array cols supported for DSV formats are of
+                // type CHAR.
+                uint32_t curr_array_size = (column.get_type() == Data_Type::CHAR)
+                                                   ? element.size()
+                                                   : column.get_array_size();
+                single_row.insert_from_ascii(
+                        element, column.get_type(), column.get_array_size(),
+                        offsets[col_idx], offsets[col_idx + 1], col_idx,
+                        curr_array_size, column.get_dynamic_array_flag());
             }
         }
         data_details.append_row(single_row);

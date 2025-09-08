@@ -50,16 +50,17 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
     Data_Details data_details(field_framework);
 
     std::vector<std::vector<uint32_t>> dynamic_array_sizes_by_row;
-    auto num_dynamic_columns = data_details.get_num_dynamic_columns();
+    bool got_dynamic_columns = data_details.got_dynamic_columns();
 
     std::string line;
     std::getline(input_stream, line);
 
     Row single_row(field_framework);
+    size_t row_idx = 0;
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
             single_row.fill_with_zeros();
-            if (num_dynamic_columns) {
+            if (got_dynamic_columns) {
                 dynamic_array_sizes_by_row.emplace_back();
             }
             for (size_t col_idx = 1; col_idx < num_tab_columns; ++col_idx) {
@@ -79,7 +80,7 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 minimum_column_widths[col_idx] =
                         std::max(minimum_column_widths[col_idx], element.size());
 
-                if (num_dynamic_columns && tab_column.get_dynamic_array_flag()) {
+                if (got_dynamic_columns && tab_column.get_dynamic_array_flag()) {
                     dynamic_array_sizes_by_row.back().push_back(element.size());
                 }
 
@@ -92,11 +93,18 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                             offsets[col_idx], offsets[col_idx + 1], col_idx,
                             tab_column.get_dynamic_array_flag());
                 } else {
+                    size_t curr_array_size =
+                            tab_column.get_dynamic_array_flag()
+                                    ? Data_Details::get_dynamic_array_size(
+                                              data_details.get_dynamic_col_idx_lookup(),
+                                              dynamic_array_sizes_by_row, row_idx,
+                                              col_idx)
+                                    : tab_column.get_array_size();
                     try {
                         single_row.insert_from_ascii(
                                 element, tab_column.get_type(),
                                 tab_column.get_array_size(), offsets[col_idx],
-                                offsets[col_idx + 1], col_idx,
+                                offsets[col_idx + 1], col_idx, curr_array_size,
                                 tab_column.get_dynamic_array_flag());
                     } catch (std::exception &error) {
                         throw std::runtime_error(
@@ -118,7 +126,8 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
 
             data_details.append_row(single_row);
         }
-        ++current_line_num;
+        ++row_idx;           // includes only data lines, not header lines
+        ++current_line_num;  // includes header lines
         std::getline(input_stream, line);
     }
 

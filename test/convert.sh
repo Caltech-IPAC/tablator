@@ -536,7 +536,7 @@ if [ $? -eq 0 ]; then
     rm -f temp.hdf5
     rm -f temp.vot
 else
-    echo "FAIL: Convert VOTable with single two-row array col of type ulong with large values to FITS and back"
+    echo "FAIL: Convert VOTable with single two-row array col of type ulong with large values to HDF5 and back"
 fi
 
 ${tablator_bin}  test/back_and_forth_tables/two_row_large_ulong_array_with_type.vot temp.fits &&
@@ -934,7 +934,19 @@ if [ $? -eq 0 ]; then
     rm -f temp.bin2
     rm -f temp.json5
 else
-    echo "PASS: Convert table with array col from json5 to bin2 and back"
+    echo "FAIL: Convert table with array col from json5 to bin2 and back"
+fi
+
+
+${tablator_bin}  test/back_and_forth_tables/three_row_variable_size_arrays.vot temp.json5 &&
+${tablator_bin} temp.json5 temp.vot &&
+    diff test/back_and_forth_tables/three_row_variable_size_arrays.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with arrays of variable size from vot to json5 and back"
+    rm -f temp.bin2
+    rm -f temp.json5
+else
+    echo "FAIL: Convert table with arrays of variable size from vot to json5 and back"
 fi
 
 

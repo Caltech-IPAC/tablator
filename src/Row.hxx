@@ -47,9 +47,9 @@ public:
                 const size_t &col_idx, bool dynamic_array_flag) {
         assert(offset + std::distance(begin, end) <= data_.size());
         std::copy(begin, end, data_.data() + offset);
-
         if (dynamic_array_flag) {
-            set_dynamic_array_size(col_idx, std::distance(begin, end) / sizeof(T));
+            set_dynamic_array_size(
+                    col_idx, std::distance(begin, end));  // distance between pointers
         }
     }
 
@@ -88,10 +88,17 @@ public:
         }
     }
 
+    void insert_char_array_from_fits(std::vector<std::vector<char>> &data_vec,
+                                     const size_t &max_array_size, const size_t &offset,
+                                     const size_t &offset_end, const size_t &col_idx,
+                                     const size_t &substring_size,
+                                     const size_t &num_substrings,
+                                     bool dynamic_array_flag);
+
     void insert_from_ascii(const std::string &value, const Data_Type &data_type,
-                           const size_t &array_size, const size_t &offset,
+                           const size_t &max_array_size, const size_t &offset,
                            const size_t &offset_end, const size_t &col_idx,
-                           bool dynamic_array_flag);
+                           const size_t &curr_array_size, bool dynamic_array_flag);
 
 
     void insert_from_bigendian(const std::vector<uint8_t> &stream,

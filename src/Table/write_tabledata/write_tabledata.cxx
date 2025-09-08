@@ -54,7 +54,7 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
     const auto &offsets = get_offsets();
     size_t num_rows = get_num_rows();
     const auto &data = get_data();
-
+    const Data_Details &data_details = get_data_details();
     for (size_t row_idx = 0, row_offset = 0; row_idx < num_rows;
          ++row_idx, row_offset += get_row_size()) {
         os << tr_prefix;
@@ -65,8 +65,12 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
             std::stringstream td;
             // Leave null entries blank, unlike in IPAC_TABLE format.
             if (!is_null_value(row_idx, col_idx)) {
+                size_t curr_array_size =
+                        column.get_dynamic_array_flag()
+                                ? data_details.get_dynamic_array_size(row_idx, col_idx)
+                                : column.get_array_size();
                 Ascii_Writer::write_type_as_ascii(
-                        td, column.get_type(), column.get_array_size(),
+                        td, column.get_type(), curr_array_size,
                         data.data() + row_offset + offsets[col_idx],
                         Ascii_Writer::DEFAULT_SEPARATOR, options);
             }

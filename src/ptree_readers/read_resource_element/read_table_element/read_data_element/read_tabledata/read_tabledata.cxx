@@ -9,18 +9,24 @@ size_t count_elements(const std::string &entry, const Data_Type &type);
 }
 
 tablator::Data_Element tablator::ptree_readers::read_tabledata(
-        const boost::property_tree::ptree &tabledata,
-        const std::vector<Field> &fields) {
-    std::vector<std::vector<std::string> > element_lists_by_row;
+        const boost::property_tree::ptree &tabledata, const std::vector<Field> &fields,
+        bool record_dynamic_array_sizes_f) {
+    std::vector<std::vector<std::string>> element_lists_by_row;
     size_t num_fields = fields.size();
 
     // Need to set the size to at least 1, because H5::StrType can not
     // handle zero sized strings.
-    std::vector<size_t> column_array_sizes(num_fields, 1);
+    std::vector<size_t> minimum_column_widths(num_fields, 1);
     const size_t null_flags_size((num_fields + 6) / 8);
-    column_array_sizes.at(0) = null_flags_size;
+    minimum_column_widths.at(0) = null_flags_size;
+
+    std::vector<std::vector<uint32_t>> dynamic_array_sizes_by_row;
 
     for (auto &tr : tabledata) {
+        if (record_dynamic_array_sizes_f) {
+            dynamic_array_sizes_by_row.emplace_back();
+        }
+
         if (tr.first == "TR" || tr.first.empty()) {
             // Add something for the null_bitfields_flag
             element_lists_by_row.push_back({});
@@ -41,9 +47,15 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                 if (td->first == "TD" || td->first.empty()) {
                     std::string temp = td->second.get_value<std::string>();
                     if (field.get_array_size() != 1) {
-                        column_array_sizes[c] =
-                                std::max(column_array_sizes[c],
-                                         count_elements(temp, field.get_type()));
+                        size_t curr_num_elements =
+                                count_elements(temp, field.get_type());
+                        minimum_column_widths[c] =
+                                std::max(minimum_column_widths[c], curr_num_elements);
+                        if (record_dynamic_array_sizes_f &&
+                            field.get_dynamic_array_flag()) {
+                            dynamic_array_sizes_by_row.back().push_back(
+                                    curr_num_elements);
+                        }
                     }
                     element_lists_by_row.rbegin()->emplace_back(temp);
                 } else {
@@ -72,9 +84,9 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
 
     for (std::size_t c = 0; c < num_fields; ++c) {
         const auto &field = fields.at(c);
-        orig_columns.emplace_back(field.get_name(), field.get_type(),
-                                  column_array_sizes[c], field.get_field_properties(),
-                                  field.get_dynamic_array_flag());
+        orig_columns.emplace_back(
+                field.get_name(), field.get_type(), minimum_column_widths[c],
+                field.get_field_properties(), field.get_dynamic_array_flag());
     }
 
     Field_Framework field_framework(orig_columns, true /* got_null_bitfields_column */);
@@ -97,12 +109,23 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                 single_row.insert_null(column.get_type(), column.get_array_size(),
                                        offsets[col_idx], offsets[col_idx + 1], col_idx,
                                        column.get_dynamic_array_flag());
-            } else
+            } else {
+                size_t curr_array_size =
+                        column.get_dynamic_array_flag()
+                                ? Data_Details::get_dynamic_array_size(
+                                          data_details.get_dynamic_col_idx_lookup(),
+                                          dynamic_array_sizes_by_row, row_idx, col_idx)
+                                : column.get_array_size();
                 try {
+                    // We have already loaded dynamic_array_sizes_by_row, so we'll just
+                    // swap it in to data_details when we're done appending rows.  No
+                    // need for Row to load those sizes as well.  Just pretend to Row
+                    // that there are no dynamic columns.
                     single_row.insert_from_ascii(
                             element, column.get_type(), column.get_array_size(),
                             offsets[col_idx], offsets[col_idx + 1], col_idx,
-                            column.get_dynamic_array_flag());
+                            curr_array_size,
+                            false /* column.get_dynamic_array_flag() */);
                 } catch (std::exception &error) {
                     throw std::runtime_error(
                             "Invalid " + to_string(fields[col_idx].get_type()) +
@@ -112,8 +135,10 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
                             ", array_size: " + std::to_string(column.get_array_size()) +
                             ". Error message: " + error.what());
                 }
+            }
         }
         data_details.append_row(single_row);
     }
+    data_details.get_dynamic_array_sizes_by_row().swap(dynamic_array_sizes_by_row);
     return Data_Element(field_framework, data_details);
 }

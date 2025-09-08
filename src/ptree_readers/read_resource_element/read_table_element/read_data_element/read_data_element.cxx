@@ -17,7 +17,7 @@ void validate_tail(boost::property_tree::ptree::const_iterator &tail_begin,
 
 tablator::Data_Element tablator::ptree_readers::read_data_element(
         const boost::property_tree::ptree &data,
-        const std::vector<tablator::Field> &fields) {
+        const std::vector<tablator::Field> &fields, bool record_dynamic_array_sizes_f) {
     auto child = data.begin();
     auto end = data.end();
 
@@ -26,7 +26,8 @@ tablator::Data_Element tablator::ptree_readers::read_data_element(
     }
 
     if (child->first == TABLEDATA) {
-        auto result = read_tabledata(child->second, fields);
+        auto result =
+                read_tabledata(child->second, fields, record_dynamic_array_sizes_f);
         validate_tail(++child, end);
         return result;
     } else if (child->first == BINARY) {
