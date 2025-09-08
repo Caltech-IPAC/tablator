@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE>
+    <INFO name="DATETIME" value="2018-07-19 10:44:39"/>
+    <INFO name="ORIGIN" value="TEST TABLE"/>
+    <TABLE>
+      <DESCRIPTION>big_uint64s (ulong)
+___ array of uint64s of which one is too big for int64
+little_uint64s (ulong)
+ ___ array of uint64s each of which fits in an int64
+any_uint32s (uint)
+___ array of uint32s</DESCRIPTION>
+      <FIELD name="big_uint64s_as_char" datatype="char" arraysize="*"/>
+      <FIELD name="little_uint64s" datatype="long" arraysize="*"/>
+      <FIELD name="any_uint32s" datatype="long" arraysize="*"/>
+      <FIELD name="chars" datatype="char" arraysize="*"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>17876521098765432109 18210987654321098765 4321098765432109876</TD>
+            <TD>41269035000000002 432109876543210 2109876543210 1 2</TD>
+            <TD>8 76543210 323232323 47</TD>
+            <TD>this is the first row</TD>
+          </TR>
+          <TR>
+            <TD>41269035000000002 4321098765432109876</TD>
+            <TD>12690350000000024 321098765432104 10987654321 13210987655 876 12345678</TD>
+            <TD></TD>
+            <TD>this is the second row</TD>
+          </TR>
+          <TR>
+            <TD>41269035000000002 4321098765432109876 2345678909876543210 2468086424680864268086</TD>
+            <TD>12345678</TD>
+            <TD>12 23 34 45 56 67 78 89 90</TD>
+            <TD>this is the third row</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

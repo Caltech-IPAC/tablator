@@ -25,12 +25,11 @@ void append_data_from_stream(Data_Details &data_details,
         src_pos += null_flags_size;
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
             auto column = columns.at(col_idx);
-            auto col_array_size = column.get_array_size();
-            auto curr_array_size = col_array_size;
+            uint32_t col_array_size = column.get_array_size();
+            uint32_t curr_array_size = col_array_size;
             auto col_type = column.get_type();
 
             bool dynamic_array_flag = field_framework.get_dynamic_array_flag(col_idx);
-
             if (is_null_MSB(stream, row_offset, col_idx)) {
                 single_row.insert_null(col_type, col_array_size, offsets[col_idx],
                                        offsets[col_idx + 1], col_idx,

@@ -95,18 +95,26 @@ public:
         return get_dynamic_array_sizes_by_row().at(row_idx);
     }
 
-    inline uint32_t get_dynamic_array_size(size_t row_idx, size_t col_idx) const {
-        const auto iter = dynamic_col_idx_lookup_.find(col_idx);
-        if (iter == dynamic_col_idx_lookup_.end()) {
+    static inline const uint32_t &get_dynamic_array_size(
+            const std::unordered_map<size_t, size_t> &dynamic_col_idx_lookup,
+            const std::vector<std::vector<uint32_t>> &dynamic_array_sizes_by_row,
+            size_t row_idx, size_t col_idx) {
+        const auto iter = dynamic_col_idx_lookup.find(col_idx);
+        if (iter == dynamic_col_idx_lookup.end()) {
             throw std::runtime_error(
                     "get_dynamic_array_size(): no lookup entry for col_idx");
         }
-        const auto &curr_sizes = get_dynamic_array_sizes(row_idx);
+        const auto &curr_sizes = dynamic_array_sizes_by_row.at(row_idx);
         if (iter->second >= curr_sizes.size()) {
             throw std::runtime_error(
                     "get_dynamic_array_size(): not enough dynamic array sizes.");
         }
         return curr_sizes.at(iter->second);
+    }
+
+    inline uint32_t get_dynamic_array_size(size_t row_idx, size_t col_idx) const {
+        return get_dynamic_array_size(dynamic_col_idx_lookup_,
+                                      dynamic_array_sizes_by_row_, row_idx, col_idx);
     }
 
 

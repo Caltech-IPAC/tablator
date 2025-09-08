@@ -46,9 +46,11 @@ Field read_field(const boost::property_tree::ptree &field);
 Property read_property(const boost::property_tree::ptree &prop);
 
 Data_Element read_data_element(const boost::property_tree::ptree &data,
-                               const std::vector<Field> &fields);
+                               const std::vector<Field> &fields,
+                               bool record_dynamic_array_sizes_f);
 Data_Element read_tabledata(const boost::property_tree::ptree &tabledata,
-                            const std::vector<Field> &fields);
+                            const std::vector<Field> &fields,
+                            bool record_dynamic_array_sizes_f);
 Data_Element read_binary2(const boost::property_tree::ptree &binary2,
                           const std::vector<Field> &fields);
 

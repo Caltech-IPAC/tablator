@@ -5,7 +5,8 @@
 #include "../HDF5_Attribute.hxx"
 #include "../HDF5_Property.hxx"
 
-// As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
+// As of 08Sep25, CHAR columns are created with dynamic_array_flag true
+// and all other columns are created with dynamic_array_flag false.
 
 namespace {
 const std::string read_description(const H5::DataSet &dataset,
@@ -19,6 +20,7 @@ const std::string read_description(const H5::DataSet &dataset,
     }
     return desc_str;
 }
+
 }  // namespace
 
 namespace tablator {
@@ -76,15 +78,15 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                 std::to_string(compound.getNmembers()));
     }
 
-    std::vector<Column> columns;
+    std::vector<Column> orig_columns;
 
     for (int i = 0; i < compound.getNmembers(); ++i) {
         H5::DataType datatype(compound.getMemberDataType(i));
         std::string name(compound.getMemberName(i));
         if (datatype.getClass() == H5T_STRING) {
-            columns.emplace_back(name, Data_Type::CHAR, datatype.getSize(),
-                                 column_metadata[i].get_field_properties(),
-                                 column_metadata[i].get_dynamic_array_flag());
+            orig_columns.emplace_back(name, Data_Type::CHAR, datatype.getSize(),
+                                      column_metadata[i].get_field_properties(),
+                                      column_metadata[i].get_dynamic_array_flag());
         } else if (datatype.getClass() == H5T_ARRAY) {
             auto array_type = compound.getMemberArrayType(i);
             hsize_t ndims = array_type.getArrayNDims();
@@ -96,24 +98,63 @@ void tablator::Table::read_hdf5(const boost::filesystem::path &path) {
                         std::to_string(ndims));
             }
             array_type.getArrayDims(&ndims);
-            columns.emplace_back(name, H5_to_Data_Type(datatype), ndims,
-                                 column_metadata[i].get_field_properties(),
-                                 column_metadata[i].get_dynamic_array_flag());
+            orig_columns.emplace_back(
+                    name, H5_to_Data_Type(datatype), ndims,
+                    column_metadata[i].get_field_properties(),
+                    false /* column_metadata[i].get_dynamic_array_flag() */);
         } else {
-            columns.emplace_back(name, H5_to_Data_Type(datatype), 1,
-                                 column_metadata[i].get_field_properties(),
-                                 column_metadata[i].get_dynamic_array_flag());
+            orig_columns.emplace_back(
+                    name, H5_to_Data_Type(datatype), 1,
+                    column_metadata[i].get_field_properties(),
+                    false /* column_metadata[i].get_dynamic_array_flag() */);
         }
     }
 
     size_t num_rows = dataset.getSpace().getSimpleExtentNpoints();
-    Field_Framework field_framework(columns, true /* got_null_bitfields_column */);
+
+    Field_Framework field_framework(orig_columns, true /* got_null_bitfields_column */);
     Data_Details data_details(field_framework, num_rows);
+
+    const auto &columns = field_framework.get_columns();
+    const auto &offsets = field_framework.get_offsets();
 
     // Resize, don't just reserve.
     data_details.adjust_num_rows(num_rows);
+    uint8_t *data_ptr_orig = data_details.get_data().data();
+    dataset.read(data_ptr_orig, compound);
 
-    dataset.read(data_details.get_data().data(), compound);
+    std::vector<std::vector<uint32_t>> dynamic_array_sizes_by_row;
+    bool got_dynamic_columns = data_details.got_dynamic_columns();
+
+
+    size_t row_size = field_framework.get_row_size();
+    const uint8_t *row_data_ptr = data_ptr_orig;
+    for (size_t row_idx = 0; row_idx < num_rows; ++row_idx, row_data_ptr += row_size) {
+        if (got_dynamic_columns) {
+            dynamic_array_sizes_by_row.emplace_back();
+        }
+
+        for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
+            const auto &column = columns[col_idx];
+            bool dynamic_array_flag = column.get_dynamic_array_flag();
+            size_t max_array_size = column.get_array_size();
+            if (dynamic_array_flag) {
+                if (column.get_type() != Data_Type::CHAR) {
+                    throw std::runtime_error(
+                            "HDF5 code currently allows only columns of type CHAR to "
+                            "have variable size");
+                }
+                size_t col_offset = offsets.at(col_idx);
+                dynamic_array_sizes_by_row.back().push_back(
+                        std::min(max_array_size,
+                                 strlen(reinterpret_cast<const char *>(row_data_ptr) +
+                                        col_offset)));
+            }
+        }  // end loop through columns
+    }      // end loop through rows
+
+    data_details.get_dynamic_array_sizes_by_row().swap(dynamic_array_sizes_by_row);
+
 
     const auto table_element =
             Table_Element::Builder(field_framework, data_details)
