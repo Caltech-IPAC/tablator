@@ -3,16 +3,17 @@
 #include <stdexcept>
 #include <utility>
 
+
 void tablator::Table::shrink_ipac_string_columns_to_fit(
         Field_Framework &old_field_framework, Data_Details &old_data_details,
-        const std::vector<size_t> &minimum_column_data_widths) {
+        const std::vector<size_t> &minimum_column_data_widths,
+        std::vector<std::vector<uint32_t>> &dynamic_array_sizes_by_row) {
     auto &old_columns = old_field_framework.get_columns();
     auto &old_offsets = old_field_framework.get_offsets();
     size_t num_columns = old_columns.size();
     size_t old_row_size(old_field_framework.get_row_size());
 
     std::vector<uint8_t> &old_data = old_data_details.get_data();
-    size_t num_rows = old_data_details.get_num_rows();
 
     for (size_t col_idx = 0; col_idx < num_columns; ++col_idx) {
         // Set array_sizes of CHAR columns to the optimal calculated widths.
@@ -31,8 +32,11 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
         return;
     }
 
+    size_t num_rows = old_data_details.get_num_rows();
+
     // FIXME: Do this in place.
-    Data_Details new_data_details(new_row_size, num_rows);
+    Data_Details new_data_details(old_data_details.get_dynamic_col_idx_lookup(),
+                                  new_row_size, num_rows);
     std::vector<uint8_t> &new_data = new_data_details.get_data();
 
     size_t old_row_offset(0), new_row_offset(0);
@@ -45,6 +49,11 @@ void tablator::Table::shrink_ipac_string_columns_to_fit(
         }
         old_row_offset += old_row_size;
         new_row_offset += new_row_size;
+    }
+
+    if (new_data_details.got_dynamic_columns()) {
+        new_data_details.get_dynamic_array_sizes_by_row().swap(
+                dynamic_array_sizes_by_row);
     }
 
     std::swap(old_field_framework, new_field_framework);

@@ -9,26 +9,32 @@ Data_Details Table::read_dsv_rows(Field_Framework &field_framework,
     auto &offsets = field_framework.get_offsets();
 
     Data_Details data_details(field_framework, dsv.size());
-
     Row single_row(field_framework);
 
-    bool skipped(false);
+    bool top_row(true);
     for (auto &dsv_row : dsv) {
-        if (!skipped) {
-            skipped = true;
+        if (top_row) {
+            top_row = false;
             continue;
         }
         single_row.fill_with_zeros();
         for (size_t col_idx = 1; col_idx < columns.size(); ++col_idx) {
             const std::string &element(dsv_row[col_idx - 1]);
+            const auto &column = columns[col_idx];
             if (element.empty() || element == "null") {
-                single_row.insert_null(columns[col_idx].get_type(),
-                                       columns[col_idx].get_array_size(), col_idx,
-                                       offsets[col_idx], offsets[col_idx + 1]);
+                single_row.insert_null(column.get_type(), column.get_array_size(),
+                                       offsets[col_idx], offsets[col_idx + 1], col_idx,
+                                       column.get_dynamic_array_flag());
             } else {
-                single_row.insert_from_ascii(element, columns[col_idx].get_type(),
-                                             columns[col_idx].get_array_size(), col_idx,
-                                             offsets[col_idx], offsets[col_idx + 1]);
+                // The only variable-size array cols supported for DSV formats are of
+                // type CHAR.
+                uint32_t curr_array_size = (column.get_type() == Data_Type::CHAR)
+                                                   ? element.size()
+                                                   : column.get_array_size();
+                single_row.insert_from_ascii(
+                        element, column.get_type(), column.get_array_size(),
+                        offsets[col_idx], offsets[col_idx + 1], col_idx,
+                        curr_array_size, column.get_dynamic_array_flag());
             }
         }
         data_details.append_row(single_row);

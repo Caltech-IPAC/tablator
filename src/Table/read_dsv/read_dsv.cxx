@@ -1,5 +1,8 @@
 #include "../../Table.hxx"
 
+// As of 08Sep25, the only variable-size array cols supported for DSV
+// formats are of type CHAR.
+
 namespace tablator {
 std::list<std::vector<std::string> > parse_dsv(std::istream &input_stream,
                                                const char &delimiter);

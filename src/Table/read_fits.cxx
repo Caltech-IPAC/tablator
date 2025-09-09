@@ -729,16 +729,17 @@ public:
             // Indicate that all array_size values are null.
 
             // Note: As of 13Oct23, the only value I have seen for anynul is 0.
-            row.insert_null(tab_data_type, array_size, tab_col_idx, col_offset,
-                            next_col_offset);
+            row.insert_null(tab_data_type, array_size, col_offset, next_col_offset,
+                            tab_col_idx, false /* dynamic_array_flag */);
         } else {
             for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
                 T array_elt = temp_array[array_offset];
                 if (got_null && array_elt == null_value) {
                     // Indicate that a single value in the array is null.
-                    row.insert_null(tab_data_type, 1 /* array_size */, tab_col_idx,
+                    row.insert_null(tab_data_type, 1 /* array_size */,
                                     col_offset + (array_offset * sizeof(T)),
-                                    next_col_offset);
+                                    next_col_offset, tab_col_idx,
+                                    false /* dynamic_array_flag */);
                 } else if ((tab_data_type == tablator::Data_Type::FLOAT32_LE ||
                             tab_data_type == tablator::Data_Type::FLOAT64_LE) &&
                            std::isnan(array_elt)) {
@@ -746,9 +747,10 @@ public:
                     // allow columns of these types to specify a NULL signal and because
                     // equality check doesn't work with NaN, which appears to be the
                     // default NULL signal for these types, at least for Euclid files.
-                    row.insert_null(tab_data_type, 1 /* array_size */, tab_col_idx,
+                    row.insert_null(tab_data_type, 1 /* array_size */,
                                     col_offset + (array_offset * sizeof(T)),
-                                    next_col_offset);
+                                    next_col_offset, tab_col_idx,
+                                    false /* dynamic_array_flag */);
                 } else {
                     *reinterpret_cast<T *>(curr_ptr) = array_elt;
                     curr_ptr += sizeof(T);
@@ -808,21 +810,13 @@ public:
                           &status);
 
         if (anynul) {
-            row.insert_null(tab_col_type, fits_col.repeat(), tab_col_idx, col_offset,
-                            next_col_offset);
+            row.insert_null(tab_col_type, fits_col.repeat(), col_offset,
+                            next_col_offset, tab_col_idx,
+                            false /* dynamic_array_flag */);
         } else {
-            char *current = row.get_data().data() + col_offset;
-            for (size_t i = 0; i < num_substrings; ++i) {
-                char *element = data_str[i];
-                size_t elt_length = strlen(element);
-                size_t j = 0;
-                for (/* */; j < elt_length && j < substring_size; ++j) {
-                    *(current + j) = *(element + j);
-                }
-                for (/* */; j < substring_size; ++j) {
-                    *(current + j) = '\0';
-                }
-            }
+            row.insert_char_array_from_fits(data_vec, array_size, col_offset,
+                                            tab_col_idx, substring_size, num_substrings,
+                                            true /* dynamic_array_flag */);
         }
     }
 

@@ -7,7 +7,9 @@
 #include "../../to_string.hxx"
 #include "../read_ipac_table.hxx"
 
-// As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
+// As of 22Aug25, char columns are all assumed to be dynamic-size
+// arrays.  Non-char columns are created with dynamic_array_flag value
+// <false>.
 
 namespace {
 
@@ -17,9 +19,10 @@ std::vector<size_t> get_ipac_column_widths(
     std::vector<size_t> ipac_column_widths;
     // Add a column for null flags.
     ipac_column_widths.push_back(tablator::bits_to_bytes(num_columns));
-    for (size_t i = 0; i < num_columns; ++i)
+    for (size_t i = 0; i < num_columns; ++i) {
         ipac_column_widths.push_back(ipac_column_offsets[i + 1] -
                                      ipac_column_offsets[i] - 1);
+    }
     return ipac_column_widths;
 }
 }  // namespace
@@ -39,19 +42,27 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
             create_types_from_ipac_headers(ipac_columns, ipac_column_widths);
 
     size_t num_tab_columns = ipac_columns[COL_NAME_IDX].size();
+
     std::vector<size_t> minimum_column_widths(num_tab_columns, 1);
 
     std::vector<Column> &tab_columns = field_framework.get_columns();
     std::vector<size_t> &offsets = field_framework.get_offsets();
     Data_Details data_details(field_framework);
 
+    std::vector<std::vector<uint32_t>> dynamic_array_sizes_by_row;
+    bool got_dynamic_columns = data_details.got_dynamic_columns();
+
     std::string line;
     std::getline(input_stream, line);
 
     Row single_row(field_framework);
+    size_t row_idx = 0;
     while (input_stream) {
         if (line.find_first_not_of(" \t") != std::string::npos) {
             single_row.fill_with_zeros();
+            if (got_dynamic_columns) {
+                dynamic_array_sizes_by_row.emplace_back();
+            }
             for (size_t col_idx = 1; col_idx < num_tab_columns; ++col_idx) {
                 const auto &tab_column = tab_columns[col_idx];
                 if (line[ipac_column_offsets[col_idx - 1]] != ' ')
@@ -69,25 +80,38 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
                 minimum_column_widths[col_idx] =
                         std::max(minimum_column_widths[col_idx], element.size());
 
+                if (got_dynamic_columns && tab_column.get_dynamic_array_flag()) {
+                    dynamic_array_sizes_by_row.back().push_back(element.size());
+                }
+
                 if ((!ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      element == ipac_columns[COL_NULL_IDX][col_idx]) ||
                     (ipac_columns[COL_NULL_IDX][col_idx].empty() &&
                      tab_column.get_type() != Data_Type::CHAR && element.empty())) {
-                    single_row.insert_null(tab_column.get_type(),
-                                           tab_column.get_array_size(), col_idx,
-                                           offsets[col_idx], offsets[col_idx + 1]);
+                    single_row.insert_null(
+                            tab_column.get_type(), tab_column.get_array_size(),
+                            offsets[col_idx], offsets[col_idx + 1], col_idx,
+                            tab_column.get_dynamic_array_flag());
                 } else {
+                    size_t curr_array_size =
+                            tab_column.get_dynamic_array_flag()
+                                    ? Data_Details::get_dynamic_array_size(
+                                              data_details.get_dynamic_col_idx_lookup(),
+                                              dynamic_array_sizes_by_row, row_idx,
+                                              col_idx)
+                                    : tab_column.get_array_size();
                     try {
-                        single_row.insert_from_ascii(element, tab_column.get_type(),
-                                                     tab_column.get_array_size(),
-                                                     col_idx, offsets[col_idx],
-                                                     offsets[col_idx + 1]);
+                        single_row.insert_from_ascii(
+                                element, tab_column.get_type(),
+                                tab_column.get_array_size(), offsets[col_idx],
+                                offsets[col_idx + 1], col_idx, curr_array_size,
+                                tab_column.get_dynamic_array_flag());
                     } catch (std::exception &error) {
                         throw std::runtime_error(
-                                "Invalid " + to_string(tab_column.get_type()) +
+                                "Failed to insert " + to_string(tab_column.get_type()) +
                                 " for field '" + tab_column.get_name() + "' in line " +
-                                std::to_string(current_line_num + 1) + ".  Found '" +
-                                element + "'");
+                                std::to_string(current_line_num + 1) + ": '" + element +
+                                "'. Error: " + error.what());
                     }
                 }
             }
@@ -102,11 +126,14 @@ void tablator::Table::read_ipac_table(std::istream &input_stream) {
 
             data_details.append_row(single_row);
         }
-        ++current_line_num;
+        ++row_idx;           // includes only data lines, not header lines
+        ++current_line_num;  // includes header lines
         std::getline(input_stream, line);
     }
+
     shrink_ipac_string_columns_to_fit(field_framework, data_details,
-                                      minimum_column_widths);
+                                      minimum_column_widths,
+                                      dynamic_array_sizes_by_row);
     Table_Element table_element =
             Table_Element::Builder(field_framework, data_details).build();
     add_resource_element(Resource_Element::Builder(table_element)

@@ -7,30 +7,48 @@
 #include "../data_size.hxx"
 
 namespace tablator {
+
+// Caller has handled nulls (except possibly for INT8_LE).
 void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type,
-                            const size_t &array_size, const size_t &col_idx,
-                            const size_t &offset, const size_t &offset_end) {
-    if (array_size != 1 && data_type != Data_Type::CHAR) {
+                            const size_t &max_array_size, const size_t &offset,
+                            const size_t &offset_end, const size_t &col_idx,
+                            const size_t &curr_array_size, bool dynamic_array_flag) {
+    if (max_array_size != 1 && data_type != Data_Type::CHAR) {
+        // Insert elements one at a time.
         std::vector<std::string> elements;
         boost::split(elements, value, boost::is_any_of(" "));
         size_t num_elements = elements.size();
-        if (num_elements != array_size) {
+        if (num_elements > max_array_size) {
             throw std::runtime_error(
-                    "Expected " + std::to_string(array_size) + " elements, but found " +
-                    std::to_string(num_elements) + ": '" + value + "'");
+                    "Expected no more than " + std::to_string(max_array_size) +
+                    " elements, but found " + std::to_string(num_elements) + ": '" +
+                    value + "'");
         }
+        if (dynamic_array_flag) {
+            set_dynamic_array_size(col_idx, curr_array_size);
+        }
+
         auto element_offset = offset;
-        auto element_size = data_size(data_type);
+        auto element_size = get_data_size(data_type);
         for (auto &e : elements) {
-            insert_from_ascii(e, data_type, 1, col_idx, element_offset,
-                              element_offset + element_size);
+            // Recurse and wind up in the other block with array_size == 1.
+            insert_from_ascii(e, data_type, 1 /* max_array_size */, element_offset,
+                              element_offset + element_size, col_idx,
+                              1,  // curr_array_size
+                              false /* dynamic_array_flag */);
             element_offset += element_size;
         }
     } else {
+        // max_array_size == 1 OR data_type = char.  Insert all at once.
+        if (dynamic_array_flag) {
+            set_dynamic_array_size(col_idx, curr_array_size);
+        }
+
         switch (data_type) {
             case Data_Type::INT8_LE:
                 if (value == "?" || value == " " || value[0] == '\0') {
-                    insert_null(data_type, array_size, col_idx, offset, offset_end);
+                    insert_null(data_type, curr_array_size, offset, offset_end, col_idx,
+                                dynamic_array_flag);
                 } else {
                     bool result = (boost::iequals(value, "true") ||
                                    boost::iequals(value, "t") || value == "1");
@@ -42,7 +60,7 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                 }
                 break;
             case Data_Type::UINT8_LE: {
-                /// Allow hex and octal input
+                // Allow hex and octal input
                 int result = std::stoi(value, nullptr, 0);
                 if (result > std::numeric_limits<uint8_t>::max() ||
                     result < std::numeric_limits<uint8_t>::lowest())
@@ -90,7 +108,7 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                 insert(boost::lexical_cast<double>(value), offset);
                 break;
             case Data_Type::CHAR:
-                insert(value, offset, offset_end);
+                insert(value, offset, offset_end, col_idx, dynamic_array_flag);
                 break;
             default:
                 throw std::runtime_error("Unknown data type in insert_from_ascii(): " +
@@ -98,4 +116,6 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
         }
     }
 }
+
+
 }  // namespace tablator

@@ -78,16 +78,19 @@ boost::property_tree::ptree::const_iterator read_links_section(
 }
 
 
-void load_field_singleton(std::vector<tablator::Field> &params,
+bool load_field_singleton(std::vector<tablator::Field> &params,
                           const boost::property_tree::ptree &node) {
     params.emplace_back(tablator::ptree_readers::read_field(node));
+    return params.back().get_dynamic_array_flag();
 }
 
-void load_field_array(std::vector<tablator::Field> &params,
+bool load_field_array(std::vector<tablator::Field> &params,
                       const boost::property_tree::ptree &array_tree) {
+    bool got_dynamic_array_flag = false;
     for (const auto &elt : array_tree) {
-        load_field_singleton(params, elt.second);
+        got_dynamic_array_flag |= load_field_singleton(params, elt.second);
     }
+    return got_dynamic_array_flag;
 }
 
 void load_labeled_properties_singleton(tablator::Labeled_Properties &labeled_properties,
