@@ -3,7 +3,10 @@
 
 #include "../../read_ipac_table.hxx"
 
-// As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
+// As of 22Aug25, char columns are all assumed to be dynamic-size
+// arrays.  Non-char columns are created with dynamic_array_flag value
+// <false>.
+
 // JTODO rename function and ipac_columns parameter.
 namespace tablator {
 

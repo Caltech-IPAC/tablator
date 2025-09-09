@@ -46,16 +46,13 @@ Field read_field(const boost::property_tree::ptree &field);
 Property read_property(const boost::property_tree::ptree &prop);
 
 Data_Element read_data_element(const boost::property_tree::ptree &data,
-                               const std::vector<Field> &fields);
+                               const std::vector<Field> &fields,
+                               bool record_dynamic_array_sizes_f);
 Data_Element read_tabledata(const boost::property_tree::ptree &tabledata,
-                            const std::vector<Field> &fields);
+                            const std::vector<Field> &fields,
+                            bool record_dynamic_array_sizes_f);
 Data_Element read_binary2(const boost::property_tree::ptree &binary2,
                           const std::vector<Field> &fields);
-
-void append_data_from_stream(Data_Details &data_details,
-                             const Field_Framework &field_framework,
-                             const std::vector<uint8_t> &stream,
-                             const std::vector<Field> &fields, size_t num_rows);
 
 boost::property_tree::ptree read_xml_string_as_property_tree(
         const std::string &ptree_xml);

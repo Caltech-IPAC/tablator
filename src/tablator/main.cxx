@@ -264,7 +264,6 @@ int main(int argc, char *argv[]) {
     bool combine_tables_f = false;
     bool append_rows_f = false;
 
-
     // Declare the supported options.
     boost::program_options::options_description visible_options("Options");
     visible_options.add_options()("help", "produce help message")(
@@ -677,8 +676,11 @@ int main(int argc, char *argv[]) {
             in_table.write(output_stream, output_path.stem().native(), output_format,
                            options);
         } else {
+            // std::cout << "main(), before read" << std::endl;
             tablator::Table table(input_path, input_format);
+            // std::cout << "main(), before write" << std::endl;
             table.write(output_path, output_format, options);
+            // std::cout << "main(), after write" << std::endl;
         }
     } catch (boost::program_options::error &exception) {
         std::cerr << exception.what() << "\n" << usage(visible_options);

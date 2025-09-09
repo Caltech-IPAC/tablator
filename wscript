@@ -24,6 +24,7 @@ def build(bld):
              'src/Format/set_from_extension.cxx',
              'src/Format/content_type.cxx',
              'src/Row/Row.cxx',
+             'src/Row/insert_char_array_from_fits.cxx',
              'src/Row/insert_null.cxx',
              'src/Row/insert_from_ascii.cxx',
              'src/Row/insert_from_bigendian.cxx',

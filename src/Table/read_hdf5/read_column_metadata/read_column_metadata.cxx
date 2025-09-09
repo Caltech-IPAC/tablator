@@ -18,42 +18,44 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
     if (!dataset.attrExists(section)) {
         return result;
     }
-    auto attribute = dataset.openAttribute(section);
-    if (attribute.getTypeClass() != H5T_VLEN) {
+    auto hdf5_attribute = dataset.openAttribute(section);
+    if (hdf5_attribute.getTypeClass() != H5T_VLEN) {
         return result;
     }
-    H5::VarLenType columns = attribute.getVarLenType();
-    if (!is_columns_valid(columns)) {
+    H5::VarLenType varlentype_columns = hdf5_attribute.getVarLenType();
+    if (!is_columns_valid(varlentype_columns)) {
         return result;
     }
 
     hvl_t hdf5_columns;
-    attribute.read(columns, &hdf5_columns);
+    hdf5_attribute.read(varlentype_columns, &hdf5_columns);
+
     for (size_t col_idx = 0; col_idx < hdf5_columns.len; ++col_idx) {
         HDF5_Column &hdf5_column =
                 reinterpret_cast<HDF5_Column *>(hdf5_columns.p)[col_idx];
 
-        ATTRIBUTES attributes;
+        ATTRIBUTES tab_attributes;
         HDF5_Field_Properties &hdf5_field_properties(hdf5_column.field_properties);
         hvl_t &hdf5_attributes(hdf5_field_properties.attributes);
-        for (size_t attribute = 0; attribute < hdf5_attributes.len; ++attribute) {
-            HDF5_Attribute &a(
-                    reinterpret_cast<HDF5_Attribute *>(hdf5_attributes.p)[attribute]);
+        for (size_t hdf5_attr_idx = 0; hdf5_attr_idx < hdf5_attributes.len;
+             ++hdf5_attr_idx) {
+            HDF5_Attribute &a(reinterpret_cast<HDF5_Attribute *>(
+                    hdf5_attributes.p)[hdf5_attr_idx]);
             const std::string name(a.name);
-            if (attributes.find(name) != attributes.end()) {
+            if (tab_attributes.find(name) != tab_attributes.end()) {
                 throw std::runtime_error("In " + section + " in col_idx " +
                                          hdf5_column.name + ": duplicate attribute " +
                                          name);
             }
-            attributes.insert(std::make_pair(name, std::string(a.value)));
+            tab_attributes.insert(std::make_pair(name, std::string(a.value)));
         }
 
         HDF5_Values &hdf5_values(hdf5_field_properties.values);
         std::vector<Option> options;
         hvl_t &hdf5_options(hdf5_values.options);
-        for (size_t option = 0; option < hdf5_options.len; ++option) {
+        for (size_t hdf5_opt_idx = 0; hdf5_opt_idx < hdf5_options.len; ++hdf5_opt_idx) {
             HDF5_Attribute &o(
-                    reinterpret_cast<HDF5_Attribute *>(hdf5_options.p)[option]);
+                    reinterpret_cast<HDF5_Attribute *>(hdf5_options.p)[hdf5_opt_idx]);
             options.emplace_back(o.name, o.value);
         }
 
@@ -72,14 +74,16 @@ std::vector<Column> read_column_metadata(const H5::H5Location &dataset,
         Field_Properties field_properties =
                 Field_Properties::Builder()
                         .add_description(hdf5_field_properties.description)
-                        .add_attributes(attributes)
+                        .add_attributes(tab_attributes)
                         .add_values(values)
                         .add_hdf5_links(links)
                         .build();
 
         result.emplace_back(hdf5_column.name, string_to_Data_Type(hdf5_column.type),
-                            hdf5_column.array_size, field_properties);
+                            hdf5_column.array_size, field_properties,
+                            hdf5_column.dynamic_array_flag);
     }
+
     return result;
 }
 }  // namespace tablator

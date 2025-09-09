@@ -40,12 +40,17 @@ public:
     size_t get_row_size() const { return field_framework_.get_row_size(); }
     size_t get_num_rows() const { return data_details_.get_num_rows(); }
 
+    size_t get_num_dynamic_columns() const {
+        return field_framework_.get_num_dynamic_columns();
+    }
+
+    // called by query_server to trim result set
     void adjust_num_rows(const size_t &new_num_rows) {
         data_details_.adjust_num_rows(new_num_rows);
     }
 
     void reserve_rows(const size_t &new_num_rows) {
-        get_data_details().reserve_rows(new_num_rows);
+        data_details_.reserve_rows(new_num_rows);
     }
 
     inline const std::vector<uint8_t> &get_data() const {

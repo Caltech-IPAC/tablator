@@ -1,0 +1,8 @@
+\fixlen = T
+\RowsRetrieved = 2
+|      ra|    dec|
+|  double| double|
+|        |       |
+|    null|   null|
+ 141.4141 23.2323 
+ 282.8282 32.3232 

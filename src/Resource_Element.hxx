@@ -87,7 +87,6 @@ inline tablator::Resource_Type determine_resource_type(
     if (!has_results_table_element) {
         return attr_rtype;
     }
-
     return Resource_Type::RESULTS;
 }
 
@@ -434,6 +433,7 @@ public:
     std::vector<Field> &get_table_element_fields() {
         return get_main_table_element().get_fields();
     }
+
     const std::vector<Field> &get_table_element_fields() const {
         return get_main_table_element().get_fields();
     }
@@ -446,6 +446,10 @@ public:
 
     void set_data(const std::vector<uint8_t> &d) {
         get_main_table_element().set_data(d);
+    }
+
+    size_t get_num_dynamic_columns() const {
+        return get_main_table_element().get_num_dynamic_columns();
     }
 
     Resource_Type get_resource_type() const { return resource_type_; };
@@ -461,7 +465,7 @@ public:
     }
 
     // This function is defined in generate_property_tree.cxx. JTODO Refactor.
-    boost::property_tree::ptree generate_property_tree(bool json_prep) const;
+    boost::property_tree::ptree generate_property_tree(bool json_prep = false) const;
 
 
 private:
@@ -469,6 +473,7 @@ private:
             : options_(std::move(options)),
               resource_type_(determine_resource_type(options_.table_elements_,
                                                      options_.attributes_)) {}
+
     Options options_;
     Resource_Type resource_type_;
 };  // class Resource_Element

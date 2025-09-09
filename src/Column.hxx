@@ -91,7 +91,7 @@ public:
     inline void set_dynamic_array_flag(bool b) { dynamic_array_flag_ = b; }
 
     inline size_t get_data_size() const {
-        return tablator::data_size(type_) * array_size_;
+        return tablator::get_data_size(type_) * array_size_;
     }
 
 private:
