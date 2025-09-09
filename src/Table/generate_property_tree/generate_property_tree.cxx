@@ -27,45 +27,41 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
-                          bool allow_dups);
+                          bool allow_dups, bool do_binary2);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
-                          const Resource_Element &resource_element, bool allow_dups);
+                          const Resource_Element &resource_element, bool allow_dups,
+                          bool do_binary2);
 
 void add_to_property_tree(boost::property_tree::ptree &parent_tree,
                           const Resource_Element &resource_element,
                           const std::vector<Data_Type> &datatypes_for_writing,
                           const std::vector<std::string> &comments,
                           const Labeled_Properties &table_labeled_properties,
-                          bool allow_dups);
+                          bool allow_dups, bool do_binary2);
 
 
 }  // namespace tablator
 
-// The generate_property_tree() functions are called for JSON, JSON5, VOTABLE.
+// The generate_property_tree() functions are called for JSON, JSON5, VOTABLE,
+// VOTABLE_BINARY2.
 
 /**********************************************************/
 
 // Called by query_server to generate meta resource.
 boost::property_tree::ptree tablator::Resource_Element::generate_property_tree(
-        bool json_prep) const {
+        bool json_prep, bool do_binary2) const {
     boost::property_tree::ptree outermost_tree;
-    add_to_property_tree(outermost_tree, *this, json_prep);
+    add_to_property_tree(outermost_tree, *this, json_prep, do_binary2);
     return outermost_tree;
 }
 
 /**********************************************************/
 
-boost::property_tree::ptree tablator::Table::generate_property_tree() const {
-    return generate_property_tree(get_original_datatypes(), false /* json_prep */);
-}
-
-/**********************************************************/
-
 boost::property_tree::ptree tablator::Table::generate_property_tree(
-        const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const {
+        const std::vector<Data_Type> &datatypes_for_writing, bool json_prep,
+        bool do_binary2) const {
     boost::property_tree::ptree outermost_tree;
-
     auto &votable_tree = outermost_tree.add(VOTABLE, "");
     votable_tree.add(XMLATTR + ".version", "1.3");
     votable_tree.add(XMLATTR + ".xmlns:xsi",
@@ -113,10 +109,12 @@ boost::property_tree::ptree tablator::Table::generate_property_tree(
     for (const auto &resource_element : get_resource_elements()) {
         if (resource_element.is_results_resource()) {
             add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
-                                 get_comments(), get_labeled_properties(), json_prep);
+                                 get_comments(), get_labeled_properties(), json_prep,
+                                 do_binary2);
         } else {
+            // This version won't use do_binary2.
             add_to_property_tree(votable_tree, resource_element, datatypes_for_writing,
-                                 json_prep);
+                                 json_prep, do_binary2);
         }
     }
 

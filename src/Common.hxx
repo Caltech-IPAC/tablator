@@ -135,8 +135,11 @@ static const std::string VOTABLE_RESOURCE_TABLE_INFO_XMLATTR_DOT(
 static const std::string RESOURCE_ELEMENT_DESCRIPTION(RESOURCE_DOT + DESCRIPTION);
 static const std::string TABLE_ELEMENT_DESCRIPTION(TABLE_DOT + DESCRIPTION);
 static const std::string DATA_TABLEDATA(DATA + DOT + TABLEDATA);
+static const std::string DATA_BINARY2(DATA + DOT + BINARY2);
+static const std::string DATA_BINARY2_STREAM(DATA_BINARY2 + DOT + STREAM);
 
 static const std::string TABLEDATA_PLACEHOLDER("TaBlEdAtA_PlAcEhOlDeR");
+static const std::string BINARY2_PLACEHOLDER("BiNaRy2_PlAcEhOlDeR");
 
 static const std::string ARRAY_TAIL("_ARRAY");
 

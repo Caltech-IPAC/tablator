@@ -29,6 +29,7 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     /// attribute.
     // FIXME: This needs to be generalized for multiple resources
     H5::Group group(outfile.createGroup("RESOURCE_0"));
+
     write_hdf5_columns(get_resource_element_params(), PARAM, group);
 
     std::array<hsize_t, 1> dims = {{get_num_rows()}};
@@ -46,12 +47,14 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     for (auto &column : columns) {
         unique_names.push_back(column.get_name());
     }
+
     std::sort(unique_names.begin(), unique_names.end());
     if (std::unique(unique_names.begin(), unique_names.end()) != unique_names.end()) {
         throw std::runtime_error(
                 "Duplicate column names are not "
                 "allowed in HDF5 tables");
     }
+
     for (size_t i = 0; i < columns.size(); ++i) {
         if (columns[i].get_type() == Data_Type::CHAR) {
             string_types.emplace_back(0, columns[i].get_array_size());
@@ -69,7 +72,6 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
     }
     // FIXME: This needs to be generalized for multiple tables
     H5::DataSet h5_table{group.createDataSet("TABLE_0", compound_type, dataspace)};
-
     const auto &comments = get_comments();
     const auto &description = get_description();
     if (!description.empty() || !comments.empty()) {
@@ -90,8 +92,10 @@ void tablator::Table::write_hdf5_to_H5File(H5::H5File &outfile) const {
                       get_main_table_element().get_description());
 
     write_hdf5_attributes(h5_table);
+
     write_hdf5_columns(columns, FIELD, h5_table);
     // JTODO Top-level params? (Master doesn't.)
+
     write_hdf5_columns(get_table_element_params(), PARAM, h5_table);
 
     h5_table.write(get_data().data(), compound_type);
