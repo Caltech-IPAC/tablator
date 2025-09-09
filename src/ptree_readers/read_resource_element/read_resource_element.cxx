@@ -130,7 +130,6 @@ tablator::Resource_Element read_resource_element(
     std::vector<Property> trailing_info_list;
     child = read_trailing_info_section(trailing_info_list, child, end);
 
-
     return tablator::Resource_Element::Builder(table_elements)
             .add_attributes(top_attributes)
             .add_description(description)

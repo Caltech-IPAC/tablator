@@ -591,10 +591,11 @@ else
     echo "FAIL: Convert Json5 Table with single multi-row non-array col of type bool to FITS and back"
 fi
 
-${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified.vot out.fits &&  ${tablator_bin}  out.fits temp.vot && diff test/back_and_forth_tables/fits_medium_modified.vot temp.vot
+${tablator_bin} --output-format=fits test/back_and_forth_tables/fits_medium_modified.vot temp.fits &&  ${tablator_bin}  temp.fits temp.vot && diff test/back_and_forth_tables/fits_medium_modified.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert VOTable translated from FITS to FITS and back"
     rm -f temp.vot
+    rm -f temp.fits
 else
     echo "FAIL: Convert VOTable translated from FITS to FITS and back"
 fi
@@ -759,31 +760,31 @@ fi
 
 
 ${tablator_bin} test/back_and_forth_tables/multiple_group_example.vot temp.json5 &&
-${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_group_example.vot out.vot
+${tablator_bin} temp.json5 temp.vot && diff test/back_and_forth_tables/multiple_group_example.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with multiple group metadata from VOTable to JSON5 and back"
     rm -f temp.json5
-    rm -f out.vot
+    rm -f temp.vot
 else
     echo "FAIL: Convert table with multiple group metadata from VOTable to JSON5 and back"
 fi
 
 ${tablator_bin} test/back_and_forth_tables/multiple_resource_results_last.vot temp.json5 &&
-${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_resource_results_last.vot out.vot
+${tablator_bin} temp.json5 temp.vot && diff test/back_and_forth_tables/multiple_resource_results_last.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with multiple resource elements from VOTable to JSON5 and back"
     rm -f temp.json5
-    rm -f out.vot
+    rm -f temp.vot
 else
     echo "FAIL: Convert table with multiple resource elements from VOTable to JSON5 and back"
 fi
 
 ${tablator_bin} test/back_and_forth_tables/multiple_resource_results_middle.vot temp.json5 &&
-${tablator_bin} temp.json5 out.vot && diff test/back_and_forth_tables/multiple_resource_results_middle.vot out.vot
+${tablator_bin} temp.json5 temp.vot && diff test/back_and_forth_tables/multiple_resource_results_middle.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Convert table with resource element in the middle from VOTable to JSON5 and back"
     rm -f temp.json5
-    rm -f out.vot
+    rm -f temp.vot
 else
     echo "FAIL: Convert table with resource element in the middle from VOTable to JSON5 and back"
 fi
@@ -888,6 +889,53 @@ if [ $? -eq 0 ]; then
     rm -f temp.vot temp.fits
 else
     echo "FAIL: Convert table with coosys and timesys from vot to FITS and back"
+fi
+
+${tablator_bin}  test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.bin2 &&
+    ${tablator_bin} temp.bin2 temp.vot &&
+    diff test/back_and_forth_tables/various_with_null_strings_and_hex.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with null strings and hex from vot to bin2 and back"
+    rm -f temp.bin2
+    rm -f temp.vot
+
+else
+    echo "FAIL: Convert table with null strings and hex from vot to bin2 and back"
+fi
+
+
+${tablator_bin}  test/back_and_forth_tables/multi_row_023.tbl temp.bin2 &&
+${tablator_bin} temp.bin2 temp.tbl &&
+    diff test/back_and_forth_tables/multi_row_023.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with char array and assorted types from tbl to bin2 and back"
+    rm -f temp.tbl
+    rm -f temp.bin2
+else
+    echo "FAIL: Convert table with char array and assorted types from tbl to bin2 and back"
+fi
+
+${tablator_bin}  test/back_and_forth_tables/partial_euclid.vot temp.bin2 &&
+${tablator_bin} temp.bin2 temp.vot &&
+    diff test/back_and_forth_tables/partial_euclid.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with array col from vot to bin2 and back"
+    rm -f temp.bin2
+    rm -f temp.vot
+else
+    echo "FAIL: Convert table with array col from vot to bin2 and back"
+fi
+
+
+${tablator_bin}  test/back_and_forth_tables/two_row_int_array.json5 temp.bin2 &&
+${tablator_bin} temp.bin2 temp.json5 &&
+    diff test/back_and_forth_tables/two_row_int_array.json5 temp.json5
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert table with array col from json5 to bin2 and back"
+    rm -f temp.bin2
+    rm -f temp.json5
+else
+    echo "FAIL: Convert table with array col from json5 to bin2 and back"
 fi
 
 
@@ -1330,7 +1378,7 @@ fi
 ${tablator_bin} test/back_and_forth_tables/multiple_info_example_rearranged.vot temp.vot && diff test/back_and_forth_tables/multiple_info_example_rearranged.vot temp.vot
 if [ $? -eq 0 ]; then
     echo "PASS: Table with multiple infos already in order"
-    rm -f temp_file
+    rm -f temp.vot
 else
     echo "FAIL: Table with multiple infos already in order"
 fi

@@ -908,6 +908,8 @@ private:
     void write_tabledata(std::ostream &os, const Format::Enums &output_format,
                          const Command_Line_Options &options) const;
 
+    void write_binary2(std::ostream &os) const;
+
     void write_html(std::ostream &os, const Command_Line_Options &options) const;
 
     boost::property_tree::ptree generate_property_tree() const;
@@ -1069,8 +1071,12 @@ private:
                                     uint num_spaces_right,
                                     const Command_Line_Options &options) const;
 
+    void splice_binary2_and_write(std::ostream &os, std::stringstream &ss,
+                                  uint num_spaces_left, uint num_spaces_right) const;
+
     boost::property_tree::ptree generate_property_tree(
-            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep) const;
+            const std::vector<Data_Type> &datatypes_for_writing, bool json_prep,
+            bool do_binary2) const;
 
     void distribute_metadata(
             tablator::Labeled_Properties &resource_element_labeled_properties,

@@ -465,7 +465,8 @@ public:
     }
 
     // This function is defined in generate_property_tree.cxx. JTODO Refactor.
-    boost::property_tree::ptree generate_property_tree(bool json_prep = false) const;
+    boost::property_tree::ptree generate_property_tree(bool json_prep = false,
+                                                       bool do_binary2 = false) const;
 
 
 private:
