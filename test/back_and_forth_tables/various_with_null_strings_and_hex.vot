@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE>
+    <TABLE>
+      <FIELD name="col0" datatype="long"/>
+      <FIELD name="col1" datatype="long"/>
+      <FIELD name="col2" datatype="char" arraysize="*"/>
+      <FIELD name="col3" datatype="double"/>
+      <FIELD name="col4" datatype="unsignedByte"/>
+      <FIELD name="col5" datatype="boolean"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD></TD>
+            <TD>27</TD>
+            <TD>J000000.00+074516.6</TD>
+            <TD>0.036659625057237355</TD>
+            <TD>0x9</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>109001351031517</TD>
+            <TD>27</TD>
+            <TD>J000000.00+090603.8</TD>
+            <TD>0.055024506754954475</TD>
+            <TD>0x9</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>110601351005286</TD>
+            <TD>27</TD>
+            <TD>J000000.00+095415.2</TD>
+            <TD>0.179</TD>
+            <TD>0x8</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>125701351005057</TD>
+            <TD>28</TD>
+            <TD>J000000.00+250536.6</TD>
+            <TD>0.087176858243807803</TD>
+            <TD>0x3</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>130201351016329</TD>
+            <TD></TD>
+            <TD>J000000.00+300738.7</TD>
+            <TD>0.14220054059480225</TD>
+            <TD>0x2</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>131801351054783</TD>
+            <TD>292</TD>
+            <TD>J000000.00+321958.9</TD>
+            <TD>1.1415149690760209</TD>
+            <TD>0x4</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>139301351005393</TD>
+            <TD>-28</TD>
+            <TD></TD>
+            <TD>20688570526223816</TD>
+            <TD>0x7</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>146901351007000</TD>
+            <TD>386</TD>
+            <TD>J000000.00+461127.6</TD>
+            <TD>1.5389247369584591</TD>
+            <TD>0x2</TD>
+            <TD></TD>
+          </TR>
+          <TR>
+            <TD>146901351018298</TD>
+            <TD>-387</TD>
+            <TD>J000000.00+464547.1</TD>
+            <TD>0.10573159057735776</TD>
+            <TD>0x5</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>149901351043970</TD>
+            <TD>393</TD>
+            <TD></TD>
+            <TD>0.52408896412717487</TD>
+            <TD>0x6</TD>
+            <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>148901351043970</TD>
+            <TD></TD>
+            <TD></TD>
+            <TD></TD>
+            <TD>0x6</TD>
+            <TD>0</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>
