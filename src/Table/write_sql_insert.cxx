@@ -5,31 +5,39 @@
 
 namespace {
 void write_point(std::ostream &os,
-                 const std::pair<std::pair<size_t, tablator::Data_Type>,
-                                 std::pair<size_t, tablator::Data_Type> > &point_input,
+                 const std::pair<std::pair<size_t, tablator::Format_Packet>,
+                                 std::pair<size_t, tablator::Format_Packet> >
+                         &point_input,
                  const uint8_t *row_start,
                  const tablator::Command_Line_Options &options) {
     os << "ST_MakePoint(";
+    size_t array_size = 1;
     tablator::Ascii_Writer::write_type_as_ascii(
-            os, point_input.first.second, 1, row_start + point_input.first.first,
+            os, point_input.first.second, array_size,
+            row_start + point_input.first.first,
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     os << ", ";
     tablator::Ascii_Writer::write_type_as_ascii(
-            os, point_input.second.second, 1, row_start + point_input.second.first,
+            os, point_input.second.second, array_size,
+            row_start + point_input.second.first,
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     os << "),\n";
 }
 
 }  // namespace
 
-void tablator::Table::write_sql_insert(
-        std::ostream &os, const std::string &quoted_table_name, const size_t &row_idx,
-        const bool &has_point,
-        const std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type> >
-                &point_input,
-        const std::vector<std::pair<std::pair<size_t, Data_Type>,
-                                    std::pair<size_t, Data_Type> > > &polygon_input,
-        const Command_Line_Options &options) const {
+void tablator::Table::write_sql_insert(std::ostream &os,
+                                       const std::string &quoted_table_name,
+                                       const size_t &row_idx, const bool &has_point,
+                                       const std::pair<
+                                               std::pair<size_t, Format_Packet>,
+                                               std::pair<size_t, Format_Packet> >
+                                               &point_input,
+                                       const std::vector<std::pair<
+                                               std::pair<size_t, Format_Packet>,
+                                               std::pair<size_t, Format_Packet> > >
+                                               &polygon_input,
+                                       const Command_Line_Options &options) const {
     const auto &data = get_data();
     auto row_offset = row_idx * get_row_size();
 
@@ -52,7 +60,7 @@ void tablator::Table::write_sql_insert(
             if (column.get_type() == Data_Type::CHAR) {
                 std::stringstream ss;
                 tablator::Ascii_Writer::write_type_as_ascii(
-                        ss, column.get_type(), column.get_array_size(),
+                        ss, column.get_format_packet(), column.get_array_size(),
                         data.data() + row_offset + offsets[col_idx], ' ', options);
                 os << quote_sql_string(ss.str(), '\'');
             } else {
@@ -60,7 +68,7 @@ void tablator::Table::write_sql_insert(
                     os << "'{";
                 }
                 tablator::Ascii_Writer::write_type_as_ascii(
-                        os, column.get_type(), column.get_array_size(),
+                        os, column.get_format_packet(), column.get_array_size(),
                         data.data() + row_offset + offsets[col_idx], ',', options);
                 if (column.get_array_size() != 1) {
                     os << "}'";

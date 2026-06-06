@@ -1,3 +1,5 @@
+#include "../Ascii_Writer.hxx"
+
 #include <cassert>
 #include <cmath>
 #include <iomanip>
@@ -8,9 +10,32 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "../Ascii_Writer.hxx"
 #include "../Decimal_String_Trimmer.hxx"
+#include "../Format_Packet.hxx"
 #include "../data_size.hxx"
+
+namespace {
+
+
+void apply_format_packet(std::ostream &stream, const tablator::Format_Packet &fmt) {
+  switch (fmt.flag_) {
+  case 'f':
+	stream << std::fixed << std::setprecision(fmt.precision_);
+	break;
+  case 'e':
+	stream << std::scientific << std::setprecision(fmt.precision_);
+	break;
+  case 'g':
+  case '\0':
+  default:
+	stream << std::defaultfloat << std::setprecision(fmt.precision_);
+	break;
+  }
+}
+
+
+}  // namespace
+
 
 namespace tablator {
 // Declare static constexpr class members.
@@ -27,13 +52,17 @@ constexpr const char Ascii_Writer::IPAC_COLUMN_SEPARATOR;
 // The usual way to write a column value in ascii.  If the value is an
 // array, individual elements are delimited by the single char
 // specified in the <separator> argument.
-void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
+
+void Ascii_Writer::write_type_as_ascii(std::ostream &os,
+                                       const Format_Packet &format_packet,
                                        const size_t &array_size, const uint8_t *data,
                                        const char &separator,
                                        const Command_Line_Options &options) {
+    auto type = format_packet.data_type_;
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
-            write_array_unit_as_ascii(os, type, 1, data + n * get_data_size(type),
+            write_array_unit_as_ascii(os, format_packet, 1,
+                                      data + n * get_data_size(type),
                                       options);
 
             if (n != array_size - 1) {
@@ -41,21 +70,22 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os, const Data_Type &type,
             }
         }
     } else {
-        write_array_unit_as_ascii(os, type, array_size, data, options);
+        write_array_unit_as_ascii(os, format_packet, array_size, data, options);
     }
 }
 
+
 //======================================================================
 
-// Called by write_single_ipac_record() as it expands a column of array
-// type to multiple columns.
 void Ascii_Writer::write_type_as_ascii_expand_array(
-        std::ostream &os, const Data_Type &type, const size_t &array_size,
+        std::ostream &os, const Format_Packet &format_packet, const size_t &array_size,
         const uint8_t *data, size_t col_width, const Command_Line_Options &options) {
+    auto type = format_packet.data_type_;
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
             os << std::setw(col_width);
-            write_array_unit_as_ascii(os, type, 1, data + n * get_data_size(type),
+            write_array_unit_as_ascii(os, format_packet, 1,
+                                      data + n * get_data_size(type),
                                       options);
 
             if (n != array_size - 1) {
@@ -63,16 +93,18 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
             }
         }
     } else {
-        write_array_unit_as_ascii(os, type, array_size, data, options);
+        write_array_unit_as_ascii(os, format_packet, array_size, data, options);
     }
 }
 
-//=======================================================================
 
-void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &type,
+//=======================================================================
+void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os,
+                                             const Format_Packet &format_packet,
                                              const size_t &array_size,
                                              const uint8_t *data,
                                              const Command_Line_Options &options) {
+    auto type = format_packet.data_type_;
     if (type != Data_Type::CHAR && array_size != 1) {
         throw std::runtime_error(
                 "write_array_unit_as_ascii() requires array_size == 1 if type is "
@@ -106,9 +138,8 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
             os << *reinterpret_cast<const uint64_t *>(data);
         } break;
         case Data_Type::FLOAT32_LE: {
-            // JNOTE: This might yield more digits than are warranted.
-            os << std::setprecision(std::numeric_limits<float>::max_digits10)
-               << *reinterpret_cast<const float *>(data);
+			apply_format_packet(os, format_packet);
+			os <<  *reinterpret_cast<const float *>(data);
         } break;
         case Data_Type::FLOAT64_LE: {
             if (options.is_trim_decimal_runs()) {
@@ -116,9 +147,8 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
                         *reinterpret_cast<const double *>(data),
                         options.min_run_length_for_trim_);
             } else {
-                // JNOTE: This might yield more digits than are warranted.
-                os << std::setprecision(std::numeric_limits<double>::max_digits10)
-                   << *reinterpret_cast<const double *>(data);
+                apply_format_packet(os, format_packet);
+                os << *reinterpret_cast<const double *>(data);
             }
         } break;
         case Data_Type::CHAR:
@@ -129,4 +159,6 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os, const Data_Type &
             break;
     }
 }
+
+
 }  // namespace tablator

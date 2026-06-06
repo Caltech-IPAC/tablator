@@ -245,7 +245,6 @@ fi
 ###########################################################
 # Test one-way conversions
 
-
 ${tablator_bin} --input-format=hdf5 --output-format=ipac_table test/multi_hdf5_mislabeled.csv temp.h5 &&
 ${tablator_bin} --input-format=ipac_table temp.h5 temp.tbl
 if [ $? -eq 0 ]; then
@@ -412,6 +411,22 @@ if [ $? -eq 0 ]; then
     rm -f temp.json5
 else
     echo "FAIL: Convert duplicate keys in JSON5 format to array"
+fi
+
+${tablator_bin} test/format.float.vot temp.vot && diff test/format.float.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with irsa_format attrs and floats to VOTable"
+    rm -f temp.vot
+else
+    echo "FAIL: Convert VOTable with irsa_format attrs and floats to VOTable"
+fi
+
+${tablator_bin} --trim-decimal-runs 0 test/format.double.vot temp.vot && diff test/format.double.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with irsa_format attrs and doubles to VOTable"
+    rm -f temp.vot
+else
+    echo "FAIL: Convert VOTable with irsa_format attrs and doubles to VOTable"
 fi
 
 
