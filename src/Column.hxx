@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Common.hxx"
 #include "Field_Properties.hxx"
+#include "Format_Packet.hxx"
 #include "data_size.hxx"
+
 
 namespace tablator {
 
@@ -20,7 +23,8 @@ public:
               type_(type),
               array_size_(array_size),
               field_properties_(field_properties),
-              dynamic_array_flag_(dynamic_array_flag) {}
+              dynamic_array_flag_(dynamic_array_flag),
+              format_packet_(extract_format_str(field_properties), type) {}
 
     Column(const std::string &name, const Data_Type &type, const size_t &array_size,
            const Field_Properties &field_properties)
@@ -94,7 +98,19 @@ public:
         return tablator::get_data_size(type_) * array_size_;
     }
 
+    inline Format_Packet get_format_packet() const { return format_packet_; }
+
 private:
+    static std::string extract_format_str(const Field_Properties &field_properties) {
+        const auto &field_prop_attributes = field_properties.get_attributes();
+        const auto format_iter =
+                field_prop_attributes.find(ATTR_IRSA_FORMAT);
+        if (format_iter != field_prop_attributes.end()) {
+            return format_iter->second;
+        }
+        return "";
+    }
+
     std::string name_;
     Data_Type type_;
 
@@ -102,6 +118,8 @@ private:
     size_t array_size_;
     Field_Properties field_properties_;
     bool dynamic_array_flag_;
+
+    Format_Packet format_packet_;
 };
 
 

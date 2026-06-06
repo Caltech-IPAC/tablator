@@ -4,7 +4,6 @@
 
 #include "../Ascii_Writer.hxx"
 
-
 //==================================================================
 //                 Extractors
 //==================================================================
@@ -52,7 +51,7 @@ std::string tablator::Table::extract_value_as_string(
 
     // JTODO Write UINT8_LE values the way Ipac_Table_Writer does?
     tablator::Ascii_Writer::write_type_as_ascii(
-            ss, column.get_type(), column.get_array_size(),
+            ss, column.get_format_packet(), column.get_array_size(),
             data.data() + curr_row_offset + offsets[col_idx],
             tablator::Ascii_Writer::DEFAULT_SEPARATOR, options);
     return ss.str();

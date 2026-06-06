@@ -65,7 +65,7 @@ void tablator::Table::write_dsv(std::ostream &os, const char &separator,
 
             if (!is_null_value(row_idx, col_idx)) {
                 tablator::Ascii_Writer::write_type_as_ascii(
-                        ss, column.get_type(), column.get_array_size(),
+                        ss, column.get_format_packet(), column.get_array_size(),
                         data.data() + offset, tablator::Ascii_Writer::DEFAULT_SEPARATOR,
                         options);
             } else if (options.write_null_strings_) {

@@ -12,8 +12,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include <H5Cpp.h>
 #include <CCfits/CCfits>
+#include <H5Cpp.h>
 
 #include "Ascii_Writer.hxx"
 #include "Column.hxx"
@@ -974,24 +974,25 @@ private:
     void write_hdf5_to_H5File(H5::H5File &outfile) const;
     void write_hdf5_attributes(H5::DataSet &table) const;
 
-    void write_sql_insert(
-            std::ostream &os, const std::string &quoted_table_name,
-            const size_t &row_idx, const bool &has_point,
-            const std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>
-                    &point_input,
-            const std::vector<std::pair<std::pair<size_t, Data_Type>,
-                                        std::pair<size_t, Data_Type>>> &polygon_input,
-            const Command_Line_Options &options) const;
+    void write_sql_insert(std::ostream &os, const std::string &quoted_table_name,
+                          const size_t &row_idx, const bool &has_point,
+                          const std::pair<std::pair<size_t, Format_Packet>,
+                                          std::pair<size_t, Format_Packet>>
+                                  &point_input,
+                          const std::vector<std::pair<std::pair<size_t, Format_Packet>,
+                                                      std::pair<size_t, Format_Packet>>>
+                                  &polygon_input,
+                          const Command_Line_Options &options) const;
 
     void write_sql_insert(std::ostream &os, const std::string &quoted_table_name,
                           const size_t &row_idx,
                           const Command_Line_Options &options) const {
-        write_sql_insert(
-                os, quoted_table_name, row_idx, false,
-                std::pair<std::pair<size_t, Data_Type>, std::pair<size_t, Data_Type>>(),
-                std::vector<std::pair<std::pair<size_t, Data_Type>,
-                                      std::pair<size_t, Data_Type>>>(),
-                options);
+        write_sql_insert(os, quoted_table_name, row_idx, false,
+                         std::pair<std::pair<size_t, Format_Packet>,
+                                   std::pair<size_t, Format_Packet>>(),
+                         std::vector<std::pair<std::pair<size_t, Format_Packet>,
+                                               std::pair<size_t, Format_Packet>>>(),
+                         options);
     }
 
     // helpers for reading

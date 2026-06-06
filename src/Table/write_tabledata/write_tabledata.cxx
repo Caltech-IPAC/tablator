@@ -70,7 +70,7 @@ void Table::write_tabledata(std::ostream &os, const Format::Enums &output_format
                                 ? data_details.get_dynamic_array_size(row_idx, col_idx)
                                 : column.get_array_size();
                 Ascii_Writer::write_type_as_ascii(
-                        td, column.get_type(), curr_array_size,
+                        td, column.get_format_packet(), curr_array_size,
                         data.data() + row_offset + offsets[col_idx],
                         Ascii_Writer::DEFAULT_SEPARATOR, options);
             }

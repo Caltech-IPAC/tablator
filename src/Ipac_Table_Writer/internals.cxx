@@ -1,7 +1,7 @@
+#include "../Ipac_Table_Writer.hxx"
+
 #include <boost/range/algorithm/replace_copy_if.hpp>
 #include <boost/range/algorithm/replace_if.hpp>
-
-#include "../Ipac_Table_Writer.hxx"
 
 #include "../Ascii_Writer.hxx"
 #include "../Data_Type_Adjuster.hxx"
@@ -437,9 +437,9 @@ void Ipac_Table_Writer::write_single_value(
 
         os << Ascii_Writer::IPAC_COLUMN_SEPARATOR << std::setw(width);
         std::stringstream ss_temp;
-        Ascii_Writer::write_type_as_ascii_expand_array(ss_temp, column.get_type(),
-                                                       column.get_array_size(),
-                                                       curr_data, width, options);
+        Ascii_Writer::write_type_as_ascii_expand_array(
+                ss_temp, column.get_format_packet(), column.get_array_size(), curr_data,
+                width, options);
         std::string s;
         boost::replace_copy_if(ss_temp.str(), std::back_inserter(s),
                                boost::is_any_of(NEWLINES), ' ');

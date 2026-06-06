@@ -160,8 +160,6 @@ void Data_Details::combine_data_details(const Field_Framework &dest_ff,
                                         const Field_Framework &src2_ff,
                                         const Data_Details &src1_dd,
                                         const Data_Details &src2_dd) {
-    const std::vector<Column> &dest_columns = dest_ff.get_columns();
-
     // Prepare to load dest_table data.
     size_t src1_null_flags_size = src1_ff.get_offsets().at(1);
     size_t src2_null_flags_size = src2_ff.get_offsets().at(1);
