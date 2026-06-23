@@ -56,8 +56,8 @@ void tablator::Table::write_sql_inserts(
 
     auto num_rows = get_num_rows();
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
-        write_sql_insert(os, quoted_table_name, row_idx,
-                         !point_input_names.first.empty(), point_input, polygon_input,
-                         options);
+        write_single_sql_insert(os, quoted_table_name, row_idx,
+                                !point_input_names.first.empty(), point_input,
+                                polygon_input, options);
     }
 }
