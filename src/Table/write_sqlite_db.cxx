@@ -1,9 +1,9 @@
+#include <sqlite/connection.hpp>
+#include <sqlite/execute.hpp>
+
 #include "../Data_Type_to_SQL.hxx"
 #include "../Table.hxx"
 #include "../quote_sql_string.hxx"
-
-#include <sqlite/connection.hpp>
-#include <sqlite/execute.hpp>
 
 void tablator::Table::write_sqlite_db(const boost::filesystem::path &path,
                                       const Command_Line_Options &options) const {
@@ -24,7 +24,7 @@ void tablator::Table::write_sqlite_db(const boost::filesystem::path &path,
     auto num_rows = get_num_rows();
     for (size_t row_idx = 0; row_idx < num_rows; ++row_idx) {
         sql_stream.str("");
-        write_sql_insert(sql_stream, table_name, row_idx, options);
+        write_single_sql_insert(sql_stream, table_name, row_idx, options);
         sqlite::execute(connection, sql_stream.str(), true);
     }
 }

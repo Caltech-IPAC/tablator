@@ -4,12 +4,11 @@
 #include "../quote_sql_string.hxx"
 
 namespace {
-void write_point(std::ostream &os,
-                 const std::pair<std::pair<size_t, tablator::Format_Packet>,
-                                 std::pair<size_t, tablator::Format_Packet> >
-                         &point_input,
-                 const uint8_t *row_start,
-                 const tablator::Command_Line_Options &options) {
+void write_point(
+        std::ostream &os,
+        const std::pair<std::pair<size_t, tablator::Format_Packet>,
+                        std::pair<size_t, tablator::Format_Packet> > &point_input,
+        const uint8_t *row_start, const tablator::Command_Line_Options &options) {
     os << "ST_MakePoint(";
     size_t array_size = 1;
     tablator::Ascii_Writer::write_type_as_ascii(
@@ -26,18 +25,14 @@ void write_point(std::ostream &os,
 
 }  // namespace
 
-void tablator::Table::write_sql_insert(std::ostream &os,
-                                       const std::string &quoted_table_name,
-                                       const size_t &row_idx, const bool &has_point,
-                                       const std::pair<
-                                               std::pair<size_t, Format_Packet>,
-                                               std::pair<size_t, Format_Packet> >
-                                               &point_input,
-                                       const std::vector<std::pair<
-                                               std::pair<size_t, Format_Packet>,
-                                               std::pair<size_t, Format_Packet> > >
-                                               &polygon_input,
-                                       const Command_Line_Options &options) const {
+void tablator::Table::write_single_sql_insert(
+        std::ostream &os, const std::string &quoted_table_name, const size_t &row_idx,
+        const bool &has_point,
+        const std::pair<std::pair<size_t, Format_Packet>,
+                        std::pair<size_t, Format_Packet> > &point_input,
+        const std::vector<std::pair<std::pair<size_t, Format_Packet>,
+                                    std::pair<size_t, Format_Packet> > > &polygon_input,
+        const Command_Line_Options &options) const {
     const auto &data = get_data();
     auto row_offset = row_idx * get_row_size();
 

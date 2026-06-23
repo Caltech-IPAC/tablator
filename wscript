@@ -57,7 +57,7 @@ def build(bld):
              'src/Table/write_dsv.cxx',
              'src/Table/write_sql_create_table.cxx',
              'src/Table/write_sql_inserts.cxx',
-             'src/Table/write_sql_insert.cxx',
+             'src/Table/write_single_sql_insert.cxx',
              'src/Table/write_sqlite_db.cxx',
              'src/Table/write_fits.cxx',
              'src/Table/write_html.cxx',
