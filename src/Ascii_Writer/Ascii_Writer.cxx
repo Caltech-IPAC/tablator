@@ -14,29 +14,6 @@
 #include "../Format_Packet.hxx"
 #include "../data_size.hxx"
 
-namespace {
-
-
-void apply_format_packet(std::ostream &stream, const tablator::Format_Packet &fmt) {
-  switch (fmt.flag_) {
-  case 'f':
-	stream << std::fixed << std::setprecision(fmt.precision_);
-	break;
-  case 'e':
-	stream << std::scientific << std::setprecision(fmt.precision_);
-	break;
-  case 'g':
-  case '\0':
-  default:
-	stream << std::defaultfloat << std::setprecision(fmt.precision_);
-	break;
-  }
-}
-
-
-}  // namespace
-
-
 namespace tablator {
 // Declare static constexpr class members.
 constexpr const char Ascii_Writer::DEFAULT_SEPARATOR;
@@ -62,8 +39,7 @@ void Ascii_Writer::write_type_as_ascii(std::ostream &os,
     if (type != Data_Type::CHAR && array_size != 1) {
         for (size_t n = 0; n < array_size; ++n) {
             write_array_unit_as_ascii(os, format_packet, 1,
-                                      data + n * get_data_size(type),
-                                      options);
+                                      data + n * get_data_size(type), options);
 
             if (n != array_size - 1) {
                 os << separator;
@@ -85,8 +61,7 @@ void Ascii_Writer::write_type_as_ascii_expand_array(
         for (size_t n = 0; n < array_size; ++n) {
             os << std::setw(col_width);
             write_array_unit_as_ascii(os, format_packet, 1,
-                                      data + n * get_data_size(type),
-                                      options);
+                                      data + n * get_data_size(type), options);
 
             if (n != array_size - 1) {
                 os << IPAC_COLUMN_SEPARATOR;
@@ -138,17 +113,18 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os,
             os << *reinterpret_cast<const uint64_t *>(data);
         } break;
         case Data_Type::FLOAT32_LE: {
-			apply_format_packet(os, format_packet);
-			os <<  *reinterpret_cast<const float *>(data);
+            format_packet.apply_to_stream(os);
+            os << *reinterpret_cast<const float *>(data);
         } break;
         case Data_Type::FLOAT64_LE: {
+            double value_doub = *reinterpret_cast<const double *>(data);
             if (options.is_trim_decimal_runs()) {
                 os << Decimal_String_Trimmer::get_decimal_string(
-                        *reinterpret_cast<const double *>(data),
+                        value_doub, format_packet.get_formatted_value(value_doub),
                         options.min_run_length_for_trim_);
             } else {
-                apply_format_packet(os, format_packet);
-                os << *reinterpret_cast<const double *>(data);
+                format_packet.apply_to_stream(os);
+                os << value_doub;
             }
         } break;
         case Data_Type::CHAR:

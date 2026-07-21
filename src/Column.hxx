@@ -98,13 +98,12 @@ public:
         return tablator::get_data_size(type_) * array_size_;
     }
 
-    inline Format_Packet get_format_packet() const { return format_packet_; }
+    inline const Format_Packet &get_format_packet() const { return format_packet_; }
 
 private:
     static std::string extract_format_str(const Field_Properties &field_properties) {
         const auto &field_prop_attributes = field_properties.get_attributes();
-        const auto format_iter =
-                field_prop_attributes.find(ATTR_IRSA_FORMAT);
+        const auto format_iter = field_prop_attributes.find(ATTR_IRSA_FORMAT);
         if (format_iter != field_prop_attributes.end()) {
             return format_iter->second;
         }

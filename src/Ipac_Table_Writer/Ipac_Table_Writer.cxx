@@ -11,7 +11,6 @@
 #include "../Decimal_String_Trimmer.hxx"
 #include "../Table.hxx"
 
-
 // This file contains high-level implementations of public functions of the
 // Ipac_Table_Writer class.
 
@@ -31,16 +30,11 @@ const std::vector<size_t> get_all_row_ids(const tablator::Table &table) {
 
 //====================================================
 
-// This templatized function is called for types other than CHAR and
-// FLOAT64_LE, each of which has its own dedicated function (below).
-
-template <typename T>
-size_t compute_max_column_width_for_type(const tablator::Table &table,
-                                         const std::vector<size_t> &requested_row_ids,
-                                         size_t col_idx,
-                                         uint8_t const *col_data_start_ptr,
-                                         size_t col_width_from_headers,
-                                         uint max_width_for_type, uint array_size) {
+template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+size_t compute_max_column_width_for_integral_type(
+        const tablator::Table &table, const std::vector<size_t> &requested_row_ids,
+        size_t col_idx, uint8_t const *col_data_start_ptr,
+        size_t col_width_from_headers, uint max_width_for_type, uint array_size) {
     if (col_width_from_headers >= max_width_for_type) {
         return col_width_from_headers;
     }
@@ -62,6 +56,7 @@ size_t compute_max_column_width_for_type(const tablator::Table &table,
             if (curr_array_elt == tablator::get_null<T>()) {
                 continue;
             }
+
             std::string string_val = boost::lexical_cast<std::string>(curr_array_elt);
             max_width_sofar = std::max(max_width_sofar, string_val.size());
 
@@ -76,16 +71,20 @@ size_t compute_max_column_width_for_type(const tablator::Table &table,
 
 //====================================================
 
-size_t compute_max_column_width_for_double(const tablator::Table &table,
-                                           const std::vector<size_t> &requested_row_ids,
-                                           size_t col_idx,
-                                           uint8_t const *col_data_start_ptr,
-                                           size_t col_width_from_headers,
-                                           uint min_run_length_for_trimming,
-                                           uint max_width_for_double, uint array_size) {
-    if (col_width_from_headers >= max_width_for_double) {
+template <typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+size_t compute_max_column_width_for_floating_point_type(
+        const tablator::Table &table, const std::vector<size_t> &requested_row_ids,
+        size_t col_idx, uint8_t const *col_data_start_ptr,
+        size_t col_width_from_headers, uint min_run_length_for_trim,
+        bool trim_decimal_runs_f, uint array_size) {
+    const auto &column = table.get_columns().at(col_idx);
+    const tablator::Format_Packet &format_packet = column.get_format_packet();
+    auto max_width_for_type = format_packet.get_max_strlen();
+
+    if (col_width_from_headers >= max_width_for_type) {
         return col_width_from_headers;
     }
+
     size_t max_width_sofar = col_width_from_headers;
 
     for (size_t requested_row_id : requested_row_ids) {
@@ -96,21 +95,30 @@ size_t compute_max_column_width_for_double(const tablator::Table &table,
             // We've already accounted for the width of the null value.
             continue;
         }
-        const double *curr_array_elt_data_ptr =
-                reinterpret_cast<const double *>(curr_col_data_ptr);
+        const T *curr_array_elt_data_ptr =
+                reinterpret_cast<const T *>(curr_col_data_ptr);
 
-        for (uint j = 0; j < array_size && max_width_sofar < max_width_for_double;
-             ++j) {
-            double curr_array_elt = *curr_array_elt_data_ptr;
+        for (uint j = 0; j < array_size && max_width_sofar < max_width_for_type; ++j) {
+            T curr_array_elt = *curr_array_elt_data_ptr;
             if (curr_array_elt == tablator::get_null<double>()) {
                 continue;
             }
-            size_t curr_width =
-                    tablator::Decimal_String_Trimmer::get_decimal_string_length(
-                            curr_array_elt, min_run_length_for_trimming);
-            max_width_sofar = std::max(max_width_sofar, curr_width);
 
-            if (max_width_sofar >= max_width_for_double) {
+            const std::string &orig_formatted_string =
+                    format_packet.get_formatted_value(curr_array_elt);
+
+            if (trim_decimal_runs_f) {
+                size_t curr_width =
+                        tablator::Decimal_String_Trimmer::get_decimal_string_length(
+                                curr_array_elt, orig_formatted_string,
+                                min_run_length_for_trim);
+                max_width_sofar = std::max(max_width_sofar, curr_width);
+            } else {
+                max_width_sofar =
+                        std::max(max_width_sofar, orig_formatted_string.size());
+            }
+
+            if (max_width_sofar >= max_width_for_type) {
                 return max_width_sofar;
             }
             ++curr_array_elt_data_ptr;
@@ -118,6 +126,7 @@ size_t compute_max_column_width_for_double(const tablator::Table &table,
     }
     return max_width_sofar;
 }
+
 
 //====================================================
 
@@ -203,16 +212,13 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
     static size_t MAX_INT64_STRLEN = ceil(log10(INT64_MAX)) + 1;
     static size_t MAX_UINT64_STRLEN = ceil(log10(UINT64_MAX));
 
-    // https://stackoverflow.com/questions/2151302/counting-digits-in-a-float
-    static size_t MAX_FLOAT32_STRLEN = 15;
-    static size_t MAX_FLOAT64_STRLEN = 24;
-
-    auto column = table.get_columns().at(col_idx);
+    auto &column = table.get_columns().at(col_idx);
 
     // Build lower bound for column width based on the 4 lines of
     // the header: name, unit, type, and null.
 
     auto type = column.get_type();
+
     uint array_size = column.get_array_size();
     bool got_array = (array_size > 1);
     size_t max_width_sofar = to_ipac_string(type).size();
@@ -239,7 +245,6 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
             (null_value.empty()) ? tablator::Table::DEFAULT_NULL_VALUE : null_value;
     max_width_sofar = std::max(max_width_sofar, null_str.size());
 
-
     const std::vector<uint8_t> &table_data = table.get_data();
     size_t col_offset = table.get_offsets().at(col_idx);
     uint8_t const *data_start_ptr = table_data.data();
@@ -251,68 +256,63 @@ size_t tablator::Ipac_Table_Writer::get_single_column_width(
     switch (type) {
         case Data_Type::INT8_LE: {
             // std::cout << "INT8" << std::endl;
-            max_width_sofar = compute_max_column_width_for_type<int8_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<int8_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_INT8_STRLEN, array_size);
         } break;
         case Data_Type::UINT8_LE: {
             // std::cout << "UINT8" << std::endl;
-            max_width_sofar = compute_max_column_width_for_type<uint8_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<uint8_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_UINT8_STRLEN, array_size);
         } break;
         case Data_Type::INT16_LE: {
             // std::cout << "INT16" << std::endl;
-            max_width_sofar = compute_max_column_width_for_type<int16_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<int16_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_INT16_STRLEN, array_size);
         } break;
         case Data_Type::UINT16_LE: {
             // std::cout << "UINT16" << std::endl;
-            max_width_sofar = compute_max_column_width_for_type<uint16_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<uint16_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_UINT16_STRLEN, array_size);
         } break;
         case Data_Type::INT32_LE: {
             // std::cout << "INT32" << std::endl;
-            max_width_sofar = compute_max_column_width_for_type<int32_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<int32_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_INT32_STRLEN, array_size);
         } break;
         case Data_Type::UINT32_LE: {
             // std::cout << "UINT32" << std::endl;
-            max_width_sofar = compute_max_column_width_for_type<uint32_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<uint32_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_UINT32_STRLEN, array_size);
         } break;
         case Data_Type::INT64_LE: {
-            max_width_sofar = compute_max_column_width_for_type<int64_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<int64_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_INT64_STRLEN, array_size);
         } break;
         case Data_Type::UINT64_LE: {
-            max_width_sofar = compute_max_column_width_for_type<uint64_t>(
+            max_width_sofar = compute_max_column_width_for_integral_type<uint64_t>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
                     max_width_sofar, MAX_UINT64_STRLEN, array_size);
         } break;
         case Data_Type::FLOAT32_LE: {
             // std::cout << "FLOAT32" << std::endl;
-            max_width_sofar = compute_max_column_width_for_type<float>(
+            max_width_sofar = compute_max_column_width_for_floating_point_type<float>(
                     table, requested_row_ids, col_idx, col_data_start_ptr,
-                    max_width_sofar, MAX_FLOAT32_STRLEN, array_size);
+                    max_width_sofar, min_run_length_for_trim,
+                    false /* trim_decimal_runs_f */, array_size);
         } break;
         case Data_Type::FLOAT64_LE: {
             // std::cout << "FLOAT64" << std::endl;
-            if (trim_decimal_runs_f) {
-                max_width_sofar = compute_max_column_width_for_double(
-                        table, requested_row_ids, col_idx, col_data_start_ptr,
-                        max_width_sofar, min_run_length_for_trim, MAX_FLOAT64_STRLEN,
-                        array_size);
-            } else {
-                max_width_sofar = compute_max_column_width_for_type<double>(
-                        table, requested_row_ids, col_idx, col_data_start_ptr,
-                        max_width_sofar, MAX_FLOAT64_STRLEN, array_size);
-            }
+            max_width_sofar = compute_max_column_width_for_floating_point_type<double>(
+                    table, requested_row_ids, col_idx, col_data_start_ptr,
+                    max_width_sofar, min_run_length_for_trim, trim_decimal_runs_f,
+                    array_size);
         } break;
         case Data_Type::CHAR: {
             max_width_sofar = compute_max_column_width_for_char(

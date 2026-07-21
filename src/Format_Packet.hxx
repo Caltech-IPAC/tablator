@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iomanip>
+#include <iostream>
+
 #include "data_size.hxx"
 
 namespace tablator {
@@ -62,6 +65,59 @@ struct Format_Packet {
     //=============================================
 
     Format_Packet() : Format_Packet("", Data_Type::CHAR) {}
+
+    //=============================================
+
+    void apply_to_stream(std::ostream &os) const {
+        switch (flag_) {
+            case 'f':
+                os << std::fixed << std::setprecision(precision_);
+                break;
+            case 'e':
+                os << std::scientific << std::setprecision(precision_);
+                break;
+            default:
+                os << std::defaultfloat << std::setprecision(precision_);
+                break;
+        }
+    }
+
+    //=============================================
+
+  template <typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+    std::string get_formatted_value(T value) const {
+        std::ostringstream oss;
+        apply_to_stream(oss);
+        oss << value;
+        return oss.str();
+    }
+
+    //=============================================
+
+    size_t get_max_strlen() const {
+        // https://stackoverflow.com/questions/2151302/counting-digits-in-a-float
+        static size_t MAX_FLOAT32_STRLEN = 15;
+        static size_t MAX_FLOAT64_STRLEN = 24;
+
+        static size_t MAX_FLOAT32_EXPONENT_STRLEN = 4;
+        static size_t MAX_FLOAT64_EXPONENT_STRLEN = 5;
+
+        size_t max_strlen;
+        if (data_type_ == Data_Type::FLOAT32_LE) {
+            max_strlen = MAX_FLOAT32_STRLEN;
+            if (flag_ == 'e') {
+                max_strlen += MAX_FLOAT32_EXPONENT_STRLEN;
+            }
+        } else {
+            max_strlen = MAX_FLOAT64_STRLEN;
+            if (flag_ == 'e') {
+                max_strlen += MAX_FLOAT64_EXPONENT_STRLEN;
+            }
+        }
+        return max_strlen;
+    }
+
+    //=============================================
 
     Data_Type data_type_;
     uint precision_;
