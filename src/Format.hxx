@@ -1,10 +1,10 @@
 #pragma once
 
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-
 #include <map>
 #include <utility>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
 namespace tablator {
 class Format {
@@ -32,30 +32,43 @@ public:
     // problems with order of static initialization, where something
     // static would get destroyed before this variable, causing crashes
     // on exit.
-    const std::map<Enums, std::pair<std::string, std::vector<std::string> > > formats{
-            {Enums::JSON, {"json", {"js", "json"}}},
-            {Enums::JSON5, {"json5", {"js5", "json5"}}},
-            {Enums::VOTABLE, {"votable", {"xml", "vot", "vo"}}},
-            {Enums::CSV, {"csv", {"csv"}}},
-            {Enums::TSV, {"tsv", {"tsv"}}},
-            {Enums::FITS, {"fits", {"fits"}}},
-            {Enums::IPAC_TABLE, {"ipac_table", {"tbl"}}},
-            {Enums::TEXT, {"text", {"txt"}}},
-            {Enums::HTML, {"html", {"html"}}},
-            {Enums::HDF5, {"hdf5", {"h5", "hdf", "hdf5"}}},
-            {Enums::POSTGRES_SQL, {"postgres", {"postgres"}}},
-            {Enums::ORACLE_SQL, {"oracle", {"oracle"}}},
-            {Enums::SQLITE_SQL, {"sqlite", {"sqlite"}}},
-            {Enums::SQLITE_DB, {"db", {"db"}}},
-            {Enums::VOTABLE_BINARY2,
-             {"votable/binary2", {"binary2", "vobin2", "bin2"}}},
-            {Enums::UNKNOWN, {"unknown", {}}}};
+    const std::map<Enums, std::pair<std::string, std::vector<std::string> > >
+            format_extension_lookup{
+                    {Enums::JSON, {"json", {"js", "json"}}},
+                    {Enums::JSON5, {"json5", {"js5", "json5"}}},
+                    {Enums::VOTABLE, {"votable", {"xml", "vot", "vo"}}},
+                    {Enums::CSV, {"csv", {"csv"}}},
+                    {Enums::TSV, {"tsv", {"tsv"}}},
+                    {Enums::FITS, {"fits", {"fits"}}},
+                    {Enums::IPAC_TABLE, {"ipac_table", {"tbl"}}},
+                    {Enums::TEXT, {"text", {"txt"}}},
+                    {Enums::HTML, {"html", {"html"}}},
+                    {Enums::HDF5, {"hdf5", {"h5", "hdf", "hdf5"}}},
+                    {Enums::POSTGRES_SQL, {"postgres", {"postgres"}}},
+                    {Enums::ORACLE_SQL, {"oracle", {"oracle"}}},
+                    {Enums::SQLITE_SQL, {"sqlite", {"sqlite"}}},
+                    {Enums::SQLITE_DB, {"db", {"db"}}},
+                    {Enums::VOTABLE_BINARY2,
+                     {"votable/binary2", {"binary2", "vobin2", "bin2"}}},
+                    {Enums::UNKNOWN, {"unknown", {}}}};
 
-    Enums enum_format = Enums::UNKNOWN;
+    struct iless {
+        bool operator()(const std::string &a, const std::string &b) const {
+            return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(),
+                                                [](unsigned char c1, unsigned char c2) {
+                                                    return std::tolower(c1) <
+                                                           std::tolower(c2);
+                                                });
+        }
+    };
+    const std::map<std::string, std::string, iless> alias_to_name_lookup{
+            {"votable/td", "votable"},
+            {"text/xml", "votable"},
+            {"votable/b2", "votable/binary2"}};
 
     std::string extension() const {
-        auto f = formats.find(enum_format);
-        if (f == formats.end())
+        auto f = format_extension_lookup.find(enum_format);
+        if (f == format_extension_lookup.end())
             throw std::runtime_error(
                     "INTERNAL ERROR: Format::enum_format is not valid: " +
                     std::to_string(static_cast<int>(enum_format)));
@@ -73,9 +86,17 @@ public:
         enum_format = f.enum_format;
         return *this;
     }
-    void init(const std::string &format) {
-        for (auto &f : formats) {
-            if (boost::iequals(f.second.first, format)) {
+
+    void init(const std::string &format_string) {
+        const auto &lookup_str = [&]() -> const std::string & {
+            const auto iter = alias_to_name_lookup.find(format_string);
+            if (iter != alias_to_name_lookup.end()) {
+                return iter->second;
+            }
+            return format_string;
+        }();
+        for (auto &f : format_extension_lookup) {
+            if (boost::iequals(f.second.first, lookup_str)) {
                 enum_format = f.first;
                 break;
             }
@@ -108,13 +129,15 @@ public:
     bool is_unknown() const { return enum_format == Enums::UNKNOWN; }
 
     std::string string() const {
-        auto f = formats.find(enum_format);
-        if (f == formats.end())
+        auto f = format_extension_lookup.find(enum_format);
+        if (f == format_extension_lookup.end())
             throw std::runtime_error(
                     "INTERNAL ERROR: Format::enum_format is not valid: " +
                     std::to_string(static_cast<int>(enum_format)));
         return "." + f->second.first;
     }
+
+    Enums enum_format = Enums::UNKNOWN;
 };
 }  // namespace tablator
 
