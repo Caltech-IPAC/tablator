@@ -7,7 +7,7 @@ void tablator::Format::set_from_extension(const boost::filesystem::path &path,
         enum_format = default_format;
     } else {
         extension = extension.substr(1);
-        for (auto &f : formats) {
+        for (auto &f : format_extension_lookup) {
             for (auto &e : f.second.second) {
                 if (boost::iequals(e, extension)) {
                     enum_format = f.first;
