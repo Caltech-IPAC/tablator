@@ -115,9 +115,8 @@ void Table::write_binary2(std::ostream &os) const {
          ++row_idx, row_start_ptr += get_row_size()) {
         for (size_t col_idx = 0; col_idx < columns.size(); ++col_idx) {
             auto &column = columns[col_idx];
-            uint32_t array_size = column.get_array_size();
+            uint32_t max_array_size = column.get_array_size();
             bool dynamic_array_flag = column.get_dynamic_array_flag();
-
             const uint8_t *curr_data_ptr = row_start_ptr + offsets[col_idx];
             Data_Type datatype_for_writing = datatypes_for_writing[col_idx];
 
@@ -134,13 +133,13 @@ void Table::write_binary2(std::ostream &os) const {
                         write_ptr += sizeof(uint32_t);
                     } else {
                         write_bigendian_null_array(write_ptr, datatype_for_writing,
-                                                   array_size);
+                                                   max_array_size);
                     }
                     continue;
                 }
             }  // end col_idx > 0
 
-            uint32_t curr_array_size = array_size;
+            uint32_t curr_array_size = max_array_size;
             if (dynamic_array_flag) {
                 curr_array_size =
                         get_data_details().get_dynamic_array_size(row_idx, col_idx);
@@ -154,7 +153,7 @@ void Table::write_binary2(std::ostream &os) const {
             switch (datatype_for_writing) {
                 case Data_Type::INT8_LE: {
                     // std::cout << "INT8_LE" << std::endl;
-                    for (uint32_t i = 0; i < array_size; ++i) {
+                    for (uint32_t i = 0; i < curr_array_size; ++i) {
                         uint8_t element =
                                 *(reinterpret_cast<const uint8_t *>(curr_data_ptr));
                         bool result =
@@ -176,39 +175,39 @@ void Table::write_binary2(std::ostream &os) const {
                 } break;
                 case Data_Type::UINT8_LE: {
                     // std::cout << "UINT8_LE" << std::endl;
-                    write_element<uint8_t>(write_ptr, curr_data_ptr, array_size);
+                    write_element<uint8_t>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::INT16_LE: {
                     // std::cout << "INT16_LE" << std::endl;
-                    write_element<int16_t>(write_ptr, curr_data_ptr, array_size);
+                    write_element<int16_t>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::UINT16_LE: {
                     // std::cout << "UINT16_LE" << std::endl;
-                    write_element<uint16_t>(write_ptr, curr_data_ptr, array_size);
+                    write_element<uint16_t>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::INT32_LE: {
                     // std::cout << "INT32_LE" << std::endl;
-                    write_element<int32_t>(write_ptr, curr_data_ptr, array_size);
+                    write_element<int32_t>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::UINT32_LE: {
                     // std::cout << "UINT32_LE" << std::endl;
-                    write_element<uint32_t>(write_ptr, curr_data_ptr, array_size);
+                    write_element<uint32_t>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::INT64_LE: {
                     // std::cout << "INT64_LE" << std::endl;
-                    write_element<int64_t>(write_ptr, curr_data_ptr, array_size);
+                    write_element<int64_t>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::UINT64_LE: {
                     // std::cout << "UINT64_LE" << std::endl;
-                    write_element<uint64_t>(write_ptr, curr_data_ptr, array_size);
+                    write_element<uint64_t>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::FLOAT32_LE: {
                     // std::cout << "FLOAT32_LE" << std::endl;
-                    write_element<float>(write_ptr, curr_data_ptr, array_size);
+                    write_element<float>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::FLOAT64_LE: {
                     // std::cout << "FLOAT64_LE" << std::endl;
-                    write_element<double>(write_ptr, curr_data_ptr, array_size);
+                    write_element<double>(write_ptr, curr_data_ptr, curr_array_size);
                 } break;
                 case Data_Type::CHAR: {
                     // std::cout << "CHAR" << std::endl;

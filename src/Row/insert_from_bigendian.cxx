@@ -43,7 +43,8 @@ void Row::insert_from_bigendian(const std::vector<uint8_t> &stream,
 
         // CHAR value is independent of endianness.
         // insert() loads dynamic_array_size.
-        insert(src_ptr, src_ptr + array_size, offset, col_idx, dynamic_array_flag);
+        insert(src_ptr, src_ptr + array_size, offset, array_size, col_idx,
+               dynamic_array_flag);
         return;
     }
 

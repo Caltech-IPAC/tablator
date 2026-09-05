@@ -109,16 +109,17 @@ void validate_parameters(const tablator::Row &row, const tablator::Table &table,
 
 //======================================================
 
-void insert_column_element_to_row_internal(tablator::Row &row,
-                                           const tablator::Table &table, size_t col_idx,
-                                           size_t elt_idx, const uint8_t *data_ptr,
-                                           uint32_t num_elements_to_insert) {
+void insert_column_elements_to_row_internal(tablator::Row &row,
+                                            const tablator::Table &table,
+                                            size_t col_idx, size_t elt_idx,
+                                            const uint8_t *data_ptr,
+                                            uint32_t num_elements_to_insert) {
     const auto &column = table.get_columns().at(col_idx);
 
     const auto data_size = tablator::get_data_size(column.get_type());
     const auto insert_offset = table.get_offsets().at(col_idx) + elt_idx * data_size;
     row.insert(data_ptr, data_ptr + num_elements_to_insert * data_size, insert_offset,
-               col_idx, column.get_dynamic_array_flag());
+               num_elements_to_insert, col_idx, column.get_dynamic_array_flag());
 }
 }  // namespace
 
@@ -141,7 +142,7 @@ void tablator::Table::insert_array_element_into_row(tablator::Row &row, size_t c
                                                     size_t elt_idx,
                                                     const uint8_t *data_ptr) const {
     validate_parameters(row, *this, col_idx, elt_idx, 1 /* num_elements_to_insert */);
-    insert_column_element_to_row_internal(row, *this, col_idx, elt_idx, data_ptr, 1);
+    insert_column_elements_to_row_internal(row, *this, col_idx, elt_idx, data_ptr, 1);
 }
 
 //===============================================================
@@ -150,7 +151,8 @@ void tablator::Table::insert_ptr_value_into_row(tablator::Row &row, size_t col_i
                                                 const uint8_t *data_ptr,
                                                 uint32_t array_size) const {
     validate_parameters(row, *this, col_idx, 0 /* start_elt_idx */, array_size);
-    insert_column_element_to_row_internal(row, *this, col_idx, 0, data_ptr, array_size);
+    insert_column_elements_to_row_internal(row, *this, col_idx, 0, data_ptr,
+                                           array_size);
 }
 
 //===============================================================
