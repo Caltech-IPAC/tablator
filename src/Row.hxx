@@ -44,12 +44,12 @@ public:
 
     template <typename T>
     void insert(const T &begin, const T &end, const size_t &offset,
-                const size_t &col_idx, bool dynamic_array_flag) {
+                const size_t &num_elts, const size_t &col_idx,
+                bool dynamic_array_flag) {
         assert(offset + std::distance(begin, end) <= data_.size());
         std::copy(begin, end, data_.data() + offset);
         if (dynamic_array_flag) {
-            set_dynamic_array_size(
-                    col_idx, std::distance(begin, end));  // distance between pointers
+            increment_dynamic_array_size(col_idx, num_elts);
         }
     }
 
@@ -133,14 +133,15 @@ public:
     }
 
 
-    inline void increment_dynamic_array_size(const size_t &dyn_col_idx) {
+    inline void increment_dynamic_array_size(const size_t &dyn_col_idx,
+                                             uint32_t increment = 1) {
         const auto iter = dynamic_col_idx_lookup_.find(dyn_col_idx);
         if (iter == dynamic_col_idx_lookup_.end()) {
             throw std::runtime_error(
                     "increment_dynamic_array_size(): no lookup entry for col_idx");
         }
         dynamic_array_sizes_.at(iter->second) =
-                dynamic_array_sizes_.at(iter->second) + 1;
+                dynamic_array_sizes_.at(iter->second) + increment;
     }
 
 private:
