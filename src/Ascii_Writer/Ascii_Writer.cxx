@@ -113,8 +113,7 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os,
             os << *reinterpret_cast<const uint64_t *>(data);
         } break;
         case Data_Type::FLOAT32_LE: {
-            format_packet.apply_to_stream(os);
-            os << *reinterpret_cast<const float *>(data);
+            format_packet.write_to_stream(os, *reinterpret_cast<const float *>(data));
         } break;
         case Data_Type::FLOAT64_LE: {
             double value_doub = *reinterpret_cast<const double *>(data);
@@ -123,8 +122,7 @@ void Ascii_Writer::write_array_unit_as_ascii(std::ostream &os,
                         value_doub, format_packet.get_formatted_value(value_doub),
                         options.min_run_length_for_trim_);
             } else {
-                format_packet.apply_to_stream(os);
-                os << value_doub;
+                format_packet.write_to_stream(os, value_doub);
             }
         } break;
         case Data_Type::CHAR:
