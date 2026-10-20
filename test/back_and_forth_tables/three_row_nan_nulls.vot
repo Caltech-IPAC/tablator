@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE type="results">
+    <TABLE>
+      <FIELD name="dbl" datatype="double"/>
+      <FIELD name="dbl_arr" datatype="double" arraysize="2"/>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>NaN</TD>
+            <TD>NaN NaN</TD>
+          </TR>
+          <TR>
+            <TD>nan</TD>
+            <TD>NaN 1.5</TD>
+          </TR>
+          <TR>
+            <TD>1.5</TD>
+            <TD>2.5 3.5</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

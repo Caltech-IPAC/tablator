@@ -1,0 +1,13 @@
+\fixlen = T
+\RowsRetrieved = 5
+\PRIMARY_EXTNAME = 'T'
+\TABLE_EXTNAME = 'T'
+|       words|plain|u8_0|u8_1|u8_2|after|
+|        char| char| int| int| int|  int|
+|            |     |    |    |    |     |
+|        null| null|   7|   7|   7| null|
+ abcdefghijkl plain    7  200    0     1 
+ abcd    ijkl  null    7    7    7     2 
+         null          1    2    3     3 
+   ab  cd  ef        255  254  253     4 
+                pad    0    0    0     5 

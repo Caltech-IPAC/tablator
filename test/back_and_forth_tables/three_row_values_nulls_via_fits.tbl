@@ -1,0 +1,10 @@
+\fixlen = T
+\RowsRetrieved = 3
+\type = 'results'
+|int_val|int_arr_0|int_arr_1|
+|    int|      int|      int|
+|       |         |         |
+|   -999|     -999|     -999|
+    -999      -999      -999 
+       5         5      -999 
+       7         8         9 

@@ -1,0 +1,10 @@
+\fixlen = T
+\RowsRetrieved = 3
+\type = 'results'
+|   dbl|dbl_arr_0|dbl_arr_1|
+|double|   double|   double|
+|      |         |         |
+|  null|     null|     null|
+   null      null      null 
+   null       nan       1.5 
+    1.5       2.5       3.5 

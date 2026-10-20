@@ -4,7 +4,8 @@ BasedOnStyle: Google
 ColumnLimit: 88
 IndentWidth: 4
 AccessModifierOffset: -4
-SortIncludes: true
+SortIncludes: false
+IncludeBlocks: Preserve
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
 MaxEmptyLinesToKeep: 2

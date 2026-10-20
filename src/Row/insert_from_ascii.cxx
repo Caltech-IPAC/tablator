@@ -4,6 +4,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../Row.hxx"
+#include "../Utils/String_Utils.hxx"
 #include "../data_size.hxx"
 
 namespace tablator {
@@ -15,9 +16,12 @@ void Row::insert_from_ascii(const std::string &value, const Data_Type &data_type
                             const size_t &curr_array_size, bool dynamic_array_flag) {
     if (max_array_size != 1 && data_type != Data_Type::CHAR) {
         // Insert elements one at a time.
-        std::vector<std::string> elements;
-        boost::split(elements, value, boost::is_any_of(" "));
+        std::vector<std::string> elements = split_array_elements(value);
         size_t num_elements = elements.size();
+        if (num_elements == 0) {
+            throw std::runtime_error(
+                    "Expected at least one element, but found none: '" + value + "'");
+        }
         if (num_elements > max_array_size) {
             throw std::runtime_error(
                     "Expected no more than " + std::to_string(max_array_size) +

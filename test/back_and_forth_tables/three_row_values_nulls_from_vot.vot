@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+  <RESOURCE type="results">
+    <TABLE>
+      <FIELD name="int_val" datatype="int">
+        <VALUES null="-999"/>
+      </FIELD>
+      <FIELD name="int_arr" datatype="int" arraysize="2">
+        <VALUES null="-999"/>
+      </FIELD>
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD></TD>
+            <TD></TD>
+          </TR>
+          <TR>
+            <TD>5</TD>
+            <TD>5 -999</TD>
+          </TR>
+          <TR>
+            <TD>7</TD>
+            <TD>8 9</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

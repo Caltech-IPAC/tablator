@@ -6,6 +6,7 @@
 #include "../../Property.hxx"
 #include "../../Resource_Element.hxx"
 #include "../../Table_Element.hxx"
+#include "../../Utils/String_Utils.hxx"
 #include "../../to_xml_string.hxx"
 
 namespace {
@@ -210,10 +211,20 @@ void add_to_property_tree(boost::property_tree::ptree &parent_tree,
     }
 
     auto &values(field_properties.get_values());
-    if (!values.empty_except_null()) {
+
+    // Null elements of partly null arrays are stored as the column's
+    // null value.  VOTable output declares the column's null value
+    // for integer columns if it differs from tablator's default null
+    // value; JSON output always omits it.
+    bool declare_null_f =
+            !json_prep && is_non_default_integer_null_str(values.null, active_datatype);
+    if (!values.empty_except_null() || declare_null_f) {
         boost::property_tree::ptree &values_tree = field_tree.add("VALUES", "");
         if (!values.ID.empty()) values_tree.add(XMLATTR_ID, values.ID);
         if (!values.type.empty()) values_tree.add(XMLATTR_TYPE, values.type);
+        if (declare_null_f) {
+            values_tree.add(XMLATTR_DOT + "null", values.null);
+        }
         if (!values.ref.empty()) values_tree.add(XMLATTR_REF, values.ref);
 
         Min_Max_to_xml(values_tree, "MIN", values.min);
