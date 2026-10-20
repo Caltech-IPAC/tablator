@@ -415,20 +415,35 @@ fi
 
 ${tablator_bin} test/format.float.vot temp.vot && diff test/format.float.vot temp.vot
 if [ $? -eq 0 ]; then
-    echo "PASS: Convert VOTable with irsa_format attrs and floats to VOTable"
+    echo "PASS: Convert VOTable with precision attrs and floats to VOTable"
     rm -f temp.vot
 else
-    echo "FAIL: Convert VOTable with irsa_format attrs and floats to VOTable"
+    echo "FAIL: Convert VOTable with precision attrs and floats to VOTable"
 fi
 
 ${tablator_bin} --trim-decimal-runs 0 test/format.double.vot temp.vot && diff test/format.double.vot temp.vot
 if [ $? -eq 0 ]; then
-    echo "PASS: Convert VOTable with irsa_format attrs and doubles to VOTable"
+    echo "PASS: Convert VOTable with precision attrs and doubles to VOTable"
     rm -f temp.vot
 else
-    echo "FAIL: Convert VOTable with irsa_format attrs and doubles to VOTable"
+    echo "FAIL: Convert VOTable with precision attrs and doubles to VOTable"
 fi
 
+${tablator_bin} --trim-decimal-runs 0 --output-format=ipac_table test/back_and_forth_tables/three_row_fixed_notation.vot temp.tbl && diff -w test/back_and_forth_tables/three_row_fixed_notation_from_vot.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with large F6 values to IPAC Table"
+    rm -f temp.tbl
+else
+    echo "FAIL: Convert VOTable with large F6 values to IPAC Table"
+fi
+
+${tablator_bin} --trim-decimal-runs 0 --output-format=ipac_table test/back_and_forth_tables/precision_edge_cases.vot temp.tbl && diff -w test/back_and_forth_tables/precision_edge_cases_from_vot.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with malformed precision values and large, infinite, NaN, and null values to IPAC Table"
+    rm -f temp.tbl
+else
+    echo "FAIL: Convert VOTable with malformed precision values and large, infinite, NaN, and null values to IPAC Table"
+fi
 
 ###########################################################
 # Test round-trip conversions

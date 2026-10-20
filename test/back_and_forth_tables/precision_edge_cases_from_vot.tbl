@@ -1,0 +1,21 @@
+\fixlen = T
+\RowsRetrieved = 6
+\type = 'results'
+\ d_empty
+\ d_garbage
+\ d_f
+\ d_f6junk
+\ f_f6
+\ d_f6
+\ f_f6_arr
+\ d_f6_arr
+|d_missing|d_empty|d_garbage|    d_f|d_f6junk|              f_f6|                         d_f6|        f_f6_arr_0|        f_f6_arr_1|                   d_f6_arr_0|                   d_f6_arr_1|
+|   double| double|   double| double|  double|             float|                       double|             float|             float|                       double|                       double|
+|         |       |         |       |        |                  |                             |                  |                  |                             |                             |
+|     null|   null|     null|   null|    null|              null|                         null|              null|              null|                         null|                         null|
+   168.358 168.358   168.358 168.358  168.358      123456.500000                    168.358000                nan           1.500000                           nan                      1.500000 
+     1e+20   1e+20     1e+20   1e+20    1e+20  3000000000.000000  100000000000000000000.000000  3000000000.000000 -3000000000.000000  100000000000000000000.000000 -100000000000000000000.000000 
+    -1e+20  -1e+20    -1e+20  -1e+20   -1e+20 -3000000000.000000 -100000000000000000000.000000           1.500000           2.500000                      1.500000                      2.500000 
+       inf     inf       inf     inf      inf                inf                           inf                inf               -inf                           inf                          -inf 
+      -inf    -inf      -inf    -inf     -inf               -inf                          -inf           1.500000           2.500000                      1.500000                      2.500000 
+      null    null      null    null     null               null                          null               null               null                          null                          null 
