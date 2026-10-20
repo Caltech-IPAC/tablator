@@ -1,4 +1,7 @@
+#include <cmath>
+#include <cstring>
 #include <regex>
+#include <type_traits>
 #include <unordered_map>
 
 #include <CCfits/CCfits>
@@ -15,13 +18,42 @@
 
 // JTODO Descriptions get lost in conversion to and from FITS format.
 
+// JTODO Use the word "cell" throughout to mean the value of a column
+// in a single row, whether scalar or array.  "Element" can mean
+// either a cell's scalar value or a component of a cell's aray.
+
 //(We can't yet convert to FITS format VOTables with more than one RESOURCE.
 // 07Dec20)
 
-// As of 28Jun25, all columns are created with dynamic_array_flag value <false>.
+// As of 28Jun25, all non-CHAR columns created by functions in this
+// file are created with dynamic_array_flag value <false>.  All CHAR
+// columns get dynamic_array_flag value <true>, the Column
+// constructor's default for CHAR.
 
 namespace {
 
+// Returned by CFITSIO in place of a null string.  FITS string data is limited
+// to printable ASCII, so a control character can't be mistaken for real data.
+constexpr char FITS_NULL_STRING_MARKER[] = "\x01";
+
+//====================================================
+
+// Returns the null value to record for an integer FITS column: the
+// column's TNULLn value, if such exists and is different from
+// tablator's own null value for T; and DEFAULT_NULL_VALUE otherwise.
+// Tablator's FITS writer writes its own null value as TNULLn when a
+// column has no declared null value, so finding that value in TNULLn
+// doesn't mean that a null value was declared.  Either way, elements
+// equal to TNULLn are still read as null.
+
+template <typename T>
+std::string get_column_null_str(bool got_null, T null_value) {
+    static_assert(std::is_integral_v<T>, "integer types only");
+    if (!got_null || null_value == tablator::get_null<T>()) {
+        return tablator::Table::DEFAULT_NULL_VALUE;
+    }
+    return std::to_string(null_value);
+}
 
 //====================================================
 // Helper functions for reading keywords
@@ -499,7 +531,9 @@ private:
 //====================================================
 
 // There is more than one way to indicate the array_size of a FITS column.
-// JTODO We don't yet support dynamic array columns in FITS format.  28Jun25
+
+// JTODO We don't yet support dynamic array columns for non-CHAR types
+// in FITS format.  28Jun25
 size_t get_array_size(const CCfits::Column &fits_col) {
     size_t array_size = 1;
     if (std::isdigit(fits_col.format().at(0))) {
@@ -587,9 +621,22 @@ public:
 private:
     //=====================================================
 
+    // These are the types handled by store_null_value_for_type() and
+    // retrieve_null_value_for_type().  UINT64_LE is not supported: FITS has
+    // no native unsigned 64-bit type, and tablator doesn't read or write
+    // uint64 FITS columns.
     bool is_null_value_supported(tablator::Data_Type data_type) const {
-        return (data_type >= tablator::Data_Type::UINT8_LE &&
-                data_type <= tablator::Data_Type::UINT64_LE);
+        switch (data_type) {
+            case tablator::Data_Type::UINT8_LE:
+            case tablator::Data_Type::INT16_LE:
+            case tablator::Data_Type::UINT16_LE:
+            case tablator::Data_Type::INT32_LE:
+            case tablator::Data_Type::UINT32_LE:
+            case tablator::Data_Type::INT64_LE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     //=====================================================
@@ -700,6 +747,8 @@ public:
     void read_element_given_column_and_row(tablator::Row &row, fitsfile *fits_file,
                                            const CCfits::Column &fits_col,
                                            size_t fits_row_idx, size_t tab_col_idx) {
+        static_assert(!std::is_same_v<T, char>,
+                      "This function is not supported for columns of type CHAR.");
         // Use the C api because the C++ api (Column::readArrays) is
         // horrendously slow.
         tablator::Data_Type tab_data_type;
@@ -708,7 +757,6 @@ public:
         T null_value = 0;
         col_info_manager_.retrieve_info_for_column(tab_data_type, array_size, got_null,
                                                    null_value, tab_col_idx);
-
         size_t col_offset = offsets_[tab_col_idx];
         size_t next_col_offset = offsets_[tab_col_idx + 1];
 
@@ -719,51 +767,49 @@ public:
         int status = 0;
         int anynul = 0;
 
+        // With NULL as nulval, CFITSIO does no null checking and anynul is
+        // always 0.  Null elements are identified below instead.
         fits_read_col(fits_file, get_matched_datatype(), fits_col.index(), fits_row_idx,
                       1, array_size, NULL /* nulval */, temp_array.data(), &anynul,
                       &status);
 
-        if (anynul) {
-            // Indicate that all array_size values are null.
-
-            // Note: As of 13Oct23, the only value I have seen for anynul is 0.
+        // Store every element as it is read, so a null element
+        // keeps its TNULL value (the column's declared null value) or
+        // NaN, and writers can still represent it as null.  The cell
+        // is marked null only when all of its elements are null.
+        size_t num_null_elts = 0;
+        for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
+            T array_elt = temp_array[array_offset];
+            bool is_null_elt = (got_null && array_elt == null_value);
+            if constexpr (std::is_floating_point_v<T>) {
+                // FITS doesn't (or didn't) allow floating-point columns to
+                // specify a NULL signal; NaN is the de facto null, at least
+                // for Euclid files.
+                is_null_elt = is_null_elt || std::isnan(array_elt);
+            }
+            if (is_null_elt) {
+                ++num_null_elts;
+            }
+            *reinterpret_cast<T *>(curr_ptr) = array_elt;
+            curr_ptr += sizeof(T);
+        }
+        if (array_size > 0 && num_null_elts == array_size) {
             row.insert_null(tab_data_type, array_size, col_offset, next_col_offset,
                             tab_col_idx, false /* dynamic_array_flag */);
-        } else {
-            for (size_t array_offset = 0; array_offset < array_size; ++array_offset) {
-                T array_elt = temp_array[array_offset];
-                if (got_null && array_elt == null_value) {
-                    // Indicate that a single value in the array is null.
-                    row.insert_null(tab_data_type, 1 /* array_size */,
-                                    col_offset + (array_offset * sizeof(T)),
-                                    next_col_offset, tab_col_idx,
-                                    false /* dynamic_array_flag */);
-                } else if ((tab_data_type == tablator::Data_Type::FLOAT32_LE ||
-                            tab_data_type == tablator::Data_Type::FLOAT64_LE) &&
-                           std::isnan(array_elt)) {
-                    // Do these types separately, both because FITS doesn't (or didn't)
-                    // allow columns of these types to specify a NULL signal and because
-                    // equality check doesn't work with NaN, which appears to be the
-                    // default NULL signal for these types, at least for Euclid files.
-                    row.insert_null(tab_data_type, 1 /* array_size */,
-                                    col_offset + (array_offset * sizeof(T)),
-                                    next_col_offset, tab_col_idx,
-                                    false /* dynamic_array_flag */);
-                } else {
-                    *reinterpret_cast<T *>(curr_ptr) = array_elt;
-                    curr_ptr += sizeof(T);
-                }
-            }
         }
     }
 
     //====================================================
 
-    // Note: FITS thinks of elements of Tstring columns as strings---or
-    // possibly arrays of strings---but tablator thinks of each such
-    // element as a single character array, not an array of arrays.
-    // This function does not check whether individual elements of that
-    // single array are undefined/null.
+    // Note: FITS treats a cell of a Tstring column as a string or an
+    // array of strings ("substrings"), but tablator stores each cell,
+    // even those FITS treats as an array, as a single character
+    // array.  Substring i of a cell FITS regards as an array starts
+    // at index i * substring_size within tablator's single array, and
+    // substrings of length less than substring_size are padded with
+    // spaces.  A cell is null only if every substring is null; null
+    // substrings in a non-null cell are stored as empty strings.
+
     void read_string_given_column_and_row(tablator::Row &row, fitsfile *fits_file,
                                           const CCfits::Column &fits_col,
                                           size_t fits_row_idx, size_t tab_col_idx) {
@@ -772,7 +818,6 @@ public:
                 col_info_manager_.retrieve_array_size_for_column(tab_col_idx);
 
         size_t col_offset = offsets_[tab_col_idx];
-        size_t next_col_offset = offsets_[tab_col_idx + 1];
 
         // If this string column is a vector column, all of the array
         // elements (henceforth "substrings") have the same size: the
@@ -798,24 +843,46 @@ public:
         // Finally, the char**.
         char **data_str = ptr_vec.data();
 
-        tablator::Data_Type tab_col_type = tablator::Data_Type::CHAR;
-        char nulstr[] = "";
-        int status = 0;
+        // anynul is set to 1 if even a single substring is null.
         int anynul = 0;
 
-        fits_read_col_str(fits_file, fits_col.index(), fits_row_idx, 1 /* firstelem */,
-                          num_substrings /* nelements */, nulstr, data_str, &anynul,
-                          &status);
+        int status = 0;
 
-        if (anynul) {
-            row.insert_null(tab_col_type, fits_col.repeat(), col_offset,
-                            next_col_offset, tab_col_idx,
-                            false /* dynamic_array_flag */);
-        } else {
-            row.insert_char_array_from_fits(data_vec, array_size, col_offset,
-                                            tab_col_idx, substring_size, num_substrings,
-                                            true /* dynamic_array_flag */);
+        // fits_read_col_str() takes a non-const char *, but only reads it.
+        fits_read_col_str(fits_file, fits_col.index(), fits_row_idx, 1 /* firstelem */,
+                          num_substrings /* nelements */,
+                          const_cast<char *>(FITS_NULL_STRING_MARKER), data_str,
+                          &anynul, &status);
+
+        // The cell is null only if every substring is null.
+        // Otherwise, null substrings are stored as empty strings.
+        // Substrings consisting only of space characters ("blanks")
+        // are stored as empty strings as well.  FITS pads strings
+        // with trailing blanks, and the standard treats trailing
+        // blanks as insignificant, so an all-blank FITS string counts
+        // as an empty string.  CFITSIO returns such a string as a
+        // single blank.
+        size_t num_null_substrings = 0;
+        for (auto &substring : data_vec) {
+            const char *chars = substring.data();
+            if (std::strcmp(chars, FITS_NULL_STRING_MARKER) == 0) {
+                ++num_null_substrings;
+                substring[0] = '\0';
+            } else if (std::strspn(chars, " ") == std::strlen(chars)) {
+                substring[0] = '\0';
+            }
         }
+        if (num_substrings > 0 && num_null_substrings == num_substrings) {
+            size_t next_col_offset = offsets_[tab_col_idx + 1];
+            row.insert_null(tablator::Data_Type::CHAR, array_size, col_offset,
+                            next_col_offset, tab_col_idx,
+                            true /* dynamic_array_flag */);
+            return;
+        }
+
+        row.insert_char_array_from_fits(data_vec, array_size, col_offset, tab_col_idx,
+                                        substring_size, num_substrings,
+                                        true /* dynamic_array_flag */);
     }
 
 private:
@@ -922,11 +989,10 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                 // std::cout << "Tbyte: " << CCfits::Tbyte << std::endl;
                 uint8_t null_value = 0;
                 col_info_manager.store_info_for_column<uint8_t>(
-                        got_null, null_value, fits_col, Data_Type::INT32_LE,
+                        got_null, null_value, fits_col, Data_Type::UINT8_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::UINT8_LE,
                                           array_size, null_prop);
             } break;
@@ -937,8 +1003,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         got_null, null_value, fits_col, Data_Type::INT16_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::INT16_LE,
                                           array_size, null_prop);
             } break;
@@ -949,8 +1014,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         got_null, null_value, fits_col, Data_Type::UINT16_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::UINT16_LE,
                                           array_size, null_prop);
             } break;
@@ -960,8 +1024,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         got_null, null_value, fits_col, Data_Type::INT32_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::INT32_LE,
                                           array_size, null_prop);
             } break;
@@ -971,8 +1034,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         got_null, null_value, fits_col, Data_Type::UINT32_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::UINT32_LE,
                                           array_size, null_prop);
             } break;
@@ -983,8 +1045,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         got_null, null_value, fits_col, Data_Type::INT32_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::INT32_LE,
                                           array_size, null_prop);
             } break;
@@ -996,8 +1057,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         got_null, null_value, fits_col, Data_Type::UINT32_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::UINT32_LE,
                                           array_size, null_prop);
             } break;
@@ -1007,8 +1067,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                         got_null, null_value, fits_col, Data_Type::INT64_LE,
                         array_size);
                 Field_Properties null_prop;
-                null_prop.get_values().null =
-                        got_null ? std::to_string(null_value) : DEFAULT_NULL_VALUE;
+                null_prop.get_values().null = get_column_null_str(got_null, null_value);
                 orig_columns.emplace_back(fits_col.name(), Data_Type::INT64_LE,
                                           array_size, null_prop);
             } break;
@@ -1031,8 +1090,7 @@ void tablator::Table::read_fits(const boost::filesystem::path &path) {
                                                                  array_size);
             } break;
             case CCfits::Tstring:
-                orig_columns.emplace_back(fits_col.name(), Data_Type::CHAR,
-                                          fits_col.width());
+                orig_columns.emplace_back(fits_col.name(), Data_Type::CHAR, array_size);
                 col_info_manager.store_data_type_info_for_column(Data_Type::CHAR,
                                                                  array_size);
                 break;

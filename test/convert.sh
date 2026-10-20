@@ -393,6 +393,55 @@ else
     echo "FAIL: Convert VOTable with null elements to IPAC Table"
 fi
 
+${tablator_bin} --output-format=ipac_table test/back_and_forth_tables/three_row_nan_nulls.vot temp.tbl && diff -w test/back_and_forth_tables/three_row_nan_nulls_from_vot.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with NaN float cells and elements to IPAC Table"
+    rm -f temp.tbl
+else
+    echo "FAIL: Convert VOTable with NaN float cells and elements to IPAC Table"
+fi
+
+${tablator_bin} --output-format=votable test/back_and_forth_tables/three_row_values_nulls.vot temp.vot && diff test/back_and_forth_tables/three_row_values_nulls_from_vot.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with VALUES null cells and elements to VOTable"
+    rm -f temp.vot
+else
+    echo "FAIL: Convert VOTable with VALUES null cells and elements to VOTable"
+fi
+
+# Plain diff, not diff -w: the test checks the whitespace in array cells.
+${tablator_bin} --output-format=votable test/back_and_forth_tables/three_row_array_whitespace.vot temp.vot && diff test/back_and_forth_tables/three_row_array_whitespace_from_vot.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with irregular whitespace in array cells to VOTable"
+    rm -f temp.vot
+else
+    echo "FAIL: Convert VOTable with irregular whitespace in array cells to VOTable"
+fi
+
+${tablator_bin} --output-format=fits test/back_and_forth_tables/three_row_values_nulls.vot temp.fits && ${tablator_bin} --input-format=fits --output-format=votable temp.fits temp.vot && diff test/back_and_forth_tables/three_row_values_nulls_from_vot.vot temp.vot
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with VALUES null cells and elements to FITS and back to VOTable"
+    rm -f temp.fits temp.vot
+else
+    echo "FAIL: Convert VOTable with VALUES null cells and elements to FITS and back to VOTable"
+fi
+
+${tablator_bin} --trim-decimal-runs 0 test/back_and_forth_tables/three_row_values_nulls.vot temp.fits && ${tablator_bin} --input-format=fits --output-format=ipac_table temp.fits temp.tbl && diff -w test/back_and_forth_tables/three_row_values_nulls_via_fits.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with VALUES null cells and elements to FITS and then to IPAC Table"
+    rm -f temp.fits temp.tbl
+else
+    echo "FAIL: Convert VOTable with VALUES null cells and elements to FITS and then to IPAC Table"
+fi
+
+${tablator_bin} --output-format=fits test/back_and_forth_tables/two_row_array_with_nulls.vot temp.fits && ${tablator_bin} --input-format=fits --output-format=ipac_table temp.fits temp.tbl && diff -w test/back_and_forth_tables/two_row_array_with_nulls_via_fits.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert VOTable with null elements to FITS and then to IPAC Table"
+    rm -f temp.fits temp.tbl
+else
+    echo "FAIL: Convert VOTable with null elements to FITS and then to IPAC Table"
+fi
+
 #################################################################
 # Test one-way conversions
 #################################################################
@@ -444,6 +493,15 @@ if [ $? -eq 0 ]; then
 else
     echo "FAIL: Convert VOTable with malformed precision values and large, infinite, NaN, and null values to IPAC Table"
 fi
+
+${tablator_bin} test/back_and_forth_tables/fits_string_arrays_and_nulls.fits temp.tbl && diff -w test/back_and_forth_tables/fits_string_arrays_and_nulls.tbl temp.tbl
+if [ $? -eq 0 ]; then
+    echo "PASS: Convert FITS file with vector string, null string, and uint8 TNULL columns to IPAC Table"
+    rm -f temp.tbl
+else
+    echo "FAIL: Convert FITS file with vector string, null string, and uint8 TNULL columns to IPAC Table"
+fi
+
 
 ###########################################################
 # Test round-trip conversions
@@ -1587,7 +1645,7 @@ fi
 ${tablator_bin} --winnow-rows-list "1 2 3" test/multi_formatted.tbl temp.tbl && diff test/back_and_forth_tables/multi_row_123.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: winnow rows 1-3"
-    rm -f temp.json5
+    rm -f temp.tbl
 else
     echo "FAIL: winnow rows 1-3"
 fi
@@ -1595,7 +1653,7 @@ fi
 ${tablator_bin} --winnow-rows-list "0 2 4 6 8" test/winnow.tbl temp.tbl && diff test/winnow_even.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: winnow even rows"
-    rm -f temp.json5
+    rm -f temp.tbl
 else
     echo "FAIL: winnow even rows"
 fi
@@ -1603,7 +1661,7 @@ fi
 ${tablator_bin} --winnow-rows-list "0 4 6 8 9" test/winnow.tbl temp.tbl && diff test/winnow_composite.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: winnow composite rows"
-    rm -f temp.json5
+    rm -f temp.tbl
 else
     echo "FAIL: winnow composite rows"
 fi
@@ -1611,7 +1669,7 @@ fi
 ${tablator_bin} --winnow-rows-list "2 3 5 7" test/winnow.tbl temp.tbl && diff test/winnow_prime.tbl temp.tbl
 if [ $? -eq 0 ]; then
     echo "PASS: winnow prime rows"
-    rm -f temp.json5
+    rm -f temp.tbl
 else
     echo "FAIL: winnow prime rows"
 fi

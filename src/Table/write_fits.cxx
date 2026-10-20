@@ -1,11 +1,14 @@
+#include <algorithm>
+#include <string>
+#include <type_traits>
+
 #include <longnam.h>
 
 #include <CCfits/CCfits>
-#include <algorithm>
-#include <type_traits>
 
 #include "../Data_Type_Adjuster.hxx"
 #include "../Table.hxx"
+#include "../Utils/String_Utils.hxx"
 #include "../Utils/Vector_Utils.hxx"
 #include "../to_string.hxx"
 
@@ -126,6 +129,73 @@ char *get_ptr_to_null(tablator::Data_Type datatype_for_writing) {
         return iter->second;
     }
     return NULL;
+}
+
+/**********************************************************/
+
+// Writes the TNULLn keyword for an integer column: the column's
+// declared null value if that is a valid value of type T, and
+// tablator's null value for T otherwise.  Null cells and null
+// elements of non-null array cells alike are stored as TNULLn.
+template <typename T>
+void write_tnull_key_for_integer(fitsfile *fits_file, const std::string &key,
+                                 tablator::Data_Type datatype_for_writing,
+                                 const std::string &column_null_str) {
+    static_assert(std::is_integral_v<T>, "integer types only");
+    T null_value = tablator::get_null<T>();
+    T parsed_null = 0;
+    if (tablator::parse_column_null_str(parsed_null, column_null_str)) {
+        null_value = parsed_null;
+    }
+    int status = 0;
+    fits_write_key(fits_file, get_fits_datatype(datatype_for_writing), key.c_str(),
+                   &null_value, (char *)NULL /* comment */, &status);
+    if (status != 0) {
+        throw CCfits::FitsError(status);
+    }
+}
+
+/**********************************************************/
+
+void write_tnull_key_for_type(fitsfile *fits_file, const std::string &key,
+                              tablator::Data_Type datatype_for_writing,
+                              const std::string &column_null_str) {
+    switch (datatype_for_writing) {
+        case tablator::Data_Type::UINT8_LE:
+            write_tnull_key_for_integer<uint8_t>(fits_file, key, datatype_for_writing,
+                                                 column_null_str);
+            break;
+        case tablator::Data_Type::INT16_LE:
+            write_tnull_key_for_integer<int16_t>(fits_file, key, datatype_for_writing,
+                                                 column_null_str);
+            break;
+        case tablator::Data_Type::UINT16_LE:
+            write_tnull_key_for_integer<uint16_t>(fits_file, key, datatype_for_writing,
+                                                  column_null_str);
+            break;
+        case tablator::Data_Type::INT32_LE:
+            write_tnull_key_for_integer<int32_t>(fits_file, key, datatype_for_writing,
+                                                 column_null_str);
+            break;
+        case tablator::Data_Type::UINT32_LE:
+            write_tnull_key_for_integer<uint32_t>(fits_file, key, datatype_for_writing,
+                                                  column_null_str);
+            break;
+        case tablator::Data_Type::INT64_LE:
+            write_tnull_key_for_integer<int64_t>(fits_file, key, datatype_for_writing,
+                                                 column_null_str);
+            break;
+        default: {
+            // Other types use tablator's null value.
+            int status = 0;
+            fits_write_key(fits_file, get_fits_datatype(datatype_for_writing),
+                           key.c_str(), get_ptr_to_null(datatype_for_writing),
+                           (char *)NULL /* comment */, &status);
+            if (status != 0) {
+                throw CCfits::FitsError(status);
+            }
+        } break;
+    }
 }
 
 /**********************************************************/
@@ -546,9 +616,10 @@ void tablator::Table::write_fits(
         if (datatype_for_writing != Data_Type::INT8_LE &&
             datatype_for_writing != Data_Type::FLOAT32_LE &&
             datatype_for_writing != Data_Type::FLOAT64_LE) {
-            fits_write_key(fits_file, get_fits_datatype(datatype_for_writing),
-                           key_ss.str().c_str(), get_ptr_to_null(datatype_for_writing),
-                           (char *)NULL /* comment */, &status);
+            const std::string &column_null_str =
+                    columns[col_idx].get_field_properties().get_values().null;
+            write_tnull_key_for_type(fits_file, key_ss.str(), datatype_for_writing,
+                                     column_null_str);
         }
 
         if (status != 0) {
@@ -610,25 +681,21 @@ void tablator::Table::write_fits(
             size_t array_size = column.get_array_size();
             bool null_flag_is_set = is_null_value(tab_row_idx, col_idx);
 
-            bool all_or_nothing_null =
-                    ((array_size == 1) || (datatype_for_writing == Data_Type::CHAR) ||
-                     (datatype_for_writing == Data_Type::INT8_LE));
+            if (null_flag_is_set) {
+                // Every element of a null cell gets the column's
+                // TNULLn value (NaN for floating-point columns).
+                // Null elements of non-null array cells are already
+                // stored as the TNULLn value and are written as data
+                // below.
 
-            if (all_or_nothing_null && null_flag_is_set) {
-                // No need to inspect individual array elements.
-
-                // Since our version of FITS doesn't support
-                // UINT64_LE, columns of that type must be written as
-                // CHAR, and their array_size must be adjusted
-                // accordingly before we call FITS write functions.
-                size_t active_array_size = array_size;
-                if (column.get_type() == Data_Type::UINT64_LE) {
-                    active_array_size =
-                            Data_Type_Adjuster::get_char_array_size_for_uint64_col(
-                                    array_size);
-                }
+                // Tablator writes a CHAR column's cell as a single
+                // FITS string. fits_write_col_null() needs to know
+                // only the number of strings, not the number of
+                // characters.
+                size_t num_elements =
+                        (datatype_for_writing == Data_Type::CHAR) ? 1 : array_size;
                 write_null_given_column_and_row(fits_file, col_idx, fits_row_idx,
-                                                active_array_size);
+                                                num_elements);
                 continue;
             }
             switch (datatype_for_writing) {

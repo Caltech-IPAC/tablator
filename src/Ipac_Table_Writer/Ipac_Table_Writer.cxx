@@ -48,22 +48,22 @@ size_t compute_max_column_width_for_integral_type(
             // We've already accounted for the width of the null value.
             continue;
         }
-        const T *curr_array_elt_data_ptr =
-                reinterpret_cast<const T *>(curr_col_data_ptr);
+        const T *array_data_ptr = reinterpret_cast<const T *>(curr_col_data_ptr);
 
         for (uint j = 0; j < array_size && max_width_sofar < max_width_for_type; ++j) {
-            T curr_array_elt = *curr_array_elt_data_ptr;
-            if (curr_array_elt == tablator::get_null<T>()) {
-                continue;
-            }
+            // Null elements of arrays are written as is (e.g. "nan"
+            // for floating-point types), so they're measured like any
+            // other value.
+            T curr_array_elt = array_data_ptr[j];
 
-            std::string string_val = boost::lexical_cast<std::string>(curr_array_elt);
+            // Unary '+ promotes int8_t and uint8_t to int, so lexical_cast
+            // produces digits rather than a single character.
+            std::string string_val = boost::lexical_cast<std::string>(+curr_array_elt);
             max_width_sofar = std::max(max_width_sofar, string_val.size());
 
             if (max_width_sofar >= max_width_for_type) {
                 break;
             }
-            ++curr_array_elt_data_ptr;
         }
     }
     return max_width_sofar;
@@ -95,15 +95,13 @@ size_t compute_max_column_width_for_floating_point_type(
             // We've already accounted for the width of the null value.
             continue;
         }
-        const T *curr_array_elt_data_ptr =
-                reinterpret_cast<const T *>(curr_col_data_ptr);
+        const T *array_data_ptr = reinterpret_cast<const T *>(curr_col_data_ptr);
 
         for (uint j = 0; j < array_size && max_width_sofar < max_width_for_type; ++j) {
-            T curr_array_elt = *curr_array_elt_data_ptr;
-            if (curr_array_elt == tablator::get_null<double>()) {
-                continue;
-            }
-
+            // Null elements of arrays are written as is (e.g. "nan"
+            // for floating-point types), so they're measured like any
+            // other value.
+            T curr_array_elt = array_data_ptr[j];
             const std::string &orig_formatted_string =
                     format_packet.get_formatted_value(curr_array_elt);
 
@@ -121,7 +119,6 @@ size_t compute_max_column_width_for_floating_point_type(
             if (max_width_sofar >= max_width_for_type) {
                 return max_width_sofar;
             }
-            ++curr_array_elt_data_ptr;
         }
     }
     return max_width_sofar;

@@ -3,10 +3,54 @@
 #include "../../../../../Common.hxx"
 #include "../../../../../Data_Element.hxx"
 #include "../../../../../to_string.hxx"
+#include "../../../../../Utils/String_Utils.hxx"
+
+#include <boost/algorithm/string.hpp>
 
 namespace tablator {
 size_t count_elements(const std::string &entry, const Data_Type &type);
 }
+
+namespace {
+
+//========================================
+
+// Returns true if cell_text, the full text of a TD, represents a null
+// cell.  For a CHAR column: cell_text is empty, or exactly equals the
+// column's null value (whitespace counts).  For other columns:
+// cell_text is empty or all whitespace, or every whitespace-separated
+// element is null, where an element is null if it equals the column's
+// null value or, for a floating-point column, if it matches (case
+// insensitively) NaN, VOTable's null for floating-point types.  For
+// an array, a mix of null and non-null elements is not a null cell;
+// the null elements are stored as values.
+bool is_null_cell(const std::string &cell_text, const tablator::Column &column) {
+    if (cell_text.empty()) {
+        return true;
+    }
+    const std::string &column_null_str =
+            column.get_field_properties().get_values().null;
+    if (column.get_type() == tablator::Data_Type::CHAR) {
+        return !column_null_str.empty() && cell_text == column_null_str;
+    }
+    std::vector<std::string> array_elts = tablator::split_array_elements(cell_text);
+    if (array_elts.empty()) {
+        return true;
+    }
+    const tablator::Data_Type col_type = column.get_type();
+    bool is_floating_point_col = (col_type == tablator::Data_Type::FLOAT32_LE ||
+                                  col_type == tablator::Data_Type::FLOAT64_LE);
+    for (const auto &array_elt : array_elts) {
+        bool is_null_elt = (!column_null_str.empty() && array_elt == column_null_str) ||
+                           (is_floating_point_col && boost::iequals(array_elt, "NaN"));
+        if (!is_null_elt) {
+            return false;
+        }
+    }
+    return true;
+}
+
+}  // namespace
 
 tablator::Data_Element tablator::ptree_readers::read_tabledata(
         const boost::property_tree::ptree &tabledata, const std::vector<Field> &fields,
@@ -105,7 +149,7 @@ tablator::Data_Element tablator::ptree_readers::read_tabledata(
         for (size_t col_idx = 1; col_idx < num_fields; ++col_idx) {
             const auto &column = columns[col_idx];
             auto &element = element_list[col_idx - 1];
-            if (element.empty()) {
+            if (is_null_cell(element, column)) {
                 single_row.insert_null(column.get_type(), column.get_array_size(),
                                        offsets[col_idx], offsets[col_idx + 1], col_idx,
                                        column.get_dynamic_array_flag());
